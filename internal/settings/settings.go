@@ -22,6 +22,7 @@ const (
 	KeyEmailDigestThreshold = "email.digest_threshold"
 	KeyEmailAgentOffline    = "email.agent_offline"
 	KeyEmailJobFailed       = "email.job_failed"
+	KeyEmailServerUpdate    = "email.server_update"
 	KeyAgentOfflineMinutes  = "agent.offline_minutes"
 	KeyAgentCheckinSeconds  = "agent.checkin_seconds"
 	KeyAgentReportMinutes   = "agent.report_minutes"
@@ -41,6 +42,7 @@ type Values struct {
 	EmailDigestThreshold int
 	EmailAgentOffline    bool
 	EmailJobFailed       bool
+	EmailServerUpdate    bool // a new netio.patchman version was published
 	AgentOfflineMinutes  int
 	AgentCheckinSeconds  int
 	AgentReportMinutes   int
@@ -68,6 +70,7 @@ func Defaults() Values {
 		EmailDigestThreshold: 5,
 		EmailAgentOffline:    false,
 		EmailJobFailed:       true,
+		EmailServerUpdate:    true,
 		AgentOfflineMinutes:  10,
 		AgentCheckinSeconds:  60,
 		AgentReportMinutes:   60,
@@ -114,6 +117,7 @@ func FromMap(raw map[string]string) Values {
 	b(KeyEmailKEVAlways, &v.EmailKEVAlways)
 	b(KeyEmailAgentOffline, &v.EmailAgentOffline)
 	b(KeyEmailJobFailed, &v.EmailJobFailed)
+	b(KeyEmailServerUpdate, &v.EmailServerUpdate)
 	b(KeyScanEnabled, &v.ScanEnabled)
 	b(KeyAgentAutoUpdate, &v.AgentAutoUpdate)
 	i(KeyEmailDigestThreshold, &v.EmailDigestThreshold, 1, 1000)

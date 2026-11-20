@@ -246,7 +246,10 @@ a.stat:hover { border-color: var(--border-strong); text-decoration: none; }
 .table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .table .check { width: 32px; }
 .table .actions { text-align: right; white-space: nowrap; }
-.table .mono { word-break: break-all; }
+/* Versions wrap at their natural break points ("3.0.13-" / "0ubuntu3.16"),
+   never inside a number; break-word keeps the column at least as wide as the
+   longest unbreakable part. */
+.table .mono { overflow-wrap: break-word; }
 .cell-sub { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
 
 /* Badges and pills */

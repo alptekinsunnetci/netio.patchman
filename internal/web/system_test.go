@@ -11,6 +11,7 @@ import (
 	"sync"
 	"testing"
 
+	"netio.patchman/internal/notify/email"
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
 )
@@ -93,6 +94,59 @@ func (f *fakeSMTP) serve(c net.Conn) {
 		default:
 			say("250 ok")
 		}
+	}
+}
+
+// TestServerUpdateEmail: a new product version is emailed to administrators
+// once, and the email can be switched off on the settings page.
+func TestServerUpdateEmail(t *testing.T) {
+	e := newEnv(t)
+	admin := e.client
+	if status, _, _ := e.do(admin, "POST", "/setup", url.Values{"name": {"Ayşe Yılmaz"}, "email": {"ayse@example.test"},
+		"password": {"çok-güçlü-parola-1"}, "password_confirm": {"çok-güçlü-parola-1"}}); status != http.StatusSeeOther {
+		t.Fatalf("setup: %d", status)
+	}
+	check := func() {
+		token := e.csrf(admin)
+		e.do(admin, "POST", "/settings/system/update-check", url.Values{"_csrf": {token}})
+	}
+	e.latest.Store("0.3.0\n")
+	check()
+	check()
+	e.sender.mu.Lock()
+	msgs := append([]email.Message(nil), e.sender.msgs...)
+	e.sender.mu.Unlock()
+	if len(msgs) != 1 {
+		t.Fatalf("update emails = %d, want 1", len(msgs))
+	}
+	m := msgs[0]
+	if m.Subject != "[BİLGİ] netio.patchman 0.3.0 sürümü yayımlandı" || m.To[0].Address != "ayse@example.test" {
+		t.Errorf("email: %q to %v", m.Subject, m.To)
+	}
+	for _, want := range []string{"0.2.0", "docker compose up -d --build", "/releases/tag/v0.3.0", "/settings/system#updates"} {
+		if !strings.Contains(m.Text, want) {
+			t.Errorf("email text lacks %q:\n%s", want, m.Text)
+		}
+	}
+
+	// Switched off: the next version only appears in the panel.
+	token := e.csrf(admin)
+	status, _, _ := e.do(admin, "POST", "/settings", url.Values{"_csrf": {token}, "email_enabled": {"1"}, "email_min_severity": {"high"},
+		"email_digest_threshold": {"5"}, "agent_offline_minutes": {"10"}, "agent_checkin_seconds": {"60"}, "agent_report_minutes": {"60"},
+		"retention_days": {"90"}, "scan_enabled": {"1"}})
+	if status != http.StatusSeeOther {
+		t.Fatalf("settings save: %d", status)
+	}
+	e.latest.Store("0.4.0\n")
+	check()
+	e.sender.mu.Lock()
+	n := len(e.sender.msgs)
+	e.sender.mu.Unlock()
+	if n != 1 {
+		t.Errorf("email sent while switched off (%d)", n)
+	}
+	if _, body, _ := e.do(admin, "GET", "/dashboard", nil); !strings.Contains(body, "netio.patchman 0.4.0 sürümü yayımlandı") {
+		t.Error("panel notice missing for 0.4.0")
 	}
 }
 

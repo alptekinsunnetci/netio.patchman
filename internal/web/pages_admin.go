@@ -393,6 +393,7 @@ func (s *Server) settingsSave(w http.ResponseWriter, r *http.Request) {
 		settings.KeyEmailKEVAlways:    b("email_kev_always"),
 		settings.KeyEmailAgentOffline: b("email_agent_offline"),
 		settings.KeyEmailJobFailed:    b("email_job_failed"),
+		settings.KeyEmailServerUpdate: b("email_server_update"),
 		settings.KeyScanEnabled:       b("scan_enabled"),
 		settings.KeyAgentAutoUpdate:   b("agent_auto_update"),
 	}

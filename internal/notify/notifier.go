@@ -321,6 +321,35 @@ func (n *Notifier) JobFinished(ctx context.Context, j store.Job) {
 	}
 }
 
+// ServerUpdate emails administrators that a newer netio.patchman version was
+// published. The in-app notification is stored by internal/updatecheck; this
+// is called once per new version.
+func (n *Notifier) ServerUpdate(ctx context.Context, current, latest, changesURL string) {
+	cfg, err := settings.Load(ctx, n.st)
+	if err != nil || !n.emailEnabled(cfg) || !cfg.EmailServerUpdate {
+		return
+	}
+	to := n.recipients(ctx, cfg)
+	if len(to) == 0 {
+		return
+	}
+	m, err := n.renderer.Notice(email.Notice{
+		Subject: n.l.T("email.server_update.subject", "latest", latest),
+		Heading: n.l.T("email.server_update.heading"),
+		Body:    n.l.T("email.server_update.body", "latest", latest, "current", current),
+		Rows: []email.NoticeRow{
+			{Label: n.l.T("system.update.current"), Value: current, Mono: true},
+			{Label: n.l.T("system.update.latest"), Value: latest, Mono: true},
+			{Label: n.l.T("email.server_update.changes"), Value: changesURL, Mono: true},
+		},
+		Output:  "git pull\ndocker compose up -d --build",
+		LinkURL: n.baseURL() + "/settings/system#updates", LinkText: n.l.T("email.server_update.link"),
+	}, to)
+	if err == nil {
+		n.send(ctx, m)
+	}
+}
+
 // SendTest sends a test email to the given address synchronously.
 func (n *Notifier) SendTest(ctx context.Context, to string) error {
 	sender, from := n.mailer()

@@ -81,6 +81,8 @@ func TestCheck(t *testing.T) {
 	live := settings.StaticLive(settings.System{UpdateURL: srv.URL + "/VERSION"})
 	l := i18n.MustLoad().Localizer(i18n.DefaultLocale)
 	o := Options{Current: "0.2.0", Store: st, System: live, Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), L: l}
+	var announced []string
+	o.OnNewVersion = func(_ context.Context, s Status) { announced = append(announced, s.Latest) }
 	c := New(ctx, o)
 
 	s := c.Check(ctx)
@@ -93,6 +95,12 @@ func TestCheck(t *testing.T) {
 	c.Check(ctx) // same version: no second notification
 	if n, _ := st.UnreadNotifications(ctx); n != 1 {
 		t.Fatalf("notifications after two checks = %d, want 1", n)
+	}
+	if len(announced) != 1 || announced[0] != "0.3.0" {
+		t.Errorf("OnNewVersion calls = %v, want [0.3.0]", announced)
+	}
+	if got := s.ChangesURL(); !strings.HasSuffix(got, "/releases/tag/v0.3.0") {
+		t.Errorf("ChangesURL = %q", got)
 	}
 	rows, _, _ := st.ListNotifications(ctx, false, store.Page{Number: 1, Size: 10})
 	if rows[0].Kind != NotificationKind || rows[0].Params["version"] != "0.3.0" || rows[0].Params["current"] != "0.2.0" {

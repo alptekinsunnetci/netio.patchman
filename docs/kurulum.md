@@ -248,6 +248,7 @@ Sunucu, depodaki `VERSION` dosyasını açılıştan bir dakika sonra ve ardınd
 
 - Yöneticiler her sayfanın üstünde bir uyarı ve kenar çubuğunda **Yeni sürüm** etiketi görür.
 - Bildirim merkezine her yeni sürüm için bir kez bildirim düşer.
+- E-posta bildirimleri açıksa yöneticilere (veya tanımlı alıcılara) her yeni sürüm için bir kez e-posta gider. **Sistem Ayarları → E-posta bildirimleri** bölümünden kapatılabilir.
 - **Sistem Ayarları → Sunucu yapılandırması → Ürün sürümü** bölümünde kurulu sürüm, yayımlanan son sürüm, son denetim zamanı ve güncelleme komutları gösterilir. **Şimdi denetle** düğmesi denetimi hemen çalıştırır.
 
 İstekte yalnızca `User-Agent: netio-patchman-server/<sürüm>` başlığı gönderilir; sunucular, kullanıcılar veya bulgular hakkında bilgi gönderilmez. Adres değiştirilebilir: düz metin bir `VERSION` dosyası veya GitHub sürüm API'si (`https://api.github.com/repos/<sahip>/<depo>/releases/latest`) kullanılabilir. Denetim aynı bölümden kapatılabilir.

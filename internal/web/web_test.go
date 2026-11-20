@@ -180,7 +180,10 @@ func newEnvWith(t *testing.T, capture bool) *env {
 	rel := release.Load(dist, "test")
 
 	apiSrv := api.New(api.Options{Store: st, L: l, Logger: logger, Scanner: e.scan, Notifier: e.notifier, Assets: agentdist.Assets(), AgentDistDir: dist, Release: rel, System: e.sys})
-	e.updates = updatecheck.New(ctx, updatecheck.Options{Current: "0.2.0", Store: st, System: e.sys, Logger: logger, L: l})
+	e.updates = updatecheck.New(ctx, updatecheck.Options{Current: "0.2.0", Store: st, System: e.sys, Logger: logger, L: l,
+		OnNewVersion: func(ctx context.Context, s updatecheck.Status) {
+			e.notifier.ServerUpdate(ctx, s.Current, s.Latest, s.ChangesURL())
+		}})
 	site, err := web.New(web.Options{Store: st, Localizer: l, Formatter: f, Logger: logger, Scanner: e.scan, Notifier: e.notifier, System: e.sys, API: apiSrv, Release: rel, Updates: e.updates})
 	if err != nil {
 		t.Fatal(err)

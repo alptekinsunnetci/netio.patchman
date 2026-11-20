@@ -13,8 +13,8 @@ COPY cmd ./cmd
 COPY internal ./internal
 COPY deploy ./deploy
 # Windows'ta klonlanan depolarda betikler CRLF satır sonuyla gelebilir; ajan
-# kurulum betiği ve systemd birimi Linux'ta çalışacağı için LF'ye çevrilir.
-RUN sed -i 's/\r$//' deploy/agent/*.sh deploy/agent/*.service
+# kurulum betiği, systemd birimi ve OpenRC betiği Linux'ta çalışacağı için LF'ye çevrilir.
+RUN sed -i 's/\r$//' deploy/agent/*.sh deploy/agent/*.service deploy/agent/*.openrc
 ARG VERSION=
 ENV CGO_ENABLED=0
 RUN VERSION="${VERSION:-$(tr -d ' \r\n' < VERSION)}" && \

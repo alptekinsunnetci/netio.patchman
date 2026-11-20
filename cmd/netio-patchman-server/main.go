@@ -193,7 +193,12 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, l i18n.Local
 		Store: st, L: l, Logger: logger, Scanner: scan, Notifier: notifier,
 		AgentDistDir: cfg.AgentDistDir, Assets: agentdist.Assets(), System: live, Release: agentRelease,
 	})
-	updates := updatecheck.New(ctx, updatecheck.Options{Current: version.Version, Store: st, System: live, Logger: logger, L: l})
+	updates := updatecheck.New(ctx, updatecheck.Options{
+		Current: version.Version, Store: st, System: live, Logger: logger, L: l,
+		OnNewVersion: func(ctx context.Context, s updatecheck.Status) {
+			notifier.ServerUpdate(ctx, s.Current, s.Latest, s.ChangesURL())
+		},
+	})
 	site, err := web.New(web.Options{
 		Store: st, Localizer: l, Formatter: formatter, Logger: logger, Scanner: scan, Notifier: notifier,
 		System: live, API: agentAPI, Release: agentRelease, Updates: updates,

@@ -158,7 +158,7 @@ Kurulu olmayan yeni bağımlılıklar (örneğin yeni çekirdek sürümü veya b
 
 Bildirim merkezi şu olayları gösterir: yeni güvenlik açıkları, ajan bağlantısının kesilmesi ve geri gelmesi, yeni sunucu kayıtları, iş sonuçları, tarama ve e-posta hataları ve yeni netio.patchman sürümleri.
 
-**Yeni sürüm:** GitHub'da daha yeni bir netio.patchman sürümü yayımlandığında yöneticiler her sayfanın üstünde bir uyarı görür. **Güncelleme adımları** bağlantısı **Sistem Ayarları → Sunucu yapılandırması → Ürün sürümü** bölümünü açar. Orada kurulu ve yayımlanan sürüm, değişiklikler bağlantısı ve güncelleme komutları bulunur. Operatör ve izleyiciler bu uyarıyı görmez. Denetim aynı sayfadaki **Sürüm denetimi** bölümünden kapatılabilir.
+**Yeni sürüm:** GitHub'da daha yeni bir netio.patchman sürümü yayımlandığında yöneticiler her sayfanın üstünde bir uyarı görür. **Güncelleme adımları** bağlantısı **Sistem Ayarları → Sunucu yapılandırması → Ürün sürümü** bölümünü açar. Orada kurulu ve yayımlanan sürüm, değişiklikler bağlantısı ve güncelleme komutları bulunur. Operatör ve izleyiciler bu uyarıyı görmez. E-posta bildirimleri açıksa yeni sürüm ayrıca e-postayla bildirilir; e-postadaki bağlantı sürüm notlarını açar. Denetim aynı sayfadaki **Sürüm denetimi** bölümünden, e-posta **Sistem Ayarları → E-posta bildirimleri** bölümünden kapatılabilir.
 
 E-posta bildirimleri **Sistem Ayarları** sayfasında yapılandırılır:
 

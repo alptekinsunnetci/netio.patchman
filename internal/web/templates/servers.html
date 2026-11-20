@@ -14,10 +14,7 @@
 </header>
 
 <form class="filters" method="get" action="/servers">
-  <label class="field field--inline">
-    <span class="visually-hidden">{{t "common.search"}}</span>
-    <input class="field__input" type="search" name="q" value="{{$d.Filter.Search}}" placeholder="{{t "servers.search_placeholder"}}">
-  </label>
+  <input class="field__input" type="search" name="q" value="{{$d.Filter.Search}}" placeholder="{{t "servers.search_placeholder"}}" aria-label="{{t "common.search"}}">
   <label class="field field--inline">
     <span class="visually-hidden">{{t "host.field.status"}}</span>
     <select class="field__input" name="status">

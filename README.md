@@ -8,6 +8,9 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 - Yönetilen her sunucuya küçük bir ajan kurulur. Ajan port açmaz; merkezi sunucuya kendisi bağlanır.
 - Arayüz, e-postalar ve belgeler Türkçedir. CVE verileri kaynağındaki haliyle, çevrilmeden gösterilir.
 
+> [!WARNING]
+> **Kullanım riski tamamen kullanıcıya aittir.** netio.patchman sunucularınızda paket güncelleyen, servisleri ve sunucuyu yeniden başlatan bir yazılımdır. "Olduğu gibi" sunulur ve hiçbir garanti verilmez. Kullanımdan doğabilecek veri kaybı, hizmet kesintisi, başarısız güncelleme, güvenlik açığı ve benzeri her türlü zarardan yazılımı kuran ve kullanan kişi ya da kurum sorumludur. Ayrıntılar: [Sorumluluk reddi](#sorumluluk-reddi).
+
 ![Gösterge paneli](docs/images/dashboard.png)
 
 ## İçindekiler
@@ -22,6 +25,8 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 - [Sorun giderme](#sorun-giderme)
 - [Güvenlik](#güvenlik)
 - [Geliştirme](#geliştirme)
+- [Sorumluluk reddi](#sorumluluk-reddi)
+- [Lisans](#lisans)
 
 ## Özellikler
 
@@ -334,3 +339,37 @@ go test -tags live -run Live -v ./internal/scanner/
 ```
 
 Ürün gereksinimleri [docs/spec/](docs/spec/) dizinindedir.
+
+## Sorumluluk reddi
+
+netio.patchman "olduğu gibi" (AS IS) sunulur. Açık ya da örtülü hiçbir garanti verilmez: ticari elverişlilik, belirli bir amaca uygunluk, hatasız ya da kesintisiz çalışma ve güvenlik açıklarının eksiksiz tespiti dahil.
+
+**Yazılımın kurulmasından ve kullanılmasından doğabilecek tüm riskler ve sonuçlar, yazılımı kuran ve kullanan kişi ya da kuruma aittir.** Geliştirici, yürürlükteki hukukun izin verdiği en geniş ölçüde, doğrudan ya da dolaylı hiçbir zarardan sorumlu tutulamaz. Bu zararlar şunları kapsar:
+
+- Paket güncellemesi, servis veya sunucu yeniden başlatma sırasında ya da sonrasında oluşan hizmet kesintileri, uyumsuzluklar ve veri kaybı.
+- Başarısız, yarım kalan veya beklenmeyen sonuç veren güncelleme işleri ve zamanlanmış güncellemeler.
+- Tespit edilemeyen, yanlış tespit edilen veya önem derecesi hatalı gösterilen güvenlik açıkları. Güvenlik verileri üçüncü taraf kaynaklardan (OSV.dev, CISA KEV, dağıtım duyuruları) gelir; doğrulukları bu kaynaklara bağlıdır.
+- Yazılımın, ajanların veya merkezi sunucunun yanlış yapılandırılması, yetkisiz erişime açık bırakılması ya da kötüye kullanılması.
+
+Kullanmadan önce:
+
+- Yazılımı önce üretim dışı bir ortamda deneyin.
+- Güncellemelerden önce sunucularınızın ve netio.patchman veritabanının yedeğini alın.
+- Kritik sunucularda güncellemeleri bakım pencerelerinde ve kontrollü olarak uygulayın.
+- Merkezi sunucuyu yalnızca HTTPS ile ve güvenilir ağlardan erişilebilir şekilde yayınlayın.
+
+Bu yazılımı kurmanız ve kullanmanız, bu koşulları kabul ettiğiniz anlamına gelir.
+
+## Lisans
+
+Geliştirici: **Alptekin Sünnetci**. Copyright © 2026 Alptekin Sünnetci.
+
+netio.patchman, [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) ve **Commons Clause** koşulu ile lisanslanmıştır. Tam metin: [LICENSE](LICENSE).
+
+- **İzin verilenler:** Yazılımı ücretsiz kullanmak (kendi altyapınızda, kurum içinde de), incelemek, değiştirmek ve ücretsiz olarak dağıtmak.
+- **İzin verilmeyen:** Yazılımı ya da değerinin tamamı veya önemli bir kısmı bu yazılımdan gelen bir ürün veya hizmeti üçüncü kişilere ücret karşılığı sunmak. Satış, ücretli barındırma ve ücretli danışmanlık/destek hizmeti buna dahildir.
+- Dağıttığınız kopyalarda LICENSE dosyası ve telif bildirimi korunmalıdır.
+
+Ticari kullanım için geliştiriciyle iletişime geçin.
+
+Lisans metninin bağlayıcı hali İngilizce olan [LICENSE](LICENSE) dosyasıdır; bu bölüm yalnızca özet niteliğindedir.

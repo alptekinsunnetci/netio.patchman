@@ -63,13 +63,16 @@ type Status struct {
 // Available reports whether Latest is newer than the running version.
 func (s Status) Available() bool { return s.Latest != "" && Compare(s.Latest, s.Current) > 0 }
 
-// ChangesURL links to the release notes or, for the VERSION file, the
-// repository's commit history.
+// ChangesURL links to the release notes: the release page the source gave,
+// or the GitHub release tagged v<latest> (every VERSION bump is tagged).
 func (s Status) ChangesURL() string {
 	if s.ReleaseURL != "" {
 		return s.ReleaseURL
 	}
-	return brand.Repository + "/commits/main"
+	if s.Latest == "" {
+		return brand.Repository + "/releases"
+	}
+	return brand.Repository + "/releases/tag/v" + s.Latest
 }
 
 // Options configures a Checker.
@@ -80,6 +83,9 @@ type Options struct {
 	Logger  *slog.Logger
 	L       i18n.Localizer
 	Client  *http.Client // optional
+	// OnNewVersion is called once per newly published version, after the
+	// in-app notification is stored (the server sends the email from it).
+	OnNewVersion func(ctx context.Context, st Status)
 }
 
 // Checker runs the new-version check.
@@ -156,6 +162,9 @@ func (c *Checker) notify(ctx context.Context, st Status) {
 		return
 	}
 	_ = c.o.Store.SaveSettings(ctx, map[string]string{keyNotified: st.Latest})
+	if c.o.OnNewVersion != nil {
+		c.o.OnNewVersion(ctx, st)
+	}
 }
 
 // Run checks shortly after start and then every Interval. A check made less
