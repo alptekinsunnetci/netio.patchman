@@ -92,7 +92,7 @@
       <td class="num mono">{{cvss .CVSSScore}}</td>
       <td class="mono">{{.PackageName}}</td>
       <td class="mono">{{.InstalledVersion}}</td>
-      <td class="mono">{{if .FixedVersion}}{{.FixedVersion}}{{else}}<span class="muted">{{t "vuln.fix_not_available"}}</span>{{end}}</td>
+      <td>{{if .FixedVersion}}<span class="mono">{{.FixedVersion}}</span>{{else}}<span class="muted">{{t "vuln.fix_not_available"}}</span>{{end}}</td>
       <td>{{template "findingstatus" .Status}}</td>
       <td><time datetime="{{iso .FirstDetectedAt}}">{{date .FirstDetectedAt}}</time></td>
     </tr>

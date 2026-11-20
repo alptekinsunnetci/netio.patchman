@@ -8,9 +8,12 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 - Yönetilen her sunucuya küçük bir ajan kurulur. Ajan port açmaz; merkezi sunucuya kendisi bağlanır.
 - Arayüz, e-postalar ve belgeler Türkçedir. CVE verileri kaynağındaki haliyle, çevrilmeden gösterilir.
 
+![Gösterge paneli](docs/images/dashboard.png)
+
 ## İçindekiler
 
 - [Özellikler](#özellikler)
+- [Ekran görüntüleri](#ekran-görüntüleri)
 - [Nasıl çalışır](#nasıl-çalışır)
 - [Kurulum (Docker)](#kurulum-docker)
 - [Sunuculara ajan kurulumu](#sunuculara-ajan-kurulumu)
@@ -47,6 +50,42 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 | CentOS, Oracle Linux, Fedora ve diğer dağıtımlar (dnf, yum, zypper, apt veya apk kullanan) | ✓ | — |
 
 Ajan amd64 ve arm64 mimarilerinde çalışır. Hizmet yöneticisi olarak systemd veya OpenRC (Alpine) gerekir. Sunucunun fiziksel, sanal (VMware, Hyper-V, KVM/Proxmox) veya bulutta olması fark etmez.
+
+## Ekran görüntüleri
+
+Görüntüler, Ubuntu, Debian, Rocky Linux, AlmaLinux ve Alpine çalıştıran altı test sunucusundan alınmıştır. Güvenlik açıkları OSV.dev'den gelen gerçek verilerdir.
+
+**Sunucu envanteri:** Tüm sunucular, açık sayıları önem derecesine göre, bekleyen güncellemeler ve ajan durumu. Seçili sunucularda toplu güncelleme başlatılabilir.
+
+![Sunucu envanteri](docs/images/servers.png)
+
+**Sunucu ayrıntısı:** Sunucudaki açıklar CVSS puanı, etkilenen paket, kurulu ve düzeltilmiş sürümle listelenir. Güvenlik güncellemeleri, tüm güncellemeler ve yeniden başlatma tek tıkla başlatılır.
+
+![Sunucu ayrıntısı](docs/images/server.png)
+
+**Güvenlik açıkları:** Filoda tespit edilen tüm açıklar; önem derecesine, istismar durumuna ve düzeltme olup olmadığına göre süzülebilir.
+
+![Güvenlik açıkları](docs/images/vulnerabilities.png)
+
+**Açık ayrıntısı:** Orijinal açıklama (çevrilmeden), CVSS vektörü, etkilenen sunucular ve çözüm durumu.
+
+![Açık ayrıntısı](docs/images/vulnerability.png)
+
+**Güncelleme işi:** Ajan komut çıktısını gönderir ve işten sonra paketlerin gerçekten güncellendiğini doğrular.
+
+![Güncelleme işi](docs/images/job.png)
+
+**Zamanlanmış güncellemeler:** Bakım penceresi; gün, saat, süre ve hedef sunucular (tümü, işletim sistemi veya seçili sunucular).
+
+![Zamanlanmış güncelleme](docs/images/schedule.png)
+
+**Ajan kurulumu:** Dağıtım seçilir, kurulum komutu buna göre oluşur (curl veya wget, root veya sudo).
+
+![Ajan yönetimi](docs/images/agents.png)
+
+**Karanlık tema:** Panel, işletim sisteminin açık ya da koyu tema ayarını izler.
+
+![Gösterge paneli, karanlık tema](docs/images/dashboard-dark.png)
 
 ## Nasıl çalışır
 

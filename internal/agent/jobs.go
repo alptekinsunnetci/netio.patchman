@@ -27,18 +27,34 @@ type command struct {
 	okCodes []int
 }
 
-// tailBuffer keeps the last max bytes written.
+// tailBuffer keeps the last max bytes written. A lone carriage return
+// overwrites the current line as a terminal would, so progress output
+// ("(Reading database ... 5%\r... 10%\r") leaves only its final state
+// instead of dozens of lines; CRLF counts as a line end.
 type tailBuffer struct {
 	mu  sync.Mutex
 	buf bytes.Buffer
 	max int
 	cut bool
+	cr  bool // last byte was '\r'
 }
 
 func (t *tailBuffer) Write(p []byte) (int, error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	t.buf.Write(p)
+	for _, c := range p {
+		if t.cr {
+			t.cr = false
+			if c != '\n' {
+				t.buf.Truncate(bytes.LastIndexByte(t.buf.Bytes(), '\n') + 1)
+			}
+		}
+		if c == '\r' {
+			t.cr = true
+			continue
+		}
+		t.buf.WriteByte(c)
+	}
 	if t.buf.Len() > t.max {
 		b := t.buf.Bytes()
 		keep := append([]byte(nil), b[len(b)-t.max:]...)

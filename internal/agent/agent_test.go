@@ -156,6 +156,25 @@ func TestJobRunnerRejectsUnsafeInput(t *testing.T) {
 	}
 }
 
+func TestTailBufferCarriageReturn(t *testing.T) {
+	b := &tailBuffer{max: 1 << 10}
+	// dpkg progress, split across writes, then CRLF output.
+	for _, s := range []string{"Unpacking libc6 ...\n(Reading database ... \r(Reading data", "base ... 5%\r(Reading database ... 100%\r",
+		"(Reading database ... 4988 files and directories currently installed.)\n", "Setting up libc6\r\n", "done\r"} {
+		_, _ = b.Write([]byte(s))
+	}
+	want := "Unpacking libc6 ...\n(Reading database ... 4988 files and directories currently installed.)\nSetting up libc6\ndone"
+	if got := b.String(); got != want {
+		t.Errorf("got %q\nwant %q", got, want)
+	}
+	// The size limit still applies.
+	small := &tailBuffer{max: 8}
+	_, _ = small.Write([]byte("0123456789\nabc"))
+	if got := small.String(); got != "…\n6789\nabc" {
+		t.Errorf("tail: %q", got)
+	}
+}
+
 func TestParseRestartServices(t *testing.T) {
 	svc, reboot := parseNeedrestart([]byte(`NEEDRESTART-VER: 3.6
 NEEDRESTART-KCUR: 6.8.0-31-generic
