@@ -177,12 +177,6 @@ Use this name in:
 - Installation scripts
 - Default configuration examples
 
-Suggested email sender:
-
-netio.patchman <patchman@your-domain>
-
-Do not invent a production email domain. Make the sender configurable.
-
 Suggested agent binary:
 
 netio-patchman-agent
