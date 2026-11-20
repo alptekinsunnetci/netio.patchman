@@ -50,6 +50,18 @@ Filtrelerle birlikte kullanıldığında örneğin "Güncelleme bekleyen tüm Ub
 
 “Yeniden başlatma gerekli” etiketi, kurulan güncellemelerin (örneğin çekirdek) etkinleşmesi için sunucunun yeniden başlatılması gerektiğini gösterir. netio.patchman sunucuları kendiliğinden yeniden başlatmaz.
 
+### Servisleri ve sunucuyu yeniden başlatma
+
+Bir güncelleme, çalışan bir servisin kullandığı kütüphaneyi (örneğin `libssl3`, `libc6`) değiştirdiğinde servis, yeniden başlatılana kadar eski sürümü bellekte çalıştırmaya devam eder. Ajan bu servisleri her envanterde tespit eder:
+
+- Debian/Ubuntu: `needrestart` paketiyle. Kurulu değilse `apt install needrestart` ile kurun. Kuruluysa apt güncellemeleri sırasında servisler zaten kendiliğinden yeniden başlatılır.
+- RHEL ailesi: `needs-restarting -s` ile (`dnf-utils` / `yum-utils`).
+- SUSE: `zypper ps` ile.
+
+Tespit edilen servisler sunucu ayrıntısında **Yeniden başlatılması gereken servisler** bölümünde listelenir. Operatörler servisleri seçip **Seçili servisleri yeniden başlat** ile yeniden başlatabilir. Oturumları veya ağ bağlantısını kesebilecek servisler (dbus, systemd-logind, NetworkManager, getty vb.) ve ajanın kendisi atlanır; bunlar için sunucu yeniden başlatılmalıdır. Ajan, işten sonra servislerin gerçekten yenilendiğini kontrol eder.
+
+Sunucu ayrıntısındaki **Yeniden başlat** düğmesi sunucuyu 1 dakika sonra yeniden başlatır. Bu süre, sonucun panele ulaşması ve oturumdaki kullanıcıların uyarılması içindir. Sunucu açıldığında ajan yeni envanter gönderir ve “Yeniden başlatma gerekli” etiketi kalkar. Her iki işlem de uzaktan güncellemenin açık olmasını gerektirir ve denetim kayıtlarına yazılır.
+
 ## Güvenlik Açıkları
 
 Tespit edilen açıklar en kritik olandan başlayarak listelenir. Aktif olarak istismar edilen açıklar **KEV** etiketiyle işaretlenir.
@@ -106,7 +118,7 @@ Nasıl çalışır:
 - **Şimdi çalıştır** düğmesi kuralı hemen çalıştırır (bakım penceresi o andan başlar); normal zamanlama değişmez.
 - Bir zamanlama silinirse henüz ajana iletilmemiş işleri iptal edilir; tamamlanmış işlerin geçmişi korunur.
 
-netio.patchman sunucuları yeniden başlatmaz. Çekirdek güncellemelerinden sonra yeniden başlatmayı ayrıca planlayın; gereken sunucular “Yeniden başlatma gerekli” etiketiyle gösterilir. Bir sunucuyu kapsayan zamanlamalar, sunucu ayrıntısındaki **Sistem Bilgisi** sekmesinde listelenir.
+Zamanlanmış güncellemeler sunucuları yeniden başlatmaz. Çekirdek güncellemelerinden sonra yeniden başlatmayı sunucu ayrıntısındaki **Yeniden başlat** düğmesiyle ya da kendi yönteminizle planlayın; gereken sunucular “Yeniden başlatma gerekli” etiketiyle gösterilir. Bir sunucuyu kapsayan zamanlamalar, sunucu ayrıntısındaki **Sistem Bilgisi** sekmesinde listelenir.
 
 ## Güncelleme İşleri
 
@@ -116,6 +128,26 @@ Ajanlar sunucularda port açmaz. Merkezi sunucuya düzenli aralıklarla HTTPS il
 
 İş tamamlandığında ajan envanteri hemen yeniden gönderir ve güvenlik taraması güncellenir.
 
+### Sonucun doğrulanması
+
+Paket yöneticisinin hatasız bitmesi, paketlerin güncellendiği anlamına gelmez. Örneğin apt, kurulu olmayan veya sabitlenmiş (hold) paketleri uyarı vererek atlar ve yine de başarılı döner. Bu yüzden ajan her güncelleme işinde şu adımları izler:
+
+1. Paket listelerini yeniler ve bekleyen güncellemeleri hedef olarak belirler. Seçili paketlerden bekleyen güncellemesi olmayanlar atlanır ve çıktıda belirtilir.
+2. Güncelleme komutunu çalıştırır.
+3. Hedeflerden hangilerinin hâlâ beklediğini yeniden kontrol eder.
+
+İşin durumu bu kontrole göre belirlenir:
+
+| Durum | Anlamı |
+| --- | --- |
+| Başarılı | Hedeflenen tüm paketler güncellendi (çıktıda “Doğrulandı”). |
+| Kısmen başarılı | Bazı paketler güncellendi, bazıları hâlâ bekliyor. |
+| Başarısız | Komut hata verdi ya da paketlerin hiçbiri güncellenmedi. |
+
+Güncellenemeyen paketler iş sayfasında listelenir. **Kalanları yeniden dene** düğmesi yalnızca bu paketler için yeni bir iş oluşturur. Diğer başarısız işler **Yeniden dene** ile aynen tekrarlanabilir. Kısmen başarılı ve başarısız işler bildirim merkezine düşer ve ayarlarda açıksa e-postayla bildirilir. Ajan güncellemeyi kendiliğinden tekrar denemez: başarısızlığın nedeni (bağımlılık çakışması, sabitlenmiş paket, depo hatası) genellikle elle düzeltilmelidir. Zamanlanmış güncellemeler bir sonraki bakım penceresinde yeniden çalışır.
+
+Kurulu olmayan yeni bağımlılıklar (örneğin yeni çekirdek sürümü veya bölünmüş firmware paketleri) güncelleme listesinde gösterilmez. Bunları gerektiren paket güncellendiğinde paket yöneticisi onları kendiliğinden kurar.
+
 ## Ajan Yönetimi
 
 - **Kayıt anahtarları:** Yeni sunucuların kaydolması için kullanılır. Anahtar yalnızca oluşturulduğu anda gösterilir. Geçerlilik süresi ve kullanım sınırı verilmesi önerilir. Bir anahtarın iptal edilmesi kayıtlı ajanları etkilemez.
@@ -124,7 +156,9 @@ Ajanlar sunucularda port açmaz. Merkezi sunucuya düzenli aralıklarla HTTPS il
 
 ## Bildirim Merkezi ve e-postalar
 
-Bildirim merkezi şu olayları gösterir: yeni güvenlik açıkları, ajan bağlantısının kesilmesi ve geri gelmesi, yeni sunucu kayıtları, iş sonuçları, tarama ve e-posta hataları.
+Bildirim merkezi şu olayları gösterir: yeni güvenlik açıkları, ajan bağlantısının kesilmesi ve geri gelmesi, yeni sunucu kayıtları, iş sonuçları, tarama ve e-posta hataları ve yeni netio.patchman sürümleri.
+
+**Yeni sürüm:** GitHub'da daha yeni bir netio.patchman sürümü yayımlandığında yöneticiler her sayfanın üstünde bir uyarı görür. **Güncelleme adımları** bağlantısı **Sistem Ayarları → Sunucu yapılandırması → Ürün sürümü** bölümünü açar. Orada kurulu ve yayımlanan sürüm, değişiklikler bağlantısı ve güncelleme komutları bulunur. Operatör ve izleyiciler bu uyarıyı görmez. Denetim aynı sayfadaki **Sürüm denetimi** bölümünden kapatılabilir.
 
 E-posta bildirimleri **Sistem Ayarları** sayfasında yapılandırılır:
 

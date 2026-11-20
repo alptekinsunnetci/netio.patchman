@@ -17,10 +17,10 @@
     <span class="field__label">{{t "agents.token.value"}}</span>
     <span class="copy"><input class="field__input mono" type="text" value="{{.Token}}" readonly id="new-token"><button class="button button--sm" type="button" data-copy="new-token">{{t "common.copy"}}</button></span>
   </label>
-  <label class="field">
+  <div class="field">
     <span class="field__label">{{t "agents.install.command"}}</span>
-    <span class="copy"><textarea class="field__input field__input--area mono" rows="3" readonly id="new-command">{{.Command}}</textarea><button class="button button--sm" type="button" data-copy="new-command">{{t "common.copy"}}</button></span>
-  </label>
+    {{template "installcmd" .Command}}
+  </div>
 </section>
 {{end}}
 
@@ -50,7 +50,7 @@
     <ol class="steps">
       <li>{{t "agents.install.step1"}}</li>
       <li>{{t "agents.install.step2"}}
-        <pre class="code">{{$d.ExampleCommand}}</pre>
+        {{template "installcmd" $d.ExampleCommand}}
       </li>
       <li>{{t "agents.install.step3"}}</li>
     </ol>
@@ -60,8 +60,9 @@
       <pre class="code">{{$d.BaseURL}}/downloads/agent/netio-patchman-agent-linux-amd64
 {{$d.BaseURL}}/downloads/agent/netio-patchman-agent-linux-arm64
 {{$d.BaseURL}}/downloads/netio-patchman-agent.service
+{{$d.BaseURL}}/downloads/netio-patchman-agent.openrc
 {{$d.BaseURL}}/downloads/install-agent.sh</pre>
-      <pre class="code">sudo sh install-agent.sh --server-url {{$d.BaseURL}} --token &lt;KAYIT-ANAHTARI&gt; --binary ./netio-patchman-agent-linux-amd64</pre>
+      <pre class="code">sh install-agent.sh --server-url {{$d.BaseURL}} --token {{t "agents.install.token_placeholder"}} --binary ./netio-patchman-agent-linux-amd64</pre>
     </details>
     <details class="details">
       <summary>{{t "agents.install.supported_title"}}</summary>
@@ -148,4 +149,21 @@
   {{else}}{{template "empty" (t "agents.list_empty")}}{{end}}
 </section>
 {{template "pager" $d.Pager}}
+{{end}}
+
+{{/* Install command picker. The command is built in Go for every distribution and
+     privilege mode; app.js switches between them. Without JS the first target's
+     default command is shown and the controls stay hidden. */}}
+{{define "installcmd"}}
+<div class="installcmd" data-installcmd="{{.ID}}">
+  <div class="installcmd__opts" hidden>
+    <label class="field field--inline"><span class="field__label">{{t "agents.install.os"}}</span>
+      <select class="field__input" data-installcmd-os>
+        {{range .Targets}}<option value="{{.ID}}" data-root="{{.AsRoot}}" data-sudo="{{.WithSudo}}"{{if .Sudo}} data-default-sudo{{end}}>{{t (printf "agents.install.os.%s" .ID)}}</option>{{end}}
+      </select></label>
+    <label class="check-label"><input type="checkbox" data-installcmd-sudo{{if (index .Targets 0).Sudo}} checked{{end}}>{{t "agents.install.use_sudo"}}</label>
+  </div>
+  <span class="copy"><textarea class="field__input field__input--area mono" rows="3" readonly id="{{.ID}}">{{.Default}}</textarea><button class="button button--sm" type="button" data-copy="{{.ID}}">{{t "common.copy"}}</button></span>
+  <span class="field__hint">{{t "agents.install.sudo_hint"}}</span>
+</div>
 {{end}}

@@ -166,21 +166,39 @@ func (s *Server) queueJob(r *http.Request, h store.Host, typ string, pkgs []stri
 		}
 		params, pkgs = p, nil
 	case protocol.JobRefresh:
+		pkgs = nil
 	default:
 		if !h.RemoteUpdates {
 			return 0, s.l.T("job.error.remote_disabled", "hostname", h.Hostname)
 		}
-	}
-	if typ == protocol.JobUpgradePackages && len(pkgs) == 0 {
-		return 0, s.l.T("job.error.no_packages")
-	}
-	for _, p := range pkgs {
-		if !protocol.ValidPackageName(p) {
-			return 0, s.l.T("job.error.invalid_package", "package", p)
+		switch typ {
+		case protocol.JobUpgradePackages:
+			if len(pkgs) == 0 {
+				return 0, s.l.T("job.error.no_packages")
+			}
+			for _, p := range pkgs {
+				if !protocol.ValidPackageName(p) {
+					return 0, s.l.T("job.error.invalid_package", "package", p)
+				}
+			}
+		case protocol.JobRestartServices:
+			// The services travel in the packages field.
+			if len(pkgs) == 0 {
+				return 0, s.l.T("job.error.no_services")
+			}
+			for _, p := range pkgs {
+				if !protocol.ValidServiceName(p) {
+					return 0, s.l.T("job.error.invalid_service", "service", p)
+				}
+			}
+		case protocol.JobReboot:
+			if active, _ := s.st.HasActiveJob(r.Context(), h.ID, typ); active {
+				return 0, s.l.T("job.error.reboot_queued", "hostname", h.Hostname)
+			}
+			pkgs = nil
+		default:
+			pkgs = nil
 		}
-	}
-	if typ != protocol.JobUpgradePackages {
-		pkgs = nil
 	}
 	sess := sessionFrom(r)
 	id, err := s.st.CreateJob(r.Context(), h.ID, typ, pkgs, params, sess.user.ID)
@@ -635,7 +653,7 @@ func (s *Server) jobs(w http.ResponseWriter, r *http.Request) {
 	}
 	d := s.page(r, s.l.T("nav.jobs"), "jobs")
 	d.Data = map[string]any{"Jobs": jobs, "Status": status, "Pager": newPager(r, pg, total),
-		"Statuses": []string{protocol.JobQueued, protocol.JobDispatched, protocol.JobSucceeded, protocol.JobFailed, store.JobTimedOut, store.JobExpired, protocol.JobCancelled}}
+		"Statuses": []string{protocol.JobQueued, protocol.JobDispatched, protocol.JobSucceeded, protocol.JobPartial, protocol.JobFailed, store.JobTimedOut, store.JobExpired, protocol.JobCancelled}}
 	s.render(w, r, http.StatusOK, "jobs", d)
 }
 
@@ -655,7 +673,8 @@ func (s *Server) job(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	d := s.page(r, s.l.T("job.title", "id", j.ID), "jobs")
-	d.Data = map[string]any{"Job": j}
+	_, _, canRetry := retryJob(j)
+	d.Data = map[string]any{"Job": j, "CanRetry": canRetry}
 	s.render(w, r, http.StatusOK, "job", d)
 }
 
@@ -677,6 +696,57 @@ func (s *Server) jobCancel(w http.ResponseWriter, r *http.Request) {
 	}
 	s.audit(r, "job.cancel", strconv.FormatInt(id, 10), "")
 	s.redirect(w, r, back, "success", s.l.T("job.cancelled"))
+}
+
+// retryJob returns the job type and targets for retrying a finished job: the
+// packages (or services) it left behind, otherwise the same job again.
+func retryJob(j store.Job) (typ string, pkgs []string, ok bool) {
+	if j.Active() || j.Status == protocol.JobSucceeded || j.Type == protocol.JobAgentUpdate || j.Type == protocol.JobRefresh {
+		return "", nil, false
+	}
+	if len(j.Remaining) > 0 {
+		switch j.Type {
+		case protocol.JobUpgradeAll, protocol.JobUpgradeSecurity, protocol.JobUpgradePackages:
+			return protocol.JobUpgradePackages, j.Remaining, true
+		case protocol.JobRestartServices:
+			return protocol.JobRestartServices, j.Remaining, true
+		}
+	}
+	return j.Type, j.Packages, true
+}
+
+func (s *Server) jobRetry(w http.ResponseWriter, r *http.Request) {
+	id, ok := pathID(r)
+	if !ok {
+		s.errorPage(w, r, http.StatusNotFound, "error.not_found")
+		return
+	}
+	back := "/jobs/" + strconv.FormatInt(id, 10)
+	j, err := s.st.JobByID(r.Context(), id)
+	if errors.Is(err, store.ErrNotFound) {
+		s.errorPage(w, r, http.StatusNotFound, "error.not_found")
+		return
+	}
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	typ, pkgs, ok := retryJob(j)
+	if !ok {
+		s.redirect(w, r, back, "error", s.l.T("job.retry_not_possible"))
+		return
+	}
+	h, err := s.st.HostByID(r.Context(), j.HostID)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	newID, msg := s.queueJob(r, h, typ, pkgs)
+	if msg != "" {
+		s.redirect(w, r, back, "error", msg)
+		return
+	}
+	s.redirect(w, r, "/jobs/"+strconv.FormatInt(newID, 10), "success", s.l.T("job.retried", "id", j.ID))
 }
 
 // ---------- CSV exports ----------

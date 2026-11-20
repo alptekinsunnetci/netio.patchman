@@ -18,6 +18,10 @@
     <form method="post" action="/servers/{{$h.ID}}/jobs" data-confirm="{{t "server.action.all_confirm" "hostname" $h.Hostname}}">{{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_all">
       <button class="button" type="submit"{{if not $h.UpdateCount}} disabled{{end}}>{{template "icon" "package"}}{{t "server.action.all"}} ({{$h.UpdateCount}})</button></form>
     {{end}}
+    {{if $h.RemoteUpdates}}
+    <form method="post" action="/servers/{{$h.ID}}/jobs" data-confirm="{{t "server.action.reboot_confirm" "hostname" $h.Hostname}}">{{template "csrf" $root}}<input type="hidden" name="type" value="reboot">
+      <button class="button{{if $h.RebootRequired}} button--danger{{end}}" type="submit" title="{{t "server.action.reboot_hint"}}">{{template "icon" "power"}}{{t "server.action.reboot"}}</button></form>
+    {{end}}
     {{if and $h.SelfUpdate (agentOutdated $h)}}
     <form method="post" action="/servers/{{$h.ID}}/jobs">{{template "csrf" $root}}<input type="hidden" name="type" value="agent_update">
       <button class="button" type="submit" title="{{t "agents.update.outdated_hint" "version" agentRelease}}">{{template "icon" "agent"}}{{t "server.action.agent_update"}}</button></form>
@@ -28,6 +32,22 @@
 
 {{if not $h.RemoteUpdates}}<p class="alert alert--info">{{t "server.remote_disabled"}}</p>{{end}}
 {{if not $d.ScanSupported}}<p class="alert alert--info">{{t "server.scan_unsupported" "os" $h.OSName}}</p>{{end}}
+{{if $h.RestartServices}}
+<section class="panel">
+  <h2 class="panel__title">{{t "server.restart.title" "count" (len $h.RestartServices)}}</h2>
+  <p class="muted">{{t "server.restart.hint"}}</p>
+  {{if and .User.CanOperate $h.RemoteUpdates}}
+  <form method="post" action="/servers/{{$h.ID}}/jobs" data-confirm="{{t "server.restart.confirm" "hostname" $h.Hostname}}">
+    {{template "csrf" $root}}<input type="hidden" name="type" value="restart_services">
+    <label class="check-label"><input type="checkbox" data-check-all="packages"> {{t "common.select_all"}}</label>
+    <div class="checklist">
+      {{range $h.RestartServices}}<label class="check-label"><input type="checkbox" name="packages" value="{{.}}"> <span class="mono">{{.}}</span></label>{{end}}
+    </div>
+    <div><button class="button button--primary" type="submit">{{template "icon" "refresh"}}{{t "server.restart.submit"}}</button></div>
+  </form>
+  {{else}}<ul class="plain-list mono">{{range $h.RestartServices}}<li>{{.}}</li>{{end}}</ul>{{end}}
+</section>
+{{end}}
 {{if $h.ReportErrors}}<div class="alert alert--warning"><strong>{{t "server.report_errors"}}</strong><ul class="plain-list mono">{{range $h.ReportErrors}}<li>{{.}}</li>{{end}}</ul></div>{{end}}
 
 <section class="stats stats--compact">

@@ -53,6 +53,30 @@
     if (e.target.type === "radio") syncShowWhen();
   });
 
+  // Agent install command picker: every command is rendered by the server
+  // in data attributes; picking a distribution also resets the sudo default.
+  function installCmd(box, resetSudo) {
+    var sel = box.querySelector("[data-installcmd-os]");
+    var sudo = box.querySelector("[data-installcmd-sudo]");
+    var out = document.getElementById(box.getAttribute("data-installcmd"));
+    if (!sel || !sudo || !out) return;
+    var opt = sel.options[sel.selectedIndex];
+    if (resetSudo) sudo.checked = opt.hasAttribute("data-default-sudo");
+    out.value = opt.getAttribute(sudo.checked ? "data-sudo" : "data-root");
+  }
+  document.addEventListener("change", function (e) {
+    var box = e.target.closest && e.target.closest("[data-installcmd]");
+    if (box) installCmd(box, e.target.hasAttribute("data-installcmd-os"));
+  });
+  function initInstallCmd() {
+    var boxes = document.querySelectorAll("[data-installcmd]");
+    for (var i = 0; i < boxes.length; i++) {
+      var opts = boxes[i].querySelector(".installcmd__opts");
+      if (opts) opts.hidden = false;
+      installCmd(boxes[i], false);
+    }
+  }
+
   // Proportional bar segments (inline styles are blocked by CSP).
   function applyGrow() {
     var segs = document.querySelectorAll("[data-grow]");
@@ -63,6 +87,7 @@
   function init() {
     applyGrow();
     syncShowWhen();
+    initInstallCmd();
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);

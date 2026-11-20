@@ -8,10 +8,12 @@ import (
 	"log/slog"
 	"net/mail"
 	"strconv"
+	"strings"
 	"sync"
 
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify/email"
+	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
@@ -268,7 +270,7 @@ func (n *Notifier) AgentEnrolled(ctx context.Context, hostID int64, hostname str
 func (n *Notifier) JobFinished(ctx context.Context, j store.Job) {
 	link := "/jobs/" + strconv.FormatInt(j.ID, 10)
 	params := map[string]string{"hostname": j.Hostname, "job_type": j.Type, "id": strconv.FormatInt(j.ID, 10)}
-	if j.Status == "succeeded" {
+	if j.Status == protocol.JobSucceeded {
 		// Fleet-wide automatic agent updates and scheduled runs would flood
 		// the notification center; only their failures are reported (a
 		// schedule run adds one summary notification).
@@ -277,7 +279,13 @@ func (n *Notifier) JobFinished(ctx context.Context, j store.Job) {
 		}
 		return
 	}
-	_ = n.st.AddNotification(ctx, store.LevelWarning, "job_failed", params, link)
+	// "partial": the job ran but some packages or services were left.
+	kind := "job_failed"
+	if j.Status == protocol.JobPartial {
+		kind = "job_partial"
+		params["remaining"] = strings.Join(j.Remaining, ", ")
+	}
+	_ = n.st.AddNotification(ctx, store.LevelWarning, kind, params, link)
 	cfg, err := settings.Load(ctx, n.st)
 	if err != nil || !n.emailEnabled(cfg) || !cfg.EmailJobFailed {
 		return
@@ -286,21 +294,25 @@ func (n *Notifier) JobFinished(ctx context.Context, j store.Job) {
 	if len(to) == 0 {
 		return
 	}
+	rows := []email.NoticeRow{
+		{Label: n.l.T("host.field.hostname"), Value: j.Hostname, Mono: true},
+		{Label: n.l.T("job.field.type"), Value: n.l.T("job.type." + j.Type)},
+		{Label: n.l.T("job.field.status"), Value: n.l.T("job.status." + j.Status)},
+		{Label: n.l.T("job.field.exit_code"), Value: strconv.Itoa(j.ExitCode), Mono: true},
+		{Label: n.l.T("job.field.finished_at"), Value: n.f.Long(j.FinishedAt)},
+	}
+	if len(j.Remaining) > 0 {
+		rows = append(rows, email.NoticeRow{Label: n.l.T("job.field.remaining"), Value: strings.Join(j.Remaining, ", "), Mono: true})
+	}
 	output := j.Output
 	if len(output) > 8000 {
 		output = "…" + output[len(output)-8000:]
 	}
 	m, err := n.renderer.Notice(email.Notice{
-		Subject: n.l.T("email.job_failed.subject", "hostname", j.Hostname),
-		Heading: n.l.T("email.job_failed.heading"),
-		Body:    n.l.T("email.job_failed.body", "hostname", j.Hostname, "job_type", n.l.T("job.type."+j.Type)),
-		Rows: []email.NoticeRow{
-			{Label: n.l.T("host.field.hostname"), Value: j.Hostname, Mono: true},
-			{Label: n.l.T("job.field.type"), Value: n.l.T("job.type." + j.Type)},
-			{Label: n.l.T("job.field.status"), Value: n.l.T("job.status." + j.Status)},
-			{Label: n.l.T("job.field.exit_code"), Value: strconv.Itoa(j.ExitCode), Mono: true},
-			{Label: n.l.T("job.field.finished_at"), Value: n.f.Long(j.FinishedAt)},
-		},
+		Subject: n.l.T("email."+kind+".subject", "hostname", j.Hostname),
+		Heading: n.l.T("email." + kind + ".heading"),
+		Body:    n.l.T("email."+kind+".body", "hostname", j.Hostname, "job_type", n.l.T("job.type."+j.Type)),
+		Rows:    rows,
 		Output:  output,
 		LinkURL: n.baseURL() + link, LinkText: n.l.T("email.vuln.dashboard_link"),
 	}, to)

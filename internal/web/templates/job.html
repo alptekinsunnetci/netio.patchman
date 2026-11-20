@@ -10,6 +10,10 @@
   </div>
   <div class="pagehead__actions">
     {{if $j.Active}}<a class="button" href="/jobs/{{$j.ID}}">{{template "icon" "refresh"}}{{t "common.refresh"}}</a>{{end}}
+    {{if and .User.CanOperate .Data.CanRetry}}
+    <form method="post" action="/jobs/{{$j.ID}}/retry" data-confirm="{{if $j.Remaining}}{{t "job.retry_remaining_confirm" "count" (len $j.Remaining)}}{{else}}{{t "job.retry_confirm"}}{{end}}">{{template "csrf" $root}}
+      <button class="button button--primary" type="submit">{{template "icon" "refresh"}}{{if $j.Remaining}}{{t "job.retry_remaining"}}{{else}}{{t "job.retry"}}{{end}}</button></form>
+    {{end}}
     {{if and .User.CanOperate (eq $j.Status "queued")}}
     <form method="post" action="/jobs/{{$j.ID}}/cancel">{{template "csrf" $root}}<button class="button button--danger" type="submit">{{t "job.cancel"}}</button></form>
     {{end}}
@@ -17,11 +21,13 @@
 </header>
 
 {{if $j.Active}}<p class="alert alert--info">{{t "job.waiting_hint"}}</p>{{end}}
+{{if $j.Remaining}}<div class="alert alert--warning"><strong>{{if eq $j.Type "restart_services"}}{{t "job.remaining_services"}}{{else}}{{t "job.remaining_packages"}}{{end}}</strong>
+  <p class="mono">{{join $j.Remaining ", "}}</p><p>{{if eq $j.Type "restart_services"}}{{t "job.remaining_services_hint"}}{{else}}{{t "job.remaining_packages_hint"}}{{end}}</p></div>{{end}}
 
 <section class="panel">
   <dl class="dl">
     <dt>{{t "job.field.type"}}</dt><dd>{{jobType $j.Type}}</dd>
-    {{if $j.Packages}}<dt>{{t "job.field.packages"}}</dt><dd class="mono">{{join $j.Packages ", "}}</dd>{{end}}
+    {{if $j.Packages}}<dt>{{if eq $j.Type "restart_services"}}{{t "job.field.services"}}{{else}}{{t "job.field.packages"}}{{end}}</dt><dd class="mono">{{join $j.Packages ", "}}</dd>{{end}}
     {{with param $j.Params "version"}}<dt>{{t "job.field.target_version"}}</dt><dd class="mono">{{.}}</dd>{{end}}
     {{with param $j.Params "sha256"}}<dt>SHA-256</dt><dd class="mono break">{{.}}</dd>{{end}}
     <dt>{{t "job.field.status"}}</dt><dd>{{template "jobstatus" $j.Status}}</dd>

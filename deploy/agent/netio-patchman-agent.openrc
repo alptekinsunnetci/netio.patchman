@@ -1,0 +1,26 @@
+#!/sbin/openrc-run
+# netio.patchman ajanı - OpenRC hizmeti (Alpine Linux)
+#
+# supervise-daemon ajanı izler: ajan kendini güncelledikten sonra çıkar ve
+# yeni sürüm otomatik olarak yeniden başlatılır (systemd Restart=always eşdeğeri).
+
+name="netio-patchman-agent"
+description="netio.patchman ajanı - Merkezi Linux Güvenlik Açığı ve Güncelleme Yönetimi"
+command="/usr/local/bin/netio-patchman-agent"
+command_args="-config /etc/netio-patchman/agent.env"
+supervisor="supervise-daemon"
+respawn_delay=15
+respawn_max=0
+output_log="/var/log/netio-patchman-agent.log"
+error_log="/var/log/netio-patchman-agent.log"
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
+
+depend() {
+	need net
+	after firewall
+}
+
+start_pre() {
+	checkpath -d -m 0700 /var/lib/netio-patchman
+}

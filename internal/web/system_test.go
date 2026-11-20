@@ -120,7 +120,8 @@ func TestSystemConfiguration(t *testing.T) {
 		v := url.Values{"_csrf": {token}, "base_url": {e.srv.URL}, "timezone": {"Europe/Istanbul"}, "log_level": {"info"},
 			"smtp_host": {"127.0.0.1"}, "smtp_port": {strconv.Itoa(smtp.port())}, "smtp_username": {""},
 			"smtp_from_name": {"netio.patchman"}, "smtp_from_address": {"patchman@example.test"},
-			"osv_url": {e.sys.Get().OSVURL}, "kev_enabled": {"1"}, "kev_url": {e.sys.Get().KEVSourceURL}}
+			"osv_url": {e.sys.Get().OSVURL}, "kev_enabled": {"1"}, "kev_url": {e.sys.Get().KEVSourceURL},
+			"update_enabled": {"1"}, "update_url": {e.sys.Get().UpdateSourceURL}}
 		for k, val := range over {
 			v.Set(k, val)
 		}
@@ -217,6 +218,40 @@ func TestSystemConfiguration(t *testing.T) {
 		t.Errorf("reset did not restore env values: %+v", sys)
 	}
 
+	// New-version check: up to date, then a newer VERSION is published.
+	token = e.csrf(admin)
+	status, _, hdr = e.do(admin, "POST", "/settings/system/update-check", url.Values{"_csrf": {token}})
+	if status != http.StatusSeeOther || hdr.Get("Location") != "/settings/system#updates" {
+		t.Fatalf("update check: %d %s", status, hdr.Get("Location"))
+	}
+	status, body, _ = e.do(admin, "GET", "/settings/system", nil)
+	expect(t, "up to date", status, 200, body, "Güncel sürümü kullanıyorsunuz (0.2.0)", `id="updates"`)
+	if strings.Contains(body, "Yeni sürüm:") {
+		t.Error("update offered while up to date")
+	}
+	e.latest.Store("0.3.0\n")
+	token = e.csrf(admin)
+	e.do(admin, "POST", "/settings/system/update-check", url.Values{"_csrf": {token}})
+	status, body, _ = e.do(admin, "GET", "/settings/system", nil)
+	expect(t, "update available", status, 200, body, "Yeni sürüm mevcut: 0.3.0 (kurulu: 0.2.0)",
+		"Yeni sürüm yayımlandı: 0.3.0", "docker compose up -d --build", "Yeni sürüm: 0.3.0")
+	status, body, _ = e.do(admin, "GET", "/dashboard", nil)
+	expect(t, "update banner", status, 200, body, "netio.patchman 0.3.0 sürümü yayımlandı (kurulu: 0.2.0).", `href="/settings/system#updates"`)
+	status, body, _ = e.do(admin, "GET", "/notifications", nil)
+	expect(t, "update notification", status, 200, body, "netio.patchman 0.3.0 sürümü yayımlandı. Kurulu sürüm: 0.2.0.")
+	// Turning the check off hides the notice.
+	token = e.csrf(admin)
+	e.do(admin, "POST", "/settings/system", form(token, map[string]string{"base_url": "https://patchman.example.test", "update_enabled": ""}))
+	if e.sys.Get().UpdateURL != "" {
+		t.Error("update check still enabled")
+	}
+	status, body, _ = e.do(admin, "GET", "/dashboard", nil)
+	if strings.Contains(body, "sürümü yayımlandı (kurulu") {
+		t.Error("banner shown while the check is off")
+	}
+	token = e.csrf(admin)
+	e.do(admin, "POST", "/settings/system/reset", url.Values{"_csrf": {token}})
+
 	// Operators cannot open the page.
 	token = e.csrf(admin)
 	e.do(admin, "POST", "/users", url.Values{"_csrf": {token}, "name": {"Operatör"}, "email": {"op@example.test"}, "role": {"operator"},
@@ -231,5 +266,12 @@ func TestSystemConfiguration(t *testing.T) {
 	ot := e.csrf(op)
 	if status, _, _ = e.do(op, "POST", "/settings/system/reset", url.Values{"_csrf": {ot}}); status != http.StatusForbidden {
 		t.Errorf("operator reset: %d", status)
+	}
+	if status, _, _ = e.do(op, "POST", "/settings/system/update-check", url.Values{"_csrf": {ot}}); status != http.StatusForbidden {
+		t.Errorf("operator update check: %d", status)
+	}
+	// The new-version notice is for administrators only.
+	if _, body, _ = e.do(op, "GET", "/dashboard", nil); strings.Contains(body, "sürümü yayımlandı (kurulu") {
+		t.Error("operator sees the update banner")
 	}
 }

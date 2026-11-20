@@ -3,10 +3,12 @@
 #
 # Sunucudan indirerek kurulum:
 #   curl -fsSL https://patchman.your-domain/downloads/install-agent.sh | \
-#     sudo sh -s -- --server-url https://patchman.your-domain --token <kayıt-anahtarı>
+#     sh -s -- --server-url https://patchman.your-domain --token <kayıt-anahtarı>
+# (root değilseniz "sh" yerine "sudo sh"; curl yoksa "wget -qO- <adres>")
 #
-# Çevrimdışı kurulum: ajan ikili dosyasını ve netio-patchman-agent.service
-# dosyasını bu betikle aynı dizine koyun ve --binary seçeneğini kullanın.
+# Çevrimdışı kurulum: ajan ikili dosyasını ve hizmet dosyasını
+# (systemd: netio-patchman-agent.service, OpenRC: netio-patchman-agent.openrc)
+# bu betikle aynı dizine koyun ve --binary seçeneğini kullanın.
 
 set -eu
 
@@ -17,6 +19,9 @@ CONFIG_DIR="/etc/netio-patchman"
 CONFIG_FILE="${CONFIG_DIR}/agent.env"
 STATE_DIR="/var/lib/netio-patchman"
 UNIT_PATH="/etc/systemd/system/${SERVICE_NAME}"
+OPENRC_NAME="netio-patchman-agent"
+OPENRC_FILE="${OPENRC_NAME}.openrc"
+OPENRC_PATH="/etc/init.d/${OPENRC_NAME}"
 
 SERVER_URL=""
 TOKEN=""
@@ -36,7 +41,8 @@ kullanim() {
 netio.patchman ajan kurulumu
 
 Kullanım:
-  sudo sh install-agent.sh --server-url <adres> --token <kayıt-anahtarı> [seçenekler]
+  sh install-agent.sh --server-url <adres> --token <kayıt-anahtarı> [seçenekler]
+  (root yetkisi gerekir; root değilseniz başına sudo ekleyin)
 
 Seçenekler:
   --server-url <adres>       Merkezi netio.patchman sunucusunun adresi (zorunlu)
@@ -63,8 +69,16 @@ while [ $# -gt 0 ]; do
 done
 
 [ "$(uname -s)" = "Linux" ] || hata "Ajan yalnızca Linux sistemlerde desteklenir."
-[ "$(id -u)" -eq 0 ]        || hata "Bu betik root yetkisiyle çalıştırılmalıdır (sudo kullanın)."
-command -v systemctl >/dev/null 2>&1 || hata "systemd bulunamadı. Ajan, systemd kullanan dağıtımları destekler."
+[ "$(id -u)" -eq 0 ]        || hata "Bu betik root yetkisiyle çalıştırılmalıdır: root olarak çalıştırın ya da komuttaki \"sh\" yerine \"sudo sh\" yazın."
+# systemd is checked by its runtime directory, not only the binary: some
+# images ship systemctl without running systemd as PID 1.
+if [ -d /run/systemd/system ] && command -v systemctl >/dev/null 2>&1; then
+	INIT="systemd"
+elif command -v openrc-run >/dev/null 2>&1 || [ -x /sbin/openrc-run ]; then
+	INIT="openrc"
+else
+	hata "Desteklenen bir hizmet yöneticisi bulunamadı. Ajan systemd veya OpenRC (Alpine) kullanan dağıtımlarda çalışır."
+fi
 [ -n "$SERVER_URL" ]        || hata "Merkezi sunucu adresi (--server-url) zorunludur."
 case "$SERVER_URL" in
 	https://*) ;;
@@ -122,13 +136,14 @@ if [ -z "$BINARY_SRC" ]; then
 fi
 [ -f "$BINARY_SRC" ] || hata "Ajan ikili dosyası bulunamadı: $BINARY_SRC"
 
+if [ "$INIT" = "systemd" ]; then UNIT_FILE="$SERVICE_NAME"; else UNIT_FILE="$OPENRC_FILE"; fi
 UNIT_SRC=""
-for aday in "${SCRIPT_DIR}/${SERVICE_NAME}" "$(dirname -- "$BINARY_SRC")/${SERVICE_NAME}"; do
+for aday in "${SCRIPT_DIR}/${UNIT_FILE}" "$(dirname -- "$BINARY_SRC")/${UNIT_FILE}"; do
 	if [ -n "$aday" ] && [ -f "$aday" ]; then UNIT_SRC="$aday"; break; fi
 done
 if [ -z "$UNIT_SRC" ]; then
-	indir "${SERVER_URL}/downloads/${SERVICE_NAME}" "${TMP_DIR}/${SERVICE_NAME}" || hata "systemd birim dosyası indirilemedi."
-	UNIT_SRC="${TMP_DIR}/${SERVICE_NAME}"
+	indir "${SERVER_URL}/downloads/${UNIT_FILE}" "${TMP_DIR}/${UNIT_FILE}" || hata "Hizmet dosyası indirilemedi: ${UNIT_FILE}"
+	UNIT_SRC="${TMP_DIR}/${UNIT_FILE}"
 fi
 
 bilgi "Ajan ikili dosyası kuruluyor: ${INSTALL_PATH}"
@@ -162,17 +177,33 @@ if [ -n "$TOKEN" ] && [ -f "${STATE_DIR}/credentials.json" ]; then
 	rm -f "${STATE_DIR}/credentials.json"
 fi
 
-bilgi "systemd hizmeti kuruluyor: ${SERVICE_NAME}"
-install -m 0644 "$UNIT_SRC" "$UNIT_PATH"
-systemctl daemon-reload
-systemctl enable "$SERVICE_NAME" >/dev/null
-systemctl restart "$SERVICE_NAME"
+if [ "$INIT" = "systemd" ]; then
+	bilgi "systemd hizmeti kuruluyor: ${SERVICE_NAME}"
+	install -m 0644 "$UNIT_SRC" "$UNIT_PATH"
+	systemctl daemon-reload
+	systemctl enable "$SERVICE_NAME" >/dev/null
+	systemctl restart "$SERVICE_NAME"
 
-sleep 3
-if systemctl is-active --quiet "$SERVICE_NAME"; then
-	bilgi "Kurulum tamamlandı. Ajan çalışıyor ve sunucuya kaydoluyor."
-	bilgi "Durum: systemctl status ${SERVICE_NAME}"
-	bilgi "Kayıtlar: journalctl -u ${SERVICE_NAME} -f"
+	sleep 3
+	if systemctl is-active --quiet "$SERVICE_NAME"; then
+		bilgi "Kurulum tamamlandı. Ajan çalışıyor ve sunucuya kaydoluyor."
+		bilgi "Durum: systemctl status ${SERVICE_NAME}"
+		bilgi "Kayıtlar: journalctl -u ${SERVICE_NAME} -f"
+	else
+		hata "Ajan başlatılamadı. Ayrıntılar için: journalctl -u ${SERVICE_NAME} -n 50"
+	fi
 else
-	hata "Ajan başlatılamadı. Ayrıntılar için: journalctl -u ${SERVICE_NAME} -n 50"
+	bilgi "OpenRC hizmeti kuruluyor: ${OPENRC_NAME}"
+	install -m 0755 "$UNIT_SRC" "$OPENRC_PATH"
+	rc-update add "$OPENRC_NAME" default >/dev/null
+	rc-service "$OPENRC_NAME" restart >/dev/null 2>&1 || rc-service "$OPENRC_NAME" start >/dev/null
+
+	sleep 3
+	if rc-service "$OPENRC_NAME" status >/dev/null 2>&1; then
+		bilgi "Kurulum tamamlandı. Ajan çalışıyor ve sunucuya kaydoluyor."
+		bilgi "Durum: rc-service ${OPENRC_NAME} status"
+		bilgi "Kayıtlar: tail -f /var/log/${OPENRC_NAME}.log"
+	else
+		hata "Ajan başlatılamadı. Ayrıntılar için: tail -n 50 /var/log/${OPENRC_NAME}.log"
+	fi
 fi

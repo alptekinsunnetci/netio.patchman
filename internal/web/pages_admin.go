@@ -30,12 +30,66 @@ func parseEmail(s string) (string, error) {
 type newToken struct {
 	Name    string
 	Token   string
-	Command string
+	Command installPicker
 }
 
-func (s *Server) installCommand(token string) string {
+// installTarget is one distribution family in the install command picker.
+// The defaults follow a stock installation: Ubuntu and Fedora create a sudo
+// user and lock root, while RHEL-family, Debian (with a root password), SUSE
+// and Alpine are usually administered as root and may not have sudo at all.
+// Minimal Debian and Alpine ship wget but not curl.
+type installTarget struct {
+	ID       string // i18n key suffix: agents.install.os.<ID>
+	Wget     bool
+	Sudo     bool // default privilege mode
+	AsRoot   string
+	WithSudo string
+}
+
+// Command is the command for the target's default privilege mode.
+func (t installTarget) Command() string {
+	if t.Sudo {
+		return t.WithSudo
+	}
+	return t.AsRoot
+}
+
+// installPicker is the data for the "installcmd" template: one command per
+// distribution and privilege mode. Without JS the first target is shown.
+type installPicker struct {
+	ID      string // element id prefix
+	Targets []installTarget
+}
+
+// Default is the command shown before a distribution is picked.
+func (p installPicker) Default() string { return p.Targets[0].Command() }
+
+var installTargets = []installTarget{
+	{ID: "ubuntu", Sudo: true},
+	{ID: "debian", Wget: true},
+	{ID: "rhel"},
+	{ID: "fedora", Sudo: true},
+	{ID: "suse"},
+	{ID: "alpine", Wget: true},
+}
+
+func installCommands(base, token string, wget bool) (asRoot, withSudo string) {
+	fetch := "curl -fsSL " + base + "/downloads/install-agent.sh"
+	if wget {
+		fetch = "wget -qO- " + base + "/downloads/install-agent.sh"
+	}
+	args := " -s -- --server-url " + base + " --token " + token
+	return fetch + " | sh" + args, fetch + " | sudo sh" + args
+}
+
+func (s *Server) installCommand(id, token string) installPicker {
 	base := s.baseURL()
-	return "curl -fsSL " + base + "/downloads/install-agent.sh | sudo sh -s -- --server-url " + base + " --token " + token
+	p := installPicker{ID: id}
+	for _, t := range installTargets {
+		t.AsRoot, t.WithSudo = installCommands(base, token, t.Wget)
+		p.Targets = append(p.Targets, t)
+	}
+	return p
 }
 
 func (s *Server) agents(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +128,7 @@ func (s *Server) renderAgents(w http.ResponseWriter, r *http.Request, nt *newTok
 	d.Data = map[string]any{
 		"Tokens": tokens, "NewToken": nt, "Hosts": hosts, "Pager": newPager(r, pg, total), "Versions": versions,
 		"Release": s.o.Release, "ReleaseArchs": strings.Join(archs, ", "), "AutoUpdate": cfg.AgentAutoUpdate, "Outdated": outdated,
-		"BaseURL": s.baseURL(), "ExampleCommand": s.installCommand("<KAYIT-ANAHTARI>"),
+		"BaseURL": s.baseURL(), "ExampleCommand": s.installCommand("example-command", s.l.T("agents.install.token_placeholder")),
 		"Status": r.URL.Query().Get("status"),
 	}
 	s.render(w, r, status, "agents", d)
@@ -105,7 +159,7 @@ func (s *Server) tokenCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	s.audit(r, "token.create", name, "token_id="+strconv.FormatInt(id, 10))
 	// The token is shown exactly once; only its hash is stored.
-	s.renderAgents(w, r, &newToken{Name: name, Token: token, Command: s.installCommand(token)}, http.StatusOK)
+	s.renderAgents(w, r, &newToken{Name: name, Token: token, Command: s.installCommand("new-command", token)}, http.StatusOK)
 }
 
 func (s *Server) tokenRevoke(w http.ResponseWriter, r *http.Request) {

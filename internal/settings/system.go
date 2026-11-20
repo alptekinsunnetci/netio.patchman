@@ -33,12 +33,14 @@ const (
 	KeyOSVURL          = "sources.osv_url"
 	KeyKEVEnabled      = "sources.kev_enabled"
 	KeyKEVURL          = "sources.kev_url"
+	KeyUpdateEnabled   = "updates.check_enabled"
+	KeyUpdateURL       = "updates.check_url"
 )
 
 // SystemKeys lists every server configuration key.
 var SystemKeys = []string{
 	KeyBaseURL, KeyTrustProxy, KeyTimezone, KeyLogLevel, KeySMTPHost, KeySMTPPort, KeySMTPUsername, KeySMTPPassword,
-	KeySMTPFromName, KeySMTPFromAddress, KeyOSVURL, KeyKEVEnabled, KeyKEVURL,
+	KeySMTPFromName, KeySMTPFromAddress, KeyOSVURL, KeyKEVEnabled, KeyKEVURL, KeyUpdateEnabled, KeyUpdateURL,
 }
 
 // LogLevels are the selectable log levels.
@@ -56,6 +58,10 @@ type System struct {
 	KEVURL     string // empty when the KEV feed is disabled
 	// KEVSourceURL is the configured KEV address, kept while the feed is off.
 	KEVSourceURL string
+	// UpdateURL is where the latest product version is read; empty when the
+	// new-version check is disabled. UpdateSourceURL is kept while it is off.
+	UpdateURL       string
+	UpdateSourceURL string
 }
 
 // BaseURLString returns the base URL without a trailing slash.
@@ -74,9 +80,13 @@ func SystemFromEnv(c config.Config) System {
 	sys := System{
 		BaseURL: c.BaseURL, TrustProxy: c.TrustProxy, Timezone: c.TimezoneName, Location: c.Timezone,
 		LogLevel: c.LogLevel, SMTP: c.SMTP, OSVURL: c.OSVURL, KEVURL: c.KEVURL, KEVSourceURL: c.KEVURL,
+		UpdateURL: c.UpdateURL, UpdateSourceURL: c.UpdateURL,
 	}
 	if sys.KEVSourceURL == "" {
 		sys.KEVSourceURL = config.DefaultKEVURL
+	}
+	if sys.UpdateSourceURL == "" {
+		sys.UpdateSourceURL = config.DefaultUpdateURL
 	}
 	if sys.Location == nil {
 		sys.Location = time.UTC
@@ -154,6 +164,22 @@ func SystemFrom(raw map[string]string, c config.Config) System {
 			sys.KEVURL = ""
 			if b {
 				sys.KEVURL = sys.KEVSourceURL
+			}
+		}
+	}
+	if v, ok := raw[KeyUpdateURL]; ok {
+		if u, err := ParseSourceURL(v); err == nil {
+			sys.UpdateSourceURL = u
+			if sys.UpdateURL != "" {
+				sys.UpdateURL = u
+			}
+		}
+	}
+	if v, ok := raw[KeyUpdateEnabled]; ok {
+		if b, err := strconv.ParseBool(v); err == nil {
+			sys.UpdateURL = ""
+			if b {
+				sys.UpdateURL = sys.UpdateSourceURL
 			}
 		}
 	}

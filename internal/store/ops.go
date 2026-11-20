@@ -29,6 +29,8 @@ type Job struct {
 	FinishedAt   time.Time
 	ExitCode     int
 	Output       string
+	// Remaining lists targeted packages (or services) still pending after the job.
+	Remaining []string
 	// Set for jobs created by a schedule.
 	ScheduleID   int64
 	ScheduleName string
@@ -122,11 +124,21 @@ func (s *Store) DispatchJobs(ctx context.Context, hostID int64) ([]protocol.Job,
 // CompleteJob records a job result reported by the host's agent.
 func (s *Store) CompleteJob(ctx context.Context, hostID, jobID int64, r protocol.JobResult) (Job, error) {
 	status := protocol.JobFailed
-	if r.Succeeded {
+	switch {
+	case r.Succeeded && len(r.Remaining) > 0:
+		status = protocol.JobPartial
+	case r.Succeeded:
 		status = protocol.JobSucceeded
 	}
-	res, err := s.db.ExecContext(ctx, `UPDATE jobs SET status = ?, finished_at = ?, exit_code = ?, output = ? WHERE id = ? AND host_id = ? AND status IN ('queued','dispatched')`,
-		status, now(), r.ExitCode, truncate(r.Output, protocol.MaxOutputBytes), jobID, hostID)
+	var remaining []string
+	for _, n := range r.Remaining {
+		if len(remaining) < 500 && (protocol.ValidPackageName(n) || protocol.ValidServiceName(n)) {
+			remaining = append(remaining, n)
+		}
+	}
+	rem, _ := json.Marshal(nonNil(remaining))
+	res, err := s.db.ExecContext(ctx, `UPDATE jobs SET status = ?, finished_at = ?, exit_code = ?, output = ?, remaining = ? WHERE id = ? AND host_id = ? AND status IN ('queued','dispatched')`,
+		status, now(), r.ExitCode, truncate(r.Output, protocol.MaxOutputBytes), string(rem), jobID, hostID)
 	if err != nil {
 		return Job{}, err
 	}
@@ -181,15 +193,15 @@ func (s *Store) TimeOutJobs(ctx context.Context, d time.Duration) ([]Job, error)
 	return out, nil
 }
 
-const jobSelect = `SELECT j.id, j.host_id, h.hostname, j.type, j.packages, j.params, j.status, COALESCE(u.name, ''), j.created_at, j.dispatched_at, j.finished_at, j.exit_code, j.output,
+const jobSelect = `SELECT j.id, j.host_id, h.hostname, j.type, j.packages, j.params, j.status, COALESCE(u.name, ''), j.created_at, j.dispatched_at, j.finished_at, j.exit_code, j.output, j.remaining,
  COALESCE(j.schedule_id, 0), COALESCE(sc.name, ''), j.expires_at
  FROM jobs j JOIN hosts h ON h.id = j.host_id LEFT JOIN users u ON u.id = j.created_by LEFT JOIN schedules sc ON sc.id = j.schedule_id`
 
 func scanJob(row interface{ Scan(...any) error }, withOutput bool) (Job, error) {
 	var j Job
-	var pk, params string
+	var pk, params, rem string
 	var c, d, f, e int64
-	err := row.Scan(&j.ID, &j.HostID, &j.Hostname, &j.Type, &pk, &params, &j.Status, &j.CreatedBy, &c, &d, &f, &j.ExitCode, &j.Output,
+	err := row.Scan(&j.ID, &j.HostID, &j.Hostname, &j.Type, &pk, &params, &j.Status, &j.CreatedBy, &c, &d, &f, &j.ExitCode, &j.Output, &rem,
 		&j.ScheduleID, &j.ScheduleName, &e)
 	if errors.Is(err, sql.ErrNoRows) {
 		return j, ErrNotFound
@@ -199,6 +211,7 @@ func scanJob(row interface{ Scan(...any) error }, withOutput bool) (Job, error) 
 	}
 	_ = json.Unmarshal([]byte(pk), &j.Packages)
 	_ = json.Unmarshal([]byte(params), &j.Params)
+	_ = json.Unmarshal([]byte(rem), &j.Remaining)
 	j.CreatedAt, j.DispatchedAt, j.FinishedAt, j.ExpiresAt = fromTS(c), fromTS(d), fromTS(f), fromTS(e)
 	if !withOutput {
 		j.Output = ""

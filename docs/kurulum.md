@@ -60,6 +60,7 @@ Compose proje adı `netio-patchman`, imaj adı `netio-patchman-server`, veri bir
 | Günlük seviyesi | `PATCHMAN_LOG_LEVEL` |
 | SMTP sunucusu, port, kullanıcı adı, parola, gönderen adı ve adresi | `PATCHMAN_SMTP_*` |
 | OSV API adresi, CISA KEV kataloğu (açık/kapalı ve adresi) | `PATCHMAN_OSV_URL`, `PATCHMAN_KEV_URL` |
+| Yeni sürüm denetimi (açık/kapalı ve adresi) | `PATCHMAN_UPDATE_CHECK_URL` (`off` ile kapanır) |
 
 - Ortam değişkenleri yalnızca ilk değerdir: panelde bir kez kaydedilen değer ortam değişkeninin yerine geçer. **Ortam değişkenlerine dön** düğmesi paneldeki değerleri siler.
 - SMTP parolası veritabanında saklanır, sayfada hiçbir zaman gösterilmez ve denetim kaydına yazılmaz. Veritabanı yedeklerini buna göre koruyun.
@@ -121,18 +122,28 @@ Sertifika dosyalarını konteynere salt okunur birim olarak bağlayın.
 Sertifikanız kurum içi bir CA tarafından imzalandıysa, ajan kurulumunda CA dosyasını verin:
 
 ```sh
-sudo sh install-agent.sh --server-url https://patchman.your-domain --token <ANAHTAR> --ca-file /path/kurum-ca.pem
+sh install-agent.sh --server-url https://patchman.your-domain --token <ANAHTAR> --ca-file /path/kurum-ca.pem
 ```
 
 ## 4. Ajan kurulumu
 
 ### 4.1 Sunucudan indirerek
 
-Panelde **Ajan Yönetimi → Yeni kayıt anahtarı** ile bir anahtar oluşturun ve gösterilen komutu çalıştırın:
+Panelde **Ajan Yönetimi → Yeni kayıt anahtarı** ile bir anahtar oluşturun. Komut alanının üstünden sunucunun dağıtımını seçin; komut dağıtıma göre oluşur:
+
+| Dağıtım | İndirme aracı | Varsayılan yetki |
+|---|---|---|
+| Ubuntu, Fedora | `curl` | `sudo` |
+| RHEL, CentOS, AlmaLinux, Rocky, Oracle Linux | `curl` | root |
+| SUSE, openSUSE | `curl` | root |
+| Debian | `wget` | root |
+| Alpine | `wget` | root |
+
+Varsayılanlar standart kurulumlara göredir. **sudo ile çalıştır** kutusuyla değiştirebilirsiniz: root oturumunda sudo gerekmez, sudo kurulu değilse kutuyu boş bırakın. Örnek (root olarak, CentOS):
 
 ```sh
 curl -fsSL https://patchman.your-domain/downloads/install-agent.sh | \
-  sudo sh -s -- --server-url https://patchman.your-domain --token <KAYIT-ANAHTARI>
+  sh -s -- --server-url https://patchman.your-domain --token <KAYIT-ANAHTARI>
 ```
 
 Betik şunları yapar:
@@ -140,7 +151,11 @@ Betik şunları yapar:
 1. Mimariye uygun ajanı indirir ve SHA-256 özetini doğrular.
 2. Ajanı `/usr/local/bin/netio-patchman-agent` konumuna kurar.
 3. Yapılandırmayı `/etc/netio-patchman/agent.env` dosyasına yazar (yalnızca root okuyabilir).
-4. `netio-patchman-agent.service` hizmetini etkinleştirir ve başlatır.
+4. Hizmet yöneticisini algılar ve hizmeti etkinleştirip başlatır:
+   - systemd: `netio-patchman-agent.service`, kayıtlar `journalctl -u netio-patchman-agent -f`.
+   - OpenRC (Alpine): `/etc/init.d/netio-patchman-agent` (supervise-daemon ile izlenir), kayıtlar `/var/log/netio-patchman-agent.log`.
+
+İkisi de yoksa betik hata vererek durur.
 
 Ajan ilk çalışmada kayıt anahtarıyla sunucuya kaydolur. Kalıcı kimliğini `/var/lib/netio-patchman/credentials.json` dosyasında saklar. Kayıttan sonra kayıt anahtarına ihtiyaç duyulmaz.
 
@@ -171,16 +186,28 @@ Kayıt anahtarını süreli ve kullanım sınırlı oluşturup Ansible, Puppet v
 | `PATCHMAN_REFRESH_PACKAGE_LISTS` | `true` | Paket listelerini en fazla 6 saatte bir yeniler (`apt-get update`, `zypper refresh`, `apk update`) |
 | `PATCHMAN_CA_FILE` | — | Ek CA sertifikası |
 
-Değişiklikten sonra: `sudo systemctl restart netio-patchman-agent.service`
+Değişiklikten sonra: `systemctl restart netio-patchman-agent.service` (Alpine: `rc-service netio-patchman-agent restart`)
 
 ### 4.4 Ajanı kaldırma
 
+root olarak (veya komutların başına `sudo` ekleyerek):
+
 ```sh
-sudo systemctl disable --now netio-patchman-agent.service
-sudo rm -f /etc/systemd/system/netio-patchman-agent.service /usr/local/bin/netio-patchman-agent \
+systemctl disable --now netio-patchman-agent.service
+rm -f /etc/systemd/system/netio-patchman-agent.service /usr/local/bin/netio-patchman-agent \
   /usr/local/bin/netio-patchman-agent.previous
-sudo rm -rf /etc/netio-patchman /var/lib/netio-patchman
-sudo systemctl daemon-reload
+rm -rf /etc/netio-patchman /var/lib/netio-patchman
+systemctl daemon-reload
+```
+
+Alpine (OpenRC):
+
+```sh
+rc-service netio-patchman-agent stop
+rc-update del netio-patchman-agent default
+rm -f /etc/init.d/netio-patchman-agent /usr/local/bin/netio-patchman-agent \
+  /usr/local/bin/netio-patchman-agent.previous /var/log/netio-patchman-agent.log
+rm -rf /etc/netio-patchman /var/lib/netio-patchman
 ```
 
 Ardından panelde sunucunun **Sistem Bilgisi** sekmesinden sunucuyu kaldırın.
@@ -215,6 +242,18 @@ Veritabanı şeması açılışta otomatik olarak güncellenir. Yükseltmeden ö
 
 Sunucunun ve ajanların sürümü depodaki `VERSION` dosyasından alınır. Kendi derlemenize ayrı bir sürüm vermek için `.env` içinde `PATCHMAN_VERSION` tanımlayın. Ajanlar yalnızca sürüm değiştiğinde güncellenir.
 
+### Yeni sürümün bildirilmesi
+
+Sunucu, depodaki `VERSION` dosyasını açılıştan bir dakika sonra ve ardından 12 saatte bir okur. Daha yeni bir sürüm varsa:
+
+- Yöneticiler her sayfanın üstünde bir uyarı ve kenar çubuğunda **Yeni sürüm** etiketi görür.
+- Bildirim merkezine her yeni sürüm için bir kez bildirim düşer.
+- **Sistem Ayarları → Sunucu yapılandırması → Ürün sürümü** bölümünde kurulu sürüm, yayımlanan son sürüm, son denetim zamanı ve güncelleme komutları gösterilir. **Şimdi denetle** düğmesi denetimi hemen çalıştırır.
+
+İstekte yalnızca `User-Agent: netio-patchman-server/<sürüm>` başlığı gönderilir; sunucular, kullanıcılar veya bulgular hakkında bilgi gönderilmez. Adres değiştirilebilir: düz metin bir `VERSION` dosyası veya GitHub sürüm API'si (`https://api.github.com/repos/<sahip>/<depo>/releases/latest`) kullanılabilir. Denetim aynı bölümden kapatılabilir.
+
+Uyarı yalnızca bu özelliği içeren sürümden itibaren görünür. Daha eski bir sürümü çalıştıran sunucu, bir kez elle yükseltilmelidir.
+
 ### Ajanların otomatik güncellenmesi
 
 Docker imajı, sunucuyla aynı sürümdeki amd64 ve arm64 ajan dosyalarını içerir. **Sistem Ayarları → Ajanlar → Ajanları otomatik olarak güncelle** açıkken (varsayılan):
@@ -242,7 +281,7 @@ Kurulum komutunu `--token` seçeneği **olmadan** yeniden çalıştırırsanız 
 
 ```sh
 curl -fsSL https://patchman.your-domain/downloads/install-agent.sh | \
-  sudo sh -s -- --server-url https://patchman.your-domain
+  sh -s -- --server-url https://patchman.your-domain
 ```
 
 Komut `--token` ile çalıştırılırsa ajan yeniden kaydolur. Sunucu kaydı makine kimliğiyle eşleştirildiği için geçmiş veriler kaybolmaz.
@@ -261,6 +300,7 @@ Komut, yeni bir parola üretip ekrana yazar ve hesabı etkinleştirir.
 
 - **Ajanlar:** Panelin **Ajan Yönetimi** sayfasındaki indirme adreslerinden ajan dosyasını, `netio-patchman-agent.service` dosyasını ve `install-agent.sh` betiğini alın, sunucuya kopyalayıp `--binary` seçeneğiyle kurun.
 - **Güvenlik açığı verisi:** **Sunucu yapılandırması** sayfasında OSV API adresini iç ağdaki bir yansıya yönlendirin. KEV kataloğunun adresini iç ağdaki bir kopyaya çevirin veya kataloğu kapatın. (Ortam değişkenleri: `PATCHMAN_OSV_URL`, `PATCHMAN_KEV_URL`.)
+- **Yeni sürüm denetimi:** **Sunucu yapılandırması → Sürüm denetimi** bölümünden kapatın veya iç ağdaki bir `VERSION` dosyasına yönlendirin (`PATCHMAN_UPDATE_CHECK_URL=off`).
 - Panel dış kaynak (CDN, yazı tipi) kullanmaz.
 
 ## 9. Sorun giderme

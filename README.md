@@ -22,14 +22,16 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 
 ## Özellikler
 
-- **Sunucu envanteri:** İşletim sistemi, çekirdek, IP adresleri, kurulu paketler, bekleyen güncellemeler ve yeniden başlatma ihtiyacı.
+- **Sunucu envanteri:** İşletim sistemi, çekirdek, IP adresleri, kurulu paketler, bekleyen güncellemeler, yeniden başlatma ihtiyacı ve eski kodu çalıştıran servisler.
 - **Güvenlik açığı taraması:** Kurulu paket sürümleri [OSV.dev](https://osv.dev) üzerinden dağıtımların resmî güvenlik verileriyle eşleştirilir. CVSS puanı, önem derecesi, düzeltilmiş sürüm ve üretici güvenlik duyuruları gösterilir.
 - **Aktif istismar bilgisi:** CISA Known Exploited Vulnerabilities (KEV) kataloğundaki açıklar ayrıca işaretlenir ve önceliklendirilir.
-- **Merkezi güncelleme:** Panelden tek bir sunucuda, seçilen sunucularda veya tümünde güvenlik güncellemeleri, tüm güncellemeler ya da seçili paketler kurulabilir. Bir CVE için **Düzeltmeyi uygula** ile etkilenen tüm sunucularda ilgili paketler güncellenir.
-- **Zamanlanmış güncellemeler:** "Her pazar 03:00'te Ubuntu sunucularında güvenlik güncellemelerini uygula" gibi bakım pencereleri. Sunucular hiçbir zaman kendiliğinden yeniden başlatılmaz.
+- **Merkezi güncelleme:** Panelden tek bir sunucuda, seçilen sunucularda veya tümünde güvenlik güncellemeleri, tüm güncellemeler ya da seçili paketler kurulabilir. Bir CVE için **Düzeltmeyi uygula** ile etkilenen tüm sunucularda ilgili paketler güncellenir. Ajan her işten sonra paketlerin gerçekten güncellendiğini doğrular; güncellenemeyenler listelenir ve tek tıkla yeniden denenebilir.
+- **Servis ve sunucu yeniden başlatma:** Güncellenen kütüphaneleri hâlâ eski sürümle kullanan servisler tespit edilir ve panelden yeniden başlatılabilir; sunucu panelden yeniden başlatılabilir.
+- **Zamanlanmış güncellemeler:** "Her pazar 03:00'te Ubuntu sunucularında güvenlik güncellemelerini uygula" gibi bakım pencereleri. Zamanlamalar sunucuları kendiliğinden yeniden başlatmaz.
 - **Otomatik ajan güncellemesi:** Merkezi sunucu yeni sürüme geçince ajanlar yeni sürümü indirir, SHA-256 özetini doğrular ve kendini günceller.
+- **Yeni sürüm bildirimi:** Panel, GitHub'da yeni bir netio.patchman sürümü yayımlandığında yöneticileri uyarır ve güncelleme komutlarını gösterir. İnternet erişimi olmayan kurulumlarda kapatılabilir.
 - **Bulgu yönetimi:** Açık, İşlemde, Risk Kabul Edildi, Hatalı Tespit durumları. Paket güncellenince bulgu otomatik olarak "Çözüldü" olur.
-- **Bildirimler:** Bildirim merkezi ve Türkçe e-posta bildirimleri: yeni açıklar, bağlantısı kesilen ajanlar, başarısız güncelleme işleri.
+- **Bildirimler:** Bildirim merkezi ve Türkçe e-posta bildirimleri: yeni açıklar, bağlantısı kesilen ajanlar, başarısız veya kısmen tamamlanan güncelleme işleri.
 - **Kullanıcılar ve yetkiler:** Yönetici, Operatör ve İzleyici rolleri; denetim kayıtları.
 - **Paneldense yapılandırma:** SMTP, sunucu adresi, saat dilimi, veri kaynakları ve tüm işletim ayarları panelden değiştirilir. Değişiklikler yeniden başlatma gerektirmez.
 - **Dışa aktarma:** Sunucu ve güvenlik açığı listeleri Excel uyumlu CSV olarak indirilebilir.
@@ -42,9 +44,9 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
-| Diğer dağıtımlar (dnf, yum, zypper, apt veya apk kullanan) | ✓ | — |
+| CentOS, Oracle Linux, Fedora ve diğer dağıtımlar (dnf, yum, zypper, apt veya apk kullanan) | ✓ | — |
 
-Ajan amd64 ve arm64 mimarilerinde çalışır. Kurulum betiği systemd gerektirir.
+Ajan amd64 ve arm64 mimarilerinde çalışır. Hizmet yöneticisi olarak systemd veya OpenRC (Alpine) gerekir. Sunucunun fiziksel, sanal (VMware, Hyper-V, KVM/Proxmox) veya bulutta olması fark etmez.
 
 ## Nasıl çalışır
 
@@ -146,11 +148,11 @@ Ardından panelde **Ters vekil başlıklarına güven** seçeneğini açın (vey
 ## Sunuculara ajan kurulumu
 
 1. Panelde **Ajan Yönetimi** sayfasından bir **kayıt anahtarı** oluşturun. Anahtar yalnızca bir kez gösterilir. Süre ve kullanım sınırı verebilirsiniz.
-2. Sayfada gösterilen komutu yönetilecek her sunucuda root olarak çalıştırın:
+2. Sayfada sunucunun dağıtımını seçin. Komut buna göre oluşur: Debian ve Alpine'de `wget`, diğerlerinde `curl` kullanılır. root olarak bağlanıyorsanız **sudo ile çalıştır** kutusunu boş bırakın (sudo, CentOS, Debian ve Alpine'de çoğu zaman kurulu değildir). Komutu yönetilecek sunucuda çalıştırın. Örnek (root olarak, RHEL/CentOS):
 
    ```sh
    curl -fsSL https://patchman.your-domain/downloads/install-agent.sh | \
-     sudo sh -s -- --server-url https://patchman.your-domain --token <KAYIT-ANAHTARI>
+     sh -s -- --server-url https://patchman.your-domain --token <KAYIT-ANAHTARI>
    ```
 
 3. Sunucu birkaç saniye içinde **Sunucu Envanteri** sayfasında görünür ve ilk güvenlik taraması otomatik olarak başlar.
@@ -159,7 +161,7 @@ Kurulum betiği şunları yapar:
 
 - Ajanı `/usr/local/bin/netio-patchman-agent` konumuna kurar.
 - Yapılandırmayı `/etc/netio-patchman/agent.env` dosyasına yazar.
-- `netio-patchman-agent.service` systemd hizmetini başlatır.
+- Hizmeti başlatır: systemd'de `netio-patchman-agent.service`, OpenRC'de (Alpine) `/etc/init.d/netio-patchman-agent`.
 
 Ajanın durumunu ve kayıtlarını şu komutlarla görebilirsiniz:
 

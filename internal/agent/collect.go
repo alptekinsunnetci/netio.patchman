@@ -57,9 +57,49 @@ type Collector struct {
 	StateDir     string
 }
 
-// Collect returns packages, available updates and the reboot flag. Partial
-// failures are reported in errs so the server still receives what worked.
-func (c Collector) Collect(ctx context.Context) (pkgs []protocol.Package, updates []protocol.Update, reboot bool, errs []string) {
+// Inventory is what one collection run found.
+type Inventory struct {
+	Packages []protocol.Package
+	Updates  []protocol.Update
+	Reboot   bool
+	// Services still running replaced code; see RestartServices.
+	Services []string
+	Errors   []string
+}
+
+// Collect gathers packages, pending updates, the reboot flag and services
+// that need a restart. Partial failures are listed in Errors so the server
+// still receives what worked.
+func (c Collector) Collect(ctx context.Context) Inventory {
+	pkgs, updates, reboot, errs := c.collect(ctx)
+	services, kernelPending := RestartServices(ctx, c.PM)
+	return Inventory{Packages: pkgs, Updates: updates, Reboot: reboot || kernelPending, Services: services, Errors: errs}
+}
+
+// PendingUpdates lists pending updates without refreshing the package lists.
+func PendingUpdates(ctx context.Context, pm string) ([]protocol.Update, error) {
+	switch pm {
+	case protocol.PMApt:
+		return aptUpdates(ctx)
+	case protocol.PMDnf, protocol.PMYum:
+		pkgs, err := rpmPackages(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return dnfUpdates(ctx, pm, pkgs)
+	case protocol.PMZypper:
+		pkgs, err := rpmPackages(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return zypperUpdates(ctx, pkgs)
+	case protocol.PMApk:
+		return apkUpdates(ctx)
+	}
+	return nil, errors.New("unsupported package manager")
+}
+
+func (c Collector) collect(ctx context.Context) (pkgs []protocol.Package, updates []protocol.Update, reboot bool, errs []string) {
 	addErr := func(err error) {
 		if err != nil {
 			errs = append(errs, err.Error())
@@ -193,13 +233,18 @@ func aptUpdates(ctx context.Context) ([]protocol.Update, error) {
 // Inst libssl3 [3.0.11-1~deb12u1] (3.0.11-1~deb12u2 Debian-Security:12/stable-security [amd64])
 var aptInstRE = regexp.MustCompile(`^Inst (\S+) (?:\[([^\]]*)\] )?\((\S+) (.*?)(?: \[[^\]]*\])?\)`)
 
+// parseAptSimulate returns upgrades of installed packages. "Inst" lines
+// without a current version ("[...]") are new packages pulled in as
+// dependencies (a new kernel ABI, a split firmware package): they are not
+// installed, "install --only-upgrade" skips them, and apt installs them by
+// itself when the package that needs them is upgraded.
 func parseAptSimulate(out []byte) []protocol.Update {
 	var ups []protocol.Update
 	seen := map[string]bool{}
 	sc := bufio.NewScanner(bytes.NewReader(out))
 	for sc.Scan() {
 		m := aptInstRE.FindStringSubmatch(sc.Text())
-		if m == nil || seen[m[1]] {
+		if m == nil || m[2] == "" || seen[m[1]] {
 			continue
 		}
 		seen[m[1]] = true
@@ -517,4 +562,92 @@ func splitApkNameVersion(s string) (string, string) {
 		return "", ""
 	}
 	return s[:j], s[j+1:]
+}
+
+// ---------- services that need a restart ----------
+
+// RestartServices lists services that still run code replaced by an update
+// (deleted libraries or binaries), and whether a newer kernel or microcode
+// waits for a reboot. It uses needrestart (Debian/Ubuntu), needs-restarting
+// (RHEL family) or "zypper ps" (SUSE); without them it returns nothing.
+func RestartServices(ctx context.Context, pm string) (services []string, rebootPending bool) {
+	switch pm {
+	case protocol.PMApt:
+		if _, err := exec.LookPath("needrestart"); err != nil {
+			return nil, false
+		}
+		// -b batch output, -r l: list only, never restart anything.
+		out, _, err := run(ctx, 3*time.Minute, "needrestart", "-b", "-r", "l")
+		if err != nil {
+			return nil, false
+		}
+		return parseNeedrestart(out)
+	case protocol.PMDnf, protocol.PMYum:
+		var out []byte
+		var err error
+		if _, lerr := exec.LookPath("needs-restarting"); lerr == nil {
+			out, _, err = run(ctx, 3*time.Minute, "needs-restarting", "-s")
+		} else if pm == protocol.PMDnf {
+			out, _, err = run(ctx, 3*time.Minute, "dnf", "-q", "needs-restarting", "-s")
+		} else {
+			return nil, false
+		}
+		if err != nil {
+			return nil, false
+		}
+		return parseServiceList(out), false
+	case protocol.PMZypper:
+		out, _, err := run(ctx, 3*time.Minute, "zypper", "--quiet", "ps", "-sss")
+		if err != nil {
+			return nil, false
+		}
+		return parseServiceList(out), false
+	}
+	return nil, false
+}
+
+// parseNeedrestart reads "needrestart -b" output:
+//
+//	NEEDRESTART-KSTA: 3
+//	NEEDRESTART-UCSTA: 2
+//	NEEDRESTART-SVC: cron.service
+//
+// KSTA 2 and 3 mean a newer kernel is installed; UCSTA 2 means new microcode.
+func parseNeedrestart(out []byte) (services []string, rebootPending bool) {
+	sc := bufio.NewScanner(bytes.NewReader(out))
+	for sc.Scan() {
+		key, val, ok := strings.Cut(sc.Text(), ":")
+		if !ok {
+			continue
+		}
+		val = strings.TrimSpace(val)
+		switch key {
+		case "NEEDRESTART-SVC":
+			if protocol.ValidServiceName(val) && !slices.Contains(services, val) {
+				services = append(services, val)
+			}
+		case "NEEDRESTART-KSTA":
+			rebootPending = rebootPending || val == "2" || val == "3"
+		case "NEEDRESTART-UCSTA":
+			rebootPending = rebootPending || val == "2"
+		}
+	}
+	slices.Sort(services)
+	return services, rebootPending
+}
+
+// parseServiceList reads one service name per line (needs-restarting -s,
+// zypper ps -sss). Other lines (headers, warnings) are ignored.
+func parseServiceList(out []byte) []string {
+	var services []string
+	sc := bufio.NewScanner(bytes.NewReader(out))
+	for sc.Scan() {
+		name := strings.TrimSpace(sc.Text())
+		if !protocol.ValidServiceName(name) || slices.Contains(services, name) {
+			continue
+		}
+		services = append(services, name)
+	}
+	slices.Sort(services)
+	return services
 }

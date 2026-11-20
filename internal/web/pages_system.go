@@ -1,11 +1,13 @@
 package web
 
 import (
+	"context"
 	"net/http"
 	"net/mail"
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"netio.patchman/internal/settings"
 )
@@ -32,6 +34,8 @@ type systemForm struct {
 	OSVURL          string
 	KEVEnabled      bool
 	KEVURL          string
+	UpdateEnabled   bool
+	UpdateURL       string
 }
 
 func systemFormFrom(sys settings.System) systemForm {
@@ -40,6 +44,7 @@ func systemFormFrom(sys settings.System) systemForm {
 		SMTPHost: sys.SMTP.Host, SMTPPort: strconv.Itoa(sys.SMTP.Port), SMTPUsername: sys.SMTP.Username,
 		SMTPFromName: sys.SMTP.From.Name, SMTPFromAddress: sys.SMTP.From.Address,
 		OSVURL: sys.OSVURL, KEVEnabled: sys.KEVURL != "", KEVURL: sys.KEVSourceURL,
+		UpdateEnabled: sys.UpdateURL != "", UpdateURL: sys.UpdateSourceURL,
 	}
 }
 
@@ -72,6 +77,10 @@ func (s *Server) renderSystem(w http.ResponseWriter, r *http.Request, status int
 			"TLS": env.TLSCertFile != "", "TLSCertFile": env.TLSCertFile, "LogFormat": env.LogFormat, "Locale": env.Locale,
 		},
 	}
+	if s.o.Updates != nil {
+		st := s.o.Updates.Status()
+		d.Data.(map[string]any)["UpdateStatus"] = &st
+	}
 	s.render(w, r, status, "system", d)
 }
 
@@ -89,6 +98,7 @@ func (s *Server) systemSave(w http.ResponseWriter, r *http.Request) {
 		SMTPHost: in("smtp_host"), SMTPPort: in("smtp_port"), SMTPUsername: in("smtp_username"),
 		SMTPFromName: in("smtp_from_name"), SMTPFromAddress: in("smtp_from_address"),
 		OSVURL: in("osv_url"), KEVEnabled: r.PostFormValue("kev_enabled") == "1", KEVURL: in("kev_url"),
+		UpdateEnabled: r.PostFormValue("update_enabled") == "1", UpdateURL: in("update_url"),
 	}
 	password := r.PostFormValue("smtp_password") // not trimmed
 	clearPassword := r.PostFormValue("smtp_password_clear") == "1"
@@ -160,6 +170,14 @@ func (s *Server) systemSave(w http.ResponseWriter, r *http.Request) {
 	} else {
 		kv[settings.KeyKEVURL] = u
 	}
+	kv[settings.KeyUpdateEnabled] = strconv.FormatBool(f.UpdateEnabled)
+	if u, err := settings.ParseSourceURL(f.UpdateURL); err != nil {
+		if f.UpdateEnabled || f.UpdateURL != "" {
+			bad = append(bad, s.l.T("system.error.url", "field", field("system.update.url")))
+		}
+	} else {
+		kv[settings.KeyUpdateURL] = u
+	}
 
 	if len(bad) > 0 {
 		s.renderSystem(w, r, http.StatusBadRequest, strings.Join(bad, " "), f)
@@ -208,4 +226,24 @@ func (s *Server) systemReset(w http.ResponseWriter, r *http.Request) {
 	}
 	s.audit(r, "settings.system_reset", "", "")
 	s.redirect(w, r, "/settings/system", "success", s.l.T("system.reset_done"))
+}
+
+// updateCheck runs the new-version check now.
+func (s *Server) updateCheck(w http.ResponseWriter, r *http.Request) {
+	const back = "/settings/system#updates"
+	if s.o.Updates == nil || !s.o.Updates.Status().Enabled {
+		s.redirect(w, r, back, "error", s.l.T("system.update.disabled"))
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+	defer cancel()
+	st := s.o.Updates.Check(ctx)
+	switch {
+	case st.Error != "":
+		s.redirect(w, r, back, "error", s.l.T("system.update.checked_failed", "error", st.Error))
+	case st.Available():
+		s.redirect(w, r, back, "warning", s.l.T("system.update.checked_new", "latest", st.Latest, "current", st.Current))
+	default:
+		s.redirect(w, r, back, "success", s.l.T("system.update.checked_ok", "current", st.Current))
+	}
 }

@@ -37,6 +37,7 @@ import (
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
+	"netio.patchman/internal/updatecheck"
 	"netio.patchman/internal/version"
 	"netio.patchman/internal/web"
 )
@@ -192,9 +193,10 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, l i18n.Local
 		Store: st, L: l, Logger: logger, Scanner: scan, Notifier: notifier,
 		AgentDistDir: cfg.AgentDistDir, Assets: agentdist.Assets(), System: live, Release: agentRelease,
 	})
+	updates := updatecheck.New(ctx, updatecheck.Options{Current: version.Version, Store: st, System: live, Logger: logger, L: l})
 	site, err := web.New(web.Options{
 		Store: st, Localizer: l, Formatter: formatter, Logger: logger, Scanner: scan, Notifier: notifier,
-		System: live, API: agentAPI, Release: agentRelease,
+		System: live, API: agentAPI, Release: agentRelease, Updates: updates,
 	})
 	if err != nil {
 		logger.Error(l.T("log.server.failed"), slog.String("error", err.Error()))
@@ -206,6 +208,7 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, l i18n.Local
 	}
 
 	go scan.Run(ctx)
+	go updates.Run(ctx)
 	sched := &schedule.Runner{Store: st, Zone: formatter.Zone(), L: l, Logger: logger}
 	live.OnChange(func(old, cur settings.System) {
 		level.Set(cur.LogLevel)
@@ -222,6 +225,9 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, l i18n.Local
 					logger.Warn(l.T("log.scan.kev_failed"), slog.String("error", err.Error()))
 				}
 			}()
+		}
+		if cur.UpdateURL != "" && old.UpdateURL != cur.UpdateURL {
+			go updates.Check(ctx)
 		}
 		logger.Info(l.T("log.config.updated"), slog.String("base_url", cur.BaseURLString()), slog.String("timezone", cur.Timezone),
 			slog.String("log_level", cur.LogLevelName()), slog.Bool("smtp", cur.SMTP.Enabled()))

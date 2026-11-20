@@ -70,8 +70,38 @@
       <span class="field__hint">{{t "system.kev_url_hint"}}</span></label>
   </section>
 
+  <section class="panel">
+    <h2 class="panel__title">{{t "system.update.title"}}</h2>
+    <label class="check-label"><input type="checkbox" name="update_enabled" value="1"{{if $f.UpdateEnabled}} checked{{end}}> {{t "system.update.enabled"}}</label>
+    <label class="field"><span class="field__label">{{t "system.update.url"}}</span>
+      <input class="field__input mono" type="url" name="update_url" value="{{$f.UpdateURL}}">
+      <span class="field__hint">{{t "system.update.url_hint"}}</span></label>
+  </section>
+
   <div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>
 </form>
+
+{{with $d.UpdateStatus}}
+<section class="panel" id="updates">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "system.update.status_title"}}</h2>
+    {{if .Enabled}}<form method="post" action="/settings/system/update-check">{{template "csrf" $root}}
+      <button class="button button--sm" type="submit">{{template "icon" "refresh"}}{{t "system.update.check_now"}}</button></form>{{end}}
+  </div>
+  {{if not .Enabled}}<p class="muted">{{t "system.update.disabled"}}</p>
+  {{else if .Available}}<div class="alert alert--warning"><p>{{t "system.update.available" "latest" .Latest "current" .Current}} <a href="{{.ChangesURL}}" rel="noopener noreferrer" target="_blank">{{t "system.update.changes"}}</a></p>
+    <p>{{t "system.update.how"}}</p>
+    <pre class="code">git pull
+docker compose up -d --build</pre></div>
+  {{else if .Latest}}<p class="alert alert--success">{{t "system.update.up_to_date"}}</p>{{end}}
+  {{with .Error}}<p class="alert alert--error">{{t "system.update.last_error" "error" .}}</p>{{end}}
+  <dl class="dl">
+    <dt>{{t "system.update.current"}}</dt><dd class="mono">{{.Current}}</dd>
+    <dt>{{t "system.update.latest"}}</dt><dd class="mono">{{if .Latest}}{{.Latest}}{{else}}—{{end}}</dd>
+    <dt>{{t "system.update.checked_at"}}</dt><dd>{{if .CheckedAt.IsZero}}{{t "system.update.never"}}{{else}}{{datetime .CheckedAt}}{{end}}</dd>
+  </dl>
+</section>
+{{end}}
 
 <div class="grid-2">
   <section class="panel">

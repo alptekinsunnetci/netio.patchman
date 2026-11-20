@@ -36,6 +36,12 @@ const (
 
 	// EnvPrefix is the prefix of every environment variable the product reads.
 	EnvPrefix = "PATCHMAN_"
+
+	// RepositoryPath is the GitHub owner/name of the source repository.
+	RepositoryPath = "alptekinsunnetci/netio.patchman"
+
+	// Repository is the source repository, linked from the update notice.
+	Repository = "https://github.com/" + RepositoryPath
 )
 
 // ServerUserAgent returns the User-Agent the server sends on outbound requests.

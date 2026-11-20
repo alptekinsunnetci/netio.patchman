@@ -260,7 +260,7 @@ a.stat:hover { border-color: var(--border-strong); text-decoration: none; }
 .pill { display: inline-block; padding: 0 8px; border-radius: 10px; font-size: 12px; font-weight: 500; white-space: nowrap; vertical-align: middle; line-height: 20px; background: var(--sev-none-bg); color: var(--text-muted); }
 .pill--online, .pill--succeeded, .pill--resolved { background: var(--ok-bg); color: var(--ok); }
 .pill--offline, .pill--failed, .pill--timed_out, .pill--danger, .pill--open { background: var(--danger-bg); color: var(--danger); }
-.pill--warning, .pill--in_progress, .pill--dispatched, .pill--expired { background: var(--warn-bg); color: var(--warn); }
+.pill--warning, .pill--in_progress, .pill--dispatched, .pill--expired, .pill--partial { background: var(--warn-bg); color: var(--warn); }
 .pill--queued { background: var(--info-bg); color: var(--info); }
 .sevcounts { display: inline-flex; gap: 4px; flex-wrap: wrap; }
 .sevcount { min-width: 24px; padding: 0 6px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; line-height: 20px; }
@@ -345,6 +345,8 @@ select.field__input { padding-right: 28px; }
 .dl--stacked dd { margin-bottom: 10px; }
 .footnote { color: var(--text-subtle); font-size: 12px; }
 .steps { padding-left: 20px; display: flex; flex-direction: column; gap: 10px; }
+.installcmd { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.installcmd__opts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
 .code, .output { font-family: var(--font-mono); font-size: 12.5px; background: var(--surface-muted); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin-top: 6px; }
 .output { max-height: 560px; overflow-y: auto; line-height: 1.45; }
 

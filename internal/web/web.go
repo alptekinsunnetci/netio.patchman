@@ -32,6 +32,7 @@ import (
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
+	"netio.patchman/internal/updatecheck"
 	"netio.patchman/internal/version"
 	"netio.patchman/internal/vuln"
 )
@@ -53,6 +54,8 @@ type Options struct {
 	API *api.Server
 	// Release is the agent version the server distributes.
 	Release release.Release
+	// Updates checks for new product versions (optional).
+	Updates *updatecheck.Checker
 }
 
 // Server is the dashboard.
@@ -292,6 +295,7 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("GET /jobs", view(s.jobs))
 	mux.Handle("GET /jobs/{id}", view(s.job))
 	mux.Handle("POST /jobs/{id}/cancel", operate(s.jobCancel))
+	mux.Handle("POST /jobs/{id}/retry", operate(s.jobRetry))
 
 	mux.Handle("GET /schedules", view(s.schedules))
 	mux.Handle("GET /schedules/new", admin(s.scheduleNew))
@@ -327,6 +331,7 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("GET /settings/system", admin(s.systemConfig))
 	mux.Handle("POST /settings/system", admin(s.systemSave))
 	mux.Handle("POST /settings/system/reset", admin(s.systemReset))
+	mux.Handle("POST /settings/system/update-check", admin(s.updateCheck))
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		s.errorPage(w, r, http.StatusNotFound, "error.not_found")
@@ -398,6 +403,8 @@ type pageData struct {
 	Unread  int
 	Error   string
 	Data    any
+	// Update is set for administrators when a newer product version exists.
+	Update *updatecheck.Status
 }
 
 func (s *Server) page(r *http.Request, title, active string) pageData {
@@ -406,6 +413,11 @@ func (s *Server) page(r *http.Request, title, active string) pageData {
 		u := sess.user
 		d.User, d.CSRF = &u, sess.csrf
 		d.Unread, _ = s.st.UnreadNotifications(r.Context())
+		if u.IsAdmin() && s.o.Updates != nil {
+			if st := s.o.Updates.Status(); st.Enabled && st.Available() {
+				d.Update = &st
+			}
+		}
 	}
 	return d
 }

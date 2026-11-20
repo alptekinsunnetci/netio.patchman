@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -66,8 +67,12 @@ func TestParseAptSimulate(t *testing.T) {
 Inst libssl3 [3.0.11-1~deb12u1] (3.0.11-1~deb12u2 Debian-Security:12/stable-security [amd64])
 Inst tzdata [2024a-0+deb12u1] (2025b-0+deb12u1 Debian:12.11/stable-updates [all])
 Inst linux-image-6.1.0-37-amd64 (6.1.140-1 Debian-Security:12/stable-security [amd64])
+Inst linux-firmware-amd-graphics (20240318.git3b128b60-0ubuntu2.17 Ubuntu:24.04/noble-updates, Ubuntu:24.04/noble-security [all])
+Inst libc6 [2.39-0ubuntu8.5] (2.39-0ubuntu8.6 Ubuntu:24.04/noble-updates, Ubuntu:24.04/noble-security [amd64])
 Conf libssl3 (3.0.11-1~deb12u2 Debian-Security:12/stable-security [amd64])
 `
+	// New packages pulled in as dependencies are not installed, so they are
+	// not updates: "install --only-upgrade" would skip them.
 	ups := parseAptSimulate([]byte(out))
 	if len(ups) != 3 {
 		t.Fatalf("got %+v", ups)
@@ -78,8 +83,8 @@ Conf libssl3 (3.0.11-1~deb12u2 Debian-Security:12/stable-security [amd64])
 	if ups[1].Security || ups[1].Repository != "Debian:12.11/stable-updates" {
 		t.Errorf("tzdata: %+v", ups[1])
 	}
-	if ups[2].CurrentVersion != "" || !ups[2].Security {
-		t.Errorf("new kernel: %+v", ups[2])
+	if ups[2].Name != "libc6" || !ups[2].Security || ups[2].Repository != "Ubuntu:24.04/noble-updates, Ubuntu:24.04/noble-security" {
+		t.Errorf("libc6 from two pockets: %+v", ups[2])
 	}
 }
 
@@ -148,5 +153,121 @@ func TestJobRunnerRejectsUnsafeInput(t *testing.T) {
 	res = r.Run(context.Background(), protocol.Job{ID: 3, Type: protocol.JobRefresh})
 	if !res.Succeeded {
 		t.Errorf("refresh should succeed: %+v", res)
+	}
+}
+
+func TestParseRestartServices(t *testing.T) {
+	svc, reboot := parseNeedrestart([]byte(`NEEDRESTART-VER: 3.6
+NEEDRESTART-KCUR: 6.8.0-31-generic
+NEEDRESTART-KEXP: 6.8.0-45-generic
+NEEDRESTART-KSTA: 3
+NEEDRESTART-UCSTA: 1
+NEEDRESTART-SVC: ssh.service
+NEEDRESTART-SVC: cron.service
+NEEDRESTART-SVC: cron.service
+NEEDRESTART-SESS: root @ session #1
+`))
+	if !reboot || strings.Join(svc, ",") != "cron.service,ssh.service" {
+		t.Errorf("needrestart: %v %v", svc, reboot)
+	}
+	if _, reboot := parseNeedrestart([]byte("NEEDRESTART-KSTA: 1" + string(rune(10)) + "NEEDRESTART-UCSTA: 1")); reboot {
+		t.Error("current kernel reported as pending reboot")
+	}
+	svc = parseServiceList([]byte(`Updating Subscription Management repositories.
+sshd.service
+chronyd.service
+
+bad name
+`))
+	if strings.Join(svc, ",") != "chronyd.service,sshd.service" {
+		t.Errorf("needs-restarting: %v", svc)
+	}
+}
+
+// fakeHost simulates a package manager for JobRunner tests.
+type fakeHost struct {
+	pending  []protocol.Update
+	upgrade  map[string]bool // packages the upgrade command really upgrades
+	services []string
+	ran      []string
+}
+
+func (f *fakeHost) exec(_ context.Context, c command, out *tailBuffer) int {
+	line := c.name + " " + strings.Join(c.args, " ")
+	f.ran = append(f.ran, line)
+	if c.name == "systemctl" {
+		f.services = slices.DeleteFunc(f.services, func(s string) bool { return s == c.args[1] })
+		return 0
+	}
+	if slices.Contains(c.args, "update") {
+		return 0
+	}
+	var left []protocol.Update
+	for _, u := range f.pending {
+		if !f.upgrade[u.Name] || !strings.Contains(line, " "+u.Name) && !strings.HasSuffix(line, "--with-new-pkgs") {
+			left = append(left, u)
+		}
+	}
+	f.pending = left
+	return 0
+}
+
+func (f *fakeHost) runner(t *testing.T) JobRunner {
+	return JobRunner{L: i18n.MustLoad().Localizer(i18n.DefaultLocale), PM: protocol.PMApt, RemoteUpdates: true, Exec: f.exec,
+		Pending:  func(context.Context) ([]protocol.Update, error) { return slices.Clone(f.pending), nil },
+		Services: func(context.Context) []string { return slices.Clone(f.services) },
+	}
+}
+
+func TestJobVerification(t *testing.T) {
+	ctx := context.Background()
+	// Every package upgraded: success.
+	f := &fakeHost{pending: []protocol.Update{{Name: "libssl3", Security: true}, {Name: "tzdata"}}, upgrade: map[string]bool{"libssl3": true, "tzdata": true}}
+	res := f.runner(t).Run(ctx, protocol.Job{Type: protocol.JobUpgradeSecurity})
+	if !res.Succeeded || len(res.Remaining) != 0 || !strings.Contains(f.ran[1], "--only-upgrade libssl3") || strings.Contains(f.ran[1], "tzdata") {
+		t.Errorf("security job: %+v %v", res, f.ran)
+	}
+
+	// The command exits 0 but nothing changes: failed, with the packages left.
+	f = &fakeHost{pending: []protocol.Update{{Name: "libssl3", Security: true}}}
+	res = f.runner(t).Run(ctx, protocol.Job{Type: protocol.JobUpgradeSecurity})
+	if res.Succeeded || strings.Join(res.Remaining, ",") != "libssl3" || !strings.Contains(res.Output, "hiçbiri güncellenmedi") {
+		t.Errorf("unverified success: %+v", res)
+	}
+
+	// Some packages left: partial (succeeded with remaining).
+	f = &fakeHost{pending: []protocol.Update{{Name: "a"}, {Name: "b"}}, upgrade: map[string]bool{"a": true}}
+	res = f.runner(t).Run(ctx, protocol.Job{Type: protocol.JobUpgradeAll})
+	if !res.Succeeded || strings.Join(res.Remaining, ",") != "b" {
+		t.Errorf("partial: %+v", res)
+	}
+
+	// Selected packages without a pending update are not sent to apt.
+	f = &fakeHost{pending: []protocol.Update{{Name: "a"}}, upgrade: map[string]bool{"a": true}}
+	res = f.runner(t).Run(ctx, protocol.Job{Type: protocol.JobUpgradePackages, Packages: []string{"a", "libdrm-amdgpu1"}})
+	if !res.Succeeded || strings.Contains(f.ran[1], "libdrm") || !strings.Contains(res.Output, "libdrm-amdgpu1") {
+		t.Errorf("not pending package: %+v %v", res, f.ran)
+	}
+	f = &fakeHost{}
+	res = f.runner(t).Run(ctx, protocol.Job{Type: protocol.JobUpgradePackages, Packages: []string{"libdrm-amdgpu1"}})
+	if !res.Succeeded || len(f.ran) != 1 {
+		t.Errorf("nothing pending should run only the list refresh: %+v %v", res, f.ran)
+	}
+}
+
+func TestRestartServicesJob(t *testing.T) {
+	ctx := context.Background()
+	f := &fakeHost{services: []string{"cron.service", "dbus.service", "ssh.service"}}
+	res := f.runner(t).Run(ctx, protocol.Job{Type: protocol.JobRestartServices, Packages: []string{"cron.service", "dbus.service", "ssh.service"}})
+	if !res.Succeeded || len(res.Remaining) != 0 || len(f.ran) != 2 || !strings.Contains(res.Output, "dbus.service atlandı") {
+		t.Errorf("restart: %+v %v", res, f.ran)
+	}
+	res = f.runner(t).Run(ctx, protocol.Job{Type: protocol.JobRestartServices, Packages: []string{"-evil"}})
+	if res.Succeeded {
+		t.Errorf("invalid service accepted: %+v", res)
+	}
+	res = f.runner(t).Run(ctx, protocol.Job{Type: protocol.JobReboot})
+	if !res.Succeeded || !strings.HasPrefix(f.ran[len(f.ran)-1], "shutdown -r +1 ") {
+		t.Errorf("reboot: %+v %v", res, f.ran)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -62,134 +63,401 @@ type JobRunner struct {
 	L             i18n.Localizer
 	PM            string
 	RemoteUpdates bool
-	// SecurityUpdates returns the names of pending security updates (apt).
-	SecurityUpdates func(ctx context.Context) ([]string, error)
+	// Pending lists pending updates without refreshing the package lists.
+	// It sets the job's targets and verifies them afterwards; nil skips both.
+	Pending func(ctx context.Context) ([]protocol.Update, error)
+	// Services lists services that still need a restart; nil skips the check.
+	Services func(ctx context.Context) []string
+	// Exec runs one command; nil uses execCommand. Tests replace it.
+	Exec func(ctx context.Context, c command, out *tailBuffer) int
+}
+
+// jobState collects the output of one job.
+type jobState struct {
+	r   JobRunner
+	res protocol.JobResult
+	out *tailBuffer
+}
+
+func (s *jobState) note(msg string) {
+	if msg != "" {
+		_, _ = s.out.Write([]byte("\n[netio.patchman] " + msg + "\n"))
+	}
+}
+
+func (s *jobState) finish(ok bool, code int, msg string) protocol.JobResult {
+	s.note(msg)
+	s.res.Succeeded, s.res.ExitCode, s.res.Output, s.res.FinishedAt = ok, code, strings.TrimLeft(s.out.String(), "\n"), timeutil.Now()
+	return s.res
+}
+
+// step runs a command and reports whether it failed (the job is then finished).
+func (s *jobState) step(ctx context.Context, c command) (code int, failed bool) {
+	_, _ = s.out.Write([]byte("$ " + c.name + " " + strings.Join(c.args, " ") + "\n"))
+	exe := s.r.Exec
+	if exe == nil {
+		exe = execCommand
+	}
+	code = exe(ctx, c, s.out)
+	if ctx.Err() == context.DeadlineExceeded {
+		return -1, true
+	}
+	return code, code != 0 && !slices.Contains(c.okCodes, code)
+}
+
+func execCommand(ctx context.Context, c command, out *tailBuffer) int {
+	cmd := exec.CommandContext(ctx, c.name, c.args...)
+	cmd.Env = append(os.Environ(), "LANG=C.UTF-8", "LC_ALL=C.UTF-8", "DEBIAN_FRONTEND=noninteractive", "NEEDRESTART_MODE=a", "APT_LISTCHANGES_FRONTEND=none")
+	cmd.Stdout, cmd.Stderr = out, out
+	cmd.WaitDelay = 30 * time.Second
+	err := cmd.Run()
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) {
+		return exitErr.ExitCode()
+	}
+	if err != nil {
+		_, _ = out.Write([]byte(err.Error() + "\n"))
+		return -1
+	}
+	return 0
 }
 
 // Run executes the job and returns the result. It never panics on bad input.
 func (r JobRunner) Run(ctx context.Context, job protocol.Job) protocol.JobResult {
-	res := protocol.JobResult{StartedAt: timeutil.Now()}
-	out := &tailBuffer{max: protocol.MaxOutputBytes - 1024}
-	finish := func(ok bool, code int, msg string) protocol.JobResult {
-		if msg != "" {
-			_, _ = out.Write([]byte("\n[netio.patchman] " + msg + "\n"))
-		}
-		res.Succeeded, res.ExitCode, res.Output, res.FinishedAt = ok, code, strings.TrimLeft(out.String(), "\n"), timeutil.Now()
-		return res
-	}
-
+	s := &jobState{r: r, res: protocol.JobResult{StartedAt: timeutil.Now()}, out: &tailBuffer{max: protocol.MaxOutputBytes - 1024}}
 	if job.Type == protocol.JobRefresh {
-		return finish(true, 0, r.L.T("agent.job.refresh_done"))
+		return s.finish(true, 0, r.L.T("agent.job.refresh_done"))
 	}
 	if !r.RemoteUpdates {
-		return finish(false, -1, r.L.T("agent.job.remote_updates_disabled"))
+		return s.finish(false, -1, r.L.T("agent.job.remote_updates_disabled"))
+	}
+	ctx, cancel := context.WithTimeout(ctx, JobTimeout)
+	defer cancel()
+	switch job.Type {
+	case protocol.JobRestartServices:
+		return r.restartServices(ctx, s, job.Packages)
+	case protocol.JobReboot:
+		return r.reboot(s)
 	}
 	for _, p := range job.Packages {
 		if !protocol.ValidPackageName(p) {
-			return finish(false, -1, r.L.T("agent.job.invalid_package", "package", p))
+			return s.finish(false, -1, r.L.T("agent.job.invalid_package", "package", p))
 		}
 	}
-	cmds, msg, err := r.plan(ctx, job)
+	if job.Type == protocol.JobUpgradePackages && len(job.Packages) == 0 {
+		return s.finish(false, -1, r.L.T("agent.job.no_packages"))
+	}
+	if !slices.Contains([]string{protocol.JobUpgradeAll, protocol.JobUpgradeSecurity, protocol.JobUpgradePackages}, job.Type) {
+		return s.finish(false, -1, r.L.T("agent.job.unknown_type", "type", job.Type))
+	}
+
+	// Refresh the package lists first so the targets match what will be installed.
+	if c := r.refreshCommand(); c != nil {
+		if code, failed := s.step(ctx, *c); failed {
+			return r.failStep(s, ctx, *c, code)
+		}
+	}
+	var before []protocol.Update
+	known := false
+	if r.Pending != nil {
+		var err error
+		if before, err = r.Pending(ctx); err != nil {
+			s.note(r.L.T("agent.job.pending_unknown", "error", err.Error()))
+		} else {
+			known = true
+		}
+	}
+	cmds, targets, msg, err := r.plan(job, before, known)
 	if err != nil {
-		return finish(false, -1, err.Error())
+		return s.finish(false, -1, err.Error())
 	}
 	if len(cmds) == 0 {
-		return finish(true, 0, msg)
+		return s.finish(true, 0, msg)
 	}
-
-	ctx, cancel := context.WithTimeout(ctx, JobTimeout)
-	defer cancel()
+	s.note(msg)
 	for _, c := range cmds {
-		_, _ = out.Write([]byte("$ " + c.name + " " + strings.Join(c.args, " ") + "\n"))
-		cmd := exec.CommandContext(ctx, c.name, c.args...)
-		cmd.Env = append(os.Environ(), "LANG=C.UTF-8", "LC_ALL=C.UTF-8", "DEBIAN_FRONTEND=noninteractive", "NEEDRESTART_MODE=a", "APT_LISTCHANGES_FRONTEND=none")
-		cmd.Stdout, cmd.Stderr = out, out
-		cmd.WaitDelay = 30 * time.Second
-		err := cmd.Run()
-		code := 0
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) {
-			code = exitErr.ExitCode()
-		} else if err != nil {
-			code = -1
-		}
-		if ctx.Err() == context.DeadlineExceeded {
-			return finish(false, -1, r.L.T("agent.job.timeout"))
-		}
-		if code != 0 && !contains(c.okCodes, code) {
-			return finish(false, code, r.L.T("agent.job.command_failed", "command", c.name, "code", code))
+		if code, failed := s.step(ctx, c); failed {
+			s.res.Remaining = r.stillPending(ctx, targets)
+			return r.failStep(s, ctx, c, code)
 		}
 	}
-	return finish(true, 0, r.L.T("agent.job.completed"))
+	return r.verify(ctx, s, targets)
 }
 
-func contains(list []int, v int) bool {
-	for _, x := range list {
-		if x == v {
-			return true
+func (r JobRunner) failStep(s *jobState, ctx context.Context, c command, code int) protocol.JobResult {
+	if ctx.Err() == context.DeadlineExceeded {
+		return s.finish(false, -1, r.L.T("agent.job.timeout"))
+	}
+	return s.finish(false, code, r.L.T("agent.job.command_failed", "command", c.name, "code", code))
+}
+
+// refreshCommand updates the package lists where the upgrade command does not.
+func (r JobRunner) refreshCommand() *command {
+	switch r.PM {
+	case protocol.PMApt:
+		return &command{name: "apt-get", args: []string{"update", "-q"}}
+	case protocol.PMApk:
+		return &command{name: "apk", args: []string{"update", "-q"}}
+	}
+	return nil
+}
+
+// plan returns the commands and the packages they are expected to upgrade.
+// before is the pending update list (valid when known).
+func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) (cmds []command, targets []string, msg string, err error) {
+	pending := map[string]bool{}
+	var all, security []string
+	for _, u := range before {
+		if !pending[u.Name] {
+			pending[u.Name] = true
+			all = append(all, u.Name)
+			if u.Security {
+				security = append(security, u.Name)
+			}
 		}
 	}
-	return false
-}
-
-func (r JobRunner) plan(ctx context.Context, job protocol.Job) ([]command, string, error) {
 	pkgs := job.Packages
-	if job.Type == protocol.JobUpgradePackages && len(pkgs) == 0 {
-		return nil, "", errors.New(r.L.T("agent.job.no_packages"))
+	switch job.Type {
+	case protocol.JobUpgradeAll:
+		targets = all
+		if known && len(all) == 0 {
+			return nil, nil, r.L.T("agent.job.no_updates"), nil
+		}
+	case protocol.JobUpgradeSecurity:
+		targets = security
+	case protocol.JobUpgradePackages:
+		if known {
+			// Packages without a pending update (already upgraded, not
+			// installed) would be skipped silently by the package manager.
+			var skipped []string
+			pkgs, skipped = nil, nil
+			for _, p := range job.Packages {
+				if pending[p] {
+					pkgs = append(pkgs, p)
+				} else {
+					skipped = append(skipped, p)
+				}
+			}
+			if len(skipped) > 0 {
+				msg = r.L.T("agent.job.packages_skipped", "packages", listNames(skipped))
+			}
+			if len(pkgs) == 0 {
+				return nil, nil, r.L.T("agent.job.nothing_pending"), nil
+			}
+		}
+		targets = pkgs
 	}
+
 	aptOpts := []string{"-y", "-q", "-o", "Dpkg::Options::=--force-confdef", "-o", "Dpkg::Options::=--force-confold"}
 	switch r.PM {
 	case protocol.PMApt:
-		update := command{name: "apt-get", args: []string{"update", "-q"}}
 		switch job.Type {
 		case protocol.JobUpgradeAll:
-			return []command{update, {name: "apt-get", args: append(aptOpts, "upgrade", "--with-new-pkgs")}}, "", nil
+			cmds = []command{{name: "apt-get", args: append(aptOpts, "upgrade", "--with-new-pkgs")}}
 		case protocol.JobUpgradeSecurity:
-			if r.SecurityUpdates == nil {
-				return nil, "", errors.New(r.L.T("agent.job.security_unsupported"))
+			if !known {
+				return nil, nil, "", errors.New(r.L.T("agent.job.security_unsupported"))
 			}
-			names, err := r.SecurityUpdates(ctx)
-			if err != nil {
-				return nil, "", err
+			if len(security) == 0 {
+				return nil, nil, r.L.T("agent.job.no_security_updates"), nil
 			}
-			if len(names) == 0 {
-				return nil, r.L.T("agent.job.no_security_updates"), nil
-			}
-			return []command{{name: "apt-get", args: append(append(aptOpts, "install", "--only-upgrade"), names...)}}, "", nil
+			cmds = []command{{name: "apt-get", args: append(append(aptOpts, "install", "--only-upgrade"), security...)}}
 		case protocol.JobUpgradePackages:
-			return []command{update, {name: "apt-get", args: append(append(aptOpts, "install", "--only-upgrade"), pkgs...)}}, "", nil
+			cmds = []command{{name: "apt-get", args: append(append(aptOpts, "install", "--only-upgrade"), pkgs...)}}
 		}
 	case protocol.PMDnf, protocol.PMYum:
 		switch job.Type {
 		case protocol.JobUpgradeAll:
-			return []command{{name: r.PM, args: []string{"-y", "upgrade"}}}, "", nil
+			cmds = []command{{name: r.PM, args: []string{"-y", "upgrade"}}}
 		case protocol.JobUpgradeSecurity:
-			return []command{{name: r.PM, args: []string{"-y", "upgrade", "--security"}}}, "", nil
+			cmds = []command{{name: r.PM, args: []string{"-y", "upgrade", "--security"}}}
 		case protocol.JobUpgradePackages:
-			return []command{{name: r.PM, args: append([]string{"-y", "upgrade"}, pkgs...)}}, "", nil
+			cmds = []command{{name: r.PM, args: append([]string{"-y", "upgrade"}, pkgs...)}}
 		}
 	case protocol.PMZypper:
 		// 102: reboot needed, 103: zypper itself was updated; both mean success.
 		ok := []int{102, 103}
 		switch job.Type {
 		case protocol.JobUpgradeAll:
-			return []command{{name: "zypper", args: []string{"--non-interactive", "update"}, okCodes: ok}}, "", nil
+			cmds = []command{{name: "zypper", args: []string{"--non-interactive", "update"}, okCodes: ok}}
 		case protocol.JobUpgradeSecurity:
-			return []command{{name: "zypper", args: []string{"--non-interactive", "patch", "--category", "security"}, okCodes: ok}}, "", nil
+			// Patches do not map to the package list; the result is not verified.
+			targets = nil
+			cmds = []command{{name: "zypper", args: []string{"--non-interactive", "patch", "--category", "security"}, okCodes: ok}}
 		case protocol.JobUpgradePackages:
-			return []command{{name: "zypper", args: append([]string{"--non-interactive", "update"}, pkgs...), okCodes: ok}}, "", nil
+			cmds = []command{{name: "zypper", args: append([]string{"--non-interactive", "update"}, pkgs...), okCodes: ok}}
 		}
 	case protocol.PMApk:
 		switch job.Type {
 		case protocol.JobUpgradeAll:
-			return []command{{name: "apk", args: []string{"update", "-q"}}, {name: "apk", args: []string{"upgrade"}}}, "", nil
+			cmds = []command{{name: "apk", args: []string{"upgrade"}}}
 		case protocol.JobUpgradeSecurity:
-			return nil, "", errors.New(r.L.T("agent.job.security_unsupported"))
+			return nil, nil, "", errors.New(r.L.T("agent.job.security_unsupported"))
 		case protocol.JobUpgradePackages:
-			return []command{{name: "apk", args: []string{"update", "-q"}}, {name: "apk", args: append([]string{"upgrade"}, pkgs...)}}, "", nil
+			cmds = []command{{name: "apk", args: append([]string{"upgrade"}, pkgs...)}}
 		}
 	default:
-		return nil, "", errors.New(r.L.T("agent.job.pm_unsupported"))
+		return nil, nil, "", errors.New(r.L.T("agent.job.pm_unsupported"))
 	}
-	return nil, "", errors.New(r.L.T("agent.job.unknown_type", "type", job.Type))
+	return cmds, targets, msg, nil
+}
+
+// remaining returns the targets that still have a pending update.
+func (r JobRunner) remaining(ctx context.Context, targets []string) ([]string, error) {
+	after, err := r.Pending(ctx)
+	if err != nil {
+		return nil, err
+	}
+	pending := map[string]bool{}
+	for _, u := range after {
+		pending[u.Name] = true
+	}
+	var left []string
+	for _, t := range targets {
+		if pending[t] {
+			left = append(left, t)
+		}
+	}
+	return left, nil
+}
+
+// stillPending is remaining for a failed job: nil when unknown.
+func (r JobRunner) stillPending(ctx context.Context, targets []string) []string {
+	if r.Pending == nil || len(targets) == 0 || ctx.Err() != nil {
+		return nil
+	}
+	left, _ := r.remaining(ctx, targets)
+	return left
+}
+
+// verify checks after a successful run that the targeted packages were
+// upgraded. A package manager can exit 0 without upgrading anything (a
+// package kept back, excluded, or skipped by --only-upgrade).
+func (r JobRunner) verify(ctx context.Context, s *jobState, targets []string) protocol.JobResult {
+	if r.Pending == nil || len(targets) == 0 {
+		return s.finish(true, 0, r.L.T("agent.job.completed"))
+	}
+	left, err := r.remaining(ctx, targets)
+	if err != nil {
+		s.note(r.L.T("agent.job.verify_failed", "error", err.Error()))
+		return s.finish(true, 0, r.L.T("agent.job.completed"))
+	}
+	s.res.Remaining = left
+	switch {
+	case len(left) == 0:
+		return s.finish(true, 0, r.L.T("agent.job.verified", "count", len(targets)))
+	case len(left) == len(targets):
+		return s.finish(false, 0, r.L.T("agent.job.verify_none", "packages", listNames(left)))
+	default:
+		return s.finish(true, 0, r.L.T("agent.job.verify_partial", "done", len(targets)-len(left), "total", len(targets), "packages", listNames(left)))
+	}
+}
+
+// listNames joins names for a message, shortening long lists.
+func listNames(names []string) string {
+	const max = 20
+	if len(names) > max {
+		return strings.Join(names[:max], ", ") + ", …"
+	}
+	return strings.Join(names, ", ")
+}
+
+// protectedServices are not restarted by a job: restarting them ends user
+// sessions, drops the network or stops the agent itself. A reboot is the safe
+// way to activate their updates.
+var protectedServices = []string{
+	"dbus", "dbus-broker", "systemd-logind", "user@", "getty@", "serial-getty@", "autovt@", "console-getty",
+	"display-manager", "gdm", "gdm3", "lightdm", "sddm", "NetworkManager", "systemd-networkd", "networking",
+	"network", "wpa_supplicant", "netio-patchman-agent", "emergency", "rescue",
+}
+
+func protectedService(name string) bool {
+	base := strings.TrimSuffix(name, ".service")
+	for _, p := range protectedServices {
+		if base == p || (strings.HasSuffix(p, "@") && strings.HasPrefix(base, p)) {
+			return true
+		}
+	}
+	return false
+}
+
+// restartServices restarts the listed services and checks afterwards which of
+// them still need a restart.
+func (r JobRunner) restartServices(ctx context.Context, s *jobState, services []string) protocol.JobResult {
+	if len(services) == 0 {
+		return s.finish(false, -1, r.L.T("agent.job.no_services"))
+	}
+	for _, svc := range services {
+		if !protocol.ValidServiceName(svc) {
+			return s.finish(false, -1, r.L.T("agent.job.invalid_service", "service", svc))
+		}
+	}
+	restart := func(svc string) command { return command{name: "systemctl", args: []string{"restart", svc}} }
+	if r.Exec == nil {
+		if _, err := exec.LookPath("systemctl"); err != nil {
+			if _, err := exec.LookPath("rc-service"); err != nil {
+				return s.finish(false, -1, r.L.T("agent.job.no_service_manager"))
+			}
+			restart = func(svc string) command { return command{name: "rc-service", args: []string{svc, "restart"}} }
+		}
+	}
+	var attempted, failed []string
+	for _, svc := range services {
+		if protectedService(svc) {
+			s.note(r.L.T("agent.job.service_protected", "service", svc))
+			continue
+		}
+		attempted = append(attempted, svc)
+		code, bad := s.step(ctx, restart(svc))
+		if ctx.Err() != nil {
+			return s.finish(false, -1, r.L.T("agent.job.timeout"))
+		}
+		if bad {
+			failed = append(failed, svc)
+			s.note(r.L.T("agent.job.service_failed", "service", svc, "code", code))
+		}
+	}
+	if len(attempted) == 0 {
+		return s.finish(false, -1, r.L.T("agent.job.services_none_restartable"))
+	}
+	left := failed
+	if r.Services != nil {
+		current := r.Services(ctx)
+		for _, svc := range attempted {
+			if slices.Contains(current, svc) && !slices.Contains(left, svc) {
+				left = append(left, svc)
+			}
+		}
+	}
+	s.res.Remaining = left
+	switch {
+	case len(left) == 0:
+		return s.finish(true, 0, r.L.T("agent.job.services_done", "count", len(attempted)))
+	case len(left) == len(attempted):
+		return s.finish(false, 1, r.L.T("agent.job.services_remaining", "services", listNames(left)))
+	default:
+		return s.finish(true, 0, r.L.T("agent.job.services_remaining", "services", listNames(left)))
+	}
+}
+
+// reboot schedules a reboot one minute ahead so the result reaches the server
+// first. After the reboot the agent starts again and sends a fresh report.
+func (r JobRunner) reboot(s *jobState) protocol.JobResult {
+	if _, err := exec.LookPath("shutdown"); err == nil || r.Exec != nil {
+		// systemd and sysvinit: returns at once, the reboot happens later.
+		c := command{name: "shutdown", args: []string{"-r", "+1", r.L.T("agent.job.reboot_wall")}}
+		if code, failed := s.step(context.Background(), c); failed {
+			return s.finish(false, code, r.L.T("agent.job.command_failed", "command", c.name, "code", code))
+		}
+		return s.finish(true, 0, r.L.T("agent.job.reboot_scheduled"))
+	}
+	// BusyBox (Alpine) has no shutdown; "reboot -d 60" sleeps itself, so it
+	// is started and not awaited.
+	_, _ = s.out.Write([]byte("$ reboot -d 60\n"))
+	c := exec.Command("reboot", "-d", "60")
+	if err := c.Start(); err != nil {
+		return s.finish(false, -1, err.Error())
+	}
+	_ = c.Process.Release()
+	return s.finish(true, 0, r.L.T("agent.job.reboot_scheduled"))
 }

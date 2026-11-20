@@ -61,23 +61,12 @@ func NewRunner(cfg Config, l i18n.Localizer, logger *slog.Logger) (*Runner, erro
 	r := &Runner{cfg: cfg, l: l, logger: logger, client: client, pm: pm,
 		collector: Collector{PM: pm, RefreshLists: cfg.RefreshLists, StateDir: cfg.StateDir},
 	}
-	r.jobs = JobRunner{L: l, PM: pm, RemoteUpdates: cfg.RemoteUpdates, SecurityUpdates: r.securityUpdates}
+	r.jobs = JobRunner{L: l, PM: pm, RemoteUpdates: cfg.RemoteUpdates,
+		Pending:  func(ctx context.Context) ([]protocol.Update, error) { return PendingUpdates(ctx, pm) },
+		Services: func(ctx context.Context) []string { s, _ := RestartServices(ctx, pm); return s },
+	}
 	r.updater = SelfUpdater{L: l, Client: client, Enabled: cfg.AutoUpdate}
 	return r, nil
-}
-
-func (r *Runner) securityUpdates(ctx context.Context) ([]string, error) {
-	ups, err := aptUpdates(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var names []string
-	for _, u := range ups {
-		if u.Security {
-			names = append(names, u.Name)
-		}
-	}
-	return names, nil
 }
 
 func (r *Runner) hostInfo() protocol.HostInfo {
@@ -134,20 +123,20 @@ func (r *Runner) ensureRegistered(ctx context.Context) bool {
 
 func (r *Runner) sendReport(ctx context.Context) {
 	start := time.Now()
-	pkgs, updates, reboot, errs := r.collector.Collect(ctx)
+	inv := r.collector.Collect(ctx)
 	rep := protocol.Report{
-		Host: r.hostInfo(), Packages: pkgs, Updates: updates, RebootRequired: reboot,
-		CollectedAt: timeutil.Now(), Errors: errs,
+		Host: r.hostInfo(), Packages: inv.Packages, Updates: inv.Updates, RebootRequired: inv.Reboot,
+		RestartServices: inv.Services, CollectedAt: timeutil.Now(), Errors: inv.Errors,
 	}
-	for _, e := range errs {
+	for _, e := range inv.Errors {
 		r.logger.Warn(r.l.T("log.agent.collect_warning"), slog.String("error", e))
 	}
 	if err := r.client.Report(ctx, rep); err != nil {
 		r.logger.Error(r.l.T("log.agent.report_failed"), slog.String("error", err.Error()))
 		return
 	}
-	r.logger.Info(r.l.T("log.agent.report_sent"), slog.Int("packages", len(pkgs)), slog.Int("updates", len(updates)),
-		slog.Bool("reboot_required", reboot), slog.Duration("duration", time.Since(start).Round(time.Millisecond)))
+	r.logger.Info(r.l.T("log.agent.report_sent"), slog.Int("packages", len(inv.Packages)), slog.Int("updates", len(inv.Updates)),
+		slog.Bool("reboot_required", inv.Reboot), slog.Int("restart_services", len(inv.Services)), slog.Duration("duration", time.Since(start).Round(time.Millisecond)))
 }
 
 // Run executes the agent until ctx is cancelled.
@@ -192,10 +181,9 @@ func (r *Runner) Run(ctx context.Context) {
 			interval = time.Duration(resp.CheckinIntervalSeconds) * time.Second
 		}
 		needReport := resp.ReportRequested
-		// Agent updates restart the process, so they run after all other jobs.
-		sort.SliceStable(resp.Jobs, func(i, j int) bool {
-			return resp.Jobs[i].Type != protocol.JobAgentUpdate && resp.Jobs[j].Type == protocol.JobAgentUpdate
-		})
+		// A reboot and an agent update end the process, so they run after all
+		// other jobs; the agent update last because it exits at once.
+		sort.SliceStable(resp.Jobs, func(i, j int) bool { return jobOrder(resp.Jobs[i].Type) < jobOrder(resp.Jobs[j].Type) })
 		for _, job := range resp.Jobs {
 			r.logger.Info(r.l.T("log.agent.job_started"), slog.Int64("job_id", job.ID), slog.String("type", job.Type), slog.Any("packages", job.Packages))
 			res := r.runJob(ctx, job)
@@ -227,4 +215,14 @@ func (r *Runner) Run(ctx context.Context) {
 			return
 		}
 	}
+}
+
+func jobOrder(typ string) int {
+	switch typ {
+	case protocol.JobReboot:
+		return 1
+	case protocol.JobAgentUpdate:
+		return 2
+	}
+	return 0
 }

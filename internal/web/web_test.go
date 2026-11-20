@@ -18,6 +18,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -34,6 +35,7 @@ import (
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
+	"netio.patchman/internal/updatecheck"
 	"netio.patchman/internal/web"
 )
 
@@ -117,6 +119,8 @@ type env struct {
 	sys      *settings.Live
 	sender   *captureSender
 	client   *http.Client
+	updates  *updatecheck.Checker
+	latest   atomic.Value // VERSION served by the fake repository
 }
 
 func newEnv(t *testing.T) *env { return newEnvWith(t, true) }
@@ -138,6 +142,11 @@ func newEnvWith(t *testing.T, capture bool) *env {
 	osv := fakeOSV(t)
 
 	e := &env{t: t, st: st, sender: &captureSender{}}
+	e.latest.Store("0.2.0\n")
+	repo := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = io.WriteString(w, e.latest.Load().(string))
+	}))
+	t.Cleanup(repo.Close)
 	renderer, err := email.NewRenderer(l, f, mail.Address{Name: "netio.patchman", Address: "patchman@example.test"})
 	if err != nil {
 		t.Fatal(err)
@@ -146,7 +155,7 @@ func newEnvWith(t *testing.T, capture bool) *env {
 	base, _ := url.Parse("http://placeholder")
 	e.sys, err = settings.NewLive(ctx, config.Config{
 		BaseURL: base, TimezoneName: timeutil.DefaultTimezone, Timezone: loc, LogLevel: slog.LevelInfo,
-		OSVURL: osv.URL, KEVURL: osv.URL + "/kev.json",
+		OSVURL: osv.URL, KEVURL: osv.URL + "/kev.json", UpdateURL: repo.URL + "/VERSION",
 		SMTP: config.SMTP{Port: 587, From: mail.Address{Name: "netio.patchman", Address: "patchman@example.test"}},
 	}, st)
 	if err != nil {
@@ -171,7 +180,8 @@ func newEnvWith(t *testing.T, capture bool) *env {
 	rel := release.Load(dist, "test")
 
 	apiSrv := api.New(api.Options{Store: st, L: l, Logger: logger, Scanner: e.scan, Notifier: e.notifier, Assets: agentdist.Assets(), AgentDistDir: dist, Release: rel, System: e.sys})
-	site, err := web.New(web.Options{Store: st, Localizer: l, Formatter: f, Logger: logger, Scanner: e.scan, Notifier: e.notifier, System: e.sys, API: apiSrv, Release: rel})
+	e.updates = updatecheck.New(ctx, updatecheck.Options{Current: "0.2.0", Store: st, System: e.sys, Logger: logger, L: l})
+	site, err := web.New(web.Options{Store: st, Localizer: l, Formatter: f, Logger: logger, Scanner: e.scan, Notifier: e.notifier, System: e.sys, API: apiSrv, Release: rel, Updates: e.updates})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -275,6 +285,20 @@ func TestEndToEnd(t *testing.T) {
 		t.Fatal("token not shown")
 	}
 	enrollToken := html.UnescapeString(m[1])
+	// Install command picker: Ubuntu defaults to sudo; RHEL-family runs as root
+	// with curl; Debian and Alpine use wget.
+	page := html.UnescapeString(body)
+	base := e.srv.URL
+	for _, want := range []string{
+		">curl -fsSL " + base + "/downloads/install-agent.sh | sudo sh -s -- --server-url " + base + " --token " + enrollToken + "</textarea>",
+		`value="rhel" data-root="curl -fsSL ` + base + "/downloads/install-agent.sh | sh -s -- --server-url " + base + " --token " + enrollToken + `"`,
+		`value="debian" data-root="wget -qO- ` + base + "/downloads/install-agent.sh | sh -s --",
+		`value="alpine" data-root="wget -qO- `,
+	} {
+		if !strings.Contains(page, want) {
+			t.Errorf("install command picker: missing %q", want)
+		}
+	}
 
 	// Agent registration with a wrong and a valid token.
 	client, err := agent.NewClient(agent.Config{ServerURL: mustURL(e.srv.URL)})
@@ -372,6 +396,57 @@ func TestEndToEnd(t *testing.T) {
 	}
 	status, body, _ = e.do(admin, "GET", "/jobs/1", nil)
 	expect(t, "job detail", status, 200, body, "Başarılı", "Setting up libssl3", "Seçili paket güncellemesi")
+
+	// A job that left packages behind is partial; retrying queues only those.
+	token = e.csrf(admin)
+	if status, _, _ = e.do(admin, "POST", "/servers/1/jobs", url.Values{"_csrf": {token}, "type": {"upgrade_security"}}); status != http.StatusSeeOther {
+		t.Fatalf("security job: %d", status)
+	}
+	resp, _ = client.Checkin(ctx, info)
+	if len(resp.Jobs) != 1 {
+		t.Fatalf("security job not dispatched: %+v", resp.Jobs)
+	}
+	partialID := strconv.FormatInt(resp.Jobs[0].ID, 10)
+	_ = client.JobResult(ctx, resp.Jobs[0].ID, protocol.JobResult{Succeeded: true, Remaining: []string{"openssl"}, Output: "[netio.patchman] 2 paketten 1 tanesi güncellendi."})
+	status, body, _ = e.do(admin, "GET", "/jobs/"+partialID, nil)
+	expect(t, "partial job", status, 200, body, "Kısmen başarılı", "Güncellenemeyen paketler", "Kalanları yeniden dene")
+	status, body, _ = e.do(admin, "GET", "/notifications", nil)
+	expect(t, "partial notification", status, 200, body, "#"+partialID+" numaralı iş kısmen tamamlandı", "Kalanlar: openssl")
+	token = e.csrf(admin)
+	if status, _, _ = e.do(admin, "POST", "/jobs/"+partialID+"/retry", url.Values{"_csrf": {token}}); status != http.StatusSeeOther {
+		t.Fatalf("retry: %d", status)
+	}
+	resp, _ = client.Checkin(ctx, info)
+	if len(resp.Jobs) != 1 || resp.Jobs[0].Type != protocol.JobUpgradePackages || strings.Join(resp.Jobs[0].Packages, ",") != "openssl" {
+		t.Fatalf("retry job: %+v", resp.Jobs)
+	}
+	_ = client.JobResult(ctx, resp.Jobs[0].ID, protocol.JobResult{Succeeded: true})
+
+	// Services that need a restart are listed and can be restarted; a reboot can be queued once.
+	report.RestartServices = []string{"cron.service", "nginx.service", "bad name"}
+	if err := client.Report(ctx, report); err != nil {
+		t.Fatal(err)
+	}
+	status, body, _ = e.do(admin, "GET", "/servers/1", nil)
+	expect(t, "restart services", status, 200, body, "Yeniden başlatılması gereken servisler (2)", "nginx.service", "Seçili servisleri yeniden başlat")
+	token = e.csrf(admin)
+	e.do(admin, "POST", "/servers/1/jobs", url.Values{"_csrf": {token}, "type": {"restart_services"}, "packages": {"nginx.service"}})
+	if status, _, _ = e.do(admin, "POST", "/servers/1/jobs", url.Values{"_csrf": {token}, "type": {"restart_services"}, "packages": {"--now"}}); status != http.StatusSeeOther {
+		t.Fatalf("invalid service: %d", status)
+	}
+	e.do(admin, "POST", "/servers/1/jobs", url.Values{"_csrf": {token}, "type": {"reboot"}})
+	_, body, _ = e.do(admin, "POST", "/servers/1/jobs", url.Values{"_csrf": {token}, "type": {"reboot"}})
+	resp, _ = client.Checkin(ctx, info)
+	if len(resp.Jobs) != 2 || resp.Jobs[0].Type != protocol.JobRestartServices || strings.Join(resp.Jobs[0].Packages, ",") != "nginx.service" || resp.Jobs[1].Type != protocol.JobReboot {
+		t.Fatalf("restart/reboot jobs: %+v", resp.Jobs)
+	}
+	for _, j := range resp.Jobs {
+		_ = client.JobResult(ctx, j.ID, protocol.JobResult{Succeeded: true})
+	}
+	report.RestartServices = nil
+	if err := client.Report(ctx, report); err != nil {
+		t.Fatal(err)
+	}
 
 	// Every page renders for an admin with real data.
 	for path, want := range map[string]string{
@@ -592,7 +667,9 @@ func TestEndToEnd(t *testing.T) {
 
 	// Install assets and health.
 	status, body, _ = e.do(newClient(), "GET", "/downloads/install-agent.sh", nil)
-	expect(t, "install script", status, 200, body, "netio.patchman ajan kurulum betiği")
+	expect(t, "install script", status, 200, body, "netio.patchman ajan kurulum betiği", "openrc")
+	status, body, _ = e.do(newClient(), "GET", "/downloads/netio-patchman-agent.openrc", nil)
+	expect(t, "openrc script", status, 200, body, "#!/sbin/openrc-run", "supervise-daemon")
 	status, body, _ = e.do(newClient(), "GET", "/healthz", nil)
 	expect(t, "healthz", status, 200, body, `"service":"netio.patchman"`)
 

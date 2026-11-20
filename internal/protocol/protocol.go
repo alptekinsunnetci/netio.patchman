@@ -102,8 +102,11 @@ type Report struct {
 	Packages       []Package `json:"packages"`
 	Updates        []Update  `json:"updates"`
 	RebootRequired bool      `json:"reboot_required"`
-	CollectedAt    time.Time `json:"collected_at"`
-	Errors         []string  `json:"errors,omitempty"`
+	// RestartServices are services still running old code (deleted libraries
+	// or binaries) after an update; restarting them activates the update.
+	RestartServices []string  `json:"restart_services,omitempty"`
+	CollectedAt     time.Time `json:"collected_at"`
+	Errors          []string  `json:"errors,omitempty"`
 }
 
 // Job types.
@@ -113,12 +116,14 @@ const (
 	JobUpgradeAll      = "upgrade_all"      // install all updates
 	JobUpgradePackages = "upgrade_packages" // upgrade the listed packages
 	JobAgentUpdate     = "agent_update"     // replace the agent binary and restart
+	JobRestartServices = "restart_services" // restart services that still run old code
+	JobReboot          = "reboot"           // reboot the host one minute after the result is sent
 )
 
 // ValidJobType reports whether t is a known job type.
 func ValidJobType(t string) bool {
 	switch t {
-	case JobRefresh, JobUpgradeSecurity, JobUpgradeAll, JobUpgradePackages, JobAgentUpdate:
+	case JobRefresh, JobUpgradeSecurity, JobUpgradeAll, JobUpgradePackages, JobAgentUpdate, JobRestartServices, JobReboot:
 		return true
 	}
 	return false
@@ -155,15 +160,19 @@ const (
 	JobQueued     = "queued"
 	JobDispatched = "dispatched"
 	JobSucceeded  = "succeeded"
+	JobPartial    = "partial" // finished, but some targeted packages or services were left
 	JobFailed     = "failed"
 	JobCancelled  = "cancelled"
 )
 
 // JobResult is sent by the agent when a job finishes.
 type JobResult struct {
-	Succeeded  bool      `json:"succeeded"`
-	ExitCode   int       `json:"exit_code"`
-	Output     string    `json:"output"`
+	Succeeded bool   `json:"succeeded"`
+	ExitCode  int    `json:"exit_code"`
+	Output    string `json:"output"`
+	// Remaining lists the packages (or services) the job targeted that are
+	// still pending after it ran. With Succeeded the job is partial.
+	Remaining  []string  `json:"remaining,omitempty"`
 	StartedAt  time.Time `json:"started_at"`
 	FinishedAt time.Time `json:"finished_at"`
 }
@@ -182,3 +191,9 @@ var packageNameRE = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9.+_:~@-]{0,199}$`)
 // ValidPackageName rejects names that could be read as command options or
 // contain shell metacharacters. Both sides check it.
 func ValidPackageName(name string) bool { return packageNameRE.MatchString(name) }
+
+var serviceNameRE = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9@._:\-]{0,199}$`)
+
+// ValidServiceName accepts systemd unit names (sshd.service, getty@tty1.service)
+// and OpenRC service names. Both sides check it.
+func ValidServiceName(name string) bool { return serviceNameRE.MatchString(name) }

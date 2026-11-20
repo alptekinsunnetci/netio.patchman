@@ -38,13 +38,15 @@ type Host struct {
 	RemoteUpdates  bool
 	SelfUpdate     bool // the agent accepts automatic updates
 	RebootRequired bool
-	UptimeSeconds  int64
-	EnrolledAt     time.Time
-	LastSeenAt     time.Time
-	LastReportAt   time.Time
-	LastScanAt     time.Time
-	ReportErrors   []string
-	Notes          string
+	// RestartServices still run code replaced by an update.
+	RestartServices []string
+	UptimeSeconds   int64
+	EnrolledAt      time.Time
+	LastSeenAt      time.Time
+	LastReportAt    time.Time
+	LastScanAt      time.Time
+	ReportErrors    []string
+	Notes           string
 
 	// Aggregates filled by list/detail queries.
 	PackageCount        int
@@ -72,7 +74,7 @@ const activeStatuses = `('open','in_progress')`
 const hostSelect = `SELECT h.id, h.machine_id, h.hostname, h.fqdn, h.os_id, h.os_version_id, h.os_name, h.os_version,
  h.kernel, h.arch, h.ip_addresses, h.package_manager, h.ecosystem, h.agent_version, h.remote_updates,
  h.reboot_required, h.uptime_seconds, h.enrolled_at, h.last_seen_at, h.last_report_at, h.last_scan_at,
- h.report_errors, h.notes, h.self_update,
+ h.report_errors, h.notes, h.self_update, h.restart_services,
  (SELECT COUNT(*) FROM host_packages p WHERE p.host_id = h.id) AS pkg_count,
  (SELECT COUNT(*) FROM host_updates u WHERE u.host_id = h.id) AS upd_count,
  (SELECT COUNT(*) FROM host_updates u WHERE u.host_id = h.id AND u.security = 1) AS sec_count,
@@ -85,12 +87,12 @@ const hostSelect = `SELECT h.id, h.machine_id, h.hostname, h.fqdn, h.os_id, h.os
 
 func scanHost(row interface{ Scan(...any) error }) (Host, error) {
 	var h Host
-	var ips, errs string
+	var ips, errs, svcs string
 	var remote, reboot, self int
 	var enrolled, seen, report, scan int64
 	err := row.Scan(&h.ID, &h.MachineID, &h.Hostname, &h.FQDN, &h.OSID, &h.OSVersionID, &h.OSName, &h.OSVersion,
 		&h.Kernel, &h.Arch, &ips, &h.PackageManager, &h.Ecosystem, &h.AgentVersion, &remote,
-		&reboot, &h.UptimeSeconds, &enrolled, &seen, &report, &scan, &errs, &h.Notes, &self,
+		&reboot, &h.UptimeSeconds, &enrolled, &seen, &report, &scan, &errs, &h.Notes, &self, &svcs,
 		&h.PackageCount, &h.UpdateCount, &h.SecurityUpdateCount,
 		&h.Vulns.Critical, &h.Vulns.High, &h.Vulns.Medium, &h.Vulns.Low, &h.Vulns.Other)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -101,6 +103,7 @@ func scanHost(row interface{ Scan(...any) error }) (Host, error) {
 	}
 	_ = json.Unmarshal([]byte(ips), &h.IPAddresses)
 	_ = json.Unmarshal([]byte(errs), &h.ReportErrors)
+	_ = json.Unmarshal([]byte(svcs), &h.RestartServices)
 	h.RemoteUpdates, h.RebootRequired, h.SelfUpdate = remote == 1, reboot == 1, self == 1
 	h.EnrolledAt, h.LastSeenAt, h.LastReportAt, h.LastScanAt = fromTS(enrolled), fromTS(seen), fromTS(report), fromTS(scan)
 	return h, nil
@@ -375,8 +378,15 @@ func (s *Store) SaveReport(ctx context.Context, id int64, r protocol.Report, eco
 			return err
 		}
 		errs, _ := json.Marshal(nonNil(r.Errors))
-		if _, err := tx.ExecContext(ctx, `UPDATE hosts SET reboot_required = ?, last_report_at = ?, needs_scan = 1, report_errors = ? WHERE id = ?`,
-			boolInt(r.RebootRequired), now(), string(errs), id); err != nil {
+		var services []string
+		for _, n := range r.RestartServices {
+			if len(services) < 500 && protocol.ValidServiceName(n) {
+				services = append(services, n)
+			}
+		}
+		svcs, _ := json.Marshal(nonNil(services))
+		if _, err := tx.ExecContext(ctx, `UPDATE hosts SET reboot_required = ?, restart_services = ?, last_report_at = ?, needs_scan = 1, report_errors = ? WHERE id = ?`,
+			boolInt(r.RebootRequired), string(svcs), now(), string(errs), id); err != nil {
 			return err
 		}
 		if _, err := tx.ExecContext(ctx, `DELETE FROM host_packages WHERE host_id = ?`, id); err != nil {
