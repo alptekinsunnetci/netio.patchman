@@ -18,6 +18,9 @@ services:
     environment:
       TZ: Europe/Istanbul
       PATCHMAN_DATA_DIR: /data
+      # Konteyner içinde her zaman 8080 dinlenir. Dışarıya açılan port .env
+      # içindeki PATCHMAN_PUBLISH_PORT ile değiştirilir.
+      PATCHMAN_HTTP_ADDR: ":8080"
     volumes:
       - patchman-data:/data
     ports:

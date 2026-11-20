@@ -127,7 +127,21 @@ Kurulum tamamlandı. Sıradaki adım sunuculara ajan kurmak.
 
 Ajanlar ve tarayıcılar sunucuya HTTPS ile bağlanmalıdır. Önerilen yöntem, sunucuyu nginx, Caddy veya HAProxy gibi bir ters vekilin arkasına koymaktır. Bu durumda panelde **Ters vekil başlıklarına güven** seçeneğini açın. Örnek yapılandırmalar ve sunucunun TLS'i kendisinin sonlandırması için bkz. [docs/kurulum.md](docs/kurulum.md#3-tls-ve-ters-vekil).
 
-Yayınlanan portu değiştirmek için `.env` dosyasına `PATCHMAN_PUBLISH_PORT=9090` yazın ve `docker compose up -d` komutunu yeniden çalıştırın.
+**Port değiştirme:** `.env` dosyasına `PATCHMAN_PUBLISH_PORT=8899` yazın ve `docker compose up -d` komutunu yeniden çalıştırın. Ters vekil aynı makinedeyse `PATCHMAN_PUBLISH_PORT=127.0.0.1:8899` kullanın; panel böylece dışarıya şifresiz HTTP ile açılmaz. Portu `PATCHMAN_HTTP_ADDR` ile değiştirmeyin; o ayar Docker dışı kurulumlar içindir ve Docker Compose'da yok sayılır.
+
+**Plesk:** Alan adının **Apache ve nginx Ayarları → Ek nginx yönergeleri** alanına şunu ekleyin. Plesk'in kendi `location /` bloğuyla çakışmaması için düzenli ifade biçimi kullanılır:
+
+```nginx
+location ~ ^/ {
+    proxy_pass http://127.0.0.1:8899;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    client_max_body_size 64m;
+}
+```
+
+Ardından panelde **Ters vekil başlıklarına güven** seçeneğini açın (veya `.env` içinde `PATCHMAN_TRUST_PROXY=true`).
 
 ## Sunuculara ajan kurulumu
 
@@ -218,8 +232,8 @@ Yapılandırmanın tamamı yönetim panelinden yapılabilir:
 | Değişken | Varsayılan | Açıklama | Panelden |
 |---|---|---|---|
 | `PATCHMAN_BASE_URL` | `http://localhost:8080` | Panelin ve ajanların kullandığı dış adres | evet |
-| `PATCHMAN_PUBLISH_PORT` | `8080` | Docker'ın sunucuda yayınladığı port | — |
-| `PATCHMAN_HTTP_ADDR` | `:8080` | Konteyner içindeki HTTP dinleme adresi | — |
+| `PATCHMAN_PUBLISH_PORT` | `8080` | Docker'ın sunucuda yayınladığı port; `127.0.0.1:8899` biçimi yalnızca yerel arabirimde yayınlar | — |
+| `PATCHMAN_HTTP_ADDR` | `:8080` | Yalnızca Docker dışı kurulumlarda dinleme adresi; Docker Compose'da sabit `:8080` | — |
 | `PATCHMAN_TRUST_PROXY` | `false` | Ters vekil arkasında istemci IP'sini `X-Forwarded-For` başlığından al | evet |
 | `PATCHMAN_TLS_CERT_FILE`, `PATCHMAN_TLS_KEY_FILE` | — | Sunucunun TLS'i kendisinin sonlandırması için sertifika ve anahtar | — |
 | `PATCHMAN_TIMEZONE` | `Europe/Istanbul` | Tarih ve saatlerin gösterildiği saat dilimi | evet |
@@ -238,7 +252,7 @@ Ortam değişkenlerinde hatalı bir değer varsa sunucu başlamaz ve hataları T
 
 | Belirti | Kontrol |
 |---|---|
-| Panel açılmıyor | `docker compose ps` ve `docker compose logs server`. Güvenlik duvarında 8080 (veya `PATCHMAN_PUBLISH_PORT`) portu açık mı? |
+| Panel açılmıyor | `docker compose ps` çıktısının PORTS sütununda `0.0.0.0:<port>->8080/tcp` görünmeli. `docker compose logs server` ile hataları görün. Güvenlik duvarında `PATCHMAN_PUBLISH_PORT` portu açık mı? |
 | Kurulum komutu `localhost` adresini gösteriyor | **Sunucu yapılandırması** sayfasında sunucu adresini ajanların erişebileceği adresle değiştirin. |
 | Ajan kaydolmuyor | Ajanın bulunduğu sunucudan `curl -I https://patchman.your-domain/healthz` çalışıyor mu? `journalctl -u netio-patchman-agent -n 50` |
 | Açık taraması sonuç vermiyor | Merkezi sunucunun `api.osv.dev` adresine erişimi var mı? Günlüklerde OSV hatası arayın. |
