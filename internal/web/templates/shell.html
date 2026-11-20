@@ -1,0 +1,27 @@
+{{define "shell"}}
+<a class="skip" href="#main">{{t "nav.skip"}}</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="/dashboard" aria-label="{{.Product}}">{{template "wordmark"}}</a>
+    <nav class="sidebar__nav" aria-label="{{t "nav.main"}}">
+      {{range .Nav}}
+      {{if or (and (ne .Key "users") (ne .Key "settings")) $.User.IsAdmin}}
+      <a class="navlink{{if eq .Key $.Active}} is-active{{end}}" href="{{.Href}}"{{if eq .Key $.Active}} aria-current="page"{{end}}>
+        {{template "icon" .Icon}}<span>{{t (printf "nav.%s" .Key)}}</span>
+        {{if and (eq .Key "notifications") $.Unread}}<span class="navlink__count">{{$.Unread}}</span>{{end}}
+      </a>
+      {{end}}
+      {{end}}
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink{{if eq $.Active "profile"}} is-active{{end}}" href="/profile">{{template "icon" "user"}}<span class="navlink__user"><span>{{.User.Name}}</span><small>{{roleLabel .User.Role}}</small></span></a>
+      <form method="post" action="/logout">{{template "csrf" .}}<button class="navlink navlink--button" type="submit">{{template "icon" "logout"}}<span>{{t "nav.logout"}}</span></button></form>
+      <p class="sidebar__version">{{.Product}} {{.Version}}</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+    {{template "flash" .}}
+    {{block "content" .}}{{end}}
+  </main>
+</div>
+{{end}}

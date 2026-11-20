@@ -1,0 +1,25 @@
+{{define "body"}}
+<div class="auth">
+  <div class="auth__panel">
+    <div class="auth__brand">
+      {{template "wordmark"}}
+      <p class="auth__tagline">{{t "app.description"}}</p>
+    </div>
+    <form class="form" method="post" action="/login">
+      <h1 class="form__title">{{t "login.heading"}}</h1>
+      {{template "flash" .}}
+      <input type="hidden" name="next" value="{{.Data.Next}}">
+      <label class="field">
+        <span class="field__label">{{t "login.email"}}</span>
+        <input class="field__input" type="email" name="email" value="{{.Data.Email}}" autocomplete="username" required autofocus>
+      </label>
+      <label class="field">
+        <span class="field__label">{{t "login.password"}}</span>
+        <input class="field__input" type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <button class="button button--primary button--block" type="submit">{{t "login.submit"}}</button>
+    </form>
+    <p class="auth__foot">{{.Product}} {{.Version}}</p>
+  </div>
+</div>
+{{end}}

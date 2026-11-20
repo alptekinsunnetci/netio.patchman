@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="{{.Lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{t "email.digest.heading"}}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f5f7;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#111827;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f7;padding:24px 12px;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:720px;background:#ffffff;border:1px solid #e2e5ea;border-radius:6px;">
+  <tr><td style="padding:16px 24px;border-bottom:1px solid #e2e5ea;font-size:15px;font-weight:600;">{{.Product}}</td></tr>
+  <tr>
+    <td style="padding:24px 24px 8px;">
+      <h1 style="margin:0 0 4px;font-size:20px;line-height:1.3;">{{t "email.digest.heading"}}</h1>
+      <p style="margin:0;font-size:14px;color:#4b5563;">{{t "email.digest.intro" "count" .Count}}</p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:16px 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;border-collapse:collapse;">
+        <tr>
+          <th align="left" style="padding:6px 8px 6px 0;border-bottom:1px solid #e2e5ea;color:#6b7280;font-weight:600;">{{t "vuln.field.cve_id"}}</th>
+          <th align="left" style="padding:6px 8px;border-bottom:1px solid #e2e5ea;color:#6b7280;font-weight:600;">{{t "vuln.field.severity"}}</th>
+          <th align="left" style="padding:6px 8px;border-bottom:1px solid #e2e5ea;color:#6b7280;font-weight:600;">{{t "vuln.field.cvss_score"}}</th>
+          <th align="left" style="padding:6px 8px;border-bottom:1px solid #e2e5ea;color:#6b7280;font-weight:600;">{{t "vuln.field.affected_package"}}</th>
+          <th align="right" style="padding:6px 0 6px 8px;border-bottom:1px solid #e2e5ea;color:#6b7280;font-weight:600;">{{t "vuln.field.affected_servers"}}</th>
+        </tr>
+        {{range .Rows}}
+        <tr>
+          <td style="padding:6px 8px 6px 0;border-bottom:1px solid #f0f1f3;font-family:ui-monospace,Consolas,monospace;white-space:nowrap;">{{if .URL}}<a href="{{.URL}}" style="color:#0b5c8a;">{{.CVEID}}</a>{{else}}{{.CVEID}}{{end}}{{if .KnownExploited}} <strong style="color:#b42318;">KEV</strong>{{end}}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f1f3;"><span style="color:{{sevColor (printf "%s" .Severity)}};font-weight:600;">{{.SeverityLabel}}</span></td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f1f3;font-family:ui-monospace,Consolas,monospace;">{{.CVSSText}}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f1f3;font-family:ui-monospace,Consolas,monospace;">{{.PackageName}}</td>
+          <td align="right" style="padding:6px 0 6px 8px;border-bottom:1px solid #f0f1f3;">{{.HostCount}}</td>
+        </tr>
+        {{end}}
+      </table>
+    </td>
+  </tr>
+  {{if .DashboardURL}}
+  <tr><td style="padding:8px 24px 24px;"><a href="{{.DashboardURL}}" style="display:inline-block;padding:10px 16px;background:#0b5c8a;color:#ffffff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;">{{t "email.vuln.dashboard_link"}}</a></td></tr>
+  {{end}}
+  <tr><td style="padding:12px 24px;border-top:1px solid #e2e5ea;font-size:12px;color:#6b7280;">{{t "email.footer" "product" .Product}}</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>

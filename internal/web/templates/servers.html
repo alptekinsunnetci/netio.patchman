@@ -1,0 +1,105 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.servers"}}</h1>
+    <p class="pagehead__sub">{{t "servers.subtitle"}}</p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="button" href="/servers.csv?{{$d.Query}}">{{template "icon" "download"}}{{t "common.export_csv"}}</a>
+    <a class="button button--primary" href="/agents">{{template "icon" "plus"}}{{t "servers.add"}}</a>
+  </div>
+</header>
+
+<form class="filters" method="get" action="/servers">
+  <label class="field field--inline">
+    <span class="visually-hidden">{{t "common.search"}}</span>
+    <input class="field__input" type="search" name="q" value="{{$d.Filter.Search}}" placeholder="{{t "servers.search_placeholder"}}">
+  </label>
+  <label class="field field--inline">
+    <span class="visually-hidden">{{t "host.field.status"}}</span>
+    <select class="field__input" name="status">
+      <option value="">{{t "servers.filter.all"}}</option>
+      <option value="online"{{if eq $d.Filter.Status "online"}} selected{{end}}>{{t "host.status.online"}}</option>
+      <option value="offline"{{if eq $d.Filter.Status "offline"}} selected{{end}}>{{t "host.status.offline"}}</option>
+      <option value="vulnerable"{{if eq $d.Filter.Status "vulnerable"}} selected{{end}}>{{t "servers.filter.vulnerable"}}</option>
+      <option value="updates"{{if eq $d.Filter.Status "updates"}} selected{{end}}>{{t "servers.filter.updates"}}</option>
+      <option value="reboot"{{if eq $d.Filter.Status "reboot"}} selected{{end}}>{{t "servers.filter.reboot"}}</option>
+    </select>
+  </label>
+  {{if $d.OSOptions}}
+  <label class="field field--inline">
+    <span class="visually-hidden">{{t "host.field.os"}}</span>
+    <select class="field__input" name="os">
+      <option value="">{{t "servers.filter.all_os"}}</option>
+      {{range $d.OSOptions}}<option value="{{index . 0}}"{{if eq $d.Filter.OSID (index . 0)}} selected{{end}}>{{index . 0}}</option>{{end}}
+    </select>
+  </label>
+  {{end}}
+  <button class="button" type="submit">{{t "common.filter"}}</button>
+  {{if or $d.Filter.Search $d.Filter.Status $d.Filter.OSID}}<a class="button button--ghost" href="/servers">{{t "common.clear"}}</a>{{end}}
+</form>
+
+{{$op := .User.CanOperate}}
+<form method="post" action="/servers/bulk-jobs" data-confirm="{{t "servers.bulk.confirm"}}">
+{{template "csrf" .}}<input type="hidden" name="back_query" value="{{$d.Query}}">
+{{if and $op $d.Hosts}}
+<div class="bulkbar">
+  <span class="bulkbar__label">{{t "servers.bulk.label"}}</span>
+  <select class="field__input" name="type" aria-label="{{t "servers.bulk.label"}}">
+    <option value="upgrade_security">{{t "job.type.upgrade_security"}}</option>
+    <option value="upgrade_all">{{t "job.type.upgrade_all"}}</option>
+    <option value="refresh">{{t "job.type.refresh"}}</option>
+    <option value="agent_update">{{t "job.type.agent_update"}}</option>
+  </select>
+  <button class="button button--primary" type="submit">{{t "servers.bulk.apply"}}</button>
+  <span class="field__hint">{{t "servers.bulk.hint"}}</span>
+</div>
+{{end}}
+<section class="panel panel--flush">
+  {{if $d.Hosts}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        {{if $op}}<th class="check"><input type="checkbox" data-check-all="host_ids" aria-label="{{t "common.select_all"}}"></th>{{end}}
+        <th>{{t "host.field.hostname"}}</th>
+        <th>{{t "host.field.os"}}</th>
+        <th>{{t "host.field.status"}}</th>
+        <th>{{t "host.field.vulns"}}</th>
+        <th class="num">{{t "host.field.security_updates"}}</th>
+        <th class="num">{{t "host.field.updates"}}</th>
+        <th>{{t "host.field.last_seen"}}</th>
+        <th>{{t "host.field.agent_version"}}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {{range $d.Hosts}}
+    <tr>
+      {{if $op}}<td class="check"><input type="checkbox" name="host_ids" value="{{.ID}}" aria-label="{{.Hostname}}"></td>{{end}}
+      <td>
+        <a href="/servers/{{.ID}}"><strong>{{.Hostname}}</strong></a>
+        {{if .RebootRequired}}<span class="pill pill--warning" title="{{t "host.reboot_required_hint"}}">{{t "host.reboot_required"}}</span>{{end}}
+        <div class="cell-sub mono">{{join .IPAddresses ", "}}</div>
+      </td>
+      <td>{{.OSName}}<div class="cell-sub mono">{{.Kernel}}</div></td>
+      <td>{{template "hoststatus" .}}</td>
+      <td>{{template "sevcounts" .Vulns}}</td>
+      <td class="num">{{if .SecurityUpdateCount}}<strong class="text-danger">{{.SecurityUpdateCount}}</strong>{{else}}0{{end}}</td>
+      <td class="num">{{.UpdateCount}}</td>
+      <td><time datetime="{{iso .LastSeenAt}}" title="{{datetime .LastSeenAt}}">{{ago .LastSeenAt}}</time></td>
+      <td class="mono">{{.AgentVersion}}{{if agentOutdated .}} <span class="pill pill--warning" title="{{t "agents.update.outdated_hint" "version" agentRelease}}">{{t "agents.update.outdated"}}</span>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}
+  {{template "empty" (t "servers.empty")}}
+  {{end}}
+</section>
+</form>
+{{template "pager" $d.Pager}}
+{{end}}

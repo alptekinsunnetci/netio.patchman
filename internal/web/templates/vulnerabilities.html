@@ -1,0 +1,79 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.vulnerabilities"}}</h1>
+    <p class="pagehead__sub">{{t "vulns.subtitle"}}</p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="button" href="/vulnerabilities.csv?{{$d.Query}}">{{template "icon" "download"}}{{t "common.export_csv"}}</a>
+  </div>
+</header>
+
+<nav class="chips" aria-label="{{t "vuln.field.severity"}}">
+  <a class="chip{{if eq $d.Filter.Severity ""}} is-active{{end}}" href="/vulnerabilities">{{t "vulns.filter.all_severities"}} <span>{{$d.Sev.Total}}</span></a>
+  <a class="chip chip--critical{{if eq $d.Filter.Severity "critical"}} is-active{{end}}" href="/vulnerabilities?severity=critical">{{t "severity.critical"}} <span>{{$d.Sev.Critical}}</span></a>
+  <a class="chip chip--high{{if eq $d.Filter.Severity "high"}} is-active{{end}}" href="/vulnerabilities?severity=high">{{t "severity.high"}} <span>{{$d.Sev.High}}</span></a>
+  <a class="chip chip--medium{{if eq $d.Filter.Severity "medium"}} is-active{{end}}" href="/vulnerabilities?severity=medium">{{t "severity.medium"}} <span>{{$d.Sev.Medium}}</span></a>
+  <a class="chip chip--low{{if eq $d.Filter.Severity "low"}} is-active{{end}}" href="/vulnerabilities?severity=low">{{t "severity.low"}} <span>{{$d.Sev.Low}}</span></a>
+  <a class="chip{{if $d.Filter.KEVOnly}} is-active{{end}}" href="/vulnerabilities?kev=1">{{t "vulns.filter.kev"}} <span>{{$d.KEV}}</span></a>
+</nav>
+
+<form class="filters" method="get" action="/vulnerabilities">
+  <input class="field__input" type="search" name="q" value="{{$d.Filter.Search}}" placeholder="{{t "vulns.search_placeholder"}}" aria-label="{{t "common.search"}}">
+  <select class="field__input" name="severity" aria-label="{{t "vuln.field.severity"}}">
+    <option value="">{{t "vulns.filter.all_severities"}}</option>
+    {{range (list "critical" "high" "medium" "low" "unknown")}}<option value="{{.}}"{{if eq $d.Filter.Severity .}} selected{{end}}>{{t (printf "severity.%s" .)}}</option>{{end}}
+  </select>
+  <select class="field__input" name="status" aria-label="{{t "vuln.field.status"}}">
+    <option value="">{{t "vulns.filter.active"}}</option>
+    {{range (list "open" "in_progress" "accepted_risk" "false_positive" "resolved")}}<option value="{{.}}"{{if eq $d.Filter.Status .}} selected{{end}}>{{t (printf "status.%s" .)}}</option>{{end}}
+  </select>
+  <label class="check-label"><input type="checkbox" name="kev" value="1"{{if $d.Filter.KEVOnly}} checked{{end}}> {{t "vulns.filter.kev"}}</label>
+  <label class="check-label"><input type="checkbox" name="fix" value="1"{{if $d.Filter.FixOnly}} checked{{end}}> {{t "vulns.filter.fix"}}</label>
+  <button class="button" type="submit">{{t "common.filter"}}</button>
+  {{if $d.Query}}<a class="button button--ghost" href="/vulnerabilities">{{t "common.clear"}}</a>{{end}}
+</form>
+
+<section class="panel panel--flush">
+  {{if $d.Rows}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>{{t "vuln.field.cve_id"}}</th>
+        <th>{{t "vuln.field.severity"}}</th>
+        <th class="num">{{t "vuln.field.cvss_score"}}</th>
+        <th>{{t "vuln.field.affected_package"}}</th>
+        <th class="num">{{t "vuln.field.affected_servers"}}</th>
+        <th>{{t "vulns.col.fix"}}</th>
+        <th>{{t "vuln.field.first_detected"}}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {{range $d.Rows}}
+    <tr>
+      <td>
+        <a class="mono" href="/vulnerabilities/{{.CVEID}}"><strong>{{.CVEID}}</strong></a> {{if .KnownExploited}}{{template "kev"}}{{end}}
+        {{if .Title}}<div class="cell-sub" lang="en">{{truncate .Title 110}}</div>{{end}}
+      </td>
+      <td>{{template "sev" .Severity}}</td>
+      <td class="num mono">{{cvss .CVSSScore}}</td>
+      <td class="mono">{{join .Packages ", "}}</td>
+      <td class="num">{{.HostCount}}</td>
+      <td>{{if .FixAvailable}}<span class="pill pill--online">{{t "vulns.fix_available"}}</span>{{else}}<span class="pill pill--muted">{{t "vuln.fix_not_available"}}</span>{{end}}</td>
+      <td><time datetime="{{iso .FirstDetectedAt}}">{{date .FirstDetectedAt}}</time></td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}
+  {{template "empty" (t "vulns.empty")}}
+  {{end}}
+</section>
+{{template "pager" $d.Pager}}
+<p class="footnote">{{t "vuln.original_language_note"}}</p>
+{{end}}

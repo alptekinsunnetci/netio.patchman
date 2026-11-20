@@ -1,0 +1,40 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.schedules"}}</h1>
+    <p class="pagehead__sub">{{t "schedules.subtitle"}}</p>
+  </div>
+  {{if .User.IsAdmin}}<div class="pagehead__actions"><a class="button button--primary" href="/schedules/new">{{template "icon" "plus"}}{{t "schedules.new"}}</a></div>{{end}}
+</header>
+
+<p class="alert alert--info">{{t "schedules.how"}} {{t "schedules.no_reboot"}}</p>
+
+<section class="panel panel--flush">
+  {{if $d.Rows}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr>
+      <th>{{t "schedule.field.name"}}</th><th>{{t "schedule.field.job_type"}}</th><th>{{t "schedule.field.when"}}</th>
+      <th>{{t "schedule.field.target"}}</th><th>{{t "schedule.field.next_run"}}</th><th>{{t "schedule.field.last_run"}}</th><th>{{t "schedule.field.status"}}</th>
+    </tr></thead>
+    <tbody>
+    {{range $d.Rows}}
+    <tr>
+      <td><a href="/schedules/{{.ID}}"><strong>{{.Name}}</strong></a></td>
+      <td>{{jobType .JobType}}</td>
+      <td>{{scheduleDays .Days}} · <span class="mono">{{clock .Minute}}</span><div class="cell-sub">{{t "schedule.field.window_short"}}: {{t "schedule.window_value" "n" .WindowMinutes}}</div></td>
+      <td>{{scheduleTarget .}}</td>
+      <td>{{if .Enabled}}{{datetime .NextRunAt}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td>{{if .LastRunAt.IsZero}}<span class="muted">{{t "time.never"}}</span>{{else}}{{datetime .LastRunAt}}<div class="cell-sub">{{t "schedule.last_run_value" "count" .LastQueued "skipped" .LastSkipped}}</div>{{end}}</td>
+      <td>{{if .Enabled}}<span class="pill pill--online">{{t "common.enabled"}}</span>{{else}}<span class="pill">{{t "common.disabled"}}</span>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "schedules.empty")}}{{end}}
+</section>
+{{end}}

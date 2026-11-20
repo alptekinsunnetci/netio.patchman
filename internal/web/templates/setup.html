@@ -1,0 +1,33 @@
+{{define "body"}}
+<div class="auth">
+  <div class="auth__panel auth__panel--wide">
+    <div class="auth__brand">
+      {{template "wordmark"}}
+      <p class="auth__tagline">{{t "app.description"}}</p>
+    </div>
+    <form class="form" method="post" action="/setup">
+      <h1 class="form__title">{{t "setup.heading"}}</h1>
+      <p class="muted">{{t "setup.intro"}}</p>
+      {{template "flash" .}}
+      <label class="field">
+        <span class="field__label">{{t "user.field.name"}}</span>
+        <input class="field__input" type="text" name="name" value="{{.Data.Name}}" autocomplete="name" required autofocus>
+      </label>
+      <label class="field">
+        <span class="field__label">{{t "user.field.email"}}</span>
+        <input class="field__input" type="email" name="email" value="{{.Data.Email}}" autocomplete="username" required>
+      </label>
+      <label class="field">
+        <span class="field__label">{{t "user.field.password"}}</span>
+        <input class="field__input" type="password" name="password" autocomplete="new-password" required minlength="10">
+        <span class="field__hint">{{t "user.password_hint"}}</span>
+      </label>
+      <label class="field">
+        <span class="field__label">{{t "user.field.password_confirm"}}</span>
+        <input class="field__input" type="password" name="password_confirm" autocomplete="new-password" required minlength="10">
+      </label>
+      <button class="button button--primary button--block" type="submit">{{t "setup.submit"}}</button>
+    </form>
+  </div>
+</div>
+{{end}}

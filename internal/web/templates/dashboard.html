@@ -1,0 +1,147 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "dashboard.title"}}</h1>
+    <p class="pagehead__sub">{{t "dashboard.subtitle"}}</p>
+  </div>
+</header>
+
+{{if eq $d.Stats.Hosts 0}}
+<section class="panel empty">
+  {{template "icon" "server"}}
+  <h2 class="empty__title">{{t "dashboard.empty.title"}}</h2>
+  <p class="empty__body">{{t "dashboard.empty.body" "agent" "netio-patchman-agent"}}</p>
+  <a class="button button--primary" href="/agents">{{t "dashboard.empty.action"}}</a>
+</section>
+{{else}}
+
+<section class="stats">
+  <a class="stat" href="/servers">
+    <p class="stat__label">{{t "dashboard.stat.servers"}}</p>
+    <p class="stat__value">{{$d.Stats.Hosts}}</p>
+    <p class="stat__meta">{{t "dashboard.stat.online" "n" $d.Stats.Online}}</p>
+  </a>
+  <a class="stat stat--critical" href="/vulnerabilities?severity=critical">
+    <p class="stat__label">{{t "dashboard.stat.critical"}}</p>
+    <p class="stat__value">{{$d.Sev.Critical}}</p>
+    <p class="stat__meta">{{t "dashboard.stat.high" "n" $d.Sev.High}}</p>
+  </a>
+  <a class="stat{{if $d.KEV}} stat--critical{{end}}" href="/vulnerabilities?kev=1">
+    <p class="stat__label">{{t "dashboard.stat.kev"}}</p>
+    <p class="stat__value">{{$d.KEV}}</p>
+    <p class="stat__meta">{{t "dashboard.stat.kev_meta"}}</p>
+  </a>
+  <a class="stat" href="/packages?security=1">
+    <p class="stat__label">{{t "dashboard.stat.pending_updates"}}</p>
+    <p class="stat__value">{{$d.Stats.SecurityUpdates}}</p>
+    <p class="stat__meta">{{t "dashboard.stat.updates_meta" "total" $d.Stats.PendingUpdates "hosts" $d.Stats.HostsWithUpdates}}</p>
+  </a>
+  <a class="stat{{if $d.Stats.Offline}} stat--warning{{end}}" href="/servers?status=offline">
+    <p class="stat__label">{{t "dashboard.stat.offline_agents"}}</p>
+    <p class="stat__value">{{$d.Stats.Offline}}</p>
+    <p class="stat__meta">{{t "dashboard.stat.reboot" "n" $d.Stats.RebootRequired}}</p>
+  </a>
+</section>
+
+<section class="panel">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "dashboard.severity_distribution"}}</h2>
+    <a class="panel__link" href="/vulnerabilities">{{t "common.view_all"}}</a>
+  </div>
+  {{$total := $d.Sev.Total}}
+  {{if $total}}
+  <div class="sevbar" role="img" aria-label="{{t "dashboard.severity_distribution"}}">
+    {{if $d.Sev.Critical}}<span class="sevbar__seg sevbar__seg--critical" data-grow="{{$d.Sev.Critical}}"></span>{{end}}
+    {{if $d.Sev.High}}<span class="sevbar__seg sevbar__seg--high" data-grow="{{$d.Sev.High}}"></span>{{end}}
+    {{if $d.Sev.Medium}}<span class="sevbar__seg sevbar__seg--medium" data-grow="{{$d.Sev.Medium}}"></span>{{end}}
+    {{if $d.Sev.Low}}<span class="sevbar__seg sevbar__seg--low" data-grow="{{$d.Sev.Low}}"></span>{{end}}
+    {{if $d.Sev.Other}}<span class="sevbar__seg sevbar__seg--unknown" data-grow="{{$d.Sev.Other}}"></span>{{end}}
+  </div>
+  <ul class="legend">
+    <li><a href="/vulnerabilities?severity=critical"><span class="legend__dot legend__dot--critical"></span>{{t "severity.critical"}} <strong>{{$d.Sev.Critical}}</strong></a></li>
+    <li><a href="/vulnerabilities?severity=high"><span class="legend__dot legend__dot--high"></span>{{t "severity.high"}} <strong>{{$d.Sev.High}}</strong></a></li>
+    <li><a href="/vulnerabilities?severity=medium"><span class="legend__dot legend__dot--medium"></span>{{t "severity.medium"}} <strong>{{$d.Sev.Medium}}</strong></a></li>
+    <li><a href="/vulnerabilities?severity=low"><span class="legend__dot legend__dot--low"></span>{{t "severity.low"}} <strong>{{$d.Sev.Low}}</strong></a></li>
+    <li><a href="/vulnerabilities?severity=unknown"><span class="legend__dot legend__dot--unknown"></span>{{t "severity.unknown"}} <strong>{{$d.Sev.Other}}</strong></a></li>
+  </ul>
+  {{else}}
+  <p class="muted">{{t "dashboard.no_vulns"}}</p>
+  {{end}}
+</section>
+
+<div class="grid-2">
+  <section class="panel panel--flush">
+    <div class="panel__head">
+      <h2 class="panel__title">{{t "dashboard.top_vulns"}}</h2>
+      <a class="panel__link" href="/vulnerabilities">{{t "common.view_all"}}</a>
+    </div>
+    {{if $d.TopVulns}}
+    <table class="table">
+      <thead><tr><th>{{t "vuln.field.cve_id"}}</th><th>{{t "vuln.field.severity"}}</th><th class="num">{{t "vuln.field.affected_servers"}}</th></tr></thead>
+      <tbody>
+      {{range $d.TopVulns}}
+      <tr>
+        <td><a class="mono" href="/vulnerabilities/{{.CVEID}}">{{.CVEID}}</a> {{if .KnownExploited}}{{template "kev"}}{{end}}<div class="cell-sub mono">{{join .Packages ", "}}</div></td>
+        <td>{{template "sev" .Severity}}</td>
+        <td class="num">{{.HostCount}}</td>
+      </tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{else}}{{template "empty" (t "dashboard.no_vulns")}}{{end}}
+  </section>
+
+  <section class="panel panel--flush">
+    <div class="panel__head">
+      <h2 class="panel__title">{{t "dashboard.top_hosts"}}</h2>
+      <a class="panel__link" href="/servers?status=vulnerable">{{t "common.view_all"}}</a>
+    </div>
+    {{if $d.TopHosts}}
+    <table class="table">
+      <thead><tr><th>{{t "host.field.hostname"}}</th><th>{{t "host.field.vulns"}}</th><th class="num">{{t "host.field.security_updates"}}</th></tr></thead>
+      <tbody>
+      {{range $d.TopHosts}}
+      <tr>
+        <td><a href="/servers/{{.ID}}">{{.Hostname}}</a><div class="cell-sub">{{.OSName}}</div></td>
+        <td>{{template "sevcounts" .Vulns}}</td>
+        <td class="num">{{.SecurityUpdateCount}}</td>
+      </tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{else}}{{template "empty" (t "dashboard.no_vulnerable_hosts")}}{{end}}
+  </section>
+</div>
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "dashboard.recent_jobs"}}</h2>
+    <a class="panel__link" href="/jobs">{{t "common.view_all"}}</a>
+  </div>
+  {{if $d.Jobs}}
+  <table class="table">
+    <thead><tr><th>{{t "job.field.id"}}</th><th>{{t "host.field.hostname"}}</th><th>{{t "job.field.type"}}</th><th>{{t "job.field.status"}}</th><th>{{t "job.field.created_at"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Jobs}}
+    <tr>
+      <td><a class="mono" href="/jobs/{{.ID}}">#{{.ID}}</a></td>
+      <td><a href="/servers/{{.HostID}}">{{.Hostname}}</a></td>
+      <td>{{jobType .Type}}</td>
+      <td>{{template "jobstatus" .Status}}</td>
+      <td><time datetime="{{iso .CreatedAt}}" title="{{datetime .CreatedAt}}">{{ago .CreatedAt}}</time></td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}{{template "empty" (t "dashboard.no_jobs")}}{{end}}
+</section>
+
+<p class="footnote">
+  {{if $d.Scan.LastRunAt.IsZero}}{{t "dashboard.scan_pending"}}{{else}}{{t "dashboard.last_scan" "time" (datetime $d.Scan.LastRunAt)}}{{end}}
+  {{if $d.Scan.LastError}} · <span class="text-danger">{{t "dashboard.scan_error"}}</span>{{end}}
+</p>
+{{end}}
+{{end}}

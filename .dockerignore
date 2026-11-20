@@ -1,0 +1,7 @@
+.git
+.env
+bin
+dist
+docs
+*.md
+**/*_test.go

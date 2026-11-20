@@ -1,0 +1,151 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.agents"}}</h1>
+    <p class="pagehead__sub">{{t "agents.subtitle"}}</p>
+  </div>
+</header>
+
+{{with $d.NewToken}}
+<section class="panel panel--highlight">
+  <h2 class="panel__title">{{t "agents.token.created" "name" .Name}}</h2>
+  <p class="alert alert--warning">{{t "agents.token.show_once"}}</p>
+  <label class="field">
+    <span class="field__label">{{t "agents.token.value"}}</span>
+    <span class="copy"><input class="field__input mono" type="text" value="{{.Token}}" readonly id="new-token"><button class="button button--sm" type="button" data-copy="new-token">{{t "common.copy"}}</button></span>
+  </label>
+  <label class="field">
+    <span class="field__label">{{t "agents.install.command"}}</span>
+    <span class="copy"><textarea class="field__input field__input--area mono" rows="3" readonly id="new-command">{{.Command}}</textarea><button class="button button--sm" type="button" data-copy="new-command">{{t "common.copy"}}</button></span>
+  </label>
+</section>
+{{end}}
+
+<section class="panel">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "agents.update.title"}}</h2>
+    {{if and .User.CanOperate $d.Release.Available $d.Outdated}}
+    <form method="post" action="/agents/update-all" data-confirm="{{t "agents.update.all_confirm" "n" $d.Outdated "version" $d.Release.Version}}">
+      {{template "csrf" $root}}<button class="button button--primary" type="submit">{{template "icon" "refresh"}}{{t "agents.update.all" "n" $d.Outdated}}</button>
+    </form>
+    {{end}}
+  </div>
+  {{if $d.Release.Available}}
+  <dl class="dl">
+    <dt>{{t "agents.update.release"}}</dt><dd class="mono">{{$d.Release.Version}} <span class="muted">({{$d.ReleaseArchs}})</span></dd>
+    <dt>{{t "agents.update.auto"}}</dt><dd>{{if $d.AutoUpdate}}<span class="pill pill--online">{{t "common.enabled"}}</span> <span class="muted">{{t "agents.update.auto_on_hint"}}</span>{{else}}<span class="pill pill--muted">{{t "common.disabled"}}</span> <span class="muted">{{t "agents.update.auto_off_hint"}}</span>{{end}}</dd>
+    <dt>{{t "agents.update.outdated_count"}}</dt><dd>{{$d.Outdated}}</dd>
+  </dl>
+  {{else}}
+  <p class="alert alert--warning">{{t "agents.update.no_release"}}</p>
+  {{end}}
+</section>
+
+<div class="grid-2 grid-2--wide-left">
+  <section class="panel">
+    <h2 class="panel__title">{{t "agents.install.title"}}</h2>
+    <ol class="steps">
+      <li>{{t "agents.install.step1"}}</li>
+      <li>{{t "agents.install.step2"}}
+        <pre class="code">{{$d.ExampleCommand}}</pre>
+      </li>
+      <li>{{t "agents.install.step3"}}</li>
+    </ol>
+    <details class="details">
+      <summary>{{t "agents.install.offline_title"}}</summary>
+      <p>{{t "agents.install.offline_body"}}</p>
+      <pre class="code">{{$d.BaseURL}}/downloads/agent/netio-patchman-agent-linux-amd64
+{{$d.BaseURL}}/downloads/agent/netio-patchman-agent-linux-arm64
+{{$d.BaseURL}}/downloads/netio-patchman-agent.service
+{{$d.BaseURL}}/downloads/install-agent.sh</pre>
+      <pre class="code">sudo sh install-agent.sh --server-url {{$d.BaseURL}} --token &lt;KAYIT-ANAHTARI&gt; --binary ./netio-patchman-agent-linux-amd64</pre>
+    </details>
+    <details class="details">
+      <summary>{{t "agents.install.supported_title"}}</summary>
+      <p>{{t "agents.install.supported_body"}}</p>
+    </details>
+  </section>
+
+  {{if .User.IsAdmin}}
+  <section class="panel">
+    <h2 class="panel__title">{{t "agents.token.new"}}</h2>
+    <form class="form" method="post" action="/agents/tokens">
+      {{template "csrf" $root}}
+      <label class="field"><span class="field__label">{{t "agents.token.name"}}</span>
+        <input class="field__input" type="text" name="name" required maxlength="100" placeholder="{{t "agents.token.name_placeholder"}}"></label>
+      <label class="field"><span class="field__label">{{t "agents.token.valid_days"}}</span>
+        <input class="field__input" type="number" name="valid_days" min="0" max="3650" value="7">
+        <span class="field__hint">{{t "agents.token.valid_days_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "agents.token.max_uses"}}</span>
+        <input class="field__input" type="number" name="max_uses" min="0" max="100000" value="0">
+        <span class="field__hint">{{t "agents.token.max_uses_hint"}}</span></label>
+      <div><button class="button button--primary" type="submit">{{t "agents.token.create"}}</button></div>
+    </form>
+  </section>
+  {{end}}
+</div>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{t "agents.tokens"}}</h2></div>
+  {{if $d.Tokens}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "agents.token.name"}}</th><th>{{t "agents.token.prefix"}}</th><th>{{t "agents.token.created_by"}}</th><th>{{t "agents.token.created_at"}}</th><th>{{t "agents.token.expires_at"}}</th><th class="num">{{t "agents.token.uses"}}</th><th>{{t "agents.token.status"}}</th>{{if $root.User.IsAdmin}}<th></th>{{end}}</tr></thead>
+    <tbody>
+    {{range $d.Tokens}}
+    <tr>
+      <td>{{.Name}}</td>
+      <td class="mono">{{.TokenPrefix}}…</td>
+      <td>{{.CreatedBy}}</td>
+      <td>{{datetime .CreatedAt}}</td>
+      <td>{{if .ExpiresAt.IsZero}}{{t "agents.token.never"}}{{else}}{{datetime .ExpiresAt}}{{end}}</td>
+      <td class="num">{{.Uses}}{{if .MaxUses}} / {{.MaxUses}}{{end}}</td>
+      <td>{{if not .RevokedAt.IsZero}}<span class="pill pill--muted">{{t "agents.token.revoked_state"}}</span>{{else if .Usable}}<span class="pill pill--online">{{t "agents.token.active"}}</span>{{else}}<span class="pill pill--muted">{{t "agents.token.expired"}}</span>{{end}}</td>
+      {{if $root.User.IsAdmin}}<td class="actions">{{if .RevokedAt.IsZero}}<form method="post" action="/agents/tokens/{{.ID}}/revoke" data-confirm="{{t "agents.token.revoke_confirm"}}">{{template "csrf" $root}}<button class="button button--sm button--ghost" type="submit">{{t "agents.token.revoke"}}</button></form>{{end}}</td>{{end}}
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "agents.tokens_empty")}}{{end}}
+</section>
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "agents.list"}}</h2>
+    <form class="filters filters--inline" method="get" action="/agents">
+      <select class="field__input" name="status" aria-label="{{t "host.field.status"}}">
+        <option value="">{{t "servers.filter.all"}}</option>
+        <option value="online"{{if eq $d.Status "online"}} selected{{end}}>{{t "host.status.online"}}</option>
+        <option value="offline"{{if eq $d.Status "offline"}} selected{{end}}>{{t "host.status.offline"}}</option>
+      </select>
+      <button class="button button--sm" type="submit">{{t "common.filter"}}</button>
+    </form>
+  </div>
+  {{if $d.Versions}}<p class="panel__note">{{t "agents.versions"}}: {{range $i, $v := $d.Versions}}{{if $i}}, {{end}}<span class="mono">{{if index $v 0}}{{index $v 0}}{{else}}?{{end}}</span> ({{index $v 1}}){{end}}</p>{{end}}
+  {{if $d.Hosts}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "host.field.hostname"}}</th><th>{{t "host.field.status"}}</th><th>{{t "host.field.agent_version"}}</th><th>{{t "host.field.self_update"}}</th><th>{{t "host.field.remote_updates"}}</th><th>{{t "host.field.enrolled_at"}}</th><th>{{t "host.field.last_seen"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Hosts}}
+    <tr>
+      <td><a href="/servers/{{.ID}}">{{.Hostname}}</a></td>
+      <td>{{template "hoststatus" .}}</td>
+      <td class="mono">{{.AgentVersion}} {{if agentOutdated .}}<span class="pill pill--warning">{{t "agents.update.outdated"}}</span>{{else if $d.Release.Available}}<span class="pill pill--online">{{t "agents.update.current"}}</span>{{end}}</td>
+      <td>{{if .SelfUpdate}}{{t "common.enabled"}}{{else}}<span class="muted">{{t "common.disabled"}}</span>{{end}}</td>
+      <td>{{if .RemoteUpdates}}{{t "common.enabled"}}{{else}}<span class="muted">{{t "common.disabled"}}</span>{{end}}</td>
+      <td>{{date .EnrolledAt}}</td>
+      <td><time datetime="{{iso .LastSeenAt}}" title="{{datetime .LastSeenAt}}">{{ago .LastSeenAt}}</time></td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "agents.list_empty")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+{{end}}

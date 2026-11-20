@@ -1,0 +1,88 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$c := $d.Cfg}}{{$root := .}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.settings"}}</h1>
+    <p class="pagehead__sub">{{t "settings.subtitle"}}</p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="button" href="/settings/system">{{template "icon" "settings"}}{{t "settings.system_link"}}</a>
+    <a class="button" href="/settings/audit">{{template "icon" "list"}}{{t "audit.title"}}</a>
+  </div>
+</header>
+
+<form class="form" method="post" action="/settings">
+  {{template "csrf" $root}}
+
+  <section class="panel" id="email">
+    <h2 class="panel__title">{{t "settings.email.title"}}</h2>
+    {{if not $d.EmailConfigured}}<p class="alert alert--warning">{{t "settings.email.not_configured"}} <a href="/settings/system#smtp">{{t "settings.system_link"}}</a></p>{{end}}
+    <label class="check-label"><input type="checkbox" name="email_enabled" value="1"{{if $c.EmailEnabled}} checked{{end}}> {{t "settings.email.enabled"}}</label>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "settings.email.min_severity"}}</span>
+        <select class="field__input" name="email_min_severity">{{range $d.Severities}}<option value="{{.}}"{{if eq $c.EmailMinSeverity .}} selected{{end}}>{{sevLabel .}}</option>{{end}}</select>
+        <span class="field__hint">{{t "settings.email.min_severity_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "settings.email.digest_threshold"}}</span>
+        <input class="field__input" type="number" name="email_digest_threshold" min="1" max="1000" value="{{$c.EmailDigestThreshold}}">
+        <span class="field__hint">{{t "settings.email.digest_threshold_hint"}}</span></label>
+    </div>
+    <label class="field"><span class="field__label">{{t "settings.email.recipients"}}</span>
+      <textarea class="field__input field__input--area" name="email_recipients" rows="3" placeholder="guvenlik@your-domain">{{$d.Recipients}}</textarea>
+      <span class="field__hint">{{t "settings.email.recipients_hint"}}</span></label>
+    <label class="check-label"><input type="checkbox" name="email_kev_always" value="1"{{if $c.EmailKEVAlways}} checked{{end}}> {{t "settings.email.kev_always"}}</label>
+    <label class="check-label"><input type="checkbox" name="email_agent_offline" value="1"{{if $c.EmailAgentOffline}} checked{{end}}> {{t "settings.email.agent_offline"}}</label>
+    <label class="check-label"><input type="checkbox" name="email_job_failed" value="1"{{if $c.EmailJobFailed}} checked{{end}}> {{t "settings.email.job_failed"}}</label>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">{{t "settings.agent.title"}}</h2>
+    <label class="check-label"><input type="checkbox" name="agent_auto_update" value="1"{{if $c.AgentAutoUpdate}} checked{{end}}> {{t "settings.agent.auto_update"}}</label>
+    <p class="field__hint">{{t "settings.agent.auto_update_hint"}}</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "settings.agent.checkin_seconds"}}</span>
+        <input class="field__input" type="number" name="agent_checkin_seconds" min="15" max="3600" value="{{$c.AgentCheckinSeconds}}"></label>
+      <label class="field"><span class="field__label">{{t "settings.agent.report_minutes"}}</span>
+        <input class="field__input" type="number" name="agent_report_minutes" min="5" max="1440" value="{{$c.AgentReportMinutes}}"></label>
+      <label class="field"><span class="field__label">{{t "settings.agent.offline_minutes"}}</span>
+        <input class="field__input" type="number" name="agent_offline_minutes" min="2" max="10080" value="{{$c.AgentOfflineMinutes}}"></label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">{{t "settings.scan.title"}}</h2>
+    <label class="check-label"><input type="checkbox" name="scan_enabled" value="1"{{if $c.ScanEnabled}} checked{{end}}> {{t "settings.scan.enabled"}}</label>
+    <p class="field__hint">{{t "settings.scan.sources"}}</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "settings.retention.days"}}</span>
+        <input class="field__input" type="number" name="retention_days" min="7" max="3650" value="{{$c.RetentionDays}}">
+        <span class="field__hint">{{t "settings.retention.hint"}}</span></label>
+    </div>
+  </section>
+
+  <div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>
+</form>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2 class="panel__title">{{t "settings.scan.status"}}</h2>
+    <dl class="dl">
+      <dt>{{t "settings.scan.last_run"}}</dt><dd>{{if $d.Scan.LastRunAt.IsZero}}{{t "time.never"}}{{else}}{{long $d.Scan.LastRunAt}}{{end}}</dd>
+      <dt>{{t "settings.scan.state"}}</dt><dd>{{if $d.Scan.Scanning}}{{t "settings.scan.running"}}{{else}}{{t "settings.scan.idle"}}{{end}}</dd>
+      <dt>{{t "settings.scan.kev"}}</dt><dd>{{if $c.KEVUpdatedAt.IsZero}}{{t "time.never"}}{{else}}{{long $c.KEVUpdatedAt}}{{end}} · {{t "settings.scan.kev_count" "n" $d.KEVCount}}</dd>
+      {{if $d.Scan.LastError}}<dt>{{t "settings.scan.last_error"}}</dt><dd class="text-danger mono break">{{$d.Scan.LastError}} <span class="muted">({{datetime $d.Scan.LastErrorAt}})</span></dd>{{end}}
+    </dl>
+    <form method="post" action="/settings/scan-now">{{template "csrf" $root}}<button class="button" type="submit">{{template "icon" "refresh"}}{{t "settings.scan.now"}}</button></form>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">{{t "settings.email.test_title"}}</h2>
+    <p class="muted">{{t "settings.email.test_body"}}</p>
+    <form class="form form--row" method="post" action="/settings/test-email">
+      {{template "csrf" $root}}
+      <label class="field field--grow"><span class="field__label">{{t "user.field.email"}}</span><input class="field__input" type="email" name="to" value="{{$root.User.Email}}" required></label>
+      <div class="field field--end"><button class="button" type="submit"{{if not $d.EmailConfigured}} disabled{{end}}>{{t "settings.email.test_send"}}</button></div>
+    </form>
+  </section>
+</div>
+{{end}}

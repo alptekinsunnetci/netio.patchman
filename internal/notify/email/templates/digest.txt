@@ -1,0 +1,10 @@
+{{t "email.digest.heading"}}
+{{t "email.digest.intro" "count" .Count}}
+
+{{range .Rows}}- {{.CVEID}}{{if .KnownExploited}} [KEV]{{end}} | {{.SeverityLabel}} | CVSS {{.CVSSText}} | {{.PackageName}} | {{t "vuln.field.affected_servers"}}: {{.HostCount}}
+{{end}}{{if .DashboardURL}}
+{{t "email.vuln.dashboard_link"}}:
+{{.DashboardURL}}
+{{end}}
+--
+{{t "email.footer" "product" .Product}}

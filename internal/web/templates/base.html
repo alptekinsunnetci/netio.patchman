@@ -1,0 +1,53 @@
+{{define "base"}}<!doctype html>
+<html lang="{{.Lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="{{.Product}}">
+<meta name="description" content="{{t "app.description"}}">
+<title>{{.Title}} · {{.Product}}</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css?v={{.Version}}">
+<script src="/static/app.js?v={{.Version}}" defer></script>
+</head>
+<body>
+{{block "body" .}}{{end}}
+</body>
+</html>{{end}}
+
+{{define "icon"}}<svg class="icon" aria-hidden="true" focusable="false"><use href="/static/icons.svg#i-{{.}}"></use></svg>{{end}}
+
+{{define "wordmark"}}<span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="/static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span>{{end}}
+
+{{define "csrf"}}<input type="hidden" name="_csrf" value="{{.CSRF}}">{{end}}
+
+{{define "flash"}}
+{{with .Flash}}<p class="alert alert--{{.Kind}}" role="status">{{.Text}}</p>{{end}}
+{{with .Error}}<p class="alert alert--error" role="alert">{{.}}</p>{{end}}
+{{end}}
+
+{{define "sev"}}<span class="badge badge--{{sevClass .}}">{{sevLabel .}}</span>{{end}}
+
+{{define "kev"}}<span class="badge badge--kev" title="{{t "vuln.kev_tooltip"}}">KEV</span>{{end}}
+
+{{define "jobstatus"}}<span class="pill pill--{{.}}">{{jobStatus .}}</span>{{end}}
+
+{{define "findingstatus"}}<span class="pill pill--{{.}}">{{statusLabel .}}</span>{{end}}
+
+{{define "hoststatus"}}{{if online .}}<span class="pill pill--online">{{t "host.status.online"}}</span>{{else if .LastSeenAt.IsZero}}<span class="pill pill--muted">{{t "host.status.pending"}}</span>{{else}}<span class="pill pill--offline">{{t "host.status.offline"}}</span>{{end}}{{end}}
+
+{{define "sevcounts"}}{{if .Total}}<span class="sevcounts">{{if .Critical}}<span class="sevcount sevcount--critical" title="{{t "severity.critical"}}">{{.Critical}}</span>{{end}}{{if .High}}<span class="sevcount sevcount--high" title="{{t "severity.high"}}">{{.High}}</span>{{end}}{{if .Medium}}<span class="sevcount sevcount--medium" title="{{t "severity.medium"}}">{{.Medium}}</span>{{end}}{{if .Low}}<span class="sevcount sevcount--low" title="{{t "severity.low"}}">{{.Low}}</span>{{end}}{{if .Other}}<span class="sevcount sevcount--unknown" title="{{t "severity.unknown"}}">{{.Other}}</span>{{end}}</span>{{else}}<span class="muted">0</span>{{end}}{{end}}
+
+{{define "pager"}}{{if gt .Pages 1}}
+<nav class="pager" aria-label="{{t "pager.label"}}">
+  <span class="pager__info">{{t "pager.info" "from" .From "to" .To "total" .Total}}</span>
+  <span class="pager__links">
+    {{if .PrevURL}}<a class="button button--sm" href="{{.PrevURL}}">{{t "pager.prev"}}</a>{{else}}<span class="button button--sm is-disabled">{{t "pager.prev"}}</span>{{end}}
+    <span class="pager__page">{{t "pager.page" "page" .Page "pages" .Pages}}</span>
+    {{if .NextURL}}<a class="button button--sm" href="{{.NextURL}}">{{t "pager.next"}}</a>{{else}}<span class="button button--sm is-disabled">{{t "pager.next"}}</span>{{end}}
+  </span>
+</nav>
+{{else if .Total}}<p class="pager__info pager__info--single">{{t "pager.total" "total" .Total}}</p>{{end}}{{end}}
+
+{{define "empty"}}<div class="empty"><p class="empty__body">{{.}}</p></div>{{end}}

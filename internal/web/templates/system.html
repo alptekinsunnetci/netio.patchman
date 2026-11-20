@@ -1,0 +1,100 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$f := $d.Form}}{{$root := .}}
+<nav class="breadcrumb"><a href="/settings">{{t "nav.settings"}}</a> / {{t "system.title"}}</nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "system.title"}}</h1>
+    <p class="pagehead__sub">{{t "system.subtitle"}}</p>
+  </div>
+  {{if $d.AnyStored}}<div class="pagehead__actions">
+    <form method="post" action="/settings/system/reset" data-confirm="{{t "system.reset_confirm"}}">{{template "csrf" $root}}
+      <button class="button" type="submit">{{template "icon" "refresh"}}{{t "system.reset"}}</button></form>
+  </div>{{end}}
+</header>
+
+<form class="form" method="post" action="/settings/system" autocomplete="off">
+  {{template "csrf" $root}}
+
+  <section class="panel">
+    <h2 class="panel__title">{{t "system.server.title"}}</h2>
+    <label class="field"><span class="field__label">{{t "system.base_url"}}</span>
+      <input class="field__input mono" type="url" name="base_url" value="{{$f.BaseURL}}" required placeholder="https://patchman.your-domain">
+      <span class="field__hint">{{t "system.base_url_hint"}}</span></label>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "system.timezone"}}</span>
+        <input class="field__input" type="text" name="timezone" value="{{$f.Timezone}}" list="timezones" required spellcheck="false">
+        <datalist id="timezones">{{range $d.Timezones}}<option value="{{.}}">{{end}}</datalist>
+        <span class="field__hint">{{t "system.timezone_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "system.log_level"}}</span>
+        <select class="field__input" name="log_level">{{range $d.LogLevels}}<option value="{{.}}"{{if eq $f.LogLevel .}} selected{{end}}>{{t (printf "system.log_level.%s" .)}}</option>{{end}}</select></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="trust_proxy" value="1"{{if $f.TrustProxy}} checked{{end}}> {{t "system.trust_proxy"}}</label>
+    <p class="field__hint">{{t "system.trust_proxy_hint"}}</p>
+  </section>
+
+  <section class="panel" id="smtp">
+    <h2 class="panel__title">{{t "system.smtp.title"}}</h2>
+    {{if not $d.EmailConfigured}}<p class="alert alert--warning">{{t "system.smtp.off"}}</p>{{end}}
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "system.smtp.host"}}</span>
+        <input class="field__input mono" type="text" name="smtp_host" value="{{$f.SMTPHost}}" placeholder="smtp.your-domain" spellcheck="false">
+        <span class="field__hint">{{t "system.smtp.host_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "system.smtp.port"}}</span>
+        <input class="field__input" type="number" name="smtp_port" min="1" max="65535" value="{{$f.SMTPPort}}" required>
+        <span class="field__hint">{{t "system.smtp.port_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "system.smtp.username"}}</span>
+        <input class="field__input" type="text" name="smtp_username" value="{{$f.SMTPUsername}}" autocomplete="off" spellcheck="false"></label>
+      <label class="field"><span class="field__label">{{t "system.smtp.password"}}</span>
+        <input class="field__input" type="password" name="smtp_password" value="" autocomplete="new-password" placeholder="{{if $d.PasswordSet}}{{t "system.smtp.password_set"}}{{end}}">
+        <span class="field__hint">{{if $d.PasswordSet}}{{t "system.smtp.password_keep"}}{{else}}{{t "system.smtp.password_hint"}}{{end}}</span></label>
+      <label class="field"><span class="field__label">{{t "system.smtp.from_name"}}</span>
+        <input class="field__input" type="text" name="smtp_from_name" value="{{$f.SMTPFromName}}" maxlength="100"></label>
+      <label class="field"><span class="field__label">{{t "system.smtp.from_address"}}</span>
+        <input class="field__input" type="email" name="smtp_from_address" value="{{$f.SMTPFromAddress}}" placeholder="patchman@your-domain">
+        <span class="field__hint">{{t "system.smtp.from_address_hint"}}</span></label>
+    </div>
+    {{if $d.PasswordSet}}<label class="check-label"><input type="checkbox" name="smtp_password_clear" value="1"> {{t "system.smtp.password_clear"}}</label>{{end}}
+    <p class="field__hint">{{t "system.smtp.storage_hint"}}</p>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">{{t "system.sources.title"}}</h2>
+    <label class="field"><span class="field__label">{{t "system.osv_url"}}</span>
+      <input class="field__input mono" type="url" name="osv_url" value="{{$f.OSVURL}}" required>
+      <span class="field__hint">{{t "system.osv_url_hint"}}</span></label>
+    <label class="check-label"><input type="checkbox" name="kev_enabled" value="1"{{if $f.KEVEnabled}} checked{{end}}> {{t "system.kev_enabled"}}</label>
+    <label class="field"><span class="field__label">{{t "system.kev_url"}}</span>
+      <input class="field__input mono" type="url" name="kev_url" value="{{$f.KEVURL}}">
+      <span class="field__hint">{{t "system.kev_url_hint"}}</span></label>
+  </section>
+
+  <div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>
+</form>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2 class="panel__title">{{t "settings.email.test_title"}}</h2>
+    <p class="muted">{{t "system.smtp.test_body"}}</p>
+    <form class="form form--row" method="post" action="/settings/test-email">
+      {{template "csrf" $root}}<input type="hidden" name="back" value="/settings/system">
+      <label class="field field--grow"><span class="field__label">{{t "user.field.email"}}</span><input class="field__input" type="email" name="to" value="{{$root.User.Email}}" required></label>
+      <div class="field field--end"><button class="button" type="submit"{{if not $d.EmailConfigured}} disabled{{end}}>{{t "settings.email.test_send"}}</button></div>
+    </form>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">{{t "system.startup.title"}}</h2>
+    <p class="muted">{{t "system.startup.body"}}</p>
+    {{$e := $d.Env}}
+    <dl class="dl">
+      <dt>{{t "system.startup.http_addr"}}</dt><dd class="mono">{{$e.HTTPAddr}}</dd>
+      <dt>{{t "system.startup.tls"}}</dt><dd>{{if $e.TLS}}<span class="mono break">{{$e.TLSCertFile}}</span>{{else}}{{t "system.startup.tls_off"}}{{end}}</dd>
+      <dt>{{t "system.startup.database"}}</dt><dd class="mono break">{{$e.Database}}</dd>
+      <dt>{{t "system.startup.agent_dist"}}</dt><dd class="mono break">{{$e.AgentDistDir}}</dd>
+      <dt>{{t "system.startup.log_format"}}</dt><dd class="mono">{{$e.LogFormat}}</dd>
+      <dt>{{t "system.startup.locale"}}</dt><dd class="mono">{{$e.Locale}}</dd>
+    </dl>
+  </section>
+</div>
+{{end}}

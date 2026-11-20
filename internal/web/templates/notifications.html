@@ -1,0 +1,45 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.notifications"}}</h1>
+    <p class="pagehead__sub">{{t "notifications.subtitle"}}</p>
+  </div>
+  <div class="pagehead__actions">
+    {{if .Unread}}<form method="post" action="/notifications/read">{{template "csrf" $root}}<input type="hidden" name="id" value="0"><button class="button" type="submit">{{t "notifications.mark_all"}}</button></form>{{end}}
+    {{if .User.IsAdmin}}<a class="button button--ghost" href="/settings#email">{{t "notifications.email_settings"}}</a>{{end}}
+  </div>
+</header>
+
+<nav class="tabs">
+  <a class="tab{{if not $d.UnreadOnly}} is-active{{end}}" href="/notifications">{{t "notifications.all"}}</a>
+  <a class="tab{{if $d.UnreadOnly}} is-active{{end}}" href="/notifications?filter=unread">{{t "notifications.unread"}} <span class="tab__count">{{.Unread}}</span></a>
+</nav>
+
+<section class="panel panel--flush">
+  {{if $d.Rows}}
+  <ul class="notif-list">
+    {{range $d.Rows}}
+    <li class="notif notif--{{.Level}}{{if .ReadAt.IsZero}} is-unread{{end}}">
+      <span class="notif__dot" aria-hidden="true"></span>
+      <div class="notif__body">
+        <p class="notif__text">{{notifText .}}</p>
+        <p class="notif__meta"><time datetime="{{iso .CreatedAt}}" title="{{datetime .CreatedAt}}">{{ago .CreatedAt}}</time> · {{t (printf "level.%s" .Level)}}</p>
+      </div>
+      <div class="notif__actions">
+        {{if .Link}}
+        <form method="post" action="/notifications/read">{{template "csrf" $root}}<input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="link" value="{{.Link}}"><button class="button button--sm" type="submit">{{t "notifications.open"}}</button></form>
+        {{end}}
+        {{if .ReadAt.IsZero}}
+        <form method="post" action="/notifications/read">{{template "csrf" $root}}<input type="hidden" name="id" value="{{.ID}}"><button class="button button--sm button--ghost" type="submit">{{t "notifications.mark_read"}}</button></form>
+        {{end}}
+      </div>
+    </li>
+    {{end}}
+  </ul>
+  {{else}}{{template "empty" (t "notifications.empty")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+{{end}}

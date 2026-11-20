@@ -1,0 +1,109 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$s := $d.S}}{{$root := .}}{{$admin := .User.IsAdmin}}
+<nav class="breadcrumb"><a href="/schedules">{{t "nav.schedules"}}</a> / <span>{{.Title}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{.Title}}</h1>
+    {{if not $d.IsNew}}<p class="pagehead__sub">{{jobType $s.JobType}} · {{scheduleDays $s.Days}} <span class="mono">{{clock $s.Minute}}</span> ·
+      {{if $s.Enabled}}{{t "schedule.field.next_run"}}: {{long $s.NextRunAt}}{{else}}{{t "common.disabled"}}{{end}}</p>{{end}}
+  </div>
+  {{if and $admin (not $d.IsNew)}}
+  <div class="pagehead__actions">
+    <form method="post" action="/schedules/{{$s.ID}}/run" data-confirm="{{t "schedule.run_now_confirm"}}">{{template "csrf" $root}}
+      <button class="button" type="submit">{{template "icon" "play"}}{{t "schedule.run_now"}}</button></form>
+  </div>
+  {{end}}
+</header>
+
+{{with $d.Coverage}}
+<p class="alert alert--info">{{t "schedule.coverage" "total" .Total "pending" .Pending}}{{if .RemoteOff}} {{t "schedule.coverage_remote_off" "count" .RemoteOff}}{{end}}</p>
+{{end}}
+{{if not $admin}}<p class="alert alert--info">{{t "schedules.readonly"}}</p>{{end}}
+
+<form class="form" method="post" action="{{if $d.IsNew}}/schedules{{else}}/schedules/{{$s.ID}}{{end}}">
+  {{template "csrf" $root}}
+  <fieldset class="fieldset"{{if not $admin}} disabled{{end}}>
+  <section class="panel">
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "schedule.field.name"}}</span>
+        <input class="field__input" type="text" name="name" value="{{$s.Name}}" maxlength="100" required placeholder="{{t "schedule.field.name_placeholder"}}"></label>
+      <label class="field"><span class="field__label">{{t "schedule.field.job_type"}}</span>
+        <select class="field__input" name="job_type">{{range $d.JobTypes}}<option value="{{.}}"{{if eq $s.JobType .}} selected{{end}}>{{jobType .}}</option>{{end}}</select></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="enabled" value="1"{{if $s.Enabled}} checked{{end}}> {{t "schedule.field.enabled"}}</label>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">{{t "schedule.field.when"}}</h2>
+    <div class="field"><span class="field__label">{{t "schedule.field.days"}}</span>
+      <div class="daypicker">{{range $d.Days}}<label class="check-label"><input type="checkbox" name="days" value="{{.Value}}"{{if .Checked}} checked{{end}}> {{.Label}}</label>{{end}}</div>
+    </div>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "schedule.field.time"}}</span>
+        <input class="field__input" type="text" name="time" value="{{$d.Clock}}" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" inputmode="numeric" maxlength="5" placeholder="03:00" autocomplete="off">
+        <span class="field__hint">{{t "schedule.field.time_hint" "tz" $d.Timezone}}</span></label>
+      <label class="field"><span class="field__label">{{t "schedule.field.window"}}</span>
+        <input class="field__input" type="number" name="window_minutes" min="15" max="1440" value="{{$s.WindowMinutes}}" required>
+        <span class="field__hint">{{t "schedule.field.window_hint"}}</span></label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">{{t "schedule.field.target"}}</h2>
+    <div class="daypicker">
+      {{range list "all" "os" "hosts"}}<label class="check-label"><input type="radio" name="target" value="{{.}}"{{if eq $s.Target .}} checked{{end}}> {{t (printf "schedule.target.%s" .)}}</label>{{end}}
+    </div>
+    <label class="field" data-show-when="target=os"><span class="field__label">{{t "schedule.field.os"}}</span>
+      <select class="field__input" name="os_id">
+        <option value="">{{t "common.empty"}}</option>
+        {{range $d.OSOptions}}<option value="{{index . 0}}"{{if eq $s.OSID (index . 0)}} selected{{end}}>{{index . 0}} · {{index . 1}}</option>{{end}}
+      </select></label>
+    <div class="field" data-show-when="target=hosts"><span class="field__label">{{t "schedule.field.hosts"}}</span>
+      {{if $d.Hosts}}
+      <label class="check-label"><input type="checkbox" data-check-all="host_ids"> {{t "common.select_all"}}</label>
+      <div class="checklist">
+        {{range $d.Hosts}}<label class="check-label"><input type="checkbox" name="host_ids" value="{{.ID}}"{{if .Checked}} checked{{end}}> <span>{{.Hostname}} <small class="muted">{{.OS}}</small></span></label>{{end}}
+      </div>
+      {{else}}<p class="muted">{{t "servers.empty"}}</p>{{end}}
+    </div>
+  </section>
+
+  <p class="field__hint">{{t "schedules.no_reboot"}}</p>
+  {{if $admin}}<div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>{{end}}
+  </fieldset>
+</form>
+
+{{if not $d.IsNew}}
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{t "schedule.recent_jobs"}}</h2></div>
+  {{if $d.Jobs}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "job.field.id"}}</th><th>{{t "host.field.hostname"}}</th><th>{{t "job.field.status"}}</th><th>{{t "job.field.created_at"}}</th><th>{{t "job.field.expires_at"}}</th><th>{{t "job.field.finished_at"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Jobs}}
+    <tr>
+      <td><a class="mono" href="/jobs/{{.ID}}">#{{.ID}}</a></td>
+      <td><a href="/servers/{{.HostID}}">{{.Hostname}}</a></td>
+      <td>{{template "jobstatus" .Status}}</td>
+      <td>{{datetime .CreatedAt}}</td>
+      <td>{{datetime .ExpiresAt}}</td>
+      <td>{{datetime .FinishedAt}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "schedule.no_jobs")}}{{end}}
+</section>
+
+{{if $admin}}
+<section class="panel panel--danger">
+  <form method="post" action="/schedules/{{$s.ID}}/delete" data-confirm="{{t "schedule.delete_confirm"}}">{{template "csrf" $root}}
+    <button class="button button--danger" type="submit">{{t "schedule.delete"}}</button></form>
+</section>
+{{end}}
+{{end}}
+{{end}}

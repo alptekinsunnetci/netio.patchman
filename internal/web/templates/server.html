@@ -1,0 +1,215 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$h := $d.Host}}{{$root := .}}
+<nav class="breadcrumb"><a href="/servers">{{t "nav.servers"}}</a> / <span>{{$h.Hostname}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{$h.Hostname}} {{template "hoststatus" $h}} {{if $h.RebootRequired}}<span class="pill pill--warning">{{t "host.reboot_required"}}</span>{{end}}</h1>
+    <p class="pagehead__sub">{{$h.OSName}} · <span class="mono">{{$h.Kernel}}</span> · {{t "host.last_seen_ago" "ago" (ago $h.LastSeenAt)}}</p>
+  </div>
+  {{if .User.CanOperate}}
+  <div class="pagehead__actions">
+    <form method="post" action="/servers/{{$h.ID}}/jobs">{{template "csrf" $root}}<input type="hidden" name="type" value="refresh">
+      <button class="button" type="submit" title="{{t "server.action.refresh_hint"}}">{{template "icon" "refresh"}}{{t "server.action.refresh"}}</button></form>
+    {{if $h.RemoteUpdates}}
+    <form method="post" action="/servers/{{$h.ID}}/jobs" data-confirm="{{t "server.action.security_confirm" "hostname" $h.Hostname}}">{{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_security">
+      <button class="button button--primary" type="submit"{{if not $h.SecurityUpdateCount}} disabled{{end}}>{{template "icon" "shield"}}{{t "server.action.security"}} ({{$h.SecurityUpdateCount}})</button></form>
+    <form method="post" action="/servers/{{$h.ID}}/jobs" data-confirm="{{t "server.action.all_confirm" "hostname" $h.Hostname}}">{{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_all">
+      <button class="button" type="submit"{{if not $h.UpdateCount}} disabled{{end}}>{{template "icon" "package"}}{{t "server.action.all"}} ({{$h.UpdateCount}})</button></form>
+    {{end}}
+    {{if and $h.SelfUpdate (agentOutdated $h)}}
+    <form method="post" action="/servers/{{$h.ID}}/jobs">{{template "csrf" $root}}<input type="hidden" name="type" value="agent_update">
+      <button class="button" type="submit" title="{{t "agents.update.outdated_hint" "version" agentRelease}}">{{template "icon" "agent"}}{{t "server.action.agent_update"}}</button></form>
+    {{end}}
+  </div>
+  {{end}}
+</header>
+
+{{if not $h.RemoteUpdates}}<p class="alert alert--info">{{t "server.remote_disabled"}}</p>{{end}}
+{{if not $d.ScanSupported}}<p class="alert alert--info">{{t "server.scan_unsupported" "os" $h.OSName}}</p>{{end}}
+{{if $h.ReportErrors}}<div class="alert alert--warning"><strong>{{t "server.report_errors"}}</strong><ul class="plain-list mono">{{range $h.ReportErrors}}<li>{{.}}</li>{{end}}</ul></div>{{end}}
+
+<section class="stats stats--compact">
+  <div class="stat"><p class="stat__label">{{t "host.field.vulns"}}</p><p class="stat__value">{{$h.Vulns.Total}}</p><p class="stat__meta">{{template "sevcounts" $h.Vulns}}</p></div>
+  <div class="stat"><p class="stat__label">{{t "host.field.security_updates"}}</p><p class="stat__value">{{$h.SecurityUpdateCount}}</p><p class="stat__meta">{{t "server.updates_total" "n" $h.UpdateCount}}</p></div>
+  <div class="stat"><p class="stat__label">{{t "host.field.packages"}}</p><p class="stat__value">{{$h.PackageCount}}</p><p class="stat__meta">{{$h.PackageManager}}</p></div>
+  <div class="stat"><p class="stat__label">{{t "host.field.last_scan"}}</p><p class="stat__value stat__value--sm">{{if $h.LastScanAt.IsZero}}{{t "time.never"}}{{else}}{{ago $h.LastScanAt}}{{end}}</p><p class="stat__meta">{{t "host.field.last_report"}}: {{ago $h.LastReportAt}}</p></div>
+</section>
+
+<nav class="tabs" aria-label="{{t "server.tabs"}}">
+  <a class="tab{{if eq $d.Tab "vulns"}} is-active{{end}}" href="/servers/{{$h.ID}}">{{t "server.tab.vulns"}}</a>
+  <a class="tab{{if eq $d.Tab "updates"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=updates">{{t "server.tab.updates"}} <span class="tab__count">{{$h.UpdateCount}}</span></a>
+  <a class="tab{{if eq $d.Tab "packages"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=packages">{{t "server.tab.packages"}} <span class="tab__count">{{$h.PackageCount}}</span></a>
+  <a class="tab{{if eq $d.Tab "jobs"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=jobs">{{t "server.tab.jobs"}}</a>
+  <a class="tab{{if eq $d.Tab "info"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=info">{{t "server.tab.info"}}</a>
+</nav>
+
+{{if eq $d.Tab "vulns"}}
+<form class="filters" method="get" action="/servers/{{$h.ID}}">
+  <select class="field__input" name="status" aria-label="{{t "vuln.field.status"}}">
+    <option value="">{{t "vulns.filter.active"}}</option>
+    <option value="accepted_risk"{{if eq $d.Status "accepted_risk"}} selected{{end}}>{{t "status.accepted_risk"}}</option>
+    <option value="false_positive"{{if eq $d.Status "false_positive"}} selected{{end}}>{{t "status.false_positive"}}</option>
+    <option value="resolved"{{if eq $d.Status "resolved"}} selected{{end}}>{{t "status.resolved"}}</option>
+    <option value="all"{{if eq $d.Status "all"}} selected{{end}}>{{t "vulns.filter.all"}}</option>
+  </select>
+  <button class="button" type="submit">{{t "common.filter"}}</button>
+</form>
+{{if .User.CanOperate}}
+<form class="inline-actions" method="post" action="/servers/{{$h.ID}}/rescan">{{template "csrf" $root}}<button class="button button--sm button--ghost" type="submit">{{template "icon" "refresh"}}{{t "server.action.rescan"}}</button></form>
+{{end}}
+<section class="panel panel--flush">
+  {{if $d.Findings}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "vuln.field.cve_id"}}</th><th>{{t "vuln.field.severity"}}</th><th class="num">{{t "vuln.field.cvss_score"}}</th><th>{{t "vuln.field.affected_package"}}</th><th>{{t "vuln.field.installed_version"}}</th><th>{{t "vuln.field.fixed_version"}}</th><th>{{t "vuln.field.status"}}</th><th>{{t "vuln.field.first_detected"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Findings}}
+    <tr>
+      <td><a class="mono" href="/vulnerabilities/{{.CVEID}}">{{.CVEID}}</a> {{if .KnownExploited}}{{template "kev"}}{{end}}{{if .Title}}<div class="cell-sub" lang="en">{{truncate .Title 90}}</div>{{end}}</td>
+      <td>{{template "sev" .Severity}}</td>
+      <td class="num mono">{{cvss .CVSSScore}}</td>
+      <td class="mono">{{.PackageName}}</td>
+      <td class="mono">{{.InstalledVersion}}</td>
+      <td class="mono">{{if .FixedVersion}}{{.FixedVersion}}{{else}}<span class="muted">{{t "vuln.fix_not_available"}}</span>{{end}}</td>
+      <td>{{template "findingstatus" .Status}}</td>
+      <td><time datetime="{{iso .FirstDetectedAt}}">{{date .FirstDetectedAt}}</time></td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "server.no_vulns")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+
+{{else if eq $d.Tab "updates"}}
+<section class="panel panel--flush">
+  {{if $d.Updates}}
+  <form method="post" action="/servers/{{$h.ID}}/jobs" data-confirm="{{t "server.action.selected_confirm"}}">
+    {{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_packages"><input type="hidden" name="back_tab" value="updates">
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr>{{if and $root.User.CanOperate $h.RemoteUpdates}}<th class="check"><input type="checkbox" data-check-all="packages" aria-label="{{t "common.select_all"}}"></th>{{end}}<th>{{t "package.field.name"}}</th><th>{{t "package.field.current"}}</th><th>{{t "package.field.available"}}</th><th>{{t "package.field.repository"}}</th><th>{{t "package.field.type"}}</th></tr></thead>
+      <tbody>
+      {{range $d.Updates}}
+      <tr>
+        {{if and $root.User.CanOperate $h.RemoteUpdates}}<td class="check"><input type="checkbox" name="packages" value="{{.Name}}" aria-label="{{.Name}}"></td>{{end}}
+        <td class="mono"><a href="/packages/{{.Name}}">{{.Name}}</a></td>
+        <td class="mono">{{if .CurrentVersion}}{{.CurrentVersion}}{{else}}<span class="muted">{{t "package.new_install"}}</span>{{end}}</td>
+        <td class="mono">{{.AvailableVersion}}</td>
+        <td class="mono cell-sub">{{.Repository}}</td>
+        <td>{{if .Security}}<span class="pill pill--danger">{{t "package.security"}}</span>{{else}}<span class="pill pill--muted">{{t "package.regular"}}</span>{{end}}</td>
+      </tr>
+      {{end}}
+      </tbody>
+    </table>
+    </div>
+    {{if and $root.User.CanOperate $h.RemoteUpdates}}<div class="panel__foot"><button class="button button--primary" type="submit">{{t "server.action.upgrade_selected"}}</button></div>{{end}}
+  </form>
+  {{else}}{{template "empty" (t "server.no_updates")}}{{end}}
+</section>
+
+{{else if eq $d.Tab "packages"}}
+<form class="filters" method="get" action="/servers/{{$h.ID}}">
+  <input type="hidden" name="tab" value="packages">
+  <input class="field__input" type="search" name="q" value="{{$d.Q}}" placeholder="{{t "package.search_placeholder"}}" aria-label="{{t "common.search"}}">
+  <button class="button" type="submit">{{t "common.search"}}</button>
+</form>
+<section class="panel panel--flush">
+  {{if $d.Packages}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "package.field.name"}}</th><th>{{t "package.field.version"}}</th><th>{{t "package.field.arch"}}</th><th>{{t "package.field.source"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Packages}}
+    <tr><td class="mono"><a href="/packages/{{.Name}}">{{.Name}}</a></td><td class="mono">{{.Version}}</td><td class="mono">{{.Arch}}</td><td class="mono cell-sub">{{.SourceName}}{{if and .SourceVersion (ne .SourceVersion .Version)}} {{.SourceVersion}}{{end}}</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "server.no_packages")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+
+{{else if eq $d.Tab "jobs"}}
+<section class="panel panel--flush">
+  {{if $d.Jobs}}
+  <table class="table">
+    <thead><tr><th>{{t "job.field.id"}}</th><th>{{t "job.field.type"}}</th><th>{{t "job.field.status"}}</th><th>{{t "job.field.created_by"}}</th><th>{{t "job.field.created_at"}}</th><th>{{t "job.field.finished_at"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Jobs}}
+    <tr><td><a class="mono" href="/jobs/{{.ID}}">#{{.ID}}</a></td><td>{{jobType .Type}}</td><td>{{template "jobstatus" .Status}}</td><td>{{if .ScheduleID}}<a href="/schedules/{{.ScheduleID}}">{{t "jobs.by_schedule" "name" .ScheduleName}}</a>{{else if .CreatedBy}}{{.CreatedBy}}{{else}}<span class="muted">{{t "common.system"}}</span>{{end}}</td><td>{{datetime .CreatedAt}}</td><td>{{datetime .FinishedAt}}</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}{{template "empty" (t "server.no_jobs")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+
+{{else}}
+<div class="grid-2">
+  <section class="panel">
+    <h2 class="panel__title">{{t "server.system_info"}}</h2>
+    <dl class="dl">
+      <dt>{{t "host.field.hostname"}}</dt><dd class="mono">{{$h.Hostname}}</dd>
+      <dt>{{t "host.field.fqdn"}}</dt><dd class="mono">{{$h.FQDN}}</dd>
+      <dt>{{t "host.field.ip"}}</dt><dd class="mono">{{join $h.IPAddresses ", "}}</dd>
+      <dt>{{t "host.field.os"}}</dt><dd>{{$h.OSName}}</dd>
+      <dt>{{t "host.field.kernel"}}</dt><dd class="mono">{{$h.Kernel}}</dd>
+      <dt>{{t "host.field.arch"}}</dt><dd class="mono">{{$h.Arch}}</dd>
+      <dt>{{t "host.field.uptime"}}</dt><dd>{{uptime $h.UptimeSeconds}}</dd>
+      <dt>{{t "host.field.package_manager"}}</dt><dd class="mono">{{$h.PackageManager}}</dd>
+      <dt>{{t "host.field.ecosystem"}}</dt><dd class="mono">{{if $h.Ecosystem}}{{$h.Ecosystem}}{{else}}<span class="muted">{{t "server.scan_unsupported_short"}}</span>{{end}}</dd>
+      <dt>{{t "host.field.machine_id"}}</dt><dd class="mono">{{$h.MachineID}}</dd>
+    </dl>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">{{t "server.agent_info"}}</h2>
+    <dl class="dl">
+      <dt>{{t "host.field.agent_version"}}</dt><dd class="mono">{{$h.AgentVersion}}{{if agentOutdated $h}} <span class="pill pill--warning">{{t "agents.update.outdated"}}</span> <span class="muted">→ {{agentRelease}}</span>{{end}}</dd>
+      <dt>{{t "host.field.self_update"}}</dt><dd>{{if $h.SelfUpdate}}{{t "common.enabled"}}{{else}}{{t "common.disabled"}}{{end}}</dd>
+      <dt>{{t "host.field.remote_updates"}}</dt><dd>{{if $h.RemoteUpdates}}{{t "common.enabled"}}{{else}}{{t "common.disabled"}}{{end}}</dd>
+      <dt>{{t "host.field.enrolled_at"}}</dt><dd>{{long $h.EnrolledAt}}</dd>
+      <dt>{{t "host.field.last_seen"}}</dt><dd>{{long $h.LastSeenAt}}</dd>
+      <dt>{{t "host.field.last_report"}}</dt><dd>{{long $h.LastReportAt}}</dd>
+      <dt>{{t "host.field.last_scan"}}</dt><dd>{{long $h.LastScanAt}}</dd>
+    </dl>
+  </section>
+</div>
+<section class="panel">
+  <h2 class="panel__title">{{t "host.field.schedules"}}</h2>
+  {{if $d.Schedules}}
+  <ul class="plain-list">
+    {{range $d.Schedules}}
+    <li><a href="/schedules/{{.ID}}">{{.Name}}</a> · {{jobType .JobType}} · {{scheduleDays .Days}} {{clock .Minute}}
+      {{if not .Enabled}}<span class="pill">{{t "common.disabled"}}</span>{{else}}<span class="muted">· {{t "schedule.field.next_run"}}: {{datetime .NextRunAt}}</span>{{end}}</li>
+    {{end}}
+  </ul>
+  {{else}}<p class="muted">{{t "host.no_schedules"}}</p>{{end}}
+</section>
+<section class="panel">
+  <h2 class="panel__title">{{t "host.field.notes"}}</h2>
+  {{if .User.CanOperate}}
+  <form class="form" method="post" action="/servers/{{$h.ID}}/notes">
+    {{template "csrf" $root}}
+    <textarea class="field__input field__input--area" name="notes" rows="4" aria-label="{{t "host.field.notes"}}">{{$h.Notes}}</textarea>
+    <div><button class="button" type="submit">{{t "common.save"}}</button></div>
+  </form>
+  {{else}}<p class="prewrap">{{if $h.Notes}}{{$h.Notes}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</p>{{end}}
+</section>
+{{if .User.IsAdmin}}
+<section class="panel panel--danger">
+  <h2 class="panel__title">{{t "server.delete_title"}}</h2>
+  <p class="muted">{{t "server.delete_body"}}</p>
+  <form class="filters" method="post" action="/servers/{{$h.ID}}/delete">
+    {{template "csrf" $root}}
+    <label class="field field--inline"><span class="field__label">{{t "server.delete_confirm_label" "hostname" $h.Hostname}}</span>
+    <input class="field__input" type="text" name="confirm" autocomplete="off" required></label>
+    <button class="button button--danger" type="submit">{{t "server.delete_button"}}</button>
+  </form>
+</section>
+{{end}}
+{{end}}
+{{end}}

@@ -1,0 +1,139 @@
+package i18n
+
+import (
+	"io/fs"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
+	"testing"
+)
+
+func TestDefaultCatalogLoads(t *testing.T) {
+	b, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !b.Supports(DefaultLocale) {
+		t.Fatalf("default locale %s missing", DefaultLocale)
+	}
+	for _, k := range b.Keys(DefaultLocale) {
+		if strings.TrimSpace(b.catalogs[DefaultLocale][k]) == "" {
+			t.Errorf("empty message for key %q", k)
+		}
+	}
+}
+
+func TestTInterpolationAndFallback(t *testing.T) {
+	l := MustLoad().Localizer("xx-XX") // unknown locale falls back to tr-TR
+	if l.Locale() != DefaultLocale {
+		t.Fatalf("locale = %s, want %s", l.Locale(), DefaultLocale)
+	}
+	got := l.T("validation.required", "field", "E-posta")
+	if got != "E-posta alanı zorunludur." {
+		t.Errorf("got %q", got)
+	}
+	if got := l.T("no.such.key"); got != "no.such.key" {
+		t.Errorf("missing key should return key, got %q", got)
+	}
+}
+
+func TestTurkishUpperCase(t *testing.T) {
+	l := MustLoad().Localizer(DefaultLocale)
+	cases := map[string]string{"Kritik": "KRİTİK", "Yüksek": "YÜKSEK", "Düşük": "DÜŞÜK", "Bilinmiyor": "BİLİNMİYOR"}
+	for in, want := range cases {
+		if got := l.Upper(in); got != want {
+			t.Errorf("Upper(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+// TestReferencedKeysExist scans Go sources and templates for literal catalog
+// keys and fails if any is missing from the default catalog.
+func TestReferencedKeysExist(t *testing.T) {
+	b := MustLoad()
+	have := map[string]bool{}
+	for _, k := range b.Keys(DefaultLocale) {
+		have[k] = true
+	}
+	patterns := []*regexp.Regexp{
+		regexp.MustCompile(`\.T\("([a-z0-9_.]*[a-z0-9_])"\s*[,)]`), // skips dynamic keys like "nav."+key
+		regexp.MustCompile(`\{\{-?\s*t "([a-z0-9_.]+)"`),
+		regexp.MustCompile(`\(t "([a-z0-9_.]+)"`),
+		regexp.MustCompile(`fail\("([a-z0-9_.]+)"`),
+		regexp.MustCompile(`errorPage\([^)]*"(error\.[a-z0-9_.]+)"\)`),
+	}
+	root := filepath.Join("..", "..")
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() && (d.Name() == ".git" || d.Name() == "node_modules") {
+			return filepath.SkipDir
+		}
+		ext := filepath.Ext(path)
+		if d.IsDir() || (ext != ".go" && ext != ".html" && ext != ".txt") || strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+		src, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		for _, re := range patterns {
+			for _, m := range re.FindAllStringSubmatch(string(src), -1) {
+				key := m[1]
+				if strings.HasPrefix(key, "error.") && !strings.Contains(key, ".title") && !strings.Contains(key, ".body") && key != "error.back_to_dashboard" {
+					// errorPage(key) uses key+".title" and key+".body"
+					for _, suffix := range []string{".title", ".body"} {
+						if !have[key+suffix] {
+							t.Errorf("%s: missing catalog key %q", path, key+suffix)
+						}
+					}
+					continue
+				}
+				if !have[key] {
+					t.Errorf("%s: missing catalog key %q", path, key)
+				}
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Keys built at runtime from identifiers.
+	families := map[string][]string{
+		"severity.":   {"critical", "high", "medium", "low", "none", "unknown"},
+		"status.":     {"open", "in_progress", "resolved", "accepted_risk", "false_positive"},
+		"job.type.":   {"refresh", "upgrade_security", "upgrade_all", "upgrade_packages", "agent_update"},
+		"job.status.": {"queued", "dispatched", "succeeded", "failed", "timed_out", "cancelled", "expired"},
+		"role.":       {"admin", "operator", "viewer"},
+		"level.":      {"critical", "warning", "info"},
+		"nav.":        {"dashboard", "servers", "vulnerabilities", "packages", "jobs", "schedules", "agents", "notifications", "users", "settings"},
+		"notification.": {"vuln_detected", "vulns_detected", "agent_offline", "agent_online", "agent_enrolled", "agent_reenrolled", "job_succeeded", "job_failed", "scan_failed", "email_failed",
+			"schedule_ran", "schedule_expired", "schedule_missed"},
+		"api.error.": {"bad_request", "unauthorized", "invalid_token", "rate_limited", "too_large", "job_not_found", "not_found", "internal"},
+		"audit.action.": {"auth.login", "auth.login_failed", "auth.logout", "setup.admin_created", "user.create", "user.update", "user.delete",
+			"user.password_changed", "user.password_reset", "agent.enroll", "token.create", "token.revoke", "job.create", "job.cancel",
+			"host.rescan", "host.notes", "host.delete", "finding.status", "settings.update", "settings.test_email", "scan.trigger",
+			"settings.system_update", "settings.system_reset", "schedule.create", "schedule.update", "schedule.delete", "schedule.run", "schedule.run_now"},
+		"schedule.target.":  {"all", "os", "hosts"},
+		"system.log_level.": {"debug", "info", "warn", "error"},
+		"weekday.":          {"0", "1", "2", "3", "4", "5", "6"},
+		"weekday.short.":    {"0", "1", "2", "3", "4", "5", "6"},
+	}
+	for prefix, ids := range families {
+		for _, id := range ids {
+			if !have[prefix+id] {
+				t.Errorf("missing catalog key %q", prefix+id)
+			}
+		}
+	}
+	for m := 1; m <= 12; m++ {
+		if !have["month."+strconv.Itoa(m)] {
+			t.Errorf("missing month %d", m)
+		}
+	}
+}

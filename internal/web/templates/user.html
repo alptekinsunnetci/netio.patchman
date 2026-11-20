@@ -1,0 +1,48 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$u := $d.U}}{{$root := .}}
+<nav class="breadcrumb"><a href="/users">{{t "nav.users"}}</a> / <span>{{$u.Name}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{$u.Name}}</h1>
+    <p class="pagehead__sub">{{$u.Email}} · {{roleLabel $u.Role}}</p>
+  </div>
+</header>
+
+{{with $d.NewPassword}}
+<section class="panel panel--highlight">
+  <h2 class="panel__title">{{t "user.new_password_title"}}</h2>
+  <p class="alert alert--warning">{{t "user.new_password_body"}}</p>
+  <span class="copy"><input class="field__input mono" type="text" value="{{.}}" readonly id="new-password"><button class="button button--sm" type="button" data-copy="new-password">{{t "common.copy"}}</button></span>
+</section>
+{{end}}
+
+<div class="grid-2">
+  <section class="panel">
+    <h2 class="panel__title">{{t "user.edit"}}</h2>
+    <form class="form" method="post" action="/users/{{$u.ID}}">
+      {{template "csrf" $root}}
+      <label class="field"><span class="field__label">{{t "user.field.name"}}</span><input class="field__input" type="text" name="name" value="{{$u.Name}}" required></label>
+      <label class="field"><span class="field__label">{{t "user.field.role"}}</span>
+        <select class="field__input" name="role">{{range $d.Roles}}<option value="{{.}}"{{if eq $u.Role .}} selected{{end}}>{{roleLabel .}}</option>{{end}}</select></label>
+      <label class="check-label"><input type="checkbox" name="disabled" value="1"{{if $u.Disabled}} checked{{end}}> {{t "user.disable_account"}}</label>
+      <div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>
+    </form>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">{{t "user.account_info"}}</h2>
+    <dl class="dl">
+      <dt>{{t "user.field.created_at"}}</dt><dd>{{datetime $u.CreatedAt}}</dd>
+      <dt>{{t "user.field.last_login"}}</dt><dd>{{if $u.LastLoginAt.IsZero}}{{t "time.never"}}{{else}}{{datetime $u.LastLoginAt}}{{end}}</dd>
+      <dt>{{t "user.field.password_changed"}}</dt><dd>{{datetime $u.PasswordChangedAt}}</dd>
+    </dl>
+    <div class="button-row">
+      <form method="post" action="/users/{{$u.ID}}/reset-password" data-confirm="{{t "user.reset_confirm"}}">{{template "csrf" $root}}<button class="button" type="submit">{{t "user.reset_password"}}</button></form>
+      {{if ne $u.ID $root.User.ID}}
+      <form method="post" action="/users/{{$u.ID}}/delete" data-confirm="{{t "user.delete_confirm" "email" $u.Email}}">{{template "csrf" $root}}<button class="button button--danger" type="submit">{{t "user.delete"}}</button></form>
+      {{end}}
+    </div>
+  </section>
+</div>
+{{end}}

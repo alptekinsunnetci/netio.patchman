@@ -1,0 +1,34 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<nav class="breadcrumb"><a href="/settings">{{t "nav.settings"}}</a> / <span>{{t "audit.title"}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "audit.title"}}</h1>
+    <p class="pagehead__sub">{{t "audit.subtitle"}}</p>
+  </div>
+</header>
+<section class="panel panel--flush">
+  {{if $d.Rows}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "audit.at"}}</th><th>{{t "audit.user"}}</th><th>{{t "audit.action"}}</th><th>{{t "audit.target"}}</th><th>{{t "audit.details"}}</th><th>{{t "audit.ip"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Rows}}
+    <tr>
+      <td>{{datetime .At}}</td>
+      <td>{{if .UserEmail}}{{.UserEmail}}{{else}}<span class="muted">{{t "common.system"}}</span>{{end}}</td>
+      <td>{{t (printf "audit.action.%s" .Action)}}</td>
+      <td class="mono">{{.Target}}</td>
+      <td class="mono cell-sub">{{.Details}}</td>
+      <td class="mono">{{.IP}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "audit.empty")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+{{end}}

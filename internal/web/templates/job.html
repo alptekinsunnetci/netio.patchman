@@ -1,0 +1,44 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$j := .Data.Job}}{{$root := .}}
+<nav class="breadcrumb"><a href="/jobs">{{t "nav.jobs"}}</a> / <span class="mono">#{{$j.ID}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{.Title}} {{template "jobstatus" $j.Status}}</h1>
+    <p class="pagehead__sub">{{jobType $j.Type}} · <a href="/servers/{{$j.HostID}}">{{$j.Hostname}}</a></p>
+  </div>
+  <div class="pagehead__actions">
+    {{if $j.Active}}<a class="button" href="/jobs/{{$j.ID}}">{{template "icon" "refresh"}}{{t "common.refresh"}}</a>{{end}}
+    {{if and .User.CanOperate (eq $j.Status "queued")}}
+    <form method="post" action="/jobs/{{$j.ID}}/cancel">{{template "csrf" $root}}<button class="button button--danger" type="submit">{{t "job.cancel"}}</button></form>
+    {{end}}
+  </div>
+</header>
+
+{{if $j.Active}}<p class="alert alert--info">{{t "job.waiting_hint"}}</p>{{end}}
+
+<section class="panel">
+  <dl class="dl">
+    <dt>{{t "job.field.type"}}</dt><dd>{{jobType $j.Type}}</dd>
+    {{if $j.Packages}}<dt>{{t "job.field.packages"}}</dt><dd class="mono">{{join $j.Packages ", "}}</dd>{{end}}
+    {{with param $j.Params "version"}}<dt>{{t "job.field.target_version"}}</dt><dd class="mono">{{.}}</dd>{{end}}
+    {{with param $j.Params "sha256"}}<dt>SHA-256</dt><dd class="mono break">{{.}}</dd>{{end}}
+    <dt>{{t "job.field.status"}}</dt><dd>{{template "jobstatus" $j.Status}}</dd>
+    <dt>{{t "job.field.created_by"}}</dt><dd>{{if $j.ScheduleID}}<a href="/schedules/{{$j.ScheduleID}}">{{t "jobs.by_schedule" "name" $j.ScheduleName}}</a>{{else if $j.CreatedBy}}{{$j.CreatedBy}}{{else}}{{t "common.system"}}{{end}}</dd>
+    <dt>{{t "job.field.created_at"}}</dt><dd>{{long $j.CreatedAt}}</dd>
+    {{if not $j.ExpiresAt.IsZero}}<dt>{{t "job.field.expires_at"}}</dt><dd>{{long $j.ExpiresAt}}</dd>{{end}}
+    <dt>{{t "job.field.dispatched_at"}}</dt><dd>{{long $j.DispatchedAt}}</dd>
+    <dt>{{t "job.field.finished_at"}}</dt><dd>{{long $j.FinishedAt}}</dd>
+    {{if not $j.FinishedAt.IsZero}}<dt>{{t "job.field.exit_code"}}</dt><dd class="mono">{{$j.ExitCode}}</dd>{{end}}
+  </dl>
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">{{t "job.field.output"}}</h2>
+  {{if $j.Output}}<pre class="output">{{$j.Output}}</pre>
+  {{else if eq $j.Status "timed_out"}}<p class="muted">{{t "job.timed_out_hint"}}</p>
+  {{else if eq $j.Status "expired"}}<p class="muted">{{t "job.expired_hint"}}</p>
+  {{else}}<p class="muted">{{t "job.no_output"}}</p>{{end}}
+</section>
+{{end}}

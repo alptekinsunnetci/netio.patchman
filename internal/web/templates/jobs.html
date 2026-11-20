@@ -1,0 +1,44 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.jobs"}}</h1>
+    <p class="pagehead__sub">{{t "jobs.subtitle"}}</p>
+  </div>
+</header>
+
+<form class="filters" method="get" action="/jobs">
+  <select class="field__input" name="status" aria-label="{{t "job.field.status"}}">
+    <option value="">{{t "jobs.filter.all"}}</option>
+    {{range $d.Statuses}}<option value="{{.}}"{{if eq $d.Status .}} selected{{end}}>{{jobStatus .}}</option>{{end}}
+  </select>
+  <button class="button" type="submit">{{t "common.filter"}}</button>
+</form>
+
+<section class="panel panel--flush">
+  {{if $d.Jobs}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "job.field.id"}}</th><th>{{t "host.field.hostname"}}</th><th>{{t "job.field.type"}}</th><th>{{t "job.field.packages"}}</th><th>{{t "job.field.status"}}</th><th>{{t "job.field.created_by"}}</th><th>{{t "job.field.created_at"}}</th><th>{{t "job.field.finished_at"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Jobs}}
+    <tr>
+      <td><a class="mono" href="/jobs/{{.ID}}">#{{.ID}}</a></td>
+      <td><a href="/servers/{{.HostID}}">{{.Hostname}}</a></td>
+      <td>{{jobType .Type}}</td>
+      <td class="mono cell-sub">{{truncate (join .Packages ", ") 60}}</td>
+      <td>{{template "jobstatus" .Status}}</td>
+      <td>{{if .ScheduleID}}<a href="/schedules/{{.ScheduleID}}">{{t "jobs.by_schedule" "name" .ScheduleName}}</a>{{else if .CreatedBy}}{{.CreatedBy}}{{else}}<span class="muted">{{t "common.system"}}</span>{{end}}</td>
+      <td>{{datetime .CreatedAt}}</td>
+      <td>{{datetime .FinishedAt}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "jobs.empty")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+{{end}}

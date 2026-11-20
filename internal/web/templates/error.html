@@ -1,0 +1,13 @@
+{{define "body"}}
+<div class="auth">
+  <div class="auth__panel">
+    <div class="auth__brand">{{template "wordmark"}}</div>
+    <div class="errorbox">
+      <p class="errorbox__code">{{.Data.Status}}</p>
+      <h1 class="form__title">{{.Title}}</h1>
+      <p class="muted">{{t (printf "%s.body" .Data.Key)}}</p>
+      <a class="button button--primary" href="/dashboard">{{t "error.back_to_dashboard"}}</a>
+    </div>
+  </div>
+</div>
+{{end}}

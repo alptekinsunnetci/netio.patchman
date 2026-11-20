@@ -1,0 +1,277 @@
+# netio.patchman Kurulum ve İşletim Kılavuzu
+
+Bu belge, netio.patchman sunucusunun üretim ortamına kurulmasını, ajanların dağıtılmasını, yedekleme ve sürüm yükseltme işlemlerini anlatır.
+
+## 1. Sistem gereksinimleri
+
+**Sunucu**
+
+| Sunucu sayısı | İşlemci | Bellek | Disk |
+|---|---|---|---|
+| 100'e kadar | 1 çekirdek | 1 GB | 5 GB |
+| 100–500 | 2 çekirdek | 2 GB | 20 GB |
+| 500 üzeri | 4 çekirdek | 4 GB | 40 GB |
+
+- Docker Engine 24+ ve Docker Compose v2.24+ ya da doğrudan çalıştırma için herhangi bir Linux dağıtımı.
+- Ajanların erişebileceği bir alan adı ve TLS sertifikası (önerilir).
+- Güvenlik açığı verileri için `api.osv.dev` ve `www.cisa.gov` adreslerine HTTPS (443) erişimi. Erişim yoksa bkz. [Bölüm 8](#8-internet-erişimi-olmayan-ortamlar).
+
+**Yönetilen sunucular (ajan)**
+
+- systemd kullanan bir Linux dağıtımı, amd64 veya arm64 mimari.
+- Sunucu adresine HTTPS erişimi. Ajan bağlantıyı her zaman kendisi başlatır; yönetilen sunucularda gelen bağlantı için port açmak gerekmez.
+
+## 2. Docker Compose ile kurulum
+
+```sh
+git clone https://github.com/alptekinsunnetci/netio.patchman.git netio-patchman && cd netio-patchman
+cp .env.example .env
+```
+
+`.env` dosyasında yalnızca sunucunun dış adresini girmeniz yeterlidir:
+
+```sh
+PATCHMAN_BASE_URL=https://patchman.your-domain
+```
+
+Sunucu adresi, ters vekil ayarı, SMTP, saat dilimi, günlük seviyesi ve veri kaynakları kurulumdan sonra panelde **Sistem Ayarları → Sunucu yapılandırması** sayfasından değiştirilebilir (bkz. bölüm 2.1).
+
+Başlatın:
+
+```sh
+docker compose up -d --build
+docker compose ps                  # durum "healthy" olmalı
+docker compose logs -f server
+```
+
+Compose proje adı `netio-patchman`, imaj adı `netio-patchman-server`, veri birimi `netio-patchman-data`'dır. Veritabanı birimde `/data/netio-patchman.db` dosyasında tutulur.
+
+İlk açılışta `PATCHMAN_BASE_URL/setup` adresinde ilk yönetici hesabı oluşturulur. Bu sayfa yalnızca hiç kullanıcı yokken açılır.
+
+### 2.1 Panelden yapılandırma
+
+**Sistem Ayarları → Sunucu yapılandırması** sayfası (yalnızca yöneticiler) şu ayarları içerir; kaydedilen değerler yeniden başlatma gerektirmeden hemen uygulanır:
+
+| Ayar | Ortam değişkeni (ilk değer) |
+|---|---|
+| Sunucu adresi | `PATCHMAN_BASE_URL` |
+| Ters vekil başlıklarına güven | `PATCHMAN_TRUST_PROXY` |
+| Saat dilimi | `PATCHMAN_TIMEZONE` |
+| Günlük seviyesi | `PATCHMAN_LOG_LEVEL` |
+| SMTP sunucusu, port, kullanıcı adı, parola, gönderen adı ve adresi | `PATCHMAN_SMTP_*` |
+| OSV API adresi, CISA KEV kataloğu (açık/kapalı ve adresi) | `PATCHMAN_OSV_URL`, `PATCHMAN_KEV_URL` |
+
+- Ortam değişkenleri yalnızca ilk değerdir: panelde bir kez kaydedilen değer ortam değişkeninin yerine geçer. **Ortam değişkenlerine dön** düğmesi paneldeki değerleri siler.
+- SMTP parolası veritabanında saklanır, sayfada hiçbir zaman gösterilmez ve denetim kaydına yazılmaz. Veritabanı yedeklerini buna göre koruyun.
+- Sunucu adresi değiştiğinde yeni kurulum komutları ve e-posta bağlantıları yeni adresi kullanır. Kurulu ajanlar `/etc/netio-patchman/agent.env` dosyasındaki adresle bağlanmaya devam eder; adres gerçekten taşındıysa bu dosyadaki `PATCHMAN_SERVER_URL` değerini güncelleyip ajanı yeniden başlatın.
+- Saat dilimi değiştiğinde zamanlanmış güncellemelerin bir sonraki çalışma zamanı yeni dilime göre yeniden hesaplanır.
+- Panel, sunucu adresi HTTPS olsa bile başka bir adresten (ör. `http://localhost:8080`) erişimde çalışmaya devam eder; böylece yanlış girilen bir adres yönetici erişimini kesmez.
+
+Sunucu başlarken, veritabanı açılmadan önce gereken şu değerler yalnızca ortam değişkeniyle değiştirilebilir ve yeniden başlatma gerektirir: `PATCHMAN_HTTP_ADDR`, `PATCHMAN_DATA_DIR`, `PATCHMAN_TLS_CERT_FILE`/`PATCHMAN_TLS_KEY_FILE`, `PATCHMAN_AGENT_DIST_DIR`, `PATCHMAN_LOG_FORMAT`, `PATCHMAN_LOCALE`. Sayfanın **Başlangıç yapılandırması** bölümü bu değerlerin geçerli hâlini gösterir.
+
+## 3. TLS ve ters vekil
+
+Ajanlar ve tarayıcılar sunucuya HTTPS ile bağlanmalıdır. İki seçenek vardır.
+
+### 3.1 Ters vekil (önerilen)
+
+Sunucuyu yalnızca yerel ağ arabiriminden yayınlayın (`.env` içinde `PATCHMAN_PUBLISH_PORT=127.0.0.1:8080` kullanılabilir) ve TLS'i nginx veya Caddy ile sonlandırın. **Sunucu yapılandırması** sayfasında "Ters vekil sunucunun … başlıklarına güven" seçeneğini açın (veya `PATCHMAN_TRUST_PROXY=true`).
+
+**nginx örneği**
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name patchman.your-domain;
+
+    ssl_certificate     /etc/ssl/patchman/fullchain.pem;
+    ssl_certificate_key /etc/ssl/patchman/privkey.pem;
+
+    client_max_body_size 32m;   # büyük envanter raporları için
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 300s;
+    }
+}
+```
+
+**Caddy örneği**
+
+```
+patchman.your-domain {
+    reverse_proxy 127.0.0.1:8080
+}
+```
+
+### 3.2 Sunucunun TLS'i kendisinin sonlandırması
+
+```sh
+PATCHMAN_TLS_CERT_FILE=/certs/tls.crt
+PATCHMAN_TLS_KEY_FILE=/certs/tls.key
+```
+
+Sertifika dosyalarını konteynere salt okunur birim olarak bağlayın.
+
+### 3.3 Kurum içi sertifika otoritesi
+
+Sertifikanız kurum içi bir CA tarafından imzalandıysa, ajan kurulumunda CA dosyasını verin:
+
+```sh
+sudo sh install-agent.sh --server-url https://patchman.your-domain --token <ANAHTAR> --ca-file /path/kurum-ca.pem
+```
+
+## 4. Ajan kurulumu
+
+### 4.1 Sunucudan indirerek
+
+Panelde **Ajan Yönetimi → Yeni kayıt anahtarı** ile bir anahtar oluşturun ve gösterilen komutu çalıştırın:
+
+```sh
+curl -fsSL https://patchman.your-domain/downloads/install-agent.sh | \
+  sudo sh -s -- --server-url https://patchman.your-domain --token <KAYIT-ANAHTARI>
+```
+
+Betik şunları yapar:
+
+1. Mimariye uygun ajanı indirir ve SHA-256 özetini doğrular.
+2. Ajanı `/usr/local/bin/netio-patchman-agent` konumuna kurar.
+3. Yapılandırmayı `/etc/netio-patchman/agent.env` dosyasına yazar (yalnızca root okuyabilir).
+4. `netio-patchman-agent.service` hizmetini etkinleştirir ve başlatır.
+
+Ajan ilk çalışmada kayıt anahtarıyla sunucuya kaydolur. Kalıcı kimliğini `/var/lib/netio-patchman/credentials.json` dosyasında saklar. Kayıttan sonra kayıt anahtarına ihtiyaç duyulmaz.
+
+### 4.2 Toplu dağıtım
+
+Kayıt anahtarını süreli ve kullanım sınırlı oluşturup Ansible, Puppet veya benzeri bir araçla aynı komutu çalıştırabilirsiniz. Örnek Ansible görevi:
+
+```yaml
+- name: netio.patchman ajanını kur
+  ansible.builtin.shell: >
+    curl -fsSL https://patchman.your-domain/downloads/install-agent.sh |
+    sh -s -- --server-url https://patchman.your-domain --token {{ patchman_token }}
+  args:
+    creates: /usr/local/bin/netio-patchman-agent
+  become: true
+```
+
+### 4.3 Ajan yapılandırması
+
+`/etc/netio-patchman/agent.env`:
+
+| Değişken | Varsayılan | Açıklama |
+|---|---|---|
+| `PATCHMAN_SERVER_URL` | — | Sunucu adresi (zorunlu) |
+| `PATCHMAN_ENROLLMENT_TOKEN` | — | İlk kayıt için anahtar |
+| `PATCHMAN_REMOTE_UPDATES` | `true` | `false` ise panelden başlatılan paket güncelleme işleri bu sunucuda çalıştırılmaz |
+| `PATCHMAN_AUTO_UPDATE` | `true` | `false` ise ajan kendini otomatik olarak güncellemez (sürüm sabitleme) |
+| `PATCHMAN_REFRESH_PACKAGE_LISTS` | `true` | Paket listelerini en fazla 6 saatte bir yeniler (`apt-get update`, `zypper refresh`, `apk update`) |
+| `PATCHMAN_CA_FILE` | — | Ek CA sertifikası |
+
+Değişiklikten sonra: `sudo systemctl restart netio-patchman-agent.service`
+
+### 4.4 Ajanı kaldırma
+
+```sh
+sudo systemctl disable --now netio-patchman-agent.service
+sudo rm -f /etc/systemd/system/netio-patchman-agent.service /usr/local/bin/netio-patchman-agent \
+  /usr/local/bin/netio-patchman-agent.previous
+sudo rm -rf /etc/netio-patchman /var/lib/netio-patchman
+sudo systemctl daemon-reload
+```
+
+Ardından panelde sunucunun **Sistem Bilgisi** sekmesinden sunucuyu kaldırın.
+
+## 5. Yedekleme ve geri yükleme
+
+Tutarlı bir veritabanı yedeği, sunucu çalışırken alınabilir:
+
+```sh
+docker compose exec server netio-patchman-server backup -out /data/yedek-$(date +%Y%m%d).db
+docker compose cp server:/data/yedek-$(date +%Y%m%d).db ./
+```
+
+Geri yükleme:
+
+```sh
+docker compose stop server
+docker compose cp ./yedek-20261119.db server:/data/netio-patchman.db
+docker compose start server
+```
+
+Yedekleri düzenli olarak (örneğin günlük cron göreviyle) alın ve sunucu dışında saklayın.
+
+## 6. Sürüm yükseltme
+
+```sh
+git pull
+docker compose up -d --build
+```
+
+Veritabanı şeması açılışta otomatik olarak güncellenir. Yükseltmeden önce yedek alın.
+
+Sunucunun ve ajanların sürümü depodaki `VERSION` dosyasından alınır. Kendi derlemenize ayrı bir sürüm vermek için `.env` içinde `PATCHMAN_VERSION` tanımlayın. Ajanlar yalnızca sürüm değiştiğinde güncellenir.
+
+### Ajanların otomatik güncellenmesi
+
+Docker imajı, sunucuyla aynı sürümdeki amd64 ve arm64 ajan dosyalarını içerir. **Sistem Ayarları → Ajanlar → Ajanları otomatik olarak güncelle** açıkken (varsayılan):
+
+1. Farklı sürüm çalıştıran bir ajan bağlandığında sunucu bir "Ajan güncellemesi" işi oluşturur.
+2. Ajan yeni dosyayı sunucudan indirir, SHA-256 özetini karşılaştırır ve `-version` ile çalıştığını doğrular.
+3. Mevcut dosyayı `netio-patchman-agent.previous` olarak saklar, yenisini yerine koyar ve çıkar; systemd ajanı yeni sürümle yeniden başlatır.
+
+Aynı anda en fazla 25 ajan güncellenir. Başarısız bir güncelleme 6 saat sonra yeniden denenir ve Bildirim Merkezi'ne düşer. Otomatik güncelleme kapalıyken ajanlar **Ajan Yönetimi → Eski ajanları güncelle** düğmesiyle ya da sunucu sayfasındaki **Ajanı güncelle** düğmesiyle güncellenebilir.
+
+Bir sunucuda ajan sürümünü sabitlemek için `/etc/netio-patchman/agent.env` dosyasına `PATCHMAN_AUTO_UPDATE=false` yazın (veya kurulumda `--disable-auto-update` kullanın).
+
+Bir güncellemeyi geri almak için:
+
+```sh
+sudo mv /usr/local/bin/netio-patchman-agent.previous /usr/local/bin/netio-patchman-agent
+sudo systemctl restart netio-patchman-agent.service
+```
+
+İmaj dışı kurulumlarda ajan dosyalarını `PATCHMAN_AGENT_DIST_DIR` dizinine `netio-patchman-agent-linux-<mimari>` adıyla, sürümü de aynı dizindeki `version` dosyasına yazın. `scripts/build-agent.sh <sürüm> <dizin>` betiği bu dizini (amd64, arm64, SHA-256 özetleri ve `version` dosyası) hazır olarak üretir.
+
+### Ajanı elle yeniden kurma
+
+Kurulum komutunu `--token` seçeneği **olmadan** yeniden çalıştırırsanız ajanın mevcut kimliği korunur:
+
+```sh
+curl -fsSL https://patchman.your-domain/downloads/install-agent.sh | \
+  sudo sh -s -- --server-url https://patchman.your-domain
+```
+
+Komut `--token` ile çalıştırılırsa ajan yeniden kaydolur. Sunucu kaydı makine kimliğiyle eşleştirildiği için geçmiş veriler kaybolmaz.
+
+## 7. Yönetici parolasını sıfırlama
+
+Tüm yöneticilerin parolası unutulduysa:
+
+```sh
+docker compose exec server netio-patchman-server reset-password -email yonetici@your-domain
+```
+
+Komut, yeni bir parola üretip ekrana yazar ve hesabı etkinleştirir.
+
+## 8. İnternet erişimi olmayan ortamlar
+
+- **Ajanlar:** Panelin **Ajan Yönetimi** sayfasındaki indirme adreslerinden ajan dosyasını, `netio-patchman-agent.service` dosyasını ve `install-agent.sh` betiğini alın, sunucuya kopyalayıp `--binary` seçeneğiyle kurun.
+- **Güvenlik açığı verisi:** **Sunucu yapılandırması** sayfasında OSV API adresini iç ağdaki bir yansıya yönlendirin. KEV kataloğunun adresini iç ağdaki bir kopyaya çevirin veya kataloğu kapatın. (Ortam değişkenleri: `PATCHMAN_OSV_URL`, `PATCHMAN_KEV_URL`.)
+- Panel dış kaynak (CDN, yazı tipi) kullanmaz.
+
+## 9. Sorun giderme
+
+| Belirti | Kontrol |
+|---|---|
+| Sunucu başlamıyor | `docker compose logs server`: yapılandırma hataları Türkçe olarak listelenir. |
+| Ajan görünmüyor | Sunucuda `journalctl -u netio-patchman-agent.service -n 50`. Kayıt anahtarının süresi dolmuş veya kullanım sınırına ulaşmış olabilir. |
+| Ajan "Çevrimdışı" | Ajan hizmetini, sunucuya HTTPS erişimini ve saat eşitlemesini kontrol edin. |
+| Güvenlik açığı bulunmuyor | **Sistem Ayarları → Tarama durumu** bölümünde son hatayı kontrol edin. Dağıtımın desteklendiğini doğrulayın. |
+| E-posta gelmiyor | **Sistem Ayarları → Sunucu yapılandırması** sayfasında SMTP ayarlarını kontrol edip **Deneme e-postası** gönderin. |
+| Güncelleme işi "Zaman aşımı" | Ajan 3 saat içinde sonuç bildirmedi. Sunucuda `journalctl -u netio-patchman-agent.service` çıktısını inceleyin. |
+
+Sunucu günlükleri JSON biçimindedir ve her kayıtta `app=netio.patchman` alanı bulunur.

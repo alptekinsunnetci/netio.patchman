@@ -1,0 +1,49 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}{{$op := .User.CanOperate}}
+<nav class="breadcrumb"><a href="/packages">{{t "nav.packages"}}</a> / <span class="mono">{{$d.Name}}</span></nav>
+<header class="pagehead">
+  <div><h1 class="pagehead__title mono">{{$d.Name}}</h1></div>
+  {{if and $op $d.WithUpdate}}
+  <div class="pagehead__actions">
+    <form method="post" action="/packages/{{$d.Name}}/upgrade" data-confirm="{{t "packages.upgrade_confirm" "package" $d.Name "n" (len $d.WithUpdate)}}">
+      {{template "csrf" $root}}<button class="button button--primary" type="submit">{{t "packages.upgrade_everywhere"}}</button>
+    </form>
+  </div>
+  {{end}}
+</header>
+
+<form method="post" action="/packages/{{$d.Name}}/upgrade" data-confirm="{{t "package.upgrade_selected_confirm" "package" $d.Name}}">
+{{template "csrf" $root}}<input type="hidden" name="selection" value="1">
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "package.pending_on"}} <span class="muted">({{len $d.WithUpdate}})</span></h2>
+    {{if and $op $d.WithUpdate}}<button class="button button--sm" type="submit">{{t "package.upgrade_selected"}}</button>{{end}}
+  </div>
+  {{if $d.WithUpdate}}
+  <table class="table">
+    <thead><tr>{{if $op}}<th class="check"><input type="checkbox" data-check-all="host_ids" aria-label="{{t "common.select_all"}}"></th>{{end}}<th>{{t "host.field.hostname"}}</th><th>{{t "package.field.current"}}</th><th>{{t "package.field.available"}}</th><th>{{t "host.field.remote_updates"}}</th></tr></thead>
+    <tbody>
+    {{range $d.WithUpdate}}<tr>
+      {{if $op}}<td class="check">{{if .RemoteUpdates}}<input type="checkbox" name="host_ids" value="{{.ID}}" aria-label="{{.Hostname}}">{{end}}</td>{{end}}
+      <td><a href="/servers/{{.ID}}?tab=updates">{{.Hostname}}</a></td><td class="mono">{{.Version}}</td><td class="mono">{{.Extra}}</td>
+      <td>{{if .RemoteUpdates}}{{t "common.enabled"}}{{else}}<span class="muted">{{t "common.disabled"}}</span>{{end}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  {{else}}{{template "empty" (t "package.no_pending")}}{{end}}
+</section>
+</form>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{t "package.installed_on"}} <span class="muted">({{len $d.Installed}})</span></h2></div>
+  {{if $d.Installed}}
+  <table class="table">
+    <thead><tr><th>{{t "host.field.hostname"}}</th><th>{{t "package.field.version"}}</th><th>{{t "package.field.arch"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Installed}}<tr><td><a href="/servers/{{.ID}}?tab=packages&q={{$d.Name}}">{{.Hostname}}</a></td><td class="mono">{{.Version}}</td><td class="mono">{{.Extra}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  {{else}}{{template "empty" (t "package.not_installed")}}{{end}}
+</section>
+{{end}}

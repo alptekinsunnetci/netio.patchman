@@ -1,0 +1,45 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.users"}}</h1>
+    <p class="pagehead__sub">{{t "users.subtitle"}}</p>
+  </div>
+</header>
+
+<div class="grid-2 grid-2--wide-left">
+  <section class="panel panel--flush">
+    <table class="table">
+      <thead><tr><th>{{t "user.field.name"}}</th><th>{{t "user.field.role"}}</th><th>{{t "user.field.status"}}</th><th>{{t "user.field.last_login"}}</th></tr></thead>
+      <tbody>
+      {{range $d.Users}}
+      <tr>
+        <td><a href="/users/{{.ID}}">{{.Name}}</a><div class="cell-sub">{{.Email}}</div></td>
+        <td>{{roleLabel .Role}}</td>
+        <td>{{if .Disabled}}<span class="pill pill--muted">{{t "user.disabled"}}</span>{{else}}<span class="pill pill--online">{{t "user.active"}}</span>{{end}}</td>
+        <td>{{if .LastLoginAt.IsZero}}<span class="muted">{{t "time.never"}}</span>{{else}}{{datetime .LastLoginAt}}{{end}}</td>
+      </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">{{t "users.new"}}</h2>
+    {{with .Error}}<p class="alert alert--error" role="alert">{{.}}</p>{{end}}
+    <form class="form" method="post" action="/users">
+      {{template "csrf" $root}}
+      <label class="field"><span class="field__label">{{t "user.field.name"}}</span><input class="field__input" type="text" name="name" value="{{index $d.Form "name"}}" required></label>
+      <label class="field"><span class="field__label">{{t "user.field.email"}}</span><input class="field__input" type="email" name="email" value="{{index $d.Form "email"}}" required autocomplete="off"></label>
+      <label class="field"><span class="field__label">{{t "user.field.role"}}</span>
+        <select class="field__input" name="role">{{range $d.Roles}}<option value="{{.}}"{{if eq (index $d.Form "role") .}} selected{{end}}>{{roleLabel .}}</option>{{end}}</select>
+        <span class="field__hint">{{t "user.role_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "user.field.password"}}</span><input class="field__input" type="password" name="password" required minlength="10" autocomplete="new-password"><span class="field__hint">{{t "user.password_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "user.field.password_confirm"}}</span><input class="field__input" type="password" name="password_confirm" required minlength="10" autocomplete="new-password"></label>
+      <div><button class="button button--primary" type="submit">{{t "users.create"}}</button></div>
+    </form>
+  </section>
+</div>
+{{end}}

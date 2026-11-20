@@ -1,0 +1,12 @@
+{{.N.Heading}}
+{{if .N.Body}}{{.N.Body}}
+{{end}}
+{{range .N.Rows}}{{.Label}}: {{.Value}}
+{{end}}{{if .N.Output}}
+{{.N.Output}}
+{{end}}{{if .N.LinkURL}}
+{{.N.LinkText}}:
+{{.N.LinkURL}}
+{{end}}
+--
+{{t "email.footer" "product" .Product}}
