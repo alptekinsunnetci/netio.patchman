@@ -36,6 +36,7 @@ import (
 	"netio.patchman/internal/release"
 	"netio.patchman/internal/scanner"
 	"netio.patchman/internal/schedule"
+	"netio.patchman/internal/selfupdate"
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
@@ -224,6 +225,7 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 	site, err := web.New(web.Options{
 		Store: st, Localizer: l, Formatter: formatter, Logger: logger, Scanner: scan, Notifier: notifier,
 		System: live, API: agentAPI, Release: agentRelease, Updates: updates, Bundle: bundle, Backups: backups, Channels: channels,
+		SelfUpdate: &selfupdate.Manager{DataDir: cfg.DataDir},
 	})
 	if err != nil {
 		logger.Error(l.T("log.server.failed"), slog.String("error", err.Error()))
@@ -266,7 +268,7 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 		logger.Info(l.T("log.config.updated"), slog.String("base_url", cur.BaseURLString()), slog.String("timezone", cur.Timezone),
 			slog.String("log_level", cur.LogLevelName()), slog.Bool("smtp", cur.SMTP.Enabled()))
 	})
-	go maintenance(ctx, st, notifier, sched, backups, l, logger)
+	go maintenance(ctx, st, notifier, sched, backups, &selfupdate.Manager{DataDir: cfg.DataDir}, l, logger)
 
 	srv := &http.Server{
 		Addr:              cfg.HTTPAddr,
@@ -332,7 +334,7 @@ func healthcheck(cfg config.Config) int {
 
 // maintenance runs periodic checks: scheduled updates, offline agents and
 // stale jobs.
-func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched *schedule.Runner, backups *backup.Runner, l i18n.Localizer, logger *slog.Logger) {
+func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched *schedule.Runner, backups *backup.Runner, su *selfupdate.Manager, l i18n.Localizer, logger *slog.Logger) {
 	// Align ticks to the start of a minute so a 03:00 schedule fires at 03:00.
 	if !sleepUntil(ctx, timeutil.Now().Truncate(time.Minute).Add(time.Minute)) {
 		return
@@ -355,6 +357,7 @@ func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched
 			n.RisksExpired(ctx, risks)
 		}
 		n.SLAOverdue(ctx)
+		n.SelfUpdateFinished(ctx, su)
 		// The trend chart keeps one row per day with the latest state.
 		if now.Sub(lastSnapshot) >= 15*time.Minute {
 			if err := st.TakeSnapshot(ctx, now); err != nil {

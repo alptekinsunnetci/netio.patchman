@@ -43,7 +43,7 @@ netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve
 - **Servis ve sunucu yeniden başlatma:** Güncellenen kütüphaneleri hâlâ eski sürümle kullanan servisler tespit edilir ve panelden yeniden başlatılabilir; sunucu panelden yeniden başlatılabilir.
 - **Zamanlanmış güncellemeler:** "Her pazar 03:00'te Ubuntu sunucularında güvenlik güncellemelerini uygula" gibi bakım pencereleri. Zamanlamalar sunucuları kendiliğinden yeniden başlatmaz.
 - **Otomatik ajan güncellemesi:** Merkezi sunucu yeni sürüme geçince ajanlar yeni sürümü indirir, SHA-256 özetini doğrular ve kendini günceller.
-- **Yeni sürüm bildirimi:** Panel, GitHub'da yeni bir netio.patchman sürümü yayımlandığında yöneticileri uyarır ve güncelleme komutlarını gösterir. İnternet erişimi olmayan kurulumlarda kapatılabilir.
+- **Yeni sürüm bildirimi:** Panel, GitHub'da yeni bir netio.patchman sürümü yayımlandığında yöneticileri uyarır ve güncelleme komutlarını gösterir. İnternet erişimi olmayan kurulumlarda kapatılabilir. İsteğe bağlı güncelleyici konteyneriyle sürüm yükseltmesi panelden tek tıkla yapılır (git pull, yedek, derleme, yeniden başlatma).
 - **Bulgu yönetimi:** Açık, İşlemde, Risk Kabul Edildi, Hatalı Tespit durumları. Paket güncellenince bulgu otomatik olarak "Çözüldü" olur. Risk kabulü süreli verilir (30, 90, 180, 365 gün; en uzun süre ayarlardan sınırlanır). Süre dolunca bulgu yeniden açılır, bildirim ve e-posta gönderilir.
 - **Sunucu grupları:** Sunucular "Üretim", "Test", "Veritabanı" gibi gruplara ayrılır. Bir sunucu birden fazla gruba üye olabilir. Listeler gruba göre süzülür, zamanlanmış güncellemeler bir grubu hedefleyebilir, raporlar grup için alınabilir.
 - **Platform bilgisi:** Ajan, sunucunun VMware, Hyper-V, KVM, Xen veya VirtualBox sanal makinesi, Docker/LXC konteyneri ya da fiziksel sunucu olduğunu bildirir. Sunucu listesi platforma göre süzülebilir.
@@ -280,6 +280,21 @@ docker compose up -d --build
 - Veritabanı şeması açılışta otomatik olarak güncellenir; yine de öncesinde yedek alın.
 - Sürüm, depodaki `VERSION` dosyasından okunur.
 - **Sistem Ayarları → Ajanlar → Ajanları otomatik olarak güncelle** seçeneği açıksa (varsayılan) ajanlar yeni sürüme kendiliğinden geçer.
+
+### Panelden güncelleme (isteğe bağlı)
+
+Sürüm yükseltmesi **Sistem Ayarları → Sunucu yapılandırması → Ürün sürümü → Şimdi güncelle** düğmesiyle de yapılabilir. Bunun için Compose dosyasındaki `updater` konteynerini bir kez etkinleştirin:
+
+```sh
+cd netio.patchman
+echo "COMPOSE_PROFILES=updater" >> .env
+docker compose up -d --build
+```
+
+Düğmeye basıldığında güncelleyici sırasıyla `git pull --ff-only`, veritabanı yedeği (`/data/before-update-<sürüm>-<zaman>.db`), sunucu imajının derlenmesi, sunucunun yeniden başlatılması ve sağlık denetimini yapar. İlerleme ve komut çıktısı panelde görünür; sayfa bitince kendiliğinden yenilenir, sonuç bildirim merkezine düşer. Panel birkaç saniye erişilemez, ajanlar etkilenmez. Bir adım başarısız olursa sunucu çalışan sürümle devam eder.
+
+> [!WARNING]
+> Güncelleyici Docker soketine (`/var/run/docker.sock`) erişir; bu, sunucu üzerinde root yetkisine eşdeğerdir. Güncelleyici dışarıya port açmaz, yalnızca panelin veri birimine yazdığı istek dosyasını bekler ve sabit adımları çalıştırır; istekten parametre almaz. Yine de bu özelliği yalnızca ihtiyaç varsa açın ve yönetici hesaplarını iki adımlı doğrulamayla koruyun. Depoda yerel değişiklik varsa `git pull --ff-only` durur ve güncelleme yapılmaz.
 
 ### Yedekleme ve geri yükleme
 

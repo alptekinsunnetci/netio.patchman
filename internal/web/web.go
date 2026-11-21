@@ -31,6 +31,7 @@ import (
 	"netio.patchman/internal/release"
 	"netio.patchman/internal/scanner"
 	"netio.patchman/internal/schedule"
+	"netio.patchman/internal/selfupdate"
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
@@ -65,6 +66,8 @@ type Options struct {
 	Backups *backup.Runner
 	// Channels sends notifications to chat and webhook channels (optional).
 	Channels *notify.Dispatcher
+	// SelfUpdate talks to the optional updater container (optional).
+	SelfUpdate *selfupdate.Manager
 }
 
 // Server is the dashboard in one language. New returns the default-language
@@ -470,6 +473,8 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("POST /settings/system", admin(s.systemSave))
 	mux.Handle("POST /settings/system/reset", admin(s.systemReset))
 	mux.Handle("POST /settings/system/update-check", admin(s.updateCheck))
+	mux.Handle("POST /settings/system/self-update", admin(s.selfUpdateStart))
+	mux.Handle("GET /settings/system/self-update/status", admin(s.selfUpdateStatus))
 	mux.Handle("POST /settings/backups/run", admin(s.backupRun))
 	mux.Handle("GET /settings/backups/{name}", admin(s.backupDownload))
 	mux.Handle("GET /settings/channels", admin(s.channels))

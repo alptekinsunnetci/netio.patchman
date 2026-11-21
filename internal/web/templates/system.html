@@ -108,8 +108,10 @@ docker compose up -d --build</pre></div>
     <dt>{{t "system.update.latest"}}</dt><dd class="mono">{{if .Latest}}{{.Latest}}{{else}}—{{end}}</dd>
     <dt>{{t "system.update.checked_at"}}</dt><dd>{{if .CheckedAt.IsZero}}{{t "system.update.never"}}{{else}}{{datetime .CheckedAt}}{{end}}</dd>
   </dl>
+  {{template "selfupdate" $d.SelfUpdate}}
 </section>
 {{end}}
+{{if not $d.UpdateStatus}}<section class="panel" id="updates">{{template "selfupdate" $d.SelfUpdate}}</section>{{end}}
 
 <div class="grid-2">
   <section class="panel">
@@ -134,5 +136,30 @@ docker compose up -d --build</pre></div>
       <dt>{{t "system.startup.locale"}}</dt><dd class="mono">{{$e.Locale}}</dd>
     </dl>
   </section>
+</div>
+{{end}}
+
+{{define "selfupdate"}}{{$root := .Root}}
+<div class="selfupdate" id="self-update"{{if .Active}} data-selfupdate="/settings/system/self-update/status"{{end}}>
+  <h3 class="panel__title panel__title--spaced">{{t "selfupdate.title"}}</h3>
+  {{if .Available}}
+    {{if .Active}}
+      <p class="alert alert--info">{{if .Pending}}{{t "selfupdate.pending"}}{{else}}{{t "selfupdate.running" "step" (t (printf "selfupdate.step.%s" .Status.Step))}}{{end}} <span class="muted">{{t "selfupdate.wait"}}</span></p>
+    {{else}}
+      {{if .HasStatus}}
+        {{if eq .Status.State "succeeded"}}<p class="alert alert--success">{{t "selfupdate.succeeded" "from" .Status.From "to" .Status.To "at" (datetime .Status.FinishedAt)}}</p>
+        {{else}}<p class="alert alert--error">{{t "selfupdate.failed" "step" (t (printf "selfupdate.step.%s" .Status.Step)) "at" (datetime .Status.FinishedAt)}}</p>{{end}}
+      {{end}}
+      <p class="muted">{{t "selfupdate.how"}}</p>
+      <form method="post" action="/settings/system/self-update" data-confirm="{{t "selfupdate.confirm"}}">{{template "csrf" $root}}
+        <button class="button button--primary" type="submit">{{template "icon" "download"}}{{t "selfupdate.start"}}</button></form>
+    {{end}}
+    {{with .Log}}<details class="details"{{if $.Active}} open{{end}}><summary>{{t "selfupdate.log"}}</summary><pre class="code prewrap" data-selfupdate-log>{{.}}</pre></details>{{end}}
+  {{else}}
+    <p class="muted">{{t "selfupdate.unavailable"}}</p>
+    <pre class="code">echo "COMPOSE_PROFILES=updater" >> .env
+docker compose up -d --build</pre>
+    <p class="field__hint">{{t "selfupdate.warning"}}</p>
+  {{end}}
 </div>
 {{end}}

@@ -2,6 +2,8 @@ package web
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"net/mail"
 	"slices"
@@ -9,7 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"netio.patchman/internal/selfupdate"
 	"netio.patchman/internal/settings"
+	"netio.patchman/internal/version"
 )
 
 // commonTimezones are offered as suggestions; any IANA zone name is accepted.
@@ -87,6 +91,7 @@ func (s *Server) renderSystem(w http.ResponseWriter, r *http.Request, status int
 		st := s.o.Updates.Status()
 		d.Data.(map[string]any)["UpdateStatus"] = &st
 	}
+	d.Data.(map[string]any)["SelfUpdate"] = s.selfUpdateView(d)
 	s.render(w, r, status, "system", d)
 }
 
@@ -275,4 +280,65 @@ func (s *Server) updateCheck(w http.ResponseWriter, r *http.Request) {
 	default:
 		s.redirect(w, r, back, "success", s.l.T("system.update.checked_ok", "current", st.Current))
 	}
+}
+
+// selfUpdateData feeds the "selfupdate" template.
+type selfUpdateData struct {
+	Root      pageData
+	Available bool // the updater container runs
+	Active    bool // an update is requested or running
+	Pending   bool
+	HasStatus bool
+	Status    selfupdate.Status
+	Log       string
+}
+
+func (s *Server) selfUpdateView(d pageData) selfUpdateData {
+	v := selfUpdateData{Root: d}
+	if s.o.SelfUpdate == nil {
+		return v
+	}
+	_, v.Available = s.o.SelfUpdate.Updater()
+	v.Status, v.HasStatus = s.o.SelfUpdate.Status()
+	v.Pending = s.o.SelfUpdate.Pending()
+	v.Active = v.Pending || v.Status.Running()
+	v.Log = s.o.SelfUpdate.Log(16 << 10)
+	return v
+}
+
+// selfUpdateStart asks the updater container to update the server.
+func (s *Server) selfUpdateStart(w http.ResponseWriter, r *http.Request) {
+	back := "/settings/system#self-update"
+	if s.o.SelfUpdate == nil {
+		s.redirect(w, r, back, "error", s.l.T("selfupdate.unavailable"))
+		return
+	}
+	err := s.o.SelfUpdate.Request(sessionFrom(r).user.Email)
+	switch {
+	case errors.Is(err, selfupdate.ErrUnavailable):
+		s.redirect(w, r, back, "error", s.l.T("selfupdate.unavailable"))
+		return
+	case errors.Is(err, selfupdate.ErrBusy):
+		s.redirect(w, r, back, "error", s.l.T("selfupdate.busy"))
+		return
+	case err != nil:
+		s.serverError(w, r, err)
+		return
+	}
+	s.audit(r, "system.self_update", version.Version, "")
+	s.redirect(w, r, back, "success", s.l.T("selfupdate.requested"))
+}
+
+// selfUpdateStatus is polled by app.js while an update runs.
+func (s *Server) selfUpdateStatus(w http.ResponseWriter, r *http.Request) {
+	out := map[string]any{"active": false}
+	if s.o.SelfUpdate != nil {
+		st, _ := s.o.SelfUpdate.Status()
+		pending := s.o.SelfUpdate.Pending()
+		out = map[string]any{"active": pending || st.Running(), "state": st.State, "step": st.Step, "to": st.To,
+			"log": s.o.SelfUpdate.Log(16 << 10)}
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	_ = json.NewEncoder(w).Encode(out)
 }

@@ -14,6 +14,7 @@ import (
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify/email"
 	"netio.patchman/internal/protocol"
+	"netio.patchman/internal/selfupdate"
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
@@ -436,6 +437,37 @@ func (n *Notifier) SLAOverdue(ctx context.Context) {
 		n.send(ctx, m)
 	}
 }
+
+// SelfUpdateFinished records the end of an update started from the panel
+// (one notification per update, matched by its finish time).
+func (n *Notifier) SelfUpdateFinished(ctx context.Context, su *selfupdate.Manager) {
+	if su == nil {
+		return
+	}
+	st, ok := su.Status()
+	if !ok || st.Running() || st.FinishedAt.IsZero() {
+		return
+	}
+	raw, err := n.st.Settings(ctx)
+	if err != nil {
+		return
+	}
+	stamp := strconv.FormatInt(st.FinishedAt.Unix(), 10)
+	if raw[keySelfUpdateNotified] == stamp {
+		return
+	}
+	if err := n.st.SaveSettings(ctx, map[string]string{keySelfUpdateNotified: stamp}); err != nil {
+		return
+	}
+	if st.State == selfupdate.StateSucceeded {
+		_ = n.st.AddNotification(ctx, store.LevelInfo, "self_update_succeeded", map[string]string{"from": st.From, "to": st.To}, "/settings/system#self-update")
+		return
+	}
+	_ = n.st.AddNotification(ctx, store.LevelCritical, "self_update_failed", map[string]string{"step": st.Step}, "/settings/system#self-update")
+}
+
+// keySelfUpdateNotified stores the finish time of the last reported update.
+const keySelfUpdateNotified = "selfupdate.notified_at"
 
 // BackupFailed records a failed database backup and emails the recipients
 // when email notifications are on.

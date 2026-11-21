@@ -42,7 +42,7 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 - **Service and server restarts:** Services still using old versions of updated libraries are detected and can be restarted from the dashboard; servers can be rebooted from the dashboard.
 - **Scheduled updates:** Maintenance windows such as "apply security updates to Ubuntu servers every Sunday at 03:00". Schedules never reboot servers by themselves.
 - **Automatic agent updates:** When the central server moves to a new version, agents download it, verify its SHA-256 digest and update themselves.
-- **New version notice:** The dashboard tells administrators when a new netio.patchman version is released on GitHub and shows the update commands. It can be turned off for installations without internet access.
+- **New version notice:** The dashboard tells administrators when a new netio.patchman version is released on GitHub and shows the update commands. It can be turned off for installations without internet access. With the optional updater container, the upgrade runs from the dashboard with one click (git pull, backup, build, restart).
 - **Finding management:** Open, In Progress, Risk Accepted and False Positive statuses. When a package is updated, its finding becomes "Resolved" automatically. Risks are accepted for a limited term (30, 90, 180 or 365 days; the maximum is set in Settings). When the term ends, the finding reopens and a notification and email are sent.
 - **Server groups:** Divide servers into groups such as "Production", "Test" or "Database". A server can belong to several groups. Lists can be filtered by group, scheduled updates can target a group and reports can be created for a group.
 - **Platform information:** The agent reports whether the server is a VMware, Hyper-V, KVM, Xen or VirtualBox virtual machine, a Docker/LXC container or a physical server. The server list can be filtered by platform.
@@ -282,6 +282,21 @@ docker compose up -d --build
 - The database schema is updated automatically at startup; still, take a backup first.
 - The version is read from the `VERSION` file in the repository.
 - If **Settings → Agents → Update agents automatically** is on (the default), agents switch to the new version by themselves.
+
+### Updating from the dashboard (optional)
+
+The upgrade can also be started with **Settings → Server configuration → Product version → Update now**. Turn on the `updater` container from the Compose file once:
+
+```sh
+cd netio.patchman
+echo "COMPOSE_PROFILES=updater" >> .env
+docker compose up -d --build
+```
+
+The updater then runs `git pull --ff-only`, a database backup (`/data/before-update-<version>-<time>.db`), the image build, the restart and a health check. Progress and command output appear in the dashboard; the page reloads when it is over and the result goes to the notification center. The dashboard is unavailable for a few seconds; agents are not affected. If a step fails, the server keeps running the current version.
+
+> [!WARNING]
+> The updater has access to the Docker socket (`/var/run/docker.sock`), which equals root access on the server. It opens no port, only waits for the request file the dashboard writes into the data volume and runs fixed steps; it takes no parameters from the request. Still, turn it on only if you need it and protect administrator accounts with two-factor authentication. If the repository has local changes, `git pull --ff-only` stops and nothing is updated.
 
 ### Backup and restore
 

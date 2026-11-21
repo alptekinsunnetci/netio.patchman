@@ -342,6 +342,28 @@ Sunucu, depodaki `VERSION` dosyasını açılıştan bir dakika sonra ve ardınd
 
 Uyarı yalnızca bu özelliği içeren sürümden itibaren görünür. Daha eski bir sürümü çalıştıran sunucu, bir kez elle yükseltilmelidir.
 
+### Panelden güncelleme
+
+İsteğe bağlı `updater` konteyneri etkinleştirildiğinde sürüm yükseltmesi **Sistem Ayarları → Sunucu yapılandırması → Ürün sürümü → Şimdi güncelle** ile yapılır:
+
+```sh
+cd netio.patchman
+echo "COMPOSE_PROFILES=updater" >> .env
+docker compose up -d --build
+```
+
+Nasıl çalışır:
+
+1. Panel, veri birimine `update-request.json` dosyasını yazar (Docker'a dokunmaz).
+2. Güncelleyici (her 5 saniyede bir yoklar) dosyayı alır ve sırasıyla çalıştırır: `git pull --ff-only` (depo sahibinin kimliğiyle, dosyalar root'a geçmez), `netio-patchman-server backup` ile yedek (`/data/before-update-<sürüm>-<zaman>.db`), `docker compose build server`, `docker compose up -d server`, sağlık denetimi (en fazla 5 dakika).
+3. Durum `/data/update/status.json`, çıktı `/data/update/update.log` dosyasına yazılır; panel bunları gösterir ve bitince bildirim oluşturur.
+
+Güncelleyici depodaki betiği (`deploy/updater/updater.sh`) çalıştırır; böylece `git pull` ile kendisi de güncellenir. Güncelleyici imajının kendisi değişirse (`deploy/updater/Dockerfile`) bir kez `docker compose up -d --build` çalıştırın.
+
+**Güvenlik:** Güncelleyici `/var/run/docker.sock` bağlar; bu, sunucuda root yetkisine eşdeğerdir. Port açmaz ve istek dosyasından parametre almaz; panele yönetici olarak giren biri yalnızca depodaki en yeni sürüme yükseltmeyi başlatabilir. Özelliği kapatmak için `.env` dosyasından `COMPOSE_PROFILES=updater` satırını silip `docker compose --profile updater rm -sf updater` çalıştırın.
+
+**Sorun giderme:** Depoda yerel değişiklik varsa `git pull --ff-only` durur (çıktıda görünür); değişiklikleri geri alın veya `git stash` ile kenara koyun. Güncelleyici çalışmıyorsa: `docker compose logs updater`.
+
 ### Ajanların otomatik güncellenmesi
 
 Docker imajı, sunucuyla aynı sürümdeki amd64 ve arm64 Linux ile amd64 Windows ajan dosyalarını içerir. **Sistem Ayarları → Ajanlar → Ajanları otomatik olarak güncelle** açıkken (varsayılan):

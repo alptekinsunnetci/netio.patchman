@@ -32,6 +32,26 @@ services:
         max-file: "5"
         tag: "netio.patchman/{{.Name}}"
 
+  # Panelden güncelleme (isteğe bağlı). Etkinleştirmek için .env dosyasına
+  # COMPOSE_PROFILES=updater ekleyip "docker compose up -d --build" çalıştırın.
+  # DİKKAT: Docker soketi bu konteynere sunucu üzerinde root yetkisi verir.
+  # Konteyner yalnızca panelin yazdığı istek dosyasını bekler ve sabit adımları
+  # (git pull, yedek, derleme, yeniden başlatma) çalıştırır; dışarıya port açmaz.
+  updater:
+    profiles: ["updater"]
+    image: netio-patchman-updater:latest
+    build:
+      context: ./deploy/updater
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/repo
+      - patchman-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
 volumes:
   patchman-data:
     name: netio-patchman-data

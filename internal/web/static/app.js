@@ -147,6 +147,29 @@
     }
   }
 
+  // Self-update progress: poll the status while the updater works. The
+  // server restarts during the update, so failed requests are retried; the
+  // page reloads when the update is over.
+  function initSelfUpdate() {
+    var box = document.querySelector("[data-selfupdate]");
+    if (!box || !window.fetch) return;
+    var url = box.getAttribute("data-selfupdate");
+    var poll = function () {
+      fetch(url, { credentials: "same-origin", cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (st) {
+          if (st && !st.active) { window.location.reload(); return; }
+          if (st && st.log) {
+            var pre = box.querySelector("[data-selfupdate-log]");
+            if (pre) pre.textContent = st.log;
+          }
+          setTimeout(poll, 4000);
+        })
+        .catch(function () { setTimeout(poll, 4000); });
+    };
+    setTimeout(poll, 4000);
+  }
+
   // Print button (reports); printing works from the browser menu without JS.
   document.addEventListener("click", function (e) {
     if (e.target.closest && e.target.closest("[data-print]")) window.print();
@@ -157,6 +180,7 @@
     applyGrow();
     syncShowWhen();
     initInstallCmd();
+    initSelfUpdate();
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);

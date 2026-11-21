@@ -153,7 +153,7 @@ func TestReferencedKeysExist(t *testing.T) {
 		"level.":      {"critical", "warning", "info"},
 		"nav.":        {"dashboard", "servers", "groups", "vulnerabilities", "packages", "reports", "jobs", "schedules", "agents", "notifications", "users", "settings"},
 		"notification.": {"vuln_detected", "vulns_detected", "agent_offline", "agent_online", "agent_enrolled", "agent_reenrolled", "job_succeeded", "job_failed", "job_partial", "scan_failed", "email_failed",
-			"schedule_ran", "schedule_expired", "schedule_missed", "server_update", "risk_expired", "backup_failed", "channel_test", "sla_overdue"},
+			"schedule_ran", "schedule_expired", "schedule_missed", "server_update", "risk_expired", "backup_failed", "channel_test", "sla_overdue", "self_update_succeeded", "self_update_failed"},
 		"channel.type.": {"slack", "teams", "telegram", "webhook"},
 		"channel.help.": {"slack", "teams", "webhook", "secret", "telegram"},
 		"host.virt.": {"unknown", "none", "vmware", "microsoft", "kvm", "qemu", "oracle", "xen", "amazon", "google", "parallels", "bochs", "vm-other",
@@ -166,12 +166,13 @@ func TestReferencedKeysExist(t *testing.T) {
 			"settings.system_update", "settings.system_reset", "schedule.create", "schedule.update", "schedule.delete", "schedule.run", "schedule.run_now",
 			"group.create", "group.update", "group.delete", "group.add_hosts", "group.remove_hosts", "host.groups", "user.mfa_enabled", "user.mfa_disabled",
 			"user.mfa_recovery_codes", "user.mfa_reset", "auth.mfa_failed", "finding.risk_expired",
-			"backup.run", "backup.download", "channel.create", "channel.update", "channel.delete", "channel.test", "user.language", "apitoken.create", "apitoken.revoke"},
+			"backup.run", "backup.download", "channel.create", "channel.update", "channel.delete", "channel.test", "user.language", "apitoken.create", "apitoken.revoke", "system.self_update"},
 		"schedule.target.":   {"all", "os", "group", "hosts"},
 		"system.log_level.":  {"debug", "info", "warn", "error"},
 		"weekday.":           {"0", "1", "2", "3", "4", "5", "6"},
 		"agents.install.os.": {"ubuntu", "debian", "rhel", "fedora", "suse", "alpine", "windows"},
 		"weekday.short.":     {"0", "1", "2", "3", "4", "5", "6"},
+		"selfupdate.step.":   {"pull", "backup", "build", "restart", "health", "done"},
 		"kernel_patch.":      {"kernelcare", "livepatch"},
 	}
 	for prefix, ids := range families {

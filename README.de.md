@@ -42,7 +42,7 @@ netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstell
 - **Neustart von Diensten und Servern:** Dienste, die noch alte Versionen aktualisierter Bibliotheken verwenden, werden erkannt und können im Dashboard neu gestartet werden; Server können im Dashboard neu gestartet werden.
 - **Geplante Updates:** Wartungsfenster wie „jeden Sonntag um 03:00 Sicherheitsupdates auf Ubuntu-Servern installieren“. Zeitpläne starten Server nie selbst neu.
 - **Automatische Agentenupdates:** Wechselt der zentrale Server auf eine neue Version, laden die Agenten sie herunter, prüfen die SHA-256-Prüfsumme und aktualisieren sich selbst.
-- **Hinweis auf neue Versionen:** Das Dashboard informiert Administratoren, wenn auf GitHub eine neue netio.patchman-Version erscheint, und zeigt die Update-Befehle. Für Installationen ohne Internetzugang abschaltbar.
+- **Hinweis auf neue Versionen:** Das Dashboard informiert Administratoren, wenn auf GitHub eine neue netio.patchman-Version erscheint, und zeigt die Update-Befehle. Für Installationen ohne Internetzugang abschaltbar. Mit dem optionalen Updater-Container läuft die Aktualisierung mit einem Klick aus dem Dashboard (git pull, Sicherung, Build, Neustart).
 - **Befundverwaltung:** Status Offen, In Bearbeitung, Risiko akzeptiert und Fehlalarm. Wird ein Paket aktualisiert, wird der Befund automatisch „Behoben“. Risiken werden befristet akzeptiert (30, 90, 180 oder 365 Tage; das Maximum wird in den Einstellungen festgelegt). Nach Ablauf wird der Befund wieder geöffnet und es werden Benachrichtigung und E-Mail gesendet.
 - **Servergruppen:** Teilen Sie Server in Gruppen wie „Produktion“, „Test“ oder „Datenbank“ ein. Ein Server kann mehreren Gruppen angehören. Listen lassen sich nach Gruppe filtern, geplante Updates können eine Gruppe als Ziel haben, Berichte können pro Gruppe erstellt werden.
 - **Plattforminformation:** Der Agent meldet, ob der Server eine virtuelle Maschine (VMware, Hyper-V, KVM, Xen, VirtualBox), ein Docker/LXC-Container oder ein physischer Server ist. Die Serverliste lässt sich nach Plattform filtern.
@@ -282,6 +282,21 @@ docker compose up -d --build
 - Das Datenbankschema wird beim Start automatisch aktualisiert; erstellen Sie trotzdem vorher eine Sicherung.
 - Die Version wird aus der Datei `VERSION` im Repository gelesen.
 - Ist **Einstellungen → Agenten → Agenten automatisch aktualisieren** eingeschaltet (Standard), wechseln die Agenten selbst auf die neue Version.
+
+### Aktualisierung aus dem Dashboard (optional)
+
+Die Aktualisierung lässt sich auch über **Einstellungen → Serverkonfiguration → Produktversion → Jetzt aktualisieren** starten. Schalten Sie dazu einmalig den `updater`-Container aus der Compose-Datei ein:
+
+```sh
+cd netio.patchman
+echo "COMPOSE_PROFILES=updater" >> .env
+docker compose up -d --build
+```
+
+Der Updater führt dann `git pull --ff-only`, eine Datenbanksicherung (`/data/before-update-<Version>-<Zeit>.db`), den Image-Build, den Neustart und eine Zustandsprüfung aus. Fortschritt und Befehlsausgabe erscheinen im Dashboard; die Seite lädt sich danach neu, das Ergebnis landet in der Benachrichtigungszentrale. Das Dashboard ist einige Sekunden nicht erreichbar; Agenten sind nicht betroffen. Schlägt ein Schritt fehl, läuft der Server mit der aktuellen Version weiter.
+
+> [!WARNING]
+> Der Updater hat Zugriff auf den Docker-Socket (`/var/run/docker.sock`), was root-Rechten auf dem Server entspricht. Er öffnet keinen Port, wartet nur auf die Anforderungsdatei, die das Dashboard in das Datenvolume schreibt, und führt feste Schritte aus; aus der Anforderung übernimmt er keine Parameter. Schalten Sie ihn trotzdem nur bei Bedarf ein und schützen Sie Administratorkonten mit Zwei-Faktor-Authentifizierung. Hat das Repository lokale Änderungen, bricht `git pull --ff-only` ab und es wird nichts aktualisiert.
 
 ### Sicherung und Wiederherstellung
 
