@@ -475,7 +475,7 @@ func (s *Store) SaveReport(ctx context.Context, id int64, r protocol.Report, eco
 		if _, err := tx.ExecContext(ctx, `DELETE FROM host_updates WHERE host_id = ?`, id); err != nil {
 			return err
 		}
-		upd, err := tx.PrepareContext(ctx, `INSERT OR REPLACE INTO host_updates (host_id, name, current_version, available_version, repository, security) VALUES (?, ?, ?, ?, ?, ?)`)
+		upd, err := tx.PrepareContext(ctx, `INSERT OR REPLACE INTO host_updates (host_id, name, current_version, available_version, repository, security, title, severity, cves) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 		if err != nil {
 			return err
 		}
@@ -484,7 +484,15 @@ func (s *Store) SaveReport(ctx context.Context, id int64, r protocol.Report, eco
 			if u.Name == "" {
 				continue
 			}
-			if _, err := upd.ExecContext(ctx, id, u.Name, u.CurrentVersion, u.AvailableVersion, u.Repository, boolInt(u.Security)); err != nil {
+			var cves []string
+			for _, c := range u.CVEs {
+				if len(cves) < 500 && validCVE(c) {
+					cves = append(cves, c)
+				}
+			}
+			cj, _ := json.Marshal(nonNil(cves))
+			if _, err := upd.ExecContext(ctx, id, u.Name, u.CurrentVersion, u.AvailableVersion, u.Repository, boolInt(u.Security),
+				truncate(u.Title, 500), truncate(u.Severity, 40), string(cj)); err != nil {
 				return err
 			}
 		}
@@ -541,7 +549,7 @@ func (s *Store) SearchHostPackages(ctx context.Context, id int64, search string,
 
 // HostUpdates returns a host's pending updates, security first.
 func (s *Store) HostUpdates(ctx context.Context, id int64) ([]protocol.Update, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT name, current_version, available_version, repository, security FROM host_updates WHERE host_id = ? ORDER BY security DESC, name`, id)
+	rows, err := s.db.QueryContext(ctx, `SELECT name, current_version, available_version, repository, security, title, severity, cves FROM host_updates WHERE host_id = ? ORDER BY security DESC, name`, id)
 	if err != nil {
 		return nil, err
 	}
@@ -550,10 +558,12 @@ func (s *Store) HostUpdates(ctx context.Context, id int64) ([]protocol.Update, e
 	for rows.Next() {
 		var u protocol.Update
 		var sec int
-		if err := rows.Scan(&u.Name, &u.CurrentVersion, &u.AvailableVersion, &u.Repository, &sec); err != nil {
+		var cves string
+		if err := rows.Scan(&u.Name, &u.CurrentVersion, &u.AvailableVersion, &u.Repository, &sec, &u.Title, &u.Severity, &cves); err != nil {
 			return nil, err
 		}
 		u.Security = sec == 1
+		_ = json.Unmarshal([]byte(cves), &u.CVEs)
 		out = append(out, u)
 	}
 	return out, rows.Err()
@@ -659,4 +669,17 @@ func (s *Store) HostsGoneOffline(ctx context.Context, offlineAfter time.Duration
 		}
 	}
 	return out, nil
+}
+
+// validCVE accepts CVE identifiers such as CVE-2024-38063.
+func validCVE(s string) bool {
+	if len(s) < 13 || len(s) > 20 || !strings.HasPrefix(s, "CVE-") {
+		return false
+	}
+	for i, r := range s[4:] {
+		if (r < '0' || r > '9') && !(i == 4 && r == '-') {
+			return false
+		}
+	}
+	return s[8] == '-'
 }

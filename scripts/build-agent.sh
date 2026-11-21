@@ -18,6 +18,11 @@ for arch in amd64 arm64; do
     -o "${OUT}/${name}" ./cmd/netio-patchman-agent
   (cd "$OUT" && sha256sum "$name" > "${name}.sha256")
 done
+name="netio-patchman-agent-windows-amd64.exe"
+echo "Derleniyor: ${name} (${VERSION})"
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "$LDFLAGS" \
+  -o "${OUT}/${name}" ./cmd/netio-patchman-agent
+(cd "$OUT" && sha256sum "$name" > "${name}.sha256")
 echo "$VERSION" > "${OUT}/version"
 echo "Ajan dosyaları hazır: ${OUT}"
 ls -l "$OUT"

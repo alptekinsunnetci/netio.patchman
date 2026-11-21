@@ -3,9 +3,10 @@
 //
 // The distribution directory (PATCHMAN_AGENT_DIST_DIR) contains:
 //
-//	netio-patchman-agent-linux-<arch>          the binary
-//	netio-patchman-agent-linux-<arch>.sha256   "<hex>  <name>" (optional, computed if missing)
-//	version                                    the agent version (optional, defaults to the server version)
+//	netio-patchman-agent-linux-<arch>             Linux binaries (amd64, arm64)
+//	netio-patchman-agent-windows-amd64.exe        the Windows binary
+//	<binary>.sha256                               "<hex>  <name>" (optional, computed if missing)
+//	version                                       the agent version (optional, defaults to the server version)
 package release
 
 import (
@@ -19,8 +20,9 @@ import (
 	"netio.patchman/internal/protocol"
 )
 
-// Binary is one architecture's agent binary.
+// Binary is one platform's agent binary.
 type Binary struct {
+	OS     string
 	Arch   string
 	Name   string
 	SHA256 string
@@ -29,12 +31,12 @@ type Binary struct {
 
 // Release is the agent version the server rolls out.
 type Release struct {
-	Version  string
+	Version string
+	// Binaries by platform key "<goos>/<arch>".
 	Binaries map[string]Binary
 }
 
-// SupportedArchs are the architectures the server builds agents for.
-var SupportedArchs = []string{"amd64", "arm64"}
+func key(goos, arch string) string { return goos + "/" + arch }
 
 // Load reads the distribution directory. A missing directory yields an empty
 // release (automatic updates are then unavailable).
@@ -48,8 +50,8 @@ func Load(dir, fallbackVersion string) Release {
 			r.Version = v
 		}
 	}
-	for _, arch := range SupportedArchs {
-		name := protocol.AgentBinaryName(arch)
+	for _, p := range protocol.AgentPlatforms {
+		name := protocol.AgentBinaryName(p[0], p[1])
 		path := filepath.Join(dir, name)
 		st, err := os.Stat(path)
 		if err != nil || st.IsDir() || st.Size() == 0 {
@@ -62,7 +64,7 @@ func Load(dir, fallbackVersion string) Release {
 		if sum == "" {
 			continue
 		}
-		r.Binaries[arch] = Binary{Arch: arch, Name: name, SHA256: sum, Size: st.Size()}
+		r.Binaries[key(p[0], p[1])] = Binary{OS: p[0], Arch: p[1], Name: name, SHA256: sum, Size: st.Size()}
 	}
 	return r
 }
@@ -98,25 +100,25 @@ func computeSum(path string) string {
 // Available reports whether at least one binary can be distributed.
 func (r Release) Available() bool { return len(r.Binaries) > 0 }
 
-// For returns the binary for an architecture.
-func (r Release) For(arch string) (Binary, bool) {
-	b, ok := r.Binaries[arch]
+// For returns the binary for a platform.
+func (r Release) For(goos, arch string) (Binary, bool) {
+	b, ok := r.Binaries[key(goos, arch)]
 	return b, ok
 }
 
-// Outdated reports whether an agent with the given version and architecture
-// should be updated: its version differs and a binary exists for it.
-func (r Release) Outdated(agentVersion, arch string) bool {
+// Outdated reports whether an agent with the given version on a host with
+// osID and arch should be updated: its version differs and a binary exists.
+func (r Release) Outdated(agentVersion, osID, arch string) bool {
 	if agentVersion == r.Version {
 		return false
 	}
-	_, ok := r.Binaries[arch]
+	_, ok := r.For(protocol.AgentOS(osID), arch)
 	return ok
 }
 
-// JobParams returns the agent_update job parameters for an architecture.
-func (r Release) JobParams(arch string) (map[string]string, bool) {
-	b, ok := r.Binaries[arch]
+// JobParams returns the agent_update job parameters for a host.
+func (r Release) JobParams(osID, arch string) (map[string]string, bool) {
+	b, ok := r.For(protocol.AgentOS(osID), arch)
 	if !ok {
 		return nil, false
 	}

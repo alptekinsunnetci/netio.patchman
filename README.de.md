@@ -1,10 +1,10 @@
 # netio.patchman
 
-**Zentrales Schwachstellen- und Update-Management für Linux**
+**Zentrales Schwachstellen- und Update-Management für Linux und Windows**
 
 [Türkçe](README.md) · [English](README.en.md) · **Deutsch** · [Русский](README.ru.md)
 
-netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstellen und Paketupdates von Hunderten Linux-Servern über ein einziges Dashboard überwachen und verwalten.
+netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstellen und Paketupdates von Hunderten Linux- und Windows-Servern über ein einziges Dashboard überwachen und verwalten.
 
 - Der zentrale Server ist ein einzelner Docker-Container mit eingebetteter SQLite-Datenbank. Es ist kein separater Datenbank-, Warteschlangen- oder Cache-Dienst nötig.
 - Auf jedem verwalteten Server wird ein kleiner Agent installiert. Der Agent öffnet keine Ports; er verbindet sich selbst mit dem zentralen Server.
@@ -36,6 +36,7 @@ netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstell
 - **Serverinventar:** Betriebssystem, Kernel, IP-Adressen, installierte Pakete, ausstehende Updates, Neustartstatus und Dienste, die noch alten Code ausführen.
 - **Schwachstellenscan:** Installierte Paketversionen werden über [OSV.dev](https://osv.dev) mit den offiziellen Sicherheitsdaten der Distributionen abgeglichen. CVSS-Wert, Schweregrad, korrigierte Version und Herstellerhinweise werden angezeigt.
 - **Bekannt ausgenutzte Schwachstellen:** Schwachstellen aus dem CISA-Katalog Known Exploited Vulnerabilities (KEV) werden markiert und priorisiert.
+- **Windows-Server:** Windows Server 2016, 2019, 2022, 2025 sowie Windows 10 und 11 werden im selben Dashboard verwaltet. Der Agent läuft als Windows-Dienst und meldet installierte Programme und die in Windows Update ausstehenden Updates (KB-Nummer, Titel, Microsoft-Schweregrad, Klassifizierung). Die CVEs, die jede ausstehende KB behebt, stammen aus dem Microsoft Security Update Guide (MSRC). Liegt ein Server mehrere Monate zurück, werden auch die CVEs der älteren, ersetzten kumulativen Updates anhand des Windows-Builds des Servers ergänzt. Sicherheitsupdates, alle Updates oder ausgewählte KBs werden aus dem Dashboard installiert und überprüft; der Server kann aus dem Dashboard neu gestartet werden.
 - **Zentrale Updates:** Installieren Sie Sicherheitsupdates, alle Updates oder ausgewählte Pakete auf einem, auf ausgewählten oder auf allen Servern direkt im Dashboard. **Korrektur anwenden** bei einer CVE aktualisiert die betroffenen Pakete auf allen betroffenen Servern. Nach jedem Auftrag prüft der Agent, ob die Pakete tatsächlich aktualisiert wurden; nicht aktualisierte Pakete werden aufgelistet und können mit einem Klick erneut versucht werden.
 - **Neustart von Diensten und Servern:** Dienste, die noch alte Versionen aktualisierter Bibliotheken verwenden, werden erkannt und können im Dashboard neu gestartet werden; Server können im Dashboard neu gestartet werden.
 - **Geplante Updates:** Wartungsfenster wie „jeden Sonntag um 03:00 Sicherheitsupdates auf Ubuntu-Servern installieren“. Zeitpläne starten Server nie selbst neu.
@@ -56,17 +57,20 @@ netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstell
 - **Konfiguration im Dashboard:** SMTP, Serveradresse, Zeitzone, Datenquellen und alle Betriebseinstellungen werden im Dashboard geändert. Änderungen gelten ohne Neustart.
 - **Export:** Server- und Schwachstellenlisten lassen sich als Excel-kompatible CSV-Dateien herunterladen.
 
-### Unterstützte Distributionen
+### Unterstützte Systeme
 
-| Distribution | Inventar und Updates | Schwachstellenscan |
+| System | Inventar und Updates | Schwachstellenscan |
 |---|---|---|
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
 | CentOS, Oracle Linux, Fedora und andere Distributionen (mit dnf, yum, zypper, apt oder apk) | ✓ | — |
+| Windows Server 2016, 2019, 2022, 2025; Windows 10, 11 (x64) | Windows Update | ✓ (ausstehende Microsoft-Updates) |
 
 Der Agent läuft auf amd64 und arm64. Als Dienstmanager wird systemd oder OpenRC (Alpine) benötigt. Physische, virtuelle (VMware, Hyper-V, KVM/Proxmox) und Cloud-Server werden gleichermaßen unterstützt.
+
+Unter Windows läuft der Agent auf x64-Systemen als Windows-Dienst und verwendet den Windows Update Agent; Server mit WSUS sehen die in WSUS genehmigten Updates. Der Schwachstellenscan unter Windows beschränkt sich auf Microsoft-Updates: Programme von Drittanbietern (Browser, 7-Zip usw.) erscheinen im Inventar, werden aber nicht gescannt. Updates, für die Microsoft keine CVE-Zuordnung veröffentlicht (etwa manche .NET-Rollups), werden als Sicherheitsupdates mit dem von Windows Update gemeldeten Schweregrad angezeigt.
 
 ## Screenshots
 
@@ -111,13 +115,14 @@ Die Screenshots zeigen die türkische Oberfläche; die anderen Sprachen haben da
 ┌──────────────────────┐   HTTPS   ┌──────────────────────────────┐   HTTPS   ┌──────────────┐
 │ netio-patchman-agent │ ────────▶ │ netio.patchman               │ ────────▶ │ api.osv.dev  │
 │  Inventar, Aufträge  │ (ausgeh.) │  Dashboard + API + SQLite    │           │ CISA KEV     │
+│  (Linux, Windows)    │           │                              │           │ MSRC         │
 └──────────────────────┘           └──────────────────────────────┘           └──────────────┘
                                                  ▲
                                      Browser ────┘  (Dashboard)
 ```
 
 1. Der Agent verbindet sich in regelmäßigen Abständen mit dem zentralen Server. Er meldet installierte Pakete und ausstehende Updates und holt einen Auftrag ab, falls einer wartet.
-2. Der zentrale Server gleicht Paketversionen mit den Sicherheitsdaten der Distributionen auf OSV.dev ab und zeigt die Befunde im Dashboard.
+2. Der zentrale Server gleicht Paketversionen mit den Sicherheitsdaten der Distributionen auf OSV.dev ab und zeigt die Befunde im Dashboard. Für Windows-Server stammen die CVEs der ausstehenden KBs aus dem Microsoft Security Update Guide.
 3. Update-Aufträge aus dem Dashboard erhält der Agent bei seiner nächsten Verbindung. Er führt sie mit festen Paketmanager-Befehlen aus und meldet das Ergebnis.
 
 Auf verwalteten Servern müssen keine eingehenden Ports geöffnet werden.
@@ -231,6 +236,23 @@ journalctl -u netio-patchman-agent -f
 
 Massenverteilung (Ansible usw.), Offline-Installation, Agentenoptionen und Entfernung: siehe [docs/kurulum.md](docs/kurulum.md#4-ajan-kurulumu) (Türkisch).
 
+### Windows-Server
+
+Wählen Sie auf der Seite Agentenverwaltung **Windows / Windows Server (PowerShell)** und führen Sie den erzeugten Befehl auf dem Server in einer **als Administrator** geöffneten PowerShell oder Eingabeaufforderung aus:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; & ([scriptblock]::Create((irm 'https://patchman.your-domain/downloads/install-agent.ps1').TrimStart([char]65279))) -ServerUrl 'https://patchman.your-domain' -Token '<REGISTRIERUNGSSCHLÜSSEL>'"
+```
+
+Das Installationsskript legt den Agenten unter `C:\Program Files\netio-patchman\netio-patchman-agent.exe` ab, schreibt die Konfiguration nach `C:\ProgramData\netio-patchman\agent.env` (nur für SYSTEM und Administratoren lesbar) und erstellt und startet den Windows-Dienst `netio-patchman-agent` (automatischer Start, Neustart bei Fehlern). Das Protokoll ist `C:\ProgramData\netio-patchman\agent.log`:
+
+```powershell
+Get-Service netio-patchman-agent
+Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50 -Wait
+```
+
+Für Server ohne Internetzugang kopieren Sie `install-agent.ps1` und `netio-patchman-agent-windows-amd64.exe` in einen Ordner und verwenden die Option `-Binary`. Entfernen: `.\install-agent.ps1 -Uninstall`. Der Agent fragt den Windows-Update-Dienst höchstens alle 6 Stunden online ab; dazwischen liest er das Ergebnis der letzten Suche von Windows selbst.
+
 ## Aktualisierung, Sicherung und Entfernung
 
 ### Auf eine neue Version wechseln
@@ -295,7 +317,7 @@ Die gesamte Konfiguration ist im Dashboard möglich:
 
 - **Einstellungen:** Benachrichtigungsschwellen und Empfänger, Verbindungsintervalle der Agenten, automatische Agentenupdates, Scans, Aufbewahrung, Sicherheit (Zwei-Faktor-Authentifizierung, Dauer der Risikoakzeptanz) und automatische Sicherungen.
 - **Einstellungen → Benachrichtigungskanäle:** Slack, Microsoft Teams, Telegram und Webhooks.
-- **Einstellungen → Serverkonfiguration:** Serveradresse, Reverse-Proxy, Zeitzone, Protokollstufe, SMTP und Datenquellen (OSV, CISA KEV).
+- **Einstellungen → Serverkonfiguration:** Serveradresse, Reverse-Proxy, Zeitzone, Protokollstufe, SMTP und Datenquellen (OSV, CISA KEV, Microsoft Security Update Guide).
 
 Die Variablen mit dem Präfix `PATCHMAN_` in `.env` liefern nur die Anfangswerte; ein im Dashboard gespeicherter Wert ersetzt sie. Mit „—“ in der Spalte „Dashboard“ markierte Werte werden beim Start benötigt und können nur in `.env` geändert werden; sie erfordern einen Neustart. Alle Optionen sind in [.env.example](.env.example) beschrieben (Kommentare auf Türkisch).
 
@@ -311,6 +333,7 @@ Die Variablen mit dem Präfix `PATCHMAN_` in `.env` liefern nur die Anfangswerte
 | `PATCHMAN_BACKUP_DIR` | `/data/backups` | Verzeichnis für automatische Sicherungen | — |
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV-API-Adresse (ein interner Spiegel ist möglich) | ja |
 | `PATCHMAN_KEV_URL` | CISA-KEV-Adresse | Adresse des KEV-Katalogs; `off` schaltet ihn ab | ja |
+| `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Adresse des Microsoft Security Update Guide für die CVE-Zuordnung von Windows-Servern; `off` schaltet ihn ab | ja |
 | `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | E-Mail-Server | ja |
 | `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP-Zugangsdaten | ja |
 | `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Absendername und -adresse | ja |
@@ -326,6 +349,8 @@ Hat eine Umgebungsvariable einen ungültigen Wert, startet der Server nicht und 
 | Das Dashboard öffnet sich nicht | `docker compose ps` sollte in der Spalte PORTS `0.0.0.0:<port>->8080/tcp` zeigen. Fehler mit `docker compose logs server` ansehen. Ist der Port `PATCHMAN_PUBLISH_PORT` in der Firewall offen? |
 | Der Installationsbefehl zeigt `localhost` | Ändern Sie auf der Seite **Serverkonfiguration** die Serveradresse auf eine für die Agenten erreichbare Adresse. |
 | Der Agent registriert sich nicht | Funktioniert `curl -I https://patchman.your-domain/healthz` vom Server des Agenten aus? `journalctl -u netio-patchman-agent -n 50` |
+| Der Windows-Agent registriert sich nicht oder zeigt keine Updates | `Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50`. Ist der Windows-Update-Dienst (`wuauserv`) deaktiviert? Nutzt der Server WSUS: Sind die Updates dort genehmigt? |
+| Keine CVEs auf einem Windows-Server | Erreicht der zentrale Server `api.msrc.microsoft.com`? Ist der Microsoft Security Update Guide in der **Serverkonfiguration** eingeschaltet? |
 | Der Schwachstellenscan findet nichts | Erreicht der zentrale Server `api.osv.dev`? Suchen Sie in den Protokollen nach OSV-Fehlern. |
 | Es kommen keine E-Mails an | Senden Sie auf der Seite **Serverkonfiguration** eine Test-E-Mail; der Fehler wird im Dashboard angezeigt. |
 
@@ -345,8 +370,8 @@ Weitere Informationen (Türkisch): [docs/kurulum.md](docs/kurulum.md) (Installat
 
 - Passwörter werden mit PBKDF2-SHA256 (600.000 Iterationen) gespeichert. Sitzungen, Registrierungsschlüssel und Agentenzugangsdaten werden in der Datenbank nur als SHA-256-Hashes abgelegt.
 - Alle Formularaktionen sind gegen CSRF geschützt. Fehlgeschlagene Anmeldungen werden pro IP und Konto begrenzt. Zwei-Faktor-Authentifizierung (TOTP) ist verfügbar und kann vorgeschrieben werden.
-- Der Agent öffnet keine Ports und nimmt keine eingehenden Verbindungen an. Er führt nur vordefinierte Paketmanager-Befehle ohne Shell aus; Paketnamen werden auf beiden Seiten geprüft.
-- Um Remote-Updates auf einem Server vollständig abzuschalten, setzen Sie `PATCHMAN_REMOTE_UPDATES=false` in dessen `/etc/netio-patchman/agent.env`.
+- Der Agent öffnet keine Ports und nimmt keine eingehenden Verbindungen an. Er führt nur vordefinierte Paketmanager-Befehle ohne Shell aus; Paketnamen werden auf beiden Seiten geprüft. Unter Windows wird Windows Update über ein im Agenten eingebettetes, festes PowerShell-Skript (Windows Update Agent API) verwendet; auch KB-Namen werden geprüft.
+- Um Remote-Updates auf einem Server vollständig abzuschalten, setzen Sie `PATCHMAN_REMOTE_UPDATES=false` in dessen `/etc/netio-patchman/agent.env`. Unter Windows steht dieselbe Einstellung in `C:\ProgramData\netio-patchman\agent.env`.
 - Das Dashboard wird mit einer strengen Content-Security-Policy ausgeliefert und nutzt keine externen Ressourcen (CDNs, Schriftarten); es funktioniert auch in Netzen ohne Internetzugang.
 
 ## Entwicklung
@@ -362,8 +387,11 @@ PATCHMAN_DATA_DIR=./data go run ./cmd/netio-patchman-server
 scripts/build-agent.sh                                    # Linux / macOS
 powershell -File scripts\build-agent.ps1                  # Windows
 
-# Live-Scantest gegen OSV.dev (Internetzugang erforderlich)
+# Live-Scantest gegen OSV.dev und den Microsoft Security Update Guide (Internetzugang erforderlich)
 go test -tags live -run Live -v ./internal/scanner/
+
+# Echte Windows-Update-Suche unter Windows (sucht nur, installiert nichts)
+go test -tags live -run LiveWindows -v ./internal/agent/
 ```
 
 Die Produktanforderungen liegen im Verzeichnis [docs/spec/](docs/spec/).
@@ -376,7 +404,7 @@ netio.patchman wird „WIE BESEHEN“ (AS IS) bereitgestellt. Es wird keinerlei 
 
 - Dienstausfälle, Inkompatibilitäten und Datenverlust während oder nach Paketupdates, Dienstneustarts oder Serverneustarts.
 - Fehlgeschlagene, unvollständige oder unerwartete Update-Aufträge und geplante Updates.
-- Nicht erkannte, falsch erkannte oder mit falschem Schweregrad angezeigte Schwachstellen. Sicherheitsdaten stammen aus Drittquellen (OSV.dev, CISA KEV, Hinweise der Distributionen); ihre Richtigkeit hängt von diesen Quellen ab.
+- Nicht erkannte, falsch erkannte oder mit falschem Schweregrad angezeigte Schwachstellen. Sicherheitsdaten stammen aus Drittquellen (OSV.dev, CISA KEV, Microsoft Security Update Guide, Hinweise der Distributionen); ihre Richtigkeit hängt von diesen Quellen ab.
 - Fehlkonfiguration der Software, der Agenten oder des zentralen Servers, ungeschützter Zugang oder Missbrauch.
 
 Vor der Nutzung:

@@ -34,6 +34,8 @@ type systemForm struct {
 	OSVURL          string
 	KEVEnabled      bool
 	KEVURL          string
+	MSRCEnabled     bool
+	MSRCURL         string
 	UpdateEnabled   bool
 	UpdateURL       string
 }
@@ -44,6 +46,7 @@ func systemFormFrom(sys settings.System) systemForm {
 		SMTPHost: sys.SMTP.Host, SMTPPort: strconv.Itoa(sys.SMTP.Port), SMTPUsername: sys.SMTP.Username,
 		SMTPFromName: sys.SMTP.From.Name, SMTPFromAddress: sys.SMTP.From.Address,
 		OSVURL: sys.OSVURL, KEVEnabled: sys.KEVURL != "", KEVURL: sys.KEVSourceURL,
+		MSRCEnabled: sys.MSRCURL != "", MSRCURL: sys.MSRCSourceURL,
 		UpdateEnabled: sys.UpdateURL != "", UpdateURL: sys.UpdateSourceURL,
 	}
 }
@@ -98,6 +101,7 @@ func (s *Server) systemSave(w http.ResponseWriter, r *http.Request) {
 		SMTPHost: in("smtp_host"), SMTPPort: in("smtp_port"), SMTPUsername: in("smtp_username"),
 		SMTPFromName: in("smtp_from_name"), SMTPFromAddress: in("smtp_from_address"),
 		OSVURL: in("osv_url"), KEVEnabled: r.PostFormValue("kev_enabled") == "1", KEVURL: in("kev_url"),
+		MSRCEnabled: r.PostFormValue("msrc_enabled") == "1", MSRCURL: in("msrc_url"),
 		UpdateEnabled: r.PostFormValue("update_enabled") == "1", UpdateURL: in("update_url"),
 	}
 	password := r.PostFormValue("smtp_password") // not trimmed
@@ -169,6 +173,17 @@ func (s *Server) systemSave(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		kv[settings.KeyKEVURL] = u
+	}
+	// Forms from before the MSRC fields keep the stored values.
+	if _, ok := r.PostForm["msrc_url"]; ok {
+		kv[settings.KeyMSRCEnabled] = strconv.FormatBool(f.MSRCEnabled)
+		if u, err := settings.ParseSourceURL(f.MSRCURL); err != nil {
+			if f.MSRCEnabled || f.MSRCURL != "" {
+				bad = append(bad, s.l.T("system.error.url", "field", field("system.msrc_url")))
+			}
+		} else {
+			kv[settings.KeyMSRCURL] = u
+		}
 	}
 	kv[settings.KeyUpdateEnabled] = strconv.FormatBool(f.UpdateEnabled)
 	if u, err := settings.ParseSourceURL(f.UpdateURL); err != nil {

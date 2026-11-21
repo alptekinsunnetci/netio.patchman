@@ -50,6 +50,20 @@ func TestSystemFromStoredOverrides(t *testing.T) {
 	if on.KEVURL != "https://kev.example.test/kev.json" {
 		t.Errorf("kev enabled: %q", on.KEVURL)
 	}
+
+	// MSRC: the environment default (none set here) and stored overrides.
+	if def := SystemFrom(nil, envConfig()); def.MSRCURL != "" || def.MSRCSourceURL != config.DefaultMSRCURL {
+		t.Errorf("msrc default: %q %q", def.MSRCURL, def.MSRCSourceURL)
+	}
+	c := envConfig()
+	c.MSRCURL = config.DefaultMSRCURL
+	off := SystemFrom(map[string]string{KeyMSRCEnabled: "false", KeyMSRCURL: "https://msrc.example.test/sug/"}, c)
+	if off.MSRCURL != "" || off.MSRCSourceURL != "https://msrc.example.test/sug" {
+		t.Errorf("msrc off: %q %q", off.MSRCURL, off.MSRCSourceURL)
+	}
+	if on := SystemFrom(map[string]string{KeyMSRCURL: "https://msrc.example.test/sug"}, c); on.MSRCURL != "https://msrc.example.test/sug" {
+		t.Errorf("msrc on: %q", on.MSRCURL)
+	}
 }
 
 func TestSystemFromIgnoresInvalidStoredValues(t *testing.T) {

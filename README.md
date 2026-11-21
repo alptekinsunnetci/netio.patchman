@@ -1,16 +1,16 @@
 # netio.patchman
 
-**Merkezi Linux Güvenlik Açığı ve Güncelleme Yönetimi**
+**Merkezi Linux ve Windows Güvenlik Açığı ve Güncelleme Yönetimi**
 
 **Türkçe** · [English](README.en.md) · [Deutsch](README.de.md) · [Русский](README.ru.md)
 
-netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket güncellemelerini tek bir panelden izlemenizi ve yönetmenizi sağlayan, kendi altyapınızda çalışan (self-hosted) bir platformdur.
+netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve paket güncellemelerini tek bir panelden izlemenizi ve yönetmenizi sağlayan, kendi altyapınızda çalışan (self-hosted) bir platformdur.
 
 - Merkezi sunucu tek bir Docker konteyneridir. Gömülü SQLite veritabanı kullanır; ayrı bir veritabanı, kuyruk ya da önbellek servisi gerekmez.
 - Yönetilen her sunucuya küçük bir ajan kurulur. Ajan port açmaz; merkezi sunucuya kendisi bağlanır.
 - Arayüz Türkçe, İngilizce, Almanca ve Rusçadır; her kullanıcı kendi dilini seçer. E-postalar ve belgeler Türkçedir. CVE verileri kaynağındaki haliyle, çevrilmeden gösterilir.
 
-> **English:** netio.patchman is a self-hosted platform for centralized Linux vulnerability and update management, with an English web interface. Read the English documentation in [README.en.md](README.en.md). · Deutsch: [README.de.md](README.de.md) · Русский: [README.ru.md](README.ru.md)
+> **English:** netio.patchman is a self-hosted platform for centralized Linux and Windows vulnerability and update management, with an English web interface. Read the English documentation in [README.en.md](README.en.md). · Deutsch: [README.de.md](README.de.md) · Русский: [README.ru.md](README.ru.md)
 
 > [!WARNING]
 > **Kullanım riski tamamen kullanıcıya aittir.** netio.patchman sunucularınızda paket güncelleyen, servisleri ve sunucuyu yeniden başlatan bir yazılımdır. "Olduğu gibi" sunulur ve hiçbir garanti verilmez. Kullanımdan doğabilecek veri kaybı, hizmet kesintisi, başarısız güncelleme, güvenlik açığı ve benzeri her türlü zarardan yazılımı kuran ve kullanan kişi ya da kurum sorumludur. Ayrıntılar: [Sorumluluk reddi](#sorumluluk-reddi).
@@ -37,6 +37,7 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 - **Sunucu envanteri:** İşletim sistemi, çekirdek, IP adresleri, kurulu paketler, bekleyen güncellemeler, yeniden başlatma ihtiyacı ve eski kodu çalıştıran servisler.
 - **Güvenlik açığı taraması:** Kurulu paket sürümleri [OSV.dev](https://osv.dev) üzerinden dağıtımların resmî güvenlik verileriyle eşleştirilir. CVSS puanı, önem derecesi, düzeltilmiş sürüm ve üretici güvenlik duyuruları gösterilir.
 - **Aktif istismar bilgisi:** CISA Known Exploited Vulnerabilities (KEV) kataloğundaki açıklar ayrıca işaretlenir ve önceliklendirilir.
+- **Windows sunucuları:** Windows Server 2016, 2019, 2022, 2025 ile Windows 10 ve 11 aynı panelden yönetilir. Ajan bir Windows hizmeti olarak çalışır; kurulu programları ve Windows Update'te bekleyen güncellemeleri (KB numarası, başlık, Microsoft önem derecesi, sınıflandırma) bildirir. Bekleyen her KB'nin düzelttiği CVE'ler Microsoft Security Update Guide'dan (MSRC) alınır. Sunucu birkaç ay geride kalmışsa, yerini aldığı eski toplu güncellemelerin CVE'leri de sunucunun Windows derlemesiyle karşılaştırılarak eklenir. Güvenlik güncellemeleri, tüm güncellemeler veya seçili KB'ler panelden kurulur, kurulum doğrulanır; sunucu panelden yeniden başlatılabilir.
 - **Merkezi güncelleme:** Panelden tek bir sunucuda, seçilen sunucularda veya tümünde güvenlik güncellemeleri, tüm güncellemeler ya da seçili paketler kurulabilir. Bir CVE için **Düzeltmeyi uygula** ile etkilenen tüm sunucularda ilgili paketler güncellenir. Ajan her işten sonra paketlerin gerçekten güncellendiğini doğrular; güncellenemeyenler listelenir ve tek tıkla yeniden denenebilir.
 - **Servis ve sunucu yeniden başlatma:** Güncellenen kütüphaneleri hâlâ eski sürümle kullanan servisler tespit edilir ve panelden yeniden başlatılabilir; sunucu panelden yeniden başlatılabilir.
 - **Zamanlanmış güncellemeler:** "Her pazar 03:00'te Ubuntu sunucularında güvenlik güncellemelerini uygula" gibi bakım pencereleri. Zamanlamalar sunucuları kendiliğinden yeniden başlatmaz.
@@ -57,17 +58,20 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 - **Paneldense yapılandırma:** SMTP, sunucu adresi, saat dilimi, veri kaynakları ve tüm işletim ayarları panelden değiştirilir. Değişiklikler yeniden başlatma gerektirmez.
 - **Dışa aktarma:** Sunucu ve güvenlik açığı listeleri Excel uyumlu CSV olarak indirilebilir.
 
-### Desteklenen dağıtımlar
+### Desteklenen sistemler
 
-| Dağıtım | Envanter ve güncelleme | Güvenlik açığı taraması |
+| Sistem | Envanter ve güncelleme | Güvenlik açığı taraması |
 |---|---|---|
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
 | CentOS, Oracle Linux, Fedora ve diğer dağıtımlar (dnf, yum, zypper, apt veya apk kullanan) | ✓ | — |
+| Windows Server 2016, 2019, 2022, 2025; Windows 10, 11 (x64) | Windows Update | ✓ (bekleyen Microsoft güncellemeleri) |
 
 Ajan amd64 ve arm64 mimarilerinde çalışır. Hizmet yöneticisi olarak systemd veya OpenRC (Alpine) gerekir. Sunucunun fiziksel, sanal (VMware, Hyper-V, KVM/Proxmox) veya bulutta olması fark etmez.
+
+Windows'ta ajan x64 sistemlerde Windows hizmeti olarak çalışır ve Windows Update Agent'ı kullanır; WSUS'a bağlı sunucularda WSUS'ta onaylanan güncellemeler görünür. Windows'ta güvenlik açığı taraması Microsoft güncellemeleriyle sınırlıdır: üçüncü taraf programlar (tarayıcılar, 7-Zip vb.) envanterde listelenir ancak taranmaz. Microsoft'un CVE eşlemesi yayımlamadığı güncellemeler (bazı .NET toplu güncellemeleri gibi) Windows Update'in bildirdiği önem derecesiyle güvenlik güncellemesi olarak gösterilir.
 
 ## Ekran görüntüleri
 
@@ -112,13 +116,14 @@ Görüntüler, Ubuntu, Debian, Rocky Linux, AlmaLinux ve Alpine çalıştıran a
 ┌──────────────────────┐   HTTPS   ┌──────────────────────────────┐   HTTPS   ┌──────────────┐
 │ netio-patchman-agent │ ────────▶ │ netio.patchman               │ ────────▶ │ api.osv.dev  │
 │  envanter, işler     │  (giden)  │  panel + API + SQLite        │           │ CISA KEV     │
+│  (Linux, Windows)    │           │                              │           │ MSRC         │
 └──────────────────────┘           └──────────────────────────────┘           └──────────────┘
                                                  ▲
                                     Tarayıcı ────┘  (yönetim paneli)
 ```
 
 1. Ajan, belirli aralıklarla merkezi sunucuya bağlanır. Kurulu paketleri ve bekleyen güncellemeleri bildirir, sırada bir iş varsa alır.
-2. Merkezi sunucu paket sürümlerini OSV.dev'deki dağıtım güvenlik verileriyle eşleştirir ve bulguları panelde gösterir.
+2. Merkezi sunucu paket sürümlerini OSV.dev'deki dağıtım güvenlik verileriyle eşleştirir ve bulguları panelde gösterir. Windows sunucularında bekleyen KB'lerin düzelttiği CVE'ler Microsoft Security Update Guide'dan alınır.
 3. Paneldeki güncelleme işleri ajanın bir sonraki bağlantısında ajana iletilir. Ajan işi sabit paket yöneticisi komutlarıyla çalıştırır ve sonucu bildirir.
 
 Yönetilen sunucularda gelen bağlantı için port açmanız gerekmez.
@@ -229,6 +234,23 @@ journalctl -u netio-patchman-agent -f
 
 Toplu dağıtım (Ansible vb.), çevrimdışı kurulum, ajan seçenekleri ve kaldırma adımları için bkz. [docs/kurulum.md](docs/kurulum.md#4-ajan-kurulumu).
 
+### Windows sunucuları
+
+Ajan Yönetimi sayfasında **Windows / Windows Server (PowerShell)** seçeneğini seçin ve oluşan komutu sunucuda **yönetici olarak** açılan PowerShell veya komut isteminde çalıştırın:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; & ([scriptblock]::Create((irm 'https://patchman.your-domain/downloads/install-agent.ps1').TrimStart([char]65279))) -ServerUrl 'https://patchman.your-domain' -Token '<KAYIT-ANAHTARI>'"
+```
+
+Kurulum betiği ajanı `C:\Program Files\netio-patchman\netio-patchman-agent.exe` konumuna kurar, yapılandırmayı yalnızca SYSTEM ve Administrators'ın erişebildiği `C:\ProgramData\netio-patchman\agent.env` dosyasına yazar ve `netio-patchman-agent` Windows hizmetini (otomatik başlatma, hata durumunda yeniden başlatma) oluşturup başlatır. Kayıtlar `C:\ProgramData\netio-patchman\agent.log` dosyasındadır:
+
+```powershell
+Get-Service netio-patchman-agent
+Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50 -Wait
+```
+
+İnternet erişimi olmayan sunucularda `install-agent.ps1` ve `netio-patchman-agent-windows-amd64.exe` dosyalarını aynı klasöre kopyalayıp `-Binary` seçeneğini kullanın. Kaldırmak için: `.\install-agent.ps1 -Uninstall`. Ajan Windows Update hizmetine en fazla 6 saatte bir çevrim içi sorar; arada Windows'un kendi son taramasının sonucunu okur.
+
 ## Güncelleme, yedekleme ve kaldırma
 
 ### Yeni sürüme geçme
@@ -293,7 +315,7 @@ Yapılandırmanın tamamı yönetim panelinden yapılabilir:
 
 - **Sistem Ayarları:** Bildirim eşikleri ve alıcıları, ajan bağlantı aralıkları, otomatik ajan güncellemesi, tarama, kayıt saklama süresi, güvenlik (iki adımlı doğrulama, risk kabulü süresi) ve otomatik yedekleme.
 - **Sistem Ayarları → Bildirim kanalları:** Slack, Microsoft Teams, Telegram ve webhook kanalları.
-- **Sistem Ayarları → Sunucu yapılandırması:** Sunucu adresi, ters vekil, saat dilimi, günlük seviyesi, SMTP ve veri kaynakları (OSV, CISA KEV).
+- **Sistem Ayarları → Sunucu yapılandırması:** Sunucu adresi, ters vekil, saat dilimi, günlük seviyesi, SMTP ve veri kaynakları (OSV, CISA KEV, Microsoft Security Update Guide).
 
 `.env` dosyasındaki `PATCHMAN_` önekli değişkenler yalnızca ilk değerleri verir; panelde kaydedilen değer bunların yerine geçer. Aşağıdaki tabloda "Panelden" sütununda "—" ile işaretli değerler sunucu başlarken gerektiği için yalnızca `.env` ile değiştirilebilir ve yeniden başlatma gerektirir. Tüm seçenekler açıklamalarıyla [.env.example](.env.example) dosyasındadır.
 
@@ -309,6 +331,7 @@ Yapılandırmanın tamamı yönetim panelinden yapılabilir:
 | `PATCHMAN_BACKUP_DIR` | `/data/backups` | Otomatik yedeklerin yazıldığı dizin | — |
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API adresi (iç ağ yansısı kullanılabilir) | evet |
 | `PATCHMAN_KEV_URL` | CISA KEV adresi | KEV kataloğu adresi; `off` ile kapatılır | evet |
+| `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Windows sunucularının CVE eşlemesi için Microsoft Security Update Guide adresi; `off` ile kapatılır | evet |
 | `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | E-posta sunucusu | evet |
 | `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP kimlik bilgileri | evet |
 | `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Gönderen adı ve adresi | evet |
@@ -324,6 +347,8 @@ Ortam değişkenlerinde hatalı bir değer varsa sunucu başlamaz ve hataları T
 | Panel açılmıyor | `docker compose ps` çıktısının PORTS sütununda `0.0.0.0:<port>->8080/tcp` görünmeli. `docker compose logs server` ile hataları görün. Güvenlik duvarında `PATCHMAN_PUBLISH_PORT` portu açık mı? |
 | Kurulum komutu `localhost` adresini gösteriyor | **Sunucu yapılandırması** sayfasında sunucu adresini ajanların erişebileceği adresle değiştirin. |
 | Ajan kaydolmuyor | Ajanın bulunduğu sunucudan `curl -I https://patchman.your-domain/healthz` çalışıyor mu? `journalctl -u netio-patchman-agent -n 50` |
+| Windows ajanı kaydolmuyor veya güncelleme göstermiyor | `Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50`. Windows Update hizmeti (`wuauserv`) devre dışı mı? Sunucu WSUS'a bağlıysa güncellemeler WSUS'ta onaylanmış mı? |
+| Windows sunucusunda CVE görünmüyor | Merkezi sunucu `api.msrc.microsoft.com` adresine erişebiliyor mu? **Sunucu yapılandırması** sayfasında Microsoft Security Update Guide açık mı? |
 | Açık taraması sonuç vermiyor | Merkezi sunucunun `api.osv.dev` adresine erişimi var mı? Günlüklerde OSV hatası arayın. |
 | E-posta gelmiyor | **Sunucu yapılandırması** sayfasından deneme e-postası gönderin; hata mesajı panelde gösterilir. |
 
@@ -342,8 +367,8 @@ Ayrıntılı bilgi: [docs/kurulum.md](docs/kurulum.md) (kurulum ve işletim), [d
 
 - Parolalar PBKDF2-SHA256 (600.000 tekrar) ile saklanır. Oturum, kayıt anahtarı ve ajan kimlikleri veritabanında yalnızca SHA-256 özeti olarak tutulur.
 - Tüm form işlemleri CSRF korumalıdır. Başarısız girişler IP ve hesap bazında sınırlandırılır.
-- Ajan port açmaz ve dışarıdan bağlantı kabul etmez. Yalnızca önceden tanımlı paket yöneticisi komutlarını, kabuk kullanmadan çalıştırır; paket adları her iki tarafta doğrulanır.
-- Bir sunucuda uzaktan güncellemeyi tamamen kapatmak için o sunucunun `/etc/netio-patchman/agent.env` dosyasına `PATCHMAN_REMOTE_UPDATES=false` yazın.
+- Ajan port açmaz ve dışarıdan bağlantı kabul etmez. Yalnızca önceden tanımlı paket yöneticisi komutlarını, kabuk kullanmadan çalıştırır; paket adları her iki tarafta doğrulanır. Windows'ta Windows Update, ajana gömülü sabit bir PowerShell betiğiyle (Windows Update Agent API) kullanılır; KB adları da doğrulanır.
+- Bir sunucuda uzaktan güncellemeyi tamamen kapatmak için o sunucunun `/etc/netio-patchman/agent.env` dosyasına `PATCHMAN_REMOTE_UPDATES=false` yazın. Windows'ta aynı ayar `C:\ProgramData\netio-patchman\agent.env` dosyasındadır.
 - Panel katı bir Content-Security-Policy ile sunulur ve dış kaynak (CDN, yazı tipi) kullanmaz; internet erişimi olmayan ağlarda da çalışır.
 
 ## Geliştirme
@@ -359,8 +384,11 @@ PATCHMAN_DATA_DIR=./data go run ./cmd/netio-patchman-server
 scripts/build-agent.sh                                    # Linux / macOS
 powershell -File scripts\build-agent.ps1                  # Windows
 
-# OSV.dev'e karşı canlı tarama testi (internet erişimi gerekir)
+# OSV.dev ve Microsoft Security Update Guide'a karşı canlı tarama testi (internet erişimi gerekir)
 go test -tags live -run Live -v ./internal/scanner/
+
+# Windows'ta gerçek Windows Update taraması (yalnızca arar, bir şey kurmaz)
+go test -tags live -run LiveWindows -v ./internal/agent/
 ```
 
 Ürün gereksinimleri [docs/spec/](docs/spec/) dizinindedir.
@@ -373,7 +401,7 @@ netio.patchman "olduğu gibi" (AS IS) sunulur. Açık ya da örtülü hiçbir ga
 
 - Paket güncellemesi, servis veya sunucu yeniden başlatma sırasında ya da sonrasında oluşan hizmet kesintileri, uyumsuzluklar ve veri kaybı.
 - Başarısız, yarım kalan veya beklenmeyen sonuç veren güncelleme işleri ve zamanlanmış güncellemeler.
-- Tespit edilemeyen, yanlış tespit edilen veya önem derecesi hatalı gösterilen güvenlik açıkları. Güvenlik verileri üçüncü taraf kaynaklardan (OSV.dev, CISA KEV, dağıtım duyuruları) gelir; doğrulukları bu kaynaklara bağlıdır.
+- Tespit edilemeyen, yanlış tespit edilen veya önem derecesi hatalı gösterilen güvenlik açıkları. Güvenlik verileri üçüncü taraf kaynaklardan (OSV.dev, CISA KEV, Microsoft Security Update Guide, dağıtım duyuruları) gelir; doğrulukları bu kaynaklara bağlıdır.
 - Yazılımın, ajanların veya merkezi sunucunun yanlış yapılandırılması, yetkisiz erişime açık bırakılması ya da kötüye kullanılması.
 
 Kullanmadan önce:

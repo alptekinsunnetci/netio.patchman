@@ -95,6 +95,10 @@ func PendingUpdates(ctx context.Context, pm string) ([]protocol.Update, error) {
 		return zypperUpdates(ctx, pkgs)
 	case protocol.PMApk:
 		return apkUpdates(ctx)
+	case protocol.PMWindowsUpdate:
+		// Jobs ask the update service so targets match what will be installed.
+		ups, _, err := wuPending(ctx, true)
+		return ups, err
 	}
 	return nil, errors.New("unsupported package manager")
 }
@@ -158,6 +162,8 @@ func (c Collector) collect(ctx context.Context) (pkgs []protocol.Package, update
 		if rel, err := os.ReadFile("/proc/sys/kernel/osrelease"); err == nil {
 			reboot = apkKernelPending(string(rel), pkgs)
 		}
+	case protocol.PMWindowsUpdate:
+		return c.collectWindows(ctx)
 	default:
 		errs = append(errs, "unsupported package manager")
 	}

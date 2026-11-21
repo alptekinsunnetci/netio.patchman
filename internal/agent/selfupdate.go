@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -102,6 +103,9 @@ func (u SelfUpdater) Update(ctx context.Context, job protocol.Job) (string, bool
 	}
 	dir := filepath.Dir(exe)
 	tmp := filepath.Join(dir, "."+filepath.Base(exe)+".new")
+	if runtime.GOOS == "windows" {
+		tmp += ".exe"
+	}
 	defer os.Remove(tmp)
 
 	got, err := u.Client.Download(ctx, path, tmp)
@@ -125,6 +129,17 @@ func (u SelfUpdater) Update(ctx context.Context, job protocol.Job) (string, bool
 
 	previous := exe + ".previous"
 	_ = os.Remove(previous)
+	if runtime.GOOS == "windows" {
+		// A running executable cannot be replaced, but it can be renamed.
+		if err := os.Rename(exe, previous); err != nil {
+			return "", false, fmt.Errorf("backup: %w", err)
+		}
+		if err := os.Rename(tmp, exe); err != nil {
+			_ = os.Rename(previous, exe)
+			return "", false, fmt.Errorf("install: %w", err)
+		}
+		return u.L.T("agent.update.installed", "from", version.Version, "to", target), true, nil
+	}
 	if err := os.Link(exe, previous); err != nil {
 		// Hard links can fail on some filesystems; fall back to a copy.
 		if err := copyFile(exe, previous); err != nil {

@@ -247,6 +247,7 @@ a.stat:hover { border-color: var(--border-strong); text-decoration: none; }
 .table tbody tr:hover td { background: var(--surface-muted); }
 .table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .table .check { width: 32px; }
+.table .nowrap { white-space: nowrap; }
 .table .actions { text-align: right; white-space: nowrap; }
 /* Versions wrap at their natural break points ("3.0.13-" / "0ubuntu3.16"),
    never inside a number; break-word keeps the column at least as wide as the

@@ -13,11 +13,13 @@ if (-not $Version) { $Version = (Get-Content -Raw (Join-Path $root "VERSION")).T
 $Out = (New-Item -ItemType Directory -Force $Out).FullName
 
 $env:CGO_ENABLED = "0"
-$env:GOOS = "linux"
 $ldflags = "-s -w -X netio.patchman/internal/version.Version=$Version"
 try {
-    foreach ($arch in @("amd64", "arm64")) {
-        $name = "netio-patchman-agent-linux-$arch"
+    foreach ($target in @("linux/amd64", "linux/arm64", "windows/amd64")) {
+        $os, $arch = $target.Split("/")
+        $name = "netio-patchman-agent-$os-$arch"
+        if ($os -eq "windows") { $name += ".exe" }
+        $env:GOOS = $os
         $env:GOARCH = $arch
         Write-Host "Derleniyor: $name ($Version)"
         go build -trimpath -ldflags $ldflags -o (Join-Path $Out $name) ./cmd/netio-patchman-agent

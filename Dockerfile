@@ -1,8 +1,8 @@
 # netio.patchman sunucu imajı
 # Derleme: docker build -t netio-patchman-server .
 # Sürüm, depodaki VERSION dosyasından okunur; --build-arg VERSION=<sürüm> ile
-# değiştirilebilir. İmaj, sunucunun yanında amd64 ve arm64 Linux ajan
-# dosyalarını da içerir; ajanlar /downloads/agent/ adresinden indirilir.
+# değiştirilebilir. İmaj, sunucunun yanında amd64 ve arm64 Linux ile amd64
+# Windows ajan dosyalarını da içerir; ajanlar /downloads/agent/ adresinden indirilir.
 
 FROM golang:1.26-alpine AS build
 WORKDIR /src
@@ -26,11 +26,14 @@ RUN VERSION="${VERSION:-$(tr -d ' \r\n' < VERSION)}" && \
       GOOS=linux GOARCH=$arch go build -trimpath -ldflags "$LDFLAGS" \
         -o /out/agent/netio-patchman-agent-linux-$arch ./cmd/netio-patchman-agent && \
       (cd /out/agent && sha256sum netio-patchman-agent-linux-$arch > netio-patchman-agent-linux-$arch.sha256); \
-    done
+    done && \
+    GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "$LDFLAGS" \
+      -o /out/agent/netio-patchman-agent-windows-amd64.exe ./cmd/netio-patchman-agent && \
+    (cd /out/agent && sha256sum netio-patchman-agent-windows-amd64.exe > netio-patchman-agent-windows-amd64.exe.sha256)
 
 FROM gcr.io/distroless/static-debian12:nonroot
 LABEL org.opencontainers.image.title="netio.patchman" \
-      org.opencontainers.image.description="Merkezi Linux Güvenlik Açığı ve Güncelleme Yönetimi" \
+      org.opencontainers.image.description="Merkezi Linux ve Windows Güvenlik Açığı ve Güncelleme Yönetimi" \
       org.opencontainers.image.source="https://github.com/alptekinsunnetci/netio.patchman"
 ENV TZ=Europe/Istanbul \
     LANG=C.UTF-8 \

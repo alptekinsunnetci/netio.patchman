@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"os"
 	"os/exec"
 	"slices"
@@ -25,6 +26,9 @@ type command struct {
 	args []string
 	// okCodes are exit codes treated as success besides 0.
 	okCodes []int
+	// fn, when set, runs the step in-process instead of exec (Windows Update);
+	// name and args are then only shown in the output.
+	fn func(ctx context.Context, out io.Writer) int
 }
 
 // tailBuffer keeps the last max bytes written. A lone carriage return
@@ -111,7 +115,11 @@ func (s *jobState) finish(ok bool, code int, msg string) protocol.JobResult {
 func (s *jobState) step(ctx context.Context, c command) (code int, failed bool) {
 	_, _ = s.out.Write([]byte("$ " + c.name + " " + strings.Join(c.args, " ") + "\n"))
 	exe := s.r.Exec
-	if exe == nil {
+	switch {
+	case exe != nil:
+	case c.fn != nil:
+		exe = func(ctx context.Context, c command, out *tailBuffer) int { return c.fn(ctx, out) }
+	default:
 		exe = execCommand
 	}
 	code = exe(ctx, c, s.out)
@@ -312,6 +320,26 @@ func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) 
 		case protocol.JobUpgradePackages:
 			cmds = []command{{name: "apk", args: append([]string{"upgrade"}, pkgs...)}}
 		}
+	case protocol.PMWindowsUpdate:
+		switch job.Type {
+		case protocol.JobUpgradeAll:
+			if known {
+				cmds = []command{windowsInstallCommand(r.L, all, "")}
+			} else {
+				cmds = []command{windowsInstallCommand(r.L, nil, "all")}
+			}
+		case protocol.JobUpgradeSecurity:
+			if !known {
+				cmds = []command{windowsInstallCommand(r.L, nil, "security")}
+				break
+			}
+			if len(security) == 0 {
+				return nil, nil, r.L.T("agent.job.no_security_updates"), nil
+			}
+			cmds = []command{windowsInstallCommand(r.L, security, "")}
+		case protocol.JobUpgradePackages:
+			cmds = []command{windowsInstallCommand(r.L, pkgs, "")}
+		}
 	default:
 		return nil, nil, "", errors.New(r.L.T("agent.job.pm_unsupported"))
 	}
@@ -459,6 +487,14 @@ func (r JobRunner) restartServices(ctx context.Context, s *jobState, services []
 // reboot schedules a reboot one minute ahead so the result reaches the server
 // first. After the reboot the agent starts again and sends a fresh report.
 func (r JobRunner) reboot(s *jobState) protocol.JobResult {
+	if r.PM == protocol.PMWindowsUpdate {
+		// Returns at once; Windows restarts after 60 seconds (planned: security fix).
+		c := command{name: "shutdown.exe", args: []string{"/r", "/t", "60", "/d", "p:2:17", "/c", r.L.T("agent.job.reboot_wall")}}
+		if code, failed := s.step(context.Background(), c); failed {
+			return s.finish(false, code, r.L.T("agent.job.command_failed", "command", c.name, "code", code))
+		}
+		return s.finish(true, 0, r.L.T("agent.job.reboot_scheduled"))
+	}
 	if _, err := exec.LookPath("shutdown"); err == nil || r.Exec != nil {
 		// systemd and sysvinit: returns at once, the reboot happens later.
 		c := command{name: "shutdown", args: []string{"-r", "+1", r.L.T("agent.job.reboot_wall")}}

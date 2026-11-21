@@ -1,6 +1,7 @@
 package i18n
 
 import (
+	"encoding/json"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -182,6 +183,41 @@ func TestReferencedKeysExist(t *testing.T) {
 	for m := 1; m <= 12; m++ {
 		if !have["month."+strconv.Itoa(m)] {
 			t.Errorf("missing month %d", m)
+		}
+	}
+}
+
+// TestCatalogsHaveNoDuplicateKeys catches a key written twice (json.Unmarshal
+// silently keeps the last value).
+func TestCatalogsHaveNoDuplicateKeys(t *testing.T) {
+	files, err := filepath.Glob("locales/*.json")
+	if err != nil || len(files) == 0 {
+		t.Fatalf("no catalogs: %v", err)
+	}
+	for _, f := range files {
+		data, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dec := json.NewDecoder(strings.NewReader(string(data)))
+		if _, err := dec.Token(); err != nil { // {
+			t.Fatal(err)
+		}
+		seen := map[string]bool{}
+		for dec.More() {
+			tok, err := dec.Token()
+			if err != nil {
+				t.Fatalf("%s: %v", f, err)
+			}
+			key := tok.(string)
+			if seen[key] {
+				t.Errorf("%s: duplicate key %q", f, key)
+			}
+			seen[key] = true
+			var v json.RawMessage
+			if err := dec.Decode(&v); err != nil {
+				t.Fatalf("%s: %v", f, err)
+			}
 		}
 	}
 }

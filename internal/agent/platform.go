@@ -21,7 +21,7 @@ var (
 // systemd-detect-virt when available, otherwise DMI and container markers.
 // "none" means a physical machine, "" that it could not be determined.
 func Virtualization() string {
-	virtOnce.Do(func() { virtID = detectVirtualization(context.Background(), "/") })
+	virtOnce.Do(func() { virtID = platformVirtualization() })
 	return virtID
 }
 
@@ -63,12 +63,24 @@ func detectVirtualization(ctx context.Context, root string) string {
 	if rel := strings.ToLower(read("proc/sys/kernel/osrelease")); strings.Contains(rel, "microsoft") {
 		return "wsl"
 	}
-	vendor := strings.ToLower(read("sys/class/dmi/id/sys_vendor"))
-	product := strings.ToLower(read("sys/class/dmi/id/product_name"))
+	vendor := read("sys/class/dmi/id/sys_vendor")
+	product := read("sys/class/dmi/id/product_name")
 	if vendor == "" && product == "" {
 		return ""
 	}
-	dmi := vendor + " " + product
+	if id := virtFromDMI(vendor, product); id != "" {
+		return id
+	}
+	if strings.Contains(read("proc/cpuinfo"), "hypervisor") {
+		return "vm-other"
+	}
+	return "none"
+}
+
+// virtFromDMI maps the DMI (SMBIOS) system vendor and product name to a
+// systemd-detect-virt id; "" when they name no known hypervisor.
+func virtFromDMI(vendor, product string) string {
+	dmi := strings.ToLower(vendor + " " + product)
 	for _, m := range []struct{ match, id string }{
 		{"vmware", "vmware"},
 		{"virtualbox", "oracle"},
@@ -87,10 +99,7 @@ func detectVirtualization(ctx context.Context, root string) string {
 			return m.id
 		}
 	}
-	if strings.Contains(read("proc/cpuinfo"), "hypervisor") {
-		return "vm-other"
-	}
-	return "none"
+	return ""
 }
 
 // aptKernelPending reports whether a newer kernel image was installed after

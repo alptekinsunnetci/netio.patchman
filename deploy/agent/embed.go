@@ -15,11 +15,17 @@ var SystemdUnit []byte
 //go:embed netio-patchman-agent.openrc
 var OpenRCScript []byte
 
+// WindowsInstallScript installs the agent as a Windows service.
+//
+//go:embed install-agent.ps1
+var WindowsInstallScript []byte
+
 // Assets maps download names to contents.
 func Assets() map[string][]byte {
 	return map[string][]byte{
 		"install-agent.sh":             InstallScript,
 		"netio-patchman-agent.service": SystemdUnit,
 		"netio-patchman-agent.openrc":  OpenRCScript,
+		"install-agent.ps1":            WindowsInstallScript,
 	}
 }

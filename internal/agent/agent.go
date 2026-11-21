@@ -23,12 +23,6 @@ import (
 	"netio.patchman/internal/version"
 )
 
-// DefaultConfigPath is the agent's environment file.
-const DefaultConfigPath = brand.ConfigDir + "/agent.env"
-
-// DefaultStateDir holds the agent credentials.
-const DefaultStateDir = "/var/lib/netio-patchman"
-
 // Config is the agent configuration.
 type Config struct {
 	ServerURL       *url.URL
@@ -137,6 +131,9 @@ func osRelease() (map[string]string, error) {
 
 // DetectPackageManager returns the package manager in use.
 func DetectPackageManager() string {
+	if runtime.GOOS == "windows" {
+		return protocol.PMWindowsUpdate
+	}
 	for _, c := range []struct{ bin, pm string }{
 		{"dpkg-query", protocol.PMApt},
 		{"apk", protocol.PMApk},
@@ -163,6 +160,15 @@ func ReadHostInfo(remoteUpdates, selfUpdate bool) (protocol.HostInfo, error) {
 	if h.Hostname, err = os.Hostname(); err != nil {
 		return h, err
 	}
+	h.IPAddresses = ipAddresses()
+	h.PackageManager = DetectPackageManager()
+	h.Virtualization = Virtualization()
+	// Machine ID, kernel or build, uptime, FQDN and OS identification.
+	return h, readPlatform(&h)
+}
+
+// readLinuxPlatform fills the Linux host fields from /etc and /proc.
+func readLinuxPlatform(h *protocol.HostInfo) error {
 	h.FQDN = fqdn(h.Hostname)
 	if b, err := os.ReadFile("/etc/machine-id"); err == nil {
 		h.MachineID = strings.TrimSpace(string(b))
@@ -177,15 +183,12 @@ func ReadHostInfo(remoteUpdates, selfUpdate bool) (protocol.HostInfo, error) {
 			}
 		}
 	}
-	h.IPAddresses = ipAddresses()
-	h.PackageManager = DetectPackageManager()
-	h.Virtualization = Virtualization()
 	rel, err := osRelease()
 	if err != nil {
-		return h, err
+		return err
 	}
 	h.OSID, h.OSIDLike, h.OSVersionID, h.OSVersion, h.OSName = rel["ID"], rel["ID_LIKE"], rel["VERSION_ID"], rel["VERSION"], rel["PRETTY_NAME"]
-	return h, nil
+	return nil
 }
 
 func fqdn(hostname string) string {

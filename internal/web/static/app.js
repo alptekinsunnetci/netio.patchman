@@ -64,6 +64,8 @@
     if (!sel || !sudo || !out) return;
     var opt = sel.options[sel.selectedIndex];
     if (resetSudo) sudo.checked = opt.hasAttribute("data-default-sudo");
+    var sudoLabel = sudo.closest("label");
+    if (sudoLabel) sudoLabel.hidden = opt.hasAttribute("data-nosudo");
     out.value = opt.getAttribute(sudo.checked ? "data-sudo" : "data-root");
   }
   document.addEventListener("change", function (e) {

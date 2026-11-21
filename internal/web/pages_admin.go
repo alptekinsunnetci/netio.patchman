@@ -11,7 +11,7 @@ import (
 	"netio.patchman/internal/auth"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify"
-	"netio.patchman/internal/release"
+	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/schedule"
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
@@ -44,6 +44,7 @@ type installTarget struct {
 	ID       string // i18n key suffix: agents.install.os.<ID>
 	Wget     bool
 	Sudo     bool // default privilege mode
+	Windows  bool // PowerShell command; no sudo choice
 	AsRoot   string
 	WithSudo string
 }
@@ -73,6 +74,23 @@ var installTargets = []installTarget{
 	{ID: "fedora", Sudo: true},
 	{ID: "suse"},
 	{ID: "alpine", Wget: true},
+	{ID: "windows", Windows: true},
+}
+
+// windowsInstallCommand runs install-agent.ps1 from the server in an
+// elevated PowerShell. The script is fetched and run in memory, so the
+// execution policy needs no change on the machine.
+func windowsInstallCommand(base, token, locale string) string {
+	// PowerShell single-quoted strings escape ' as ''.
+	q := func(s string) string { return "'" + strings.ReplaceAll(s, "'", "''") + "'" }
+	args := " -ServerUrl " + q(base) + " -Token " + q(token)
+	if locale != "" && locale != i18n.DefaultLocale {
+		args += " -Locale " + locale
+	}
+	// TLS 1.2 for Windows Server 2016; the script is saved with a UTF-8 BOM
+	// (Turkish output from a local file), which a script block must not start with.
+	return `powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ` +
+		`& ([scriptblock]::Create((irm ` + q(base+"/downloads/install-agent.ps1") + `).TrimStart([char]65279)))` + args + `"`
 }
 
 // installCommands builds the install command; a non-default locale makes the
@@ -94,6 +112,10 @@ func (s *Server) installCommand(id, token string) installPicker {
 	p := installPicker{ID: id}
 	for _, t := range installTargets {
 		t.AsRoot, t.WithSudo = installCommands(base, token, s.l.Locale(), t.Wget)
+		if t.Windows {
+			t.AsRoot = windowsInstallCommand(base, token, s.l.Locale())
+			t.WithSudo = t.AsRoot
+		}
 		p.Targets = append(p.Targets, t)
 	}
 	return p
@@ -126,9 +148,9 @@ func (s *Server) renderAgents(w http.ResponseWriter, r *http.Request, nt *newTok
 		}
 	}
 	var archs []string
-	for _, a := range release.SupportedArchs {
-		if _, ok := s.o.Release.For(a); ok {
-			archs = append(archs, a)
+	for _, p := range protocol.AgentPlatforms {
+		if _, ok := s.o.Release.For(p[0], p[1]); ok {
+			archs = append(archs, p[0]+"/"+p[1])
 		}
 	}
 	d := s.page(r, s.l.T("nav.agents"), "agents")

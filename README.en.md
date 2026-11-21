@@ -1,10 +1,10 @@
 # netio.patchman
 
-**Central Linux Vulnerability and Update Management**
+**Central Linux and Windows Vulnerability and Update Management**
 
 [Türkçe](README.md) · **English** · [Deutsch](README.de.md) · [Русский](README.ru.md)
 
-netio.patchman is a self-hosted platform for monitoring and managing the vulnerabilities and package updates of hundreds of Linux servers from a single dashboard.
+netio.patchman is a self-hosted platform for monitoring and managing the vulnerabilities and package updates of hundreds of Linux and Windows servers from a single dashboard.
 
 - The central server is a single Docker container with an embedded SQLite database. No separate database, queue or cache service is needed.
 - A small agent is installed on each managed server. The agent opens no ports; it connects to the central server itself.
@@ -36,6 +36,7 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 - **Server inventory:** Operating system, kernel, IP addresses, installed packages, pending updates, reboot status and services still running old code.
 - **Vulnerability scanning:** Installed package versions are matched against the distributions' official security data through [OSV.dev](https://osv.dev). CVSS score, severity, fixed version and vendor advisories are shown.
 - **Known exploited vulnerabilities:** Vulnerabilities in the CISA Known Exploited Vulnerabilities (KEV) catalog are flagged and prioritized.
+- **Windows servers:** Windows Server 2016, 2019, 2022, 2025 and Windows 10 and 11 are managed from the same dashboard. The agent runs as a Windows service and reports installed programs and the updates pending in Windows Update (KB number, title, Microsoft severity, classification). The CVEs each pending KB fixes come from the Microsoft Security Update Guide (MSRC). When a server is several months behind, the CVEs of the older cumulative updates it supersedes are added too, compared against the server's Windows build. Security updates, all updates or selected KBs are installed from the dashboard and verified; the server can be restarted from the dashboard.
 - **Central updates:** Install security updates, all updates or selected packages on one server, on selected servers or on all of them from the dashboard. **Apply fix** on a CVE updates the related packages on every affected server. After each job the agent verifies that the packages were really updated; packages that were not updated are listed and can be retried with one click.
 - **Service and server restarts:** Services still using old versions of updated libraries are detected and can be restarted from the dashboard; servers can be rebooted from the dashboard.
 - **Scheduled updates:** Maintenance windows such as "apply security updates to Ubuntu servers every Sunday at 03:00". Schedules never reboot servers by themselves.
@@ -56,17 +57,20 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 - **Configuration from the dashboard:** SMTP, server address, time zone, data sources and all operational settings are changed in the dashboard. Changes apply without a restart.
 - **Export:** Server and vulnerability lists can be downloaded as Excel-compatible CSV files.
 
-### Supported distributions
+### Supported systems
 
-| Distribution | Inventory and updates | Vulnerability scanning |
+| System | Inventory and updates | Vulnerability scanning |
 |---|---|---|
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
 | CentOS, Oracle Linux, Fedora and other distributions (using dnf, yum, zypper, apt or apk) | ✓ | — |
+| Windows Server 2016, 2019, 2022, 2025; Windows 10, 11 (x64) | Windows Update | ✓ (pending Microsoft updates) |
 
 The agent runs on amd64 and arm64. It requires systemd or OpenRC (Alpine) as the service manager. Physical, virtual (VMware, Hyper-V, KVM/Proxmox) and cloud servers are all supported.
+
+On Windows the agent runs as a Windows service on x64 systems and uses the Windows Update Agent; servers attached to WSUS see the updates approved in WSUS. Vulnerability scanning on Windows is limited to Microsoft updates: third-party programs (browsers, 7-Zip and so on) are listed in the inventory but not scanned. Updates for which Microsoft publishes no CVE mapping (some .NET rollups, for example) are shown as security updates with the severity Windows Update reports.
 
 ## Screenshots
 
@@ -111,13 +115,14 @@ The screenshots show the Turkish interface; the other languages have the same la
 ┌──────────────────────┐   HTTPS   ┌──────────────────────────────┐   HTTPS   ┌──────────────┐
 │ netio-patchman-agent │ ────────▶ │ netio.patchman               │ ────────▶ │ api.osv.dev  │
 │  inventory, jobs     │ (outbound)│  dashboard + API + SQLite    │           │ CISA KEV     │
+│  (Linux, Windows)    │           │                              │           │ MSRC         │
 └──────────────────────┘           └──────────────────────────────┘           └──────────────┘
                                                  ▲
                                      Browser ────┘  (dashboard)
 ```
 
 1. The agent connects to the central server at regular intervals. It reports installed packages and pending updates, and picks up a job if one is queued.
-2. The central server matches package versions against the distributions' security data on OSV.dev and shows the findings in the dashboard.
+2. The central server matches package versions against the distributions' security data on OSV.dev and shows the findings in the dashboard. For Windows servers, the CVEs fixed by the pending KBs come from the Microsoft Security Update Guide.
 3. Update jobs from the dashboard are handed to the agent on its next connection. The agent runs them with fixed package manager commands and reports the result.
 
 No inbound ports need to be opened on managed servers.
@@ -231,6 +236,23 @@ journalctl -u netio-patchman-agent -f
 
 For bulk deployment (Ansible etc.), offline installation, agent options and removal, see [docs/kurulum.md](docs/kurulum.md#4-ajan-kurulumu) (Turkish).
 
+### Windows servers
+
+On the Agents page choose **Windows / Windows Server (PowerShell)** and run the generated command on the server in PowerShell or a command prompt opened **as administrator**:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; & ([scriptblock]::Create((irm 'https://patchman.your-domain/downloads/install-agent.ps1').TrimStart([char]65279))) -ServerUrl 'https://patchman.your-domain' -Token '<ENROLLMENT-TOKEN>'"
+```
+
+The install script puts the agent in `C:\Program Files\netio-patchman\netio-patchman-agent.exe`, writes the configuration to `C:\ProgramData\netio-patchman\agent.env` (readable only by SYSTEM and Administrators), and creates and starts the `netio-patchman-agent` Windows service (automatic start, restart on failure). The log is `C:\ProgramData\netio-patchman\agent.log`:
+
+```powershell
+Get-Service netio-patchman-agent
+Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50 -Wait
+```
+
+For servers without internet access, copy `install-agent.ps1` and `netio-patchman-agent-windows-amd64.exe` to one folder and use the `-Binary` option. To remove the agent: `.\install-agent.ps1 -Uninstall`. The agent asks the Windows Update service online at most every 6 hours; in between it reads the result of Windows' own last scan.
+
 ## Updating, backup and removal
 
 ### Moving to a new version
@@ -295,7 +317,7 @@ All configuration can be done in the dashboard:
 
 - **Settings:** Notification thresholds and recipients, agent connection intervals, automatic agent updates, scanning, retention, security (two-factor authentication, risk acceptance term) and automatic backups.
 - **Settings → Notification channels:** Slack, Microsoft Teams, Telegram and webhook channels.
-- **Settings → Server configuration:** Server address, reverse proxy, time zone, log level, SMTP and data sources (OSV, CISA KEV).
+- **Settings → Server configuration:** Server address, reverse proxy, time zone, log level, SMTP and data sources (OSV, CISA KEV, Microsoft Security Update Guide).
 
 The `PATCHMAN_`-prefixed variables in `.env` only provide the initial values; a value saved in the dashboard replaces them. Values marked "—" in the "Dashboard" column are needed when the server starts, so they can only be changed in `.env` and require a restart. All options are described in [.env.example](.env.example) (comments in Turkish).
 
@@ -311,6 +333,7 @@ The `PATCHMAN_`-prefixed variables in `.env` only provide the initial values; a 
 | `PATCHMAN_BACKUP_DIR` | `/data/backups` | Directory for automatic backups | — |
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API address (an internal mirror can be used) | yes |
 | `PATCHMAN_KEV_URL` | CISA KEV address | KEV catalog address; `off` turns it off | yes |
+| `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Microsoft Security Update Guide address for the CVE mapping of Windows servers; `off` turns it off | yes |
 | `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | Email server | yes |
 | `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP credentials | yes |
 | `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Sender name and address | yes |
@@ -326,6 +349,8 @@ If an environment variable has an invalid value, the server does not start and l
 | The dashboard does not open | `docker compose ps` should show `0.0.0.0:<port>->8080/tcp` in the PORTS column. See errors with `docker compose logs server`. Is the `PATCHMAN_PUBLISH_PORT` port open in the firewall? |
 | The install command shows `localhost` | Change the server address on the **Server configuration** page to an address the agents can reach. |
 | The agent does not enroll | Does `curl -I https://patchman.your-domain/healthz` work from the agent's server? `journalctl -u netio-patchman-agent -n 50` |
+| The Windows agent does not enroll or shows no updates | `Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50`. Is the Windows Update service (`wuauserv`) disabled? If the server uses WSUS, are the updates approved there? |
+| No CVEs on a Windows server | Can the central server reach `api.msrc.microsoft.com`? Is the Microsoft Security Update Guide turned on in **Server configuration**? |
 | Vulnerability scanning finds nothing | Can the central server reach `api.osv.dev`? Look for OSV errors in the logs. |
 | No emails arrive | Send a test email from the **Server configuration** page; the error is shown in the dashboard. |
 
@@ -345,8 +370,8 @@ More information (in Turkish): [docs/kurulum.md](docs/kurulum.md) (installation 
 
 - Passwords are stored with PBKDF2-SHA256 (600,000 iterations). Sessions, enrollment tokens and agent credentials are stored in the database only as SHA-256 hashes.
 - All form actions are protected against CSRF. Failed sign-ins are rate-limited per IP and per account. Two-factor authentication (TOTP) is available and can be made mandatory.
-- The agent opens no ports and accepts no inbound connections. It only runs predefined package manager commands, without a shell; package names are validated on both sides.
-- To turn off remote updates completely on a server, set `PATCHMAN_REMOTE_UPDATES=false` in that server's `/etc/netio-patchman/agent.env`.
+- The agent opens no ports and accepts no inbound connections. It only runs predefined package manager commands, without a shell; package names are validated on both sides. On Windows, Windows Update is used through a fixed PowerShell script embedded in the agent (Windows Update Agent API); KB names are validated too.
+- To turn off remote updates completely on a server, set `PATCHMAN_REMOTE_UPDATES=false` in that server's `/etc/netio-patchman/agent.env`. On Windows the same setting is in `C:\ProgramData\netio-patchman\agent.env`.
 - The dashboard is served with a strict Content-Security-Policy and uses no external resources (CDNs, fonts); it also works in networks without internet access.
 
 ## Development
@@ -362,8 +387,11 @@ PATCHMAN_DATA_DIR=./data go run ./cmd/netio-patchman-server
 scripts/build-agent.sh                                    # Linux / macOS
 powershell -File scripts\build-agent.ps1                  # Windows
 
-# Live scan test against OSV.dev (requires internet access)
+# Live scan test against OSV.dev and the Microsoft Security Update Guide (requires internet access)
 go test -tags live -run Live -v ./internal/scanner/
+
+# Real Windows Update search on Windows (searches only, installs nothing)
+go test -tags live -run LiveWindows -v ./internal/agent/
 ```
 
 Product requirements are in the [docs/spec/](docs/spec/) directory.
@@ -376,7 +404,7 @@ netio.patchman is provided "AS IS". No warranty of any kind is given, express or
 
 - Service outages, incompatibilities and data loss during or after package updates, service restarts or server reboots.
 - Failed, incomplete or unexpected update jobs and scheduled updates.
-- Vulnerabilities that are not detected, detected incorrectly or shown with a wrong severity. Security data comes from third-party sources (OSV.dev, CISA KEV, distribution advisories); its accuracy depends on those sources.
+- Vulnerabilities that are not detected, detected incorrectly or shown with a wrong severity. Security data comes from third-party sources (OSV.dev, CISA KEV, Microsoft Security Update Guide, distribution advisories); its accuracy depends on those sources.
 - Misconfiguration of the software, the agents or the central server, leaving them open to unauthorized access, or misuse.
 
 Before using it:

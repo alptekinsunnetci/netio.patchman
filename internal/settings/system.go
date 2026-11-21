@@ -33,6 +33,8 @@ const (
 	KeyOSVURL          = "sources.osv_url"
 	KeyKEVEnabled      = "sources.kev_enabled"
 	KeyKEVURL          = "sources.kev_url"
+	KeyMSRCEnabled     = "sources.msrc_enabled"
+	KeyMSRCURL         = "sources.msrc_url"
 	KeyUpdateEnabled   = "updates.check_enabled"
 	KeyUpdateURL       = "updates.check_url"
 )
@@ -40,7 +42,8 @@ const (
 // SystemKeys lists every server configuration key.
 var SystemKeys = []string{
 	KeyBaseURL, KeyTrustProxy, KeyTimezone, KeyLogLevel, KeySMTPHost, KeySMTPPort, KeySMTPUsername, KeySMTPPassword,
-	KeySMTPFromName, KeySMTPFromAddress, KeyOSVURL, KeyKEVEnabled, KeyKEVURL, KeyUpdateEnabled, KeyUpdateURL,
+	KeySMTPFromName, KeySMTPFromAddress, KeyOSVURL, KeyKEVEnabled, KeyKEVURL, KeyMSRCEnabled, KeyMSRCURL,
+	KeyUpdateEnabled, KeyUpdateURL,
 }
 
 // LogLevels are the selectable log levels.
@@ -58,6 +61,10 @@ type System struct {
 	KEVURL     string // empty when the KEV feed is disabled
 	// KEVSourceURL is the configured KEV address, kept while the feed is off.
 	KEVSourceURL string
+	// MSRCURL is the Microsoft Security Update Guide API, empty when disabled;
+	// MSRCSourceURL is kept while it is off.
+	MSRCURL       string
+	MSRCSourceURL string
 	// UpdateURL is where the latest product version is read; empty when the
 	// new-version check is disabled. UpdateSourceURL is kept while it is off.
 	UpdateURL       string
@@ -80,10 +87,13 @@ func SystemFromEnv(c config.Config) System {
 	sys := System{
 		BaseURL: c.BaseURL, TrustProxy: c.TrustProxy, Timezone: c.TimezoneName, Location: c.Timezone,
 		LogLevel: c.LogLevel, SMTP: c.SMTP, OSVURL: c.OSVURL, KEVURL: c.KEVURL, KEVSourceURL: c.KEVURL,
-		UpdateURL: c.UpdateURL, UpdateSourceURL: c.UpdateURL,
+		MSRCURL: c.MSRCURL, MSRCSourceURL: c.MSRCURL, UpdateURL: c.UpdateURL, UpdateSourceURL: c.UpdateURL,
 	}
 	if sys.KEVSourceURL == "" {
 		sys.KEVSourceURL = config.DefaultKEVURL
+	}
+	if sys.MSRCSourceURL == "" {
+		sys.MSRCSourceURL = config.DefaultMSRCURL
 	}
 	if sys.UpdateSourceURL == "" {
 		sys.UpdateSourceURL = config.DefaultUpdateURL
@@ -164,6 +174,23 @@ func SystemFrom(raw map[string]string, c config.Config) System {
 			sys.KEVURL = ""
 			if b {
 				sys.KEVURL = sys.KEVSourceURL
+			}
+		}
+	}
+	if v, ok := raw[KeyMSRCURL]; ok {
+		if u, err := ParseSourceURL(v); err == nil {
+			u = strings.TrimRight(u, "/")
+			sys.MSRCSourceURL = u
+			if sys.MSRCURL != "" {
+				sys.MSRCURL = u
+			}
+		}
+	}
+	if v, ok := raw[KeyMSRCEnabled]; ok {
+		if b, err := strconv.ParseBool(v); err == nil {
+			sys.MSRCURL = ""
+			if b {
+				sys.MSRCURL = sys.MSRCSourceURL
 			}
 		}
 	}

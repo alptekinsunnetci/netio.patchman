@@ -28,6 +28,10 @@ func TargetFor(h protocol.HostInfo) Target {
 	ver := h.OSVersionID
 	major, _, _ := strings.Cut(ver, ".")
 	switch id {
+	case protocol.OSWindows:
+		// Not an OSV ecosystem: Windows hosts are matched through their pending
+		// updates and the Security Update Guide (see scanWindows).
+		return Target{Ecosystems: []string{"Windows"}}
 	case "debian":
 		if major == "" {
 			return Target{}

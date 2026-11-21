@@ -16,6 +16,7 @@ import (
 	"log/slog"
 	"math"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -242,7 +243,9 @@ func (s *Server) offlineAfter() time.Duration {
 func (s *Server) funcs() template.FuncMap {
 	l, f := s.l, s.f
 	return template.FuncMap{
-		"t":        l.T,
+		"t": l.T,
+		// pathesc escapes a path segment (Windows program names have spaces, '#', '/').
+		"pathesc":  url.PathEscape,
 		"date":     f.Date,
 		"datetime": f.DateTime,
 		"long":     f.Long,
@@ -279,7 +282,7 @@ func (s *Server) funcs() template.FuncMap {
 		},
 		"online": func(h store.Host) bool { return h.Online(s.offlineAfter()) },
 		"agentOutdated": func(h store.Host) bool {
-			return s.o.Release.Outdated(h.AgentVersion, h.Arch)
+			return s.o.Release.Outdated(h.AgentVersion, h.OSID, h.Arch)
 		},
 		"agentRelease":  func() string { return s.o.Release.Version },
 		"virt":          s.virtLabel,

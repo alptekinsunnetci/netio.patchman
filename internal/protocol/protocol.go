@@ -30,6 +30,8 @@ const (
 	PMYum    = "yum"
 	PMZypper = "zypper"
 	PMApk    = "apk"
+	// PMWindowsUpdate is the Windows Update Agent (Windows hosts).
+	PMWindowsUpdate = "windows-update"
 )
 
 // HostInfo identifies a host. Values are verbatim from the operating system.
@@ -108,6 +110,11 @@ type Update struct {
 	AvailableVersion string `json:"available_version"`
 	Repository       string `json:"repository,omitempty"`
 	Security         bool   `json:"security"`
+	// Windows Update only: the update title and Microsoft severity
+	// (Critical, Important, Moderate, Low) verbatim, and the CVEs it fixes.
+	Title    string   `json:"title,omitempty"`
+	Severity string   `json:"severity,omitempty"`
+	CVEs     []string `json:"cves,omitempty"`
 }
 
 // Report is the full inventory.
@@ -153,8 +160,30 @@ const (
 // AgentDownloadPrefix is where the server serves agent binaries.
 const AgentDownloadPrefix = "/downloads/agent/"
 
-// AgentBinaryName returns the download name for a Linux architecture.
-func AgentBinaryName(arch string) string { return "netio-patchman-agent-linux-" + arch }
+// OSWindows is HostInfo.OSID of Windows hosts (Linux hosts report the
+// os-release ID). Windows hosts use the PMWindowsUpdate package manager.
+const OSWindows = "windows"
+
+// AgentPlatforms are the GOOS/GOARCH pairs the server builds agents for.
+var AgentPlatforms = [][2]string{{"linux", "amd64"}, {"linux", "arm64"}, {"windows", "amd64"}}
+
+// AgentOS returns the agent's GOOS for a host's OS ID.
+func AgentOS(osID string) string {
+	if osID == OSWindows {
+		return "windows"
+	}
+	return "linux"
+}
+
+// AgentBinaryName returns the download name of an agent binary, e.g.
+// netio-patchman-agent-linux-amd64 or netio-patchman-agent-windows-amd64.exe.
+func AgentBinaryName(goos, arch string) string {
+	name := "netio-patchman-agent-" + goos + "-" + arch
+	if goos == "windows" {
+		name += ".exe"
+	}
+	return name
+}
 
 // Job is work dispatched to an agent.
 type Job struct {

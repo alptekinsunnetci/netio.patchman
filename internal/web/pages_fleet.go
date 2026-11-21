@@ -4,10 +4,13 @@ import (
 	"encoding/csv"
 	"errors"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/scanner"
@@ -196,7 +199,7 @@ func (s *Server) queueJob(r *http.Request, h store.Host, typ string, pkgs []stri
 		if h.AgentVersion == s.o.Release.Version {
 			return 0, s.l.T("job.error.agent_current", "hostname", h.Hostname)
 		}
-		p, ok := s.o.Release.JobParams(h.Arch)
+		p, ok := s.o.Release.JobParams(h.OSID, h.Arch)
 		if !ok {
 			return 0, s.l.T("job.error.no_agent_binary", "arch", h.Arch)
 		}
@@ -339,7 +342,7 @@ func (s *Server) agentsUpdateAll(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		for _, h := range hosts {
-			if h.SelfUpdate && s.o.Release.Outdated(h.AgentVersion, h.Arch) {
+			if h.SelfUpdate && s.o.Release.Outdated(h.AgentVersion, h.OSID, h.Arch) {
 				ids = append(ids, h.ID)
 			}
 		}
@@ -477,7 +480,15 @@ func (s *Server) vulnerability(w http.ResponseWriter, r *http.Request) {
 	sort.Slice(fixes, func(i, j int) bool { return fixes[i].Package+fixes[i].Version < fixes[j].Package+fixes[j].Version })
 	var remediation []string
 	for _, f := range fixes {
-		remediation = append(remediation, s.l.T("remediation.update", "package", f.Package, "version", f.Version))
+		switch {
+		case scanner.KBNumber(f.Package) != "" && f.Version != f.Package:
+			// Windows: the KB and the OS build that contains the fix.
+			remediation = append(remediation, s.l.T("remediation.windows_update", "package", f.Package, "version", f.Version))
+		case scanner.KBNumber(f.Package) != "":
+			remediation = append(remediation, s.l.T("remediation.windows_update_kb", "package", f.Package))
+		default:
+			remediation = append(remediation, s.l.T("remediation.update", "package", f.Package, "version", f.Version))
+		}
 	}
 	if noFix || len(fixes) == 0 {
 		remediation = append(remediation, s.l.T("remediation.no_fix"))
@@ -650,7 +661,7 @@ func (s *Server) packages(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) packageDetail(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
-	if !protocol.ValidPackageName(name) {
+	if !validPackageView(name) {
 		s.errorPage(w, r, http.StatusNotFound, "error.not_found")
 		return
 	}
@@ -671,7 +682,7 @@ func (s *Server) packageDetail(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) packageUpgrade(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
-	back := "/packages/" + name
+	back := "/packages/" + url.PathEscape(name)
 	if !protocol.ValidPackageName(name) {
 		s.redirect(w, r, "/packages", "error", s.l.T("job.error.invalid_package", "package", name))
 		return
@@ -938,4 +949,14 @@ func (s *Server) vulnerabilitiesCSV(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	cw.Flush()
+}
+
+// validPackageView accepts package names for viewing: besides package
+// manager names, Windows program names ("7-Zip 26.01 (x64)"). Jobs still
+// require protocol.ValidPackageName.
+func validPackageView(name string) bool {
+	if name == "" || len(name) > 200 || !utf8.ValidString(name) {
+		return false
+	}
+	return !strings.ContainsFunc(name, unicode.IsControl)
 }

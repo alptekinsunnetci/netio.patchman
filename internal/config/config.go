@@ -22,6 +22,8 @@ import (
 const (
 	DefaultOSVURL = "https://api.osv.dev"
 	DefaultKEVURL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+	// DefaultMSRCURL is the Microsoft Security Update Guide API (CVE details for Windows hosts).
+	DefaultMSRCURL = "https://api.msrc.microsoft.com/sug/v2.0/en-US"
 	// DefaultUpdateURL is the VERSION file on the default branch: the version
 	// an operator gets with "git pull" (see internal/updatecheck).
 	DefaultUpdateURL = "https://raw.githubusercontent.com/" + brand.RepositoryPath + "/main/VERSION"
@@ -46,6 +48,7 @@ type Config struct {
 	TrustProxy   bool
 	OSVURL       string
 	KEVURL       string // empty disables the KEV feed
+	MSRCURL      string // empty disables MSRC lookups
 	UpdateURL    string // empty disables the new-version check
 }
 
@@ -163,6 +166,12 @@ func Load(b *i18n.Bundle, getenv func(string) string) (Config, error) {
 		cfg.KEVURL = ""
 	} else if u, err := url.Parse(cfg.KEVURL); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
 		fail("config.error.invalid_url", "name", "PATCHMAN_KEV_URL", "value", cfg.KEVURL)
+	}
+	cfg.MSRCURL = strings.TrimRight(env("MSRC_URL", DefaultMSRCURL), "/")
+	if strings.EqualFold(cfg.MSRCURL, "off") {
+		cfg.MSRCURL = ""
+	} else if u, err := url.Parse(cfg.MSRCURL); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		fail("config.error.invalid_url", "name", "PATCHMAN_MSRC_URL", "value", cfg.MSRCURL)
 	}
 	cfg.UpdateURL = env("UPDATE_CHECK_URL", DefaultUpdateURL)
 	if strings.EqualFold(cfg.UpdateURL, "off") {

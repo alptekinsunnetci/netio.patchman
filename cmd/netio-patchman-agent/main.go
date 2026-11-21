@@ -1,16 +1,15 @@
-// Command netio-patchman-agent runs on each managed Linux server and reports
-// to the netio.patchman server.
+// Command netio-patchman-agent runs on each managed Linux or Windows server
+// and reports to the netio.patchman server.
 package main
 
 import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
-	"os/signal"
 	"runtime"
-	"syscall"
 
 	"netio.patchman/internal/agent"
 	"netio.patchman/internal/brand"
@@ -20,6 +19,12 @@ import (
 )
 
 func main() {
+	// platformMain runs agentMain in the foreground or, on Windows, as a
+	// service; it handles stop signals and where the log goes.
+	os.Exit(platformMain(agentMain))
+}
+
+func agentMain(ctx context.Context, logOut io.Writer) int {
 	bundle := i18n.MustLoad()
 	// PATCHMAN_LOCALE from the environment chooses the language of flag help
 	// and config errors; the value in agent.env applies after the config loads.
@@ -33,7 +38,7 @@ func main() {
 
 	if *showVersion {
 		fmt.Printf("%s %s (%s)\n", brand.AgentBinary, version.Version, brand.Name)
-		return
+		return 0
 	}
 
 	level := slog.LevelInfo
@@ -41,17 +46,17 @@ func main() {
 		level = slog.LevelDebug
 	}
 	// journald adds timestamps; text format keeps journal lines readable.
-	logger := logging.New(os.Stdout, "agent", level, "text")
+	logger := logging.New(logOut, "agent", level, "text")
 
-	if runtime.GOOS != "linux" {
+	if runtime.GOOS != "linux" && runtime.GOOS != "windows" {
 		logger.Error(l.T("log.agent.not_linux"), slog.String("os", runtime.GOOS))
-		os.Exit(1)
+		return 1
 	}
 
 	cfg, err := agent.LoadConfig(l, *configPath, os.Getenv)
 	if err != nil {
 		logger.Error(l.T("log.config.failed"), slog.String("path", *configPath), slog.String("error", err.Error()))
-		os.Exit(1)
+		return 1
 	}
 	// Log and job messages (shown in the panel) use the configured language.
 	l = bundle.Localizer(cfg.Locale)
@@ -59,7 +64,7 @@ func main() {
 	runner, err := agent.NewRunner(cfg, l, logger)
 	if err != nil {
 		logger.Error(l.T("log.config.failed"), slog.String("error", err.Error()))
-		os.Exit(1)
+		return 1
 	}
 
 	logger.Info(l.T("log.agent.starting"),
@@ -70,13 +75,13 @@ func main() {
 		slog.String("user_agent", brand.AgentUserAgent(version.Version, runtime.GOOS, runtime.GOARCH)),
 	)
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
 	runner.Run(ctx)
 	if runner.RestartRequested() {
-		// systemd (Restart=always) starts the new binary.
+		// systemd (Restart=always) or the Windows service recovery settings
+		// start the new binary.
 		logger.Info(l.T("agent.update.restarting"))
-		return
+		return restartExitCode
 	}
 	logger.Info(l.T("log.agent.stopping"))
+	return 0
 }

@@ -15,6 +15,7 @@ import (
 
 	"netio.patchman/internal/brand"
 	"netio.patchman/internal/i18n"
+	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
@@ -27,6 +28,8 @@ type Options struct {
 	Store  *store.Store
 	OSV    *OSVClient
 	KEVURL string // empty disables KEV
+	// MSRCURL is the Security Update Guide API for Windows hosts (empty disables).
+	MSRCURL string
 	// System, when set, supplies the OSV and KEV addresses (editable at
 	// runtime); OSV is then only a template for the HTTP settings.
 	System   *settings.Live
@@ -57,6 +60,7 @@ type Scanner struct {
 	mu     sync.Mutex
 	status Status
 	osv    *OSVClient // client for the current System OSV address
+	msrc   *MSRCClient
 }
 
 // sources returns the OSV client and the KEV feed address (empty when the
@@ -201,6 +205,9 @@ func (s *Scanner) ScanHost(ctx context.Context, hostID int64) error {
 	host, err := st.HostByID(ctx, hostID)
 	if err != nil {
 		return err
+	}
+	if host.OSID == protocol.OSWindows {
+		return s.scanWindows(ctx, host)
 	}
 	target := TargetFor(host.HostInfo())
 	if !target.Supported() {

@@ -14,11 +14,12 @@ Bu belge, netio.patchman sunucusunun üretim ortamına kurulmasını, ajanların
 
 - Docker Engine 24+ ve Docker Compose v2.24+ ya da doğrudan çalıştırma için herhangi bir Linux dağıtımı.
 - Ajanların erişebileceği bir alan adı ve TLS sertifikası (önerilir).
-- Güvenlik açığı verileri için `api.osv.dev` ve `www.cisa.gov` adreslerine HTTPS (443) erişimi. Erişim yoksa bkz. [Bölüm 8](#8-internet-erişimi-olmayan-ortamlar).
+- Güvenlik açığı verileri için `api.osv.dev` ve `www.cisa.gov` adreslerine, Windows sunucuları varsa `api.msrc.microsoft.com` adresine HTTPS (443) erişimi. Erişim yoksa bkz. [Bölüm 8](#8-internet-erişimi-olmayan-ortamlar).
 
 **Yönetilen sunucular (ajan)**
 
-- systemd kullanan bir Linux dağıtımı, amd64 veya arm64 mimari.
+- systemd veya OpenRC (Alpine) kullanan bir Linux dağıtımı, amd64 veya arm64 mimari.
+- ya da Windows Server 2016, 2019, 2022, 2025 veya Windows 10, 11 (x64). Bkz. [Bölüm 4.5](#45-windows-sunucuları).
 - Sunucu adresine HTTPS erişimi. Ajan bağlantıyı her zaman kendisi başlatır; yönetilen sunucularda gelen bağlantı için port açmak gerekmez.
 
 ## 2. Docker Compose ile kurulum
@@ -213,6 +214,65 @@ rm -rf /etc/netio-patchman /var/lib/netio-patchman
 
 Ardından panelde sunucunun **Sistem Bilgisi** sekmesinden sunucuyu kaldırın.
 
+### 4.5 Windows sunucuları
+
+Desteklenen sürümler: Windows Server 2016, 2019, 2022, 2025 ve Windows 10, 11 (x64). Ajan bir Windows hizmeti olarak çalışır ve Windows Update Agent'ı kullanır. Windows Update hizmeti (`wuauserv`) devre dışı bırakılmamış olmalıdır. Sunucu WSUS'a bağlıysa ajan WSUS'ta onaylanan güncellemeleri görür ve kurar.
+
+**Kurulum.** Panelde **Ajan Yönetimi** sayfasında **Windows / Windows Server (PowerShell)** seçeneğini seçin ve komutu sunucuda **yönetici olarak** açılan PowerShell veya komut isteminde çalıştırın:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; & ([scriptblock]::Create((irm 'https://patchman.your-domain/downloads/install-agent.ps1').TrimStart([char]65279))) -ServerUrl 'https://patchman.your-domain' -Token '<KAYIT-ANAHTARI>'"
+```
+
+Komut, Windows Server 2016'da da çalışması için önce TLS 1.2'yi açar, ardından `install-agent.ps1` betiğini indirip çalıştırır. Betik:
+
+1. Ajanı `https://patchman.your-domain/downloads/agent/netio-patchman-agent-windows-amd64.exe` adresinden indirir ve SHA-256 özetini doğrular.
+2. Ajanı `C:\Program Files\netio-patchman\netio-patchman-agent.exe` konumuna kurar.
+3. Yapılandırmayı `C:\ProgramData\netio-patchman\agent.env` dosyasına yazar. Bu dizin (kimlik bilgileri ve günlük dahil) yalnızca SYSTEM ve Administrators tarafından okunabilir.
+4. `netio-patchman-agent` hizmetini otomatik başlatmalı olarak oluşturur. Hata durumunda ve kendini güncelledikten sonra Windows hizmeti yeniden başlatır (`sc failure` ve `sc failureflag`).
+
+Betik seçenekleri: `-ServerUrl`, `-Token`, `-Binary <dosya>` (çevrimdışı kurulum), `-CaFile <dosya>` (ajanın sunucu sertifikasını doğrulaması için ek CA; betiğin kendi indirmesi Windows sertifika deposunu kullanır, iç CA'yı Windows'a ekleyin ya da `-Binary` kullanın), `-DisableRemoteUpdates`, `-DisableAutoUpdate`, `-Locale <dil>`, `-Uninstall`, `-Help`.
+
+**Çevrimdışı kurulum.** `install-agent.ps1` ve `netio-patchman-agent-windows-amd64.exe` dosyalarını aynı klasöre kopyalayın:
+
+```powershell
+.\install-agent.ps1 -ServerUrl https://patchman.your-domain -Token <KAYIT-ANAHTARI> -Binary .\netio-patchman-agent-windows-amd64.exe
+```
+
+**Toplu dağıtım.** Kurulum komutu Group Policy başlangıç betiği, SCCM/Intune veya Ansible (`ansible.windows.win_shell`) ile çalıştırılabilir. Aynı anahtar birden çok sunucuda kullanılabilir.
+
+**Durum ve günlük:**
+
+```powershell
+Get-Service netio-patchman-agent
+Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50 -Wait
+Restart-Service netio-patchman-agent        # agent.env değişikliğinden sonra
+```
+
+Günlük 10 MB'ı geçince `agent.log.1` olarak saklanır.
+
+**Nasıl çalışır.**
+
+- *Envanter:* Kurulu programlar ("Programlar ve Özellikler" listesi) ve Windows Update'te bekleyen güncellemeler (KB numarası, başlık, Microsoft önem derecesi, sınıflandırma). Tanım güncellemeleri (Defender) ve sürüm yükseltmeleri (feature update) listelenmez. Ajan Windows Update hizmetine en fazla 6 saatte bir çevrim içi sorar; arada Windows'un kendi son taramasının sonucunu okur (`PATCHMAN_REFRESH_PACKAGE_LISTS=false` ise hep bu sonucu kullanır).
+- *Güvenlik açıkları:* Merkezi sunucu bekleyen her KB için [Microsoft Security Update Guide](https://msrc.microsoft.com/update-guide) API'sinden düzelttiği CVE'leri, CVSS puanlarını ve başlıkları alır. Toplu güncellemelerde (cumulative update) yerini aldığı eski KB'ler de, düzeltmeyi içeren Windows derlemesi sunucunun derlemesinden yeniyse eklenir. Bulgu, KB ile eşleştirilir; KB kurulunca bulgu "Çözüldü" olur. KEV işaretlemesi Linux'taki gibi çalışır. Microsoft'un CVE eşlemesi yayımlamadığı güncellemeler (bazı .NET toplu güncellemeleri gibi) güvenlik güncellemesi olarak listelenir ancak CVE bulgusu oluşturmaz. Üçüncü taraf programlar taranmaz.
+- *Güncelleme işleri:* Güvenlik güncellemeleri, tüm güncellemeler, seçili KB'ler ve **Düzeltmeyi uygula** Windows Update üzerinden indirilip kurulur; ardından ajan bekleyen listeyi yeniden okuyarak kurulumu doğrular. Kurulum yeniden başlatma gerektiriyorsa iş çıktısında belirtilir ve sunucu **Yeniden başlatma gerekli** olarak işaretlenir. Zamanlanmış güncellemeler Windows'ta da sunucuyu yeniden başlatmaz.
+- *Yeniden başlatma:* Paneldeki **Yeniden başlat** işi `shutdown.exe /r /t 60` çalıştırır; sonuç önce panele gönderilir.
+
+**Kaldırma.** Yönetici PowerShell'de:
+
+```powershell
+.\install-agent.ps1 -Uninstall
+```
+
+Betik yoksa:
+
+```powershell
+Stop-Service netio-patchman-agent; sc.exe delete netio-patchman-agent
+Remove-Item -Recurse -Force 'C:\Program Files\netio-patchman', 'C:\ProgramData\netio-patchman'
+```
+
+Ardından panelde sunucunun **Sistem Bilgisi** sekmesinden sunucuyu kaldırın.
+
 ## 5. Yedekleme ve geri yükleme
 
 ### 5.1 Otomatik yedekleme
@@ -283,11 +343,11 @@ Uyarı yalnızca bu özelliği içeren sürümden itibaren görünür. Daha eski
 
 ### Ajanların otomatik güncellenmesi
 
-Docker imajı, sunucuyla aynı sürümdeki amd64 ve arm64 ajan dosyalarını içerir. **Sistem Ayarları → Ajanlar → Ajanları otomatik olarak güncelle** açıkken (varsayılan):
+Docker imajı, sunucuyla aynı sürümdeki amd64 ve arm64 Linux ile amd64 Windows ajan dosyalarını içerir. **Sistem Ayarları → Ajanlar → Ajanları otomatik olarak güncelle** açıkken (varsayılan):
 
 1. Farklı sürüm çalıştıran bir ajan bağlandığında sunucu bir "Ajan güncellemesi" işi oluşturur.
 2. Ajan yeni dosyayı sunucudan indirir, SHA-256 özetini karşılaştırır ve `-version` ile çalıştığını doğrular.
-3. Mevcut dosyayı `netio-patchman-agent.previous` olarak saklar, yenisini yerine koyar ve çıkar; systemd ajanı yeni sürümle yeniden başlatır.
+3. Mevcut dosyayı `netio-patchman-agent.previous` olarak saklar, yenisini yerine koyar ve çıkar; systemd ajanı yeni sürümle yeniden başlatır. Windows'ta çalışan dosya `netio-patchman-agent.exe.previous` adıyla kenara alınır ve hizmet, kurtarma ayarları sayesinde yeni sürümle birkaç saniye içinde yeniden başlar.
 
 Aynı anda en fazla 25 ajan güncellenir. Başarısız bir güncelleme 6 saat sonra yeniden denenir ve Bildirim Merkezi'ne düşer. Otomatik güncelleme kapalıyken ajanlar **Ajan Yönetimi → Eski ajanları güncelle** düğmesiyle ya da sunucu sayfasındaki **Ajanı güncelle** düğmesiyle güncellenebilir.
 
@@ -300,7 +360,7 @@ sudo mv /usr/local/bin/netio-patchman-agent.previous /usr/local/bin/netio-patchm
 sudo systemctl restart netio-patchman-agent.service
 ```
 
-İmaj dışı kurulumlarda ajan dosyalarını `PATCHMAN_AGENT_DIST_DIR` dizinine `netio-patchman-agent-linux-<mimari>` adıyla, sürümü de aynı dizindeki `version` dosyasına yazın. `scripts/build-agent.sh <sürüm> <dizin>` betiği bu dizini (amd64, arm64, SHA-256 özetleri ve `version` dosyası) hazır olarak üretir.
+İmaj dışı kurulumlarda ajan dosyalarını `PATCHMAN_AGENT_DIST_DIR` dizinine `netio-patchman-agent-linux-<mimari>` ve `netio-patchman-agent-windows-amd64.exe` adıyla, sürümü de aynı dizindeki `version` dosyasına yazın. `scripts/build-agent.sh <sürüm> <dizin>` betiği bu dizini (Linux amd64 ve arm64, Windows amd64, SHA-256 özetleri ve `version` dosyası) hazır olarak üretir.
 
 ### Ajanı elle yeniden kurma
 
@@ -333,8 +393,8 @@ Komut, kullanıcının doğrulayıcısını ve yedek kodlarını kaldırır, otu
 
 ## 8. İnternet erişimi olmayan ortamlar
 
-- **Ajanlar:** Panelin **Ajan Yönetimi** sayfasındaki indirme adreslerinden ajan dosyasını, `netio-patchman-agent.service` dosyasını ve `install-agent.sh` betiğini alın, sunucuya kopyalayıp `--binary` seçeneğiyle kurun.
-- **Güvenlik açığı verisi:** **Sunucu yapılandırması** sayfasında OSV API adresini iç ağdaki bir yansıya yönlendirin. KEV kataloğunun adresini iç ağdaki bir kopyaya çevirin veya kataloğu kapatın. (Ortam değişkenleri: `PATCHMAN_OSV_URL`, `PATCHMAN_KEV_URL`.)
+- **Ajanlar:** Panelin **Ajan Yönetimi** sayfasındaki indirme adreslerinden ajan dosyasını, `netio-patchman-agent.service` dosyasını ve `install-agent.sh` betiğini alın, sunucuya kopyalayıp `--binary` seçeneğiyle kurun. Windows'ta `install-agent.ps1` ve `netio-patchman-agent-windows-amd64.exe` ile `-Binary` kullanılır.
+- **Güvenlik açığı verisi:** **Sunucu yapılandırması** sayfasında OSV API adresini iç ağdaki bir yansıya yönlendirin. KEV kataloğunun adresini iç ağdaki bir kopyaya çevirin veya kataloğu kapatın. Windows sunucuları için Microsoft Security Update Guide adresini bir vekil sunucuya yönlendirin ya da kapatın; kapalıyken yalnızca Windows Update'in kendisinin bildirdiği CVE'ler kullanılır. (Ortam değişkenleri: `PATCHMAN_OSV_URL`, `PATCHMAN_KEV_URL`, `PATCHMAN_MSRC_URL`.)
 - **Yeni sürüm denetimi:** **Sunucu yapılandırması → Sürüm denetimi** bölümünden kapatın veya iç ağdaki bir `VERSION` dosyasına yönlendirin (`PATCHMAN_UPDATE_CHECK_URL=off`).
 - Panel dış kaynak (CDN, yazı tipi) kullanmaz.
 
@@ -344,6 +404,8 @@ Komut, kullanıcının doğrulayıcısını ve yedek kodlarını kaldırır, otu
 |---|---|
 | Sunucu başlamıyor | `docker compose logs server`: yapılandırma hataları Türkçe olarak listelenir. |
 | Ajan görünmüyor | Sunucuda `journalctl -u netio-patchman-agent.service -n 50`. Kayıt anahtarının süresi dolmuş veya kullanım sınırına ulaşmış olabilir. |
+| Windows ajanı görünmüyor veya güncelleme listelemiyor | `Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50`. `wuauserv` hizmeti devre dışı mı? WSUS kullanılıyorsa güncellemeler onaylanmış mı? |
+| Windows sunucusunda CVE yok | Merkezi sunucunun `api.msrc.microsoft.com` erişimini ve **Sunucu yapılandırması** sayfasındaki Microsoft Security Update Guide ayarını kontrol edin. |
 | Ajan "Çevrimdışı" | Ajan hizmetini, sunucuya HTTPS erişimini ve saat eşitlemesini kontrol edin. |
 | Güvenlik açığı bulunmuyor | **Sistem Ayarları → Tarama durumu** bölümünde son hatayı kontrol edin. Dağıtımın desteklendiğini doğrulayın. |
 | E-posta gelmiyor | **Sistem Ayarları → Sunucu yapılandırması** sayfasında SMTP ayarlarını kontrol edip **Deneme e-postası** gönderin. |

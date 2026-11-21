@@ -63,6 +63,10 @@
 {{$d.BaseURL}}/downloads/netio-patchman-agent.openrc
 {{$d.BaseURL}}/downloads/install-agent.sh</pre>
       <pre class="code">sh install-agent.sh --server-url {{$d.BaseURL}} --token {{t "agents.install.token_placeholder"}} --binary ./netio-patchman-agent-linux-amd64</pre>
+      <p>{{t "agents.install.offline_windows"}}</p>
+      <pre class="code">{{$d.BaseURL}}/downloads/agent/netio-patchman-agent-windows-amd64.exe
+{{$d.BaseURL}}/downloads/install-agent.ps1</pre>
+      <pre class="code">.\install-agent.ps1 -ServerUrl {{$d.BaseURL}} -Token {{t "agents.install.token_placeholder"}} -Binary .\netio-patchman-agent-windows-amd64.exe</pre>
     </details>
     <details class="details">
       <summary>{{t "agents.install.supported_title"}}</summary>
@@ -159,7 +163,7 @@
   <div class="installcmd__opts" hidden>
     <label class="field field--inline"><span class="field__label">{{t "agents.install.os"}}</span>
       <select class="field__input" data-installcmd-os>
-        {{range .Targets}}<option value="{{.ID}}" data-root="{{.AsRoot}}" data-sudo="{{.WithSudo}}"{{if .Sudo}} data-default-sudo{{end}}>{{t (printf "agents.install.os.%s" .ID)}}</option>{{end}}
+        {{range .Targets}}<option value="{{.ID}}" data-root="{{.AsRoot}}" data-sudo="{{.WithSudo}}"{{if .Sudo}} data-default-sudo{{end}}{{if .Windows}} data-nosudo{{end}}>{{t (printf "agents.install.os.%s" .ID)}}</option>{{end}}
       </select></label>
     <label class="check-label"><input type="checkbox" data-installcmd-sudo{{if (index .Targets 0).Sudo}} checked{{end}}>{{t "agents.install.use_sudo"}}</label>
   </div>

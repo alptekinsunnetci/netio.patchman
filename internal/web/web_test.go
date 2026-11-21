@@ -91,6 +91,18 @@ func fakeOSV(t *testing.T) *httptest.Server {
 		}
 		_, _ = io.WriteString(w, rec)
 	})
+	// Microsoft Security Update Guide: KB5044281 fixes CVE-2026-0002.
+	mux.HandleFunc("GET /msrc/affectedProduct", func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.URL.Query().Get("$filter"), "'5044281'") {
+			_, _ = io.WriteString(w, `{"value":[]}`)
+			return
+		}
+		_, _ = io.WriteString(w, `{"value":[{"cveNumber":"CVE-2026-0002","severity":"Critical","baseScore":"9.8","vectorString":"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",`+
+			`"kbArticles":[{"articleName":"5044281","supercedence":"5042881","fixedBuildNumber":"10.0.20348.2762"}]}]}`)
+	})
+	mux.HandleFunc("GET /msrc/vulnerability", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, `{"value":[{"cveNumber":"CVE-2026-0002","cveTitle":"Windows TCP/IP Remote Code Execution Vulnerability","releaseDate":"2026-11-10T08:00:00-08:00"}]}`)
+	})
 	mux.HandleFunc("GET /kev.json", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = io.WriteString(w, `{"vulnerabilities":[{"cveID":"CVE-2026-0001","dateAdded":"2026-11-02","dueDate":"2026-11-23","knownRansomwareCampaignUse":"Unknown"}]}`)
 	})
@@ -160,7 +172,7 @@ func newEnvWith(t *testing.T, capture bool) *env {
 	base, _ := url.Parse("http://placeholder")
 	e.sys, err = settings.NewLive(ctx, config.Config{
 		BaseURL: base, TimezoneName: timeutil.DefaultTimezone, Timezone: loc, LogLevel: slog.LevelInfo,
-		OSVURL: osv.URL, KEVURL: osv.URL + "/kev.json", UpdateURL: repo.URL + "/VERSION",
+		OSVURL: osv.URL, KEVURL: osv.URL + "/kev.json", MSRCURL: osv.URL + "/msrc", UpdateURL: repo.URL + "/VERSION",
 		SMTP: config.SMTP{Port: 587, From: mail.Address{Name: "netio.patchman", Address: "patchman@example.test"}},
 	}, st)
 	if err != nil {
@@ -177,6 +189,9 @@ func newEnvWith(t *testing.T, capture bool) *env {
 	// Agent distribution directory with a newer agent release.
 	dist := t.TempDir()
 	if err := os.WriteFile(dist+"/netio-patchman-agent-linux-amd64", []byte(fakeAgentBinary), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(dist+"/netio-patchman-agent-windows-amd64.exe", []byte("MZ windows agent"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(dist+"/version", []byte("9.9.9\n"), 0o644); err != nil {

@@ -111,13 +111,31 @@
   <form method="post" action="/servers/{{$h.ID}}/jobs" data-confirm="{{t "server.action.selected_confirm"}}">
     {{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_packages"><input type="hidden" name="back_tab" value="updates">
     <div class="table-wrap">
+    {{if eq $h.OSID "windows"}}
+    <table class="table">
+      <thead><tr>{{if and $root.User.CanOperate $h.RemoteUpdates}}<th class="check"><input type="checkbox" data-check-all="packages" aria-label="{{t "common.select_all"}}"></th>{{end}}<th>{{t "package.field.kb"}}</th><th>{{t "package.field.update_title"}}</th><th>{{t "package.field.ms_severity"}}</th><th>{{t "package.field.classification"}}</th><th>{{t "package.field.released"}}</th><th>{{t "package.field.type"}}</th></tr></thead>
+      <tbody>
+      {{range $d.Updates}}
+      <tr>
+        {{if and $root.User.CanOperate $h.RemoteUpdates}}<td class="check"><input type="checkbox" name="packages" value="{{.Name}}" aria-label="{{.Name}}"></td>{{end}}
+        <td class="mono"><a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td>
+        <td class="cell-sub">{{.Title}}{{with .CVEs}} <span class="muted mono">{{t "package.cve_count" "count" (len .)}}</span>{{end}}</td>
+        <td class="cell-sub">{{if .Severity}}{{.Severity}}{{else}}<span class="muted">—</span>{{end}}</td>
+        <td class="cell-sub">{{.Repository}}</td>
+        <td class="mono nowrap">{{.AvailableVersion}}</td>
+        <td>{{if .Security}}<span class="pill pill--danger">{{t "package.security"}}</span>{{else}}<span class="pill pill--muted">{{t "package.regular"}}</span>{{end}}</td>
+      </tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{else}}
     <table class="table">
       <thead><tr>{{if and $root.User.CanOperate $h.RemoteUpdates}}<th class="check"><input type="checkbox" data-check-all="packages" aria-label="{{t "common.select_all"}}"></th>{{end}}<th>{{t "package.field.name"}}</th><th>{{t "package.field.current"}}</th><th>{{t "package.field.available"}}</th><th>{{t "package.field.repository"}}</th><th>{{t "package.field.type"}}</th></tr></thead>
       <tbody>
       {{range $d.Updates}}
       <tr>
         {{if and $root.User.CanOperate $h.RemoteUpdates}}<td class="check"><input type="checkbox" name="packages" value="{{.Name}}" aria-label="{{.Name}}"></td>{{end}}
-        <td class="mono"><a href="/packages/{{.Name}}">{{.Name}}</a></td>
+        <td class="mono"><a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td>
         <td class="mono">{{if .CurrentVersion}}{{.CurrentVersion}}{{else}}<span class="muted">{{t "package.new_install"}}</span>{{end}}</td>
         <td class="mono">{{.AvailableVersion}}</td>
         <td class="mono cell-sub">{{.Repository}}</td>
@@ -126,6 +144,7 @@
       {{end}}
       </tbody>
     </table>
+    {{end}}
     </div>
     {{if and $root.User.CanOperate $h.RemoteUpdates}}<div class="panel__foot"><button class="button button--primary" type="submit">{{t "server.action.upgrade_selected"}}</button></div>{{end}}
   </form>
@@ -145,7 +164,7 @@
     <thead><tr><th>{{t "package.field.name"}}</th><th>{{t "package.field.version"}}</th><th>{{t "package.field.arch"}}</th><th>{{t "package.field.source"}}</th></tr></thead>
     <tbody>
     {{range $d.Packages}}
-    <tr><td class="mono"><a href="/packages/{{.Name}}">{{.Name}}</a></td><td class="mono">{{.Version}}</td><td class="mono">{{.Arch}}</td><td class="mono cell-sub">{{.SourceName}}{{if and .SourceVersion (ne .SourceVersion .Version)}} {{.SourceVersion}}{{end}}</td></tr>
+    <tr><td class="mono"><a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td><td class="mono">{{.Version}}</td><td class="mono">{{.Arch}}</td><td class="mono cell-sub">{{.SourceName}}{{if and .SourceVersion (ne .SourceVersion .Version)}} {{.SourceVersion}}{{end}}</td></tr>
     {{end}}
     </tbody>
   </table>

@@ -55,7 +55,19 @@ Filtrelerle birlikte kullanıldığında örneğin "Güncelleme bekleyen tüm Ub
 
 ### Platform
 
-Ajan sunucunun hangi platformda çalıştığını bildirir: VMware, Hyper-V, KVM/QEMU, Xen, VirtualBox, Amazon EC2, Google Compute Engine gibi sanal makineler, Docker/Podman/LXC konteynerleri ya da fiziksel sunucu. Bilgi `systemd-detect-virt` ile, bu araç yoksa (örneğin Alpine) DMI bilgileri ve konteyner işaretleriyle belirlenir. Sunucu Envanteri'ndeki **platform** süzgeci ile örneğin yalnızca fiziksel sunucuları ya da yalnızca VMware sanal makinelerini listeleyebilirsiniz. 0.3.0 öncesi ajanlarda platform “Bilinmiyor” görünür; ajan güncellenince dolar.
+Ajan sunucunun hangi platformda çalıştığını bildirir: VMware, Hyper-V, KVM/QEMU, Xen, VirtualBox, Amazon EC2, Google Compute Engine gibi sanal makineler, Docker/Podman/LXC konteynerleri ya da fiziksel sunucu. Bilgi `systemd-detect-virt` ile, bu araç yoksa (örneğin Alpine) DMI bilgileri ve konteyner işaretleriyle, Windows'ta BIOS bilgisiyle belirlenir. Sunucu Envanteri'ndeki **platform** süzgeci ile örneğin yalnızca fiziksel sunucuları ya da yalnızca VMware sanal makinelerini listeleyebilirsiniz. 0.3.0 öncesi ajanlarda platform “Bilinmiyor” görünür; ajan güncellenince dolar.
+
+### Windows sunucuları
+
+Windows sunucuları Linux sunucularla aynı listelerde görünür; işletim sistemi kimliği `windows`'tur (filtrelerde ve zamanlama kapsamında bu ad kullanılır). Farklar:
+
+- **Bekleyen Güncellemeler** sekmesinde paket yerine Windows Update güncellemeleri listelenir: KB numarası, başlık, Microsoft önem derecesi, sınıflandırma (Security Updates, Update Rollups vb.) ve yayın tarihi. Windows Update güncellemenin CVE'lerini bildirmişse sayısı başlığın yanında görünür. Güncellemeleri seçip **Seçili paketleri güncelle** ile yalnızca bu KB'leri kurabilirsiniz.
+- **Kurulu Paketler** sekmesinde "Programlar ve Özellikler" listesindeki programlar görünür. Bu programlar envanter içindir; güvenlik açığı taramasına girmez ve panelden güncellenemez.
+- **Güvenlik Açıkları:** Bekleyen her KB'nin düzelttiği CVE'ler Microsoft Security Update Guide'dan alınır. Bulguda **Etkilenen Paket** KB numarasıdır, **Kurulu Sürüm** sunucunun Windows derlemesi (örneğin `10.0.20348.2700`), **Düzeltilmiş Sürüm** düzeltmeyi içeren derlemedir. Sunucu birkaç ay geride kalmışsa, bekleyen toplu güncellemenin yerini aldığı önceki ayların CVE'leri de aynı KB altında gösterilir; tek KB'yi kurmak hepsini kapatır. **Düzeltmeyi uygula** ilgili KB'yi kurar. Microsoft'un CVE eşlemesi yayımlamadığı güncellemeler (bazı .NET toplu güncellemeleri gibi) güvenlik güncellemesi olarak listelenir ama CVE bulgusu oluşturmaz.
+- **Güncelleme işleri** Windows Update üzerinden indirip kurar; iş çıktısında her KB için sonuç (kuruldu ya da sonuç kodu ve HRESULT ile kurulamadı) yazar. Doğrulama Linux'taki gibidir. Kurulum yeniden başlatma gerektiriyorsa çıktıda belirtilir ve sunucu “Yeniden başlatma gerekli” olarak işaretlenir. Yeniden başlatma ihtiyacı Windows Update ve Windows'un bileşen hizmetinin (CBS) kayıtlarından okunur.
+- **Yeniden başlat** düğmesi Windows'ta `shutdown.exe /r /t 60` çalıştırır. Oturum açmış kullanıcılar uyarıyı görür.
+- **Yeniden başlatılması gereken servisler** Windows'ta tespit edilmez; güncellemeler gerektiğinde zaten yeniden başlatma ister.
+- Platform bilgisi BIOS (SMBIOS) üretici ve ürün adından belirlenir (Hyper-V, VMware, KVM vb.).
 
 ## Sunucu Grupları
 
@@ -87,7 +99,7 @@ Bir açığın ayrıntı sayfasında:
 
 - **Orijinal Açıklama:** CVE kaydındaki resmî açıklama, kaynağındaki dilde (genellikle İngilizce) ve değiştirilmeden gösterilir.
 - **Güvenlik Önerisi:** Hangi paketin hangi sürüme güncellenmesi gerektiği.
-- **Üretici Güvenlik Duyurusu:** Dağıtımın yayımladığı duyurular (DSA, USN, ALSA, RHSA vb.).
+- **Üretici Güvenlik Duyurusu:** Dağıtımın yayımladığı duyurular (DSA, USN, ALSA, RHSA vb.); Windows'ta açığı düzelten KB ve Microsoft destek sayfası bağlantısı.
 - **Etkilenen Sunucular:** Kurulu ve düzeltilmiş sürümleriyle birlikte.
 
 Sunucuda birden fazla çekirdek kuruluysa yalnızca **çalışan çekirdek** (`uname -r`) taranır. Eski çekirdek paketleri güncellenemez, yalnızca kaldırılabilir; taranmaları yeni çekirdek kurulup çalışsa bile açıkların açık kalmasına yol açardı. Yeni çekirdek kurulmuş ama sunucu henüz yeniden başlatılmamışsa çalışan eski çekirdeğin açıkları, yeniden başlatılana kadar açık kalır. Çalışan çekirdek paket yöneticisiyle kurulmamışsa (WSL, konteyner, özel çekirdek) tüm paketler taranır.
@@ -139,7 +151,7 @@ Güncellemeleri belirli gün ve saatlerde, bakım penceresi içinde otomatik uyg
 | İşlem | Güvenlik güncellemeleri veya tüm güncellemeler |
 | Günler, Başlangıç saati | Kuralın çalışacağı günler ve saat (`PATCHMAN_TIMEZONE`, varsayılan Europe/Istanbul) |
 | Bakım penceresi | Ajanın işi alabileceği süre (15 dakika – 24 saat) |
-| Kapsam | Tüm sunucular, belirli bir işletim sistemi (örneğin `ubuntu`) veya seçili sunucular |
+| Kapsam | Tüm sunucular, belirli bir işletim sistemi (örneğin `ubuntu` veya `windows`) veya seçili sunucular |
 
 Nasıl çalışır:
 

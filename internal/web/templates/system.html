@@ -68,6 +68,10 @@
     <label class="field"><span class="field__label">{{t "system.kev_url"}}</span>
       <input class="field__input mono" type="url" name="kev_url" value="{{$f.KEVURL}}">
       <span class="field__hint">{{t "system.kev_url_hint"}}</span></label>
+    <label class="check-label"><input type="checkbox" name="msrc_enabled" value="1"{{if $f.MSRCEnabled}} checked{{end}}> {{t "system.msrc_enabled"}}</label>
+    <label class="field"><span class="field__label">{{t "system.msrc_url"}}</span>
+      <input class="field__input mono" type="url" name="msrc_url" value="{{$f.MSRCURL}}">
+      <span class="field__hint">{{t "system.msrc_url_hint"}}</span></label>
   </section>
 
   <section class="panel">

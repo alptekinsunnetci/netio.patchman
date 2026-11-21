@@ -33,7 +33,7 @@ type Options struct {
 	Logger   *slog.Logger
 	Scanner  *scanner.Scanner
 	Notifier *notify.Notifier
-	// AgentDistDir holds netio-patchman-agent-linux-<arch> binaries.
+	// AgentDistDir holds the agent binaries (see package release).
 	AgentDistDir string
 	// Assets serves install-agent.sh and the systemd unit.
 	Assets map[string][]byte
@@ -58,7 +58,7 @@ const (
 // distributes. Failed attempts are retried after AgentUpdateRetryAfter.
 func (s *Server) maybeQueueAgentUpdate(ctx context.Context, hostID int64, info protocol.HostInfo, cfg settings.Values) {
 	rel := s.o.Release
-	if !cfg.AgentAutoUpdate || !info.SelfUpdate || !rel.Outdated(info.AgentVersion, info.Arch) {
+	if !cfg.AgentAutoUpdate || !info.SelfUpdate || !rel.Outdated(info.AgentVersion, info.OSID, info.Arch) {
 		return
 	}
 	st := s.o.Store
@@ -79,7 +79,7 @@ func (s *Server) maybeQueueAgentUpdate(ctx context.Context, hostID int64, info p
 	if n, err := st.CountActiveJobs(ctx, protocol.JobAgentUpdate); err != nil || n >= MaxConcurrentAgentUpdates {
 		return
 	}
-	params, ok := rel.JobParams(info.Arch)
+	params, ok := rel.JobParams(info.OSID, info.Arch)
 	if !ok {
 		return
 	}
@@ -317,7 +317,7 @@ func (s *Server) jobResult(w http.ResponseWriter, r *http.Request, hostID int64)
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// download serves agent binaries: netio-patchman-agent-linux-amd64[.sha256].
+// download serves agent binaries (protocol.AgentBinaryName, optional .sha256).
 func (s *Server) download(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("file")
 	if !validDistName(name) || s.o.AgentDistDir == "" {
@@ -346,10 +346,11 @@ func (s *Server) download(w http.ResponseWriter, r *http.Request) {
 }
 
 func validDistName(name string) bool {
-	switch name {
-	case "netio-patchman-agent-linux-amd64", "netio-patchman-agent-linux-arm64",
-		"netio-patchman-agent-linux-amd64.sha256", "netio-patchman-agent-linux-arm64.sha256":
-		return true
+	for _, p := range protocol.AgentPlatforms {
+		bin := protocol.AgentBinaryName(p[0], p[1])
+		if name == bin || name == bin+".sha256" {
+			return true
+		}
 	}
 	return false
 }
