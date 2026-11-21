@@ -69,7 +69,13 @@ type Server struct {
 	limiter *auth.Limiter
 	// offlineSec caches the agent offline threshold (seconds).
 	offlineSec atomic.Int64
+	// requireMFA caches the "two-factor sign-in required" setting.
+	requireMFA atomic.Bool
+	// mfa holds pending second-step sign-ins.
+	mfa mfaChallenges
 }
+
+func (s *Server) mfaRequired() bool { return s.requireMFA.Load() }
 
 type navItem struct {
 	Key  string
@@ -80,8 +86,10 @@ type navItem struct {
 var navigation = []navItem{
 	{"dashboard", "/dashboard", "dashboard"},
 	{"servers", "/servers", "server"},
+	{"groups", "/groups", "tag"},
 	{"vulnerabilities", "/vulnerabilities", "shield"},
 	{"packages", "/packages", "package"},
+	{"reports", "/reports", "report"},
 	{"jobs", "/jobs", "jobs"},
 	{"schedules", "/schedules", "calendar"},
 	{"agents", "/agents", "agent"},
@@ -91,8 +99,9 @@ var navigation = []navItem{
 }
 
 var pageNames = []string{
-	"login", "setup", "error", "dashboard", "servers", "server", "vulnerabilities", "vulnerability",
+	"login", "loginmfa", "setup", "error", "dashboard", "servers", "server", "vulnerabilities", "vulnerability",
 	"packages", "package", "jobs", "job", "schedules", "schedule", "agents", "notifications", "users", "user", "profile", "settings", "audit", "system",
+	"groups", "group", "report",
 }
 
 // New parses templates and returns a Server.
@@ -136,6 +145,7 @@ func (s *Server) secureCookie(r *http.Request) bool {
 func (s *Server) reloadSettingsCache(ctx context.Context) {
 	cfg, _ := settings.Load(ctx, s.st)
 	s.offlineSec.Store(int64(cfg.OfflineAfter().Seconds()))
+	s.requireMFA.Store(cfg.AuthRequireMFA)
 }
 
 func (s *Server) offlineAfter() time.Duration {
@@ -185,10 +195,18 @@ func (s *Server) funcs() template.FuncMap {
 			return s.o.Release.Outdated(h.AgentVersion, h.Arch)
 		},
 		"agentRelease": func() string { return s.o.Release.Version },
+		"virt":         s.virtLabel,
+		"has":          func(m map[int64]bool, id int64) bool { return m[id] },
+		"riskTerm": func(days int) string {
+			if days == 0 {
+				return l.T("vuln.risk_days.none")
+			}
+			return l.T("vuln.risk_days.n", "n", days)
+		},
 		"param":        func(m map[string]string, k string) string { return m[k] },
 		"scheduleDays": s.scheduleDays,
 		"scheduleTarget": func(sc store.ScheduleRow) string {
-			return s.scheduleTarget(sc.Target, sc.OSID, sc.HostCount)
+			return s.scheduleTarget(sc.Target, sc.OSID, sc.HostCount, sc.GroupName)
 		},
 		"clock": schedule.Clock,
 		"lower": l.Lower,
@@ -263,6 +281,8 @@ func (s *Server) Handler() http.Handler {
 
 	mux.HandleFunc("GET /login", s.loginPage)
 	mux.HandleFunc("POST /login", s.loginSubmit)
+	mux.HandleFunc("GET /login/mfa", s.loginMFAPage)
+	mux.HandleFunc("POST /login/mfa", s.loginMFASubmit)
 	mux.HandleFunc("POST /logout", s.logout)
 	mux.HandleFunc("GET /setup", s.setupPage)
 	mux.HandleFunc("POST /setup", s.setupSubmit)
@@ -280,6 +300,16 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("POST /servers/{id}/rescan", operate(s.serverRescan))
 	mux.Handle("POST /servers/{id}/notes", operate(s.serverNotes))
 	mux.Handle("POST /servers/{id}/delete", admin(s.serverDelete))
+	mux.Handle("POST /servers/{id}/groups", operate(s.serverGroups))
+	mux.Handle("POST /servers/bulk-groups", operate(s.groupMembers))
+
+	mux.Handle("GET /groups", view(s.groups))
+	mux.Handle("POST /groups", admin(s.groupCreate))
+	mux.Handle("GET /groups/{id}", view(s.group))
+	mux.Handle("POST /groups/{id}", admin(s.groupUpdate))
+	mux.Handle("POST /groups/{id}/delete", admin(s.groupDelete))
+
+	mux.Handle("GET /reports", view(s.report))
 
 	mux.Handle("GET /vulnerabilities", view(s.vulnerabilities))
 	mux.Handle("GET /vulnerabilities.csv", view(s.vulnerabilitiesCSV))
@@ -322,6 +352,11 @@ func (s *Server) Handler() http.Handler {
 
 	mux.Handle("GET /profile", view(s.profile))
 	mux.Handle("POST /profile/password", view(s.profilePassword))
+	mux.Handle("POST /profile/mfa/setup", view(s.profileMFASetup))
+	mux.Handle("POST /profile/mfa/enable", view(s.profileMFAEnable))
+	mux.Handle("POST /profile/mfa/disable", view(s.profileMFADisable))
+	mux.Handle("POST /profile/mfa/recovery", view(s.profileMFARecovery))
+	mux.Handle("POST /users/{id}/reset-mfa", admin(s.userResetMFA))
 
 	mux.Handle("GET /settings", admin(s.settings))
 	mux.Handle("POST /settings", admin(s.settingsSave))

@@ -396,6 +396,7 @@ func (s *Server) settingsSave(w http.ResponseWriter, r *http.Request) {
 		settings.KeyEmailServerUpdate: b("email_server_update"),
 		settings.KeyScanEnabled:       b("scan_enabled"),
 		settings.KeyAgentAutoUpdate:   b("agent_auto_update"),
+		settings.KeyAuthRequireMFA:    b("auth_require_mfa"),
 	}
 	var bad []string
 	for _, f := range []struct {
@@ -407,7 +408,11 @@ func (s *Server) settingsSave(w http.ResponseWriter, r *http.Request) {
 		{"agent_checkin_seconds", settings.KeyAgentCheckinSeconds, "settings.agent.checkin_seconds", 15, 3600},
 		{"agent_report_minutes", settings.KeyAgentReportMinutes, "settings.agent.report_minutes", 5, 1440},
 		{"retention_days", settings.KeyRetentionDays, "settings.retention.days", 7, 3650},
+		{"risk_max_days", settings.KeyRiskMaxDays, "settings.risk.max_days", 0, 3650},
 	} {
+		if f.form == "risk_max_days" && strings.TrimSpace(r.PostFormValue(f.form)) == "" {
+			continue // not on the form (older page): keep the stored value
+		}
 		v, ok := intIn(f.form, f.lo, f.hi)
 		if !ok {
 			bad = append(bad, s.l.T("validation.range", "field", s.l.T(f.label), "min", f.lo, "max", f.hi))

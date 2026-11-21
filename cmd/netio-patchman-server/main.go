@@ -5,6 +5,7 @@
 //	netio-patchman-server                     run the server (default)
 //	netio-patchman-server backup -out FILE    write a consistent database copy
 //	netio-patchman-server reset-password -email ADDRESS
+//	netio-patchman-server reset-mfa -email ADDRESS   remove a lost authenticator
 //	netio-patchman-server healthcheck         exit 0 when /healthz answers
 package main
 
@@ -123,6 +124,18 @@ func main() {
 		}
 		_ = st.Audit(ctx, store.AuditEntry{Action: "user.password_reset", Target: u.Email, Details: "cli"})
 		fmt.Println(l.T("cli.reset.done", "email", u.Email, "password", pw))
+	case "reset-mfa":
+		u, err := st.UserByEmail(ctx, *emailAddr)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, l.T("cli.reset.user_not_found", "email", *emailAddr))
+			os.Exit(1)
+		}
+		if err := st.DisableTOTP(ctx, u.ID, ""); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		_ = st.Audit(ctx, store.AuditEntry{Action: "user.mfa_reset", Target: u.Email, Details: "cli"})
+		fmt.Println(l.T("cli.reset_mfa.done", "email", u.Email))
 	default:
 		fmt.Fprintln(os.Stderr, l.T("cli.unknown_command", "command", cmd))
 		os.Exit(2)
@@ -169,6 +182,7 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, l i18n.Local
 			}
 		}
 		_ = st.PruneAudit(ctx, 365*24*time.Hour)
+		_ = st.PruneSnapshots(ctx, 2*365*24*time.Hour)
 		_ = st.PruneOSVQueries(ctx, 30*24*time.Hour)
 		_ = st.PruneOSVRecords(ctx, 90*24*time.Hour)
 		_ = st.DeleteExpiredSessions(ctx)
@@ -310,9 +324,28 @@ func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched
 	}
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
+	var lastSnapshot time.Time
 	for {
-		sched.Tick(ctx, timeutil.Now())
+		now := timeutil.Now()
+		sched.Tick(ctx, now)
 		n.CheckOffline(ctx)
+		if risks, err := st.ExpireAcceptedRisks(ctx, now); err != nil {
+			logger.Warn(l.T("log.maintenance.failed"), slog.String("error", err.Error()))
+		} else if len(risks) > 0 {
+			for _, r := range risks {
+				_ = st.Audit(ctx, store.AuditEntry{Action: "finding.risk_expired", Target: r.CVEID, Details: "host=" + r.Hostname + " package=" + r.Package})
+			}
+			logger.Info(l.T("log.risk.expired"), slog.Int("findings", len(risks)))
+			n.RisksExpired(ctx, risks)
+		}
+		// The trend chart keeps one row per day with the latest state.
+		if now.Sub(lastSnapshot) >= 15*time.Minute {
+			if err := st.TakeSnapshot(ctx, now); err != nil {
+				logger.Warn(l.T("log.maintenance.failed"), slog.String("error", err.Error()))
+			} else {
+				lastSnapshot = now
+			}
+		}
 		jobs, err := st.TimeOutJobs(ctx, 3*time.Hour)
 		if err != nil {
 			logger.Warn(l.T("log.maintenance.failed"), slog.String("error", err.Error()))

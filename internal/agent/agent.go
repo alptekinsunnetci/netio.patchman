@@ -176,6 +176,7 @@ func ReadHostInfo(remoteUpdates, selfUpdate bool) (protocol.HostInfo, error) {
 	}
 	h.IPAddresses = ipAddresses()
 	h.PackageManager = DetectPackageManager()
+	h.Virtualization = Virtualization()
 	rel, err := osRelease()
 	if err != nil {
 		return h, err

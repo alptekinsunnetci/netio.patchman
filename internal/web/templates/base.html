@@ -35,6 +35,8 @@
 
 {{define "findingstatus"}}<span class="pill pill--{{.}}">{{statusLabel .}}</span>{{end}}
 
+{{define "riskexpiry"}}{{if eq .Status "accepted_risk"}}<div class="cell-sub">{{if .StatusExpiresAt.IsZero}}{{t "vuln.risk_no_expiry"}}{{else}}{{t "vuln.risk_until" "date" (date .StatusExpiresAt)}}{{end}}</div>{{end}}{{end}}
+
 {{define "hoststatus"}}{{if online .}}<span class="pill pill--online">{{t "host.status.online"}}</span>{{else if .LastSeenAt.IsZero}}<span class="pill pill--muted">{{t "host.status.pending"}}</span>{{else}}<span class="pill pill--offline">{{t "host.status.offline"}}</span>{{end}}{{end}}
 
 {{define "sevcounts"}}{{if .Total}}<span class="sevcounts">{{if .Critical}}<span class="sevcount sevcount--critical" title="{{t "severity.critical"}}">{{.Critical}}</span>{{end}}{{if .High}}<span class="sevcount sevcount--high" title="{{t "severity.high"}}">{{.High}}</span>{{end}}{{if .Medium}}<span class="sevcount sevcount--medium" title="{{t "severity.medium"}}">{{.Medium}}</span>{{end}}{{if .Low}}<span class="sevcount sevcount--low" title="{{t "severity.low"}}">{{.Low}}</span>{{end}}{{if .Other}}<span class="sevcount sevcount--unknown" title="{{t "severity.unknown"}}">{{.Other}}</span>{{end}}</span>{{else}}<span class="muted">0</span>{{end}}{{end}}
@@ -49,5 +51,47 @@
   </span>
 </nav>
 {{else if .Total}}<p class="pager__info pager__info--single">{{t "pager.total" "total" .Total}}</p>{{end}}{{end}}
+
+{{define "trends"}}
+<section class="panel" aria-labelledby="trend-title">
+  <div class="panel__head">
+    <h2 class="panel__title" id="trend-title">{{t "trend.title"}}</h2>
+    <span class="panel__link muted">{{.From}} – {{.To}}</span>
+  </div>
+  {{if .Available}}
+  <div class="trends">
+    {{range .Charts}}
+    <figure class="trend" data-trend>
+      <figcaption class="trend__head"><span class="trend__title">{{t (printf "trend.metric.%s" .Key)}}</span><span class="trend__last">{{.Last}}</span></figcaption>
+      <div class="trend__plot" data-values="{{.Values}}" data-labels="{{.Labels}}" data-name="{{t (printf "trend.metric.%s" .Key)}}" role="img" aria-label="{{t "trend.aria" "metric" (t (printf "trend.metric.%s" .Key)) "first" .First "last" .Last}}">
+        <span class="trend__tick trend__tick--max">{{.Max}}</span><span class="trend__tick trend__tick--min">0</span>
+        <svg class="trend__svg" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <line class="trend__grid" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="trend__grid" x1="0" y1="20" x2="100" y2="20"></line>
+          <line class="trend__base" x1="0" y1="40" x2="100" y2="40"></line>
+          <path class="trend__area" d="{{.Area}}"></path>
+          <path class="trend__line" d="{{.Line}}"></path>
+          <line class="trend__cross" x1="0" y1="0" x2="0" y2="40" hidden></line>
+        </svg>
+        <span class="trend__dot" hidden></span>
+        <span class="trend__tip" role="status" hidden></span>
+      </div>
+    </figure>
+    {{end}}
+  </div>
+  <details class="details">
+    <summary>{{t "trend.table"}}</summary>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>{{t "trend.day"}}</th><th class="num">{{t "trend.metric.critical_high"}}</th><th class="num">{{t "trend.metric.kev"}}</th><th class="num">{{t "trend.metric.open_findings"}}</th><th class="num">{{t "trend.metric.security_updates"}}</th><th class="num">{{t "trend.reboot"}}</th><th class="num">{{t "trend.hosts"}}</th></tr></thead>
+      <tbody>
+      {{range .Rows}}<tr><td>{{date .Day}}</td><td class="num">{{add .Sev.Critical .Sev.High}}</td><td class="num">{{.KEV}}</td><td class="num">{{.OpenFindings}}</td><td class="num">{{.SecurityUpdates}}</td><td class="num">{{.RebootRequired}}</td><td class="num">{{.Hosts}}</td></tr>{{end}}
+      </tbody>
+    </table>
+    </div>
+  </details>
+  {{else}}<p class="muted">{{t "trend.collecting"}}</p>{{end}}
+</section>
+{{end}}
 
 {{define "empty"}}<div class="empty"><p class="empty__body">{{.}}</p></div>{{end}}

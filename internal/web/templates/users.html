@@ -12,13 +12,14 @@
 <div class="grid-2 grid-2--wide-left">
   <section class="panel panel--flush">
     <table class="table">
-      <thead><tr><th>{{t "user.field.name"}}</th><th>{{t "user.field.role"}}</th><th>{{t "user.field.status"}}</th><th>{{t "user.field.last_login"}}</th></tr></thead>
+      <thead><tr><th>{{t "user.field.name"}}</th><th>{{t "user.field.role"}}</th><th>{{t "user.field.status"}}</th><th>{{t "mfa.title"}}</th><th>{{t "user.field.last_login"}}</th></tr></thead>
       <tbody>
       {{range $d.Users}}
       <tr>
         <td><a href="/users/{{.ID}}">{{.Name}}</a><div class="cell-sub">{{.Email}}</div></td>
         <td>{{roleLabel .Role}}</td>
         <td>{{if .Disabled}}<span class="pill pill--muted">{{t "user.disabled"}}</span>{{else}}<span class="pill pill--online">{{t "user.active"}}</span>{{end}}</td>
+        <td>{{if .MFAEnabled}}<span class="pill pill--succeeded">{{t "mfa.status_on"}}</span>{{else}}<span class="pill pill--muted">{{t "mfa.status_off"}}</span>{{end}}</td>
         <td>{{if .LastLoginAt.IsZero}}<span class="muted">{{t "time.never"}}</span>{{else}}{{datetime .LastLoginAt}}{{end}}</td>
       </tr>
       {{end}}

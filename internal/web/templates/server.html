@@ -5,8 +5,9 @@
 <nav class="breadcrumb"><a href="/servers">{{t "nav.servers"}}</a> / <span>{{$h.Hostname}}</span></nav>
 <header class="pagehead">
   <div>
-    <h1 class="pagehead__title">{{$h.Hostname}} {{template "hoststatus" $h}} {{if $h.RebootRequired}}<span class="pill pill--warning">{{t "host.reboot_required"}}</span>{{end}}</h1>
-    <p class="pagehead__sub">{{$h.OSName}} · <span class="mono">{{$h.Kernel}}</span> · {{t "host.last_seen_ago" "ago" (ago $h.LastSeenAt)}}</p>
+    <h1 class="pagehead__title">{{$h.Hostname}} {{template "hoststatus" $h}} {{if $h.RebootRequired}}<span class="pill pill--warning">{{t "host.reboot_required"}}{{if not $h.RebootRequiredSince.IsZero}} · {{ago $h.RebootRequiredSince}}{{end}}</span>{{end}}</h1>
+    <p class="pagehead__sub">{{$h.OSName}} · <span class="mono">{{$h.Kernel}}</span> · {{virt $h.Virtualization}} · {{t "host.last_seen_ago" "ago" (ago $h.LastSeenAt)}}</p>
+    {{if $h.Groups}}<div class="tags">{{range $h.Groups}}<a class="tag" href="/groups/{{.ID}}">{{.Name}}</a>{{end}}</div>{{end}}
   </div>
   {{if .User.CanOperate}}
   <div class="pagehead__actions">
@@ -93,7 +94,7 @@
       <td class="mono">{{.PackageName}}</td>
       <td class="mono">{{.InstalledVersion}}</td>
       <td>{{if .FixedVersion}}<span class="mono">{{.FixedVersion}}</span>{{else}}<span class="muted">{{t "vuln.fix_not_available"}}</span>{{end}}</td>
-      <td>{{template "findingstatus" .Status}}</td>
+      <td>{{template "findingstatus" .Status}}{{template "riskexpiry" .}}</td>
       <td><time datetime="{{iso .FirstDetectedAt}}">{{date .FirstDetectedAt}}</time></td>
     </tr>
     {{end}}
@@ -179,6 +180,8 @@
       <dt>{{t "host.field.os"}}</dt><dd>{{$h.OSName}}</dd>
       <dt>{{t "host.field.kernel"}}</dt><dd class="mono">{{$h.Kernel}}</dd>
       <dt>{{t "host.field.arch"}}</dt><dd class="mono">{{$h.Arch}}</dd>
+      <dt>{{t "host.field.platform"}}</dt><dd>{{virt $h.Virtualization}}{{if $h.Virtualization}} <span class="muted mono">({{$h.Virtualization}})</span>{{end}}</dd>
+      <dt>{{t "host.field.reboot_required"}}</dt><dd>{{if $h.RebootRequired}}<strong class="text-warning">{{t "common.yes"}}</strong>{{if not $h.RebootRequiredSince.IsZero}} <span class="muted">— {{t "host.reboot_since" "since" (long $h.RebootRequiredSince)}}</span>{{end}}{{else}}{{t "common.no"}}{{end}}</dd>
       <dt>{{t "host.field.uptime"}}</dt><dd>{{uptime $h.UptimeSeconds}}</dd>
       <dt>{{t "host.field.package_manager"}}</dt><dd class="mono">{{$h.PackageManager}}</dd>
       <dt>{{t "host.field.ecosystem"}}</dt><dd class="mono">{{if $h.Ecosystem}}{{$h.Ecosystem}}{{else}}<span class="muted">{{t "server.scan_unsupported_short"}}</span>{{end}}</dd>
@@ -208,6 +211,20 @@
     {{end}}
   </ul>
   {{else}}<p class="muted">{{t "host.no_schedules"}}</p>{{end}}
+</section>
+<section class="panel">
+  <h2 class="panel__title">{{t "host.field.groups"}}</h2>
+  {{if $d.AllGroups}}
+  {{if .User.CanOperate}}
+  <form class="form" method="post" action="/servers/{{$h.ID}}/groups">
+    {{template "csrf" $root}}
+    <div class="checklist">
+      {{range $d.AllGroups}}<label class="check-label"><input type="checkbox" name="group_ids" value="{{.ID}}"{{if has $d.Member .ID}} checked{{end}}> {{.Name}}</label>{{end}}
+    </div>
+    <div><button class="button" type="submit">{{t "common.save"}}</button></div>
+  </form>
+  {{else}}{{if $h.Groups}}<div class="tags">{{range $h.Groups}}<a class="tag" href="/groups/{{.ID}}">{{.Name}}</a>{{end}}</div>{{else}}<p class="muted">{{t "host.no_groups"}}</p>{{end}}{{end}}
+  {{else}}<p class="muted">{{t "groups.empty"}}{{if .User.IsAdmin}} <a href="/groups">{{t "groups.create"}}</a>{{end}}</p>{{end}}
 </section>
 <section class="panel">
   <h2 class="panel__title">{{t "host.field.notes"}}</h2>

@@ -53,8 +53,14 @@
   <section class="panel">
     <h2 class="panel__title">{{t "schedule.field.target"}}</h2>
     <div class="daypicker">
-      {{range list "all" "os" "hosts"}}<label class="check-label"><input type="radio" name="target" value="{{.}}"{{if eq $s.Target .}} checked{{end}}> {{t (printf "schedule.target.%s" .)}}</label>{{end}}
+      {{range list "all" "os" "group" "hosts"}}<label class="check-label"><input type="radio" name="target" value="{{.}}"{{if eq $s.Target .}} checked{{end}}> {{t (printf "schedule.target.%s" .)}}</label>{{end}}
     </div>
+    <label class="field" data-show-when="target=group"><span class="field__label">{{t "schedule.field.group"}}</span>
+      <select class="field__input" name="group_id">
+        <option value="">{{t "common.empty"}}</option>
+        {{range $d.Groups}}<option value="{{.ID}}"{{if eq $s.GroupID .ID}} selected{{end}}>{{.Name}} · {{t "group.host_count" "count" .HostCount}}</option>{{end}}
+      </select>
+      {{if not $d.Groups}}<span class="field__hint">{{t "groups.empty"}}</span>{{end}}</label>
     <label class="field" data-show-when="target=os"><span class="field__label">{{t "schedule.field.os"}}</span>
       <select class="field__input" name="os_id">
         <option value="">{{t "common.empty"}}</option>

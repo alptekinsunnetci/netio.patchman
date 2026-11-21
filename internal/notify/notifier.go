@@ -350,6 +350,49 @@ func (n *Notifier) ServerUpdate(ctx context.Context, current, latest, changesURL
 	}
 }
 
+// RisksExpired records accepted risks that reopened because their term ended
+// (one notification per CVE) and emails a summary when alerts are enabled.
+func (n *Notifier) RisksExpired(ctx context.Context, risks []store.ExpiredRisk) {
+	if len(risks) == 0 {
+		return
+	}
+	byCVE := map[string][]string{}
+	var order []string
+	for _, r := range risks {
+		if _, ok := byCVE[r.CVEID]; !ok {
+			order = append(order, r.CVEID)
+		}
+		byCVE[r.CVEID] = append(byCVE[r.CVEID], r.Hostname)
+	}
+	for _, c := range order {
+		_ = n.st.AddNotification(ctx, store.LevelWarning, "risk_expired", map[string]string{
+			"cve": c, "count": strconv.Itoa(len(byCVE[c])), "hosts": strings.Join(byCVE[c], ", "),
+		}, "/vulnerabilities/"+c)
+	}
+	cfg, err := settings.Load(ctx, n.st)
+	if err != nil || !n.emailEnabled(cfg) {
+		return
+	}
+	to := n.recipients(ctx, cfg)
+	if len(to) == 0 {
+		return
+	}
+	rows := make([]email.NoticeRow, 0, len(order))
+	for _, c := range order {
+		rows = append(rows, email.NoticeRow{Label: c, Value: strings.Join(byCVE[c], ", "), Mono: true})
+	}
+	m, err := n.renderer.Notice(email.Notice{
+		Subject: n.l.T("email.risk_expired.subject", "count", len(order)),
+		Heading: n.l.T("email.risk_expired.heading"),
+		Body:    n.l.T("email.risk_expired.body", "count", len(order)),
+		Rows:    rows,
+		LinkURL: n.baseURL() + "/vulnerabilities", LinkText: n.l.T("email.vuln.dashboard_link"),
+	}, to)
+	if err == nil {
+		n.send(ctx, m)
+	}
+}
+
 // SendTest sends a test email to the given address synchronously.
 func (n *Notifier) SendTest(ctx context.Context, to string) error {
 	sender, from := n.mailer()

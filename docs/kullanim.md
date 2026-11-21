@@ -18,8 +18,11 @@ Altyapının genel durumunu gösterir:
 - **İstismar Edilen Açık:** CISA KEV kataloğunda yer alan, yani aktif olarak istismar edildiği bilinen açıklar. Bu açıklar her zaman önceliklidir.
 - **Bekleyen Güvenlik Güncellemesi:** Dağıtımın güvenlik deposundan gelen ve henüz kurulmamış güncellemeler.
 - **Çevrimdışı Ajan:** Belirlenen süre içinde bağlanmayan ajanlar.
+- **Yeniden Başlatma Bekleyen:** Yeni çekirdek veya mikro kod kurulmuş ama henüz yeniden başlatılmamış sunucular ve en eskisinin ne zamandan beri beklediği.
 
 Kartlara tıklayarak ilgili filtrelenmiş listeye geçebilirsiniz.
+
+**Günlük eğilim** bölümü son 30 günü dört küçük grafikte gösterir: kritik ve yüksek açık sayısı (CVE), aktif olarak istismar edilen açıklar (KEV), açık bulgular ve bekleyen güvenlik güncellemeleri. Fareyle grafiğin üzerine gelindiğinde (ya da grafik seçiliyken ok tuşlarıyla) o günün değeri gösterilir. **Günlük değerleri tablo olarak göster** aynı verileri tablo halinde açar. Sunucu filonun durumunu her 15 dakikada bir o günün kaydına yazar; merkezi sunucunun kapalı olduğu günlerde grafikte boşluk kalır. Grafik ikinci günden itibaren görünür.
 
 ## Sunucu Envanteri
 
@@ -48,7 +51,21 @@ Sunucu Envanteri listesinde sunucuları işaretleyin (başlıktaki kutu, sayfada
 
 Filtrelerle birlikte kullanıldığında örneğin "Güncelleme bekleyen tüm Ubuntu sunucularında güvenlik güncellemelerini uygula" işlemi birkaç tıklamayla yapılır. Uzaktan güncellemesi kapalı sunucular atlanır ve sonuç mesajında listelenir.
 
-“Yeniden başlatma gerekli” etiketi, kurulan güncellemelerin (örneğin çekirdek) etkinleşmesi için sunucunun yeniden başlatılması gerektiğini gösterir. netio.patchman sunucuları kendiliğinden yeniden başlatmaz.
+“Yeniden başlatma gerekli” etiketi, kurulan güncellemelerin (örneğin çekirdek) etkinleşmesi için sunucunun yeniden başlatılması gerektiğini gösterir. Etiketin ipucunda ve sunucunun **Sistem Bilgisi** sekmesinde bekleme başlangıcı görünür. Tespit yöntemi dağıtıma göre değişir: Ubuntu'da `/var/run/reboot-required`, Debian'da `/boot` altındaki çekirdeklerin çalışan çekirdekle karşılaştırılması, RHEL ailesinde `needs-restarting -r`, SUSE'de `zypper needs-rebooting`, Alpine'de kurulu `linux-*` paketinin çalışan çekirdekle karşılaştırılması. `needrestart` kuruluysa yeni mikro kod da dikkate alınır. netio.patchman sunucuları kendiliğinden yeniden başlatmaz.
+
+### Platform
+
+Ajan sunucunun hangi platformda çalıştığını bildirir: VMware, Hyper-V, KVM/QEMU, Xen, VirtualBox, Amazon EC2, Google Compute Engine gibi sanal makineler, Docker/Podman/LXC konteynerleri ya da fiziksel sunucu. Bilgi `systemd-detect-virt` ile, bu araç yoksa (örneğin Alpine) DMI bilgileri ve konteyner işaretleriyle belirlenir. Sunucu Envanteri'ndeki **platform** süzgeci ile örneğin yalnızca fiziksel sunucuları ya da yalnızca VMware sanal makinelerini listeleyebilirsiniz. 0.3.0 öncesi ajanlarda platform “Bilinmiyor” görünür; ajan güncellenince dolar.
+
+## Sunucu Grupları
+
+Sunucuları “Üretim”, “Test”, “Veritabanı” gibi gruplara ayırabilirsiniz. Bir sunucu birden fazla gruba üye olabilir.
+
+- **Grup oluşturma, yeniden adlandırma, silme:** **Sunucu Grupları** sayfasından (yalnızca yöneticiler). Grup silinince sunucular silinmez.
+- **Sunucu ekleme ve çıkarma (operatör ve yönetici):** Sunucu Envanteri'nde sunucuları işaretleyip **Seçili sunucuları gruba** çubuğundan grubu seçin ve **Gruba ekle** ya da **Gruptan çıkar** düğmesine basın. Tek bir sunucunun gruplarını, sunucu ayrıntısındaki **Sistem Bilgisi → Gruplar** bölümünden de değiştirebilirsiniz.
+- **Kullanım:** Sunucu Envanteri gruba göre süzülebilir; zamanlanmış güncellemeler bir grubu hedefleyebilir; uyumluluk raporu grup için alınabilir. Grup sayfasında grubun kritik ve KEV açık sayıları görünür.
+
+Bir grubu hedefleyen zamanlama, çalıştığı anda grubun üyelerine uygulanır; gruba sonradan eklenen sunucular da kapsanır. Grup silinirse bu zamanlamalar devre dışı bırakılır ve hedefleri boşaltılır; hiçbir zaman kendiliğinden tüm sunuculara yönelmez.
 
 ### Servisleri ve sunucuyu yeniden başlatma
 
@@ -90,6 +107,22 @@ Ubuntu'da çekirdek açıkları `linux` kaynak paketi altında gösterilir ve sa
 | Çözüldü | Paket güncellendi; netio.patchman bunu otomatik olarak belirler |
 
 Risk Kabul Edildi ve Hatalı Tespit durumundaki bulgular sayımlara ve bildirimlere dahil edilmez. Çözülen bir açık yeniden tespit edilirse otomatik olarak tekrar açılır.
+
+**Risk kabulü süreli verilir.** Durumu “Risk Kabul Edildi” yaparken **Risk kabulü süresi** seçilir: 30, 90, 180 veya 365 gün. Yönetici **Sistem Ayarları → Güvenlik → En uzun risk kabulü süresi** ile üst sınırı belirler (varsayılan 365 gün; 0 süresiz kabule izin verir). Süre, seçilen günün sonunda (gece 23:59) dolar. O anda bulgular yeniden **Açık** olur, bildirim merkezine her CVE için bir uyarı düşer, e-posta bildirimleri açıksa özet e-posta gider ve denetim kayıtlarına yazılır. Bulgu listelerinde ve raporda kabulün bitiş tarihi ile kabul eden kullanıcı görünür.
+
+## Uyumluluk Raporu
+
+**Uyumluluk Raporu** sayfası seçilen dönem (varsayılan son 30 gün, en fazla 366 gün) ve isteğe bağlı bir grup için denetime hazır bir özet üretir:
+
+- Sunucu sayısı, kritik ve yüksek açıklar, aktif olarak istismar edilen (KEV) açıklar, yeniden başlatma bekleyen sunucular
+- Dönemde tespit edilen ve kapatılan bulgular, ortalama kapatma süresi (gün)
+- Günlük eğilim grafikleri (tüm filo için)
+- Açık KEV açıkları, CISA'nın belirlediği son tarih ve **Süresi geçti** işareti
+- Sunucu bazında durum: işletim sistemi, platform, açıklar, bekleyen güvenlik güncellemeleri, yeniden başlatma
+- Kabul edilen riskler: açıklama, kabul eden kullanıcı ve bitiş tarihi (süresiz olanlar ayrıca işaretlenir)
+- Dönemde oluşturulan güncelleme işlerinin sonuçlara göre dağılımı
+
+**Yazdır / PDF kaydet** düğmesi tarayıcının yazdırma penceresini açar. Hedef olarak “PDF olarak kaydet” seçildiğinde rapor menüler olmadan, beyaz zeminde kaydedilir. Rapor, oluşturulma zamanını ve oluşturan kullanıcıyı içerir. ISO 27001 ve KVKK denetimlerinde düzenli olarak (örneğin aylık) alınıp saklanabilir. Tüm roller raporu görüntüleyebilir.
 
 ## Paket Yönetimi
 
@@ -177,4 +210,20 @@ E-postaların gönderileceği SMTP sunucusu **Sistem Ayarları → Sunucu yapıl
 
 ## Denetim Kayıtları
 
-**Sistem Ayarları → Denetim Kayıtları** sayfasında girişler, başarısız giriş denemeleri, kullanıcı ve ayar değişiklikleri, başlatılan işler, kayıt anahtarı işlemleri ve sunucu kaldırma işlemleri kullanıcı ve IP adresiyle birlikte listelenir.
+**Sistem Ayarları → Denetim Kayıtları** sayfasında girişler, başarısız giriş denemeleri, kullanıcı ve ayar değişiklikleri, başlatılan işler, kayıt anahtarı işlemleri ve sunucu kaldırma işlemleri kullanıcı ve IP adresiyle birlikte listelenir. Grup değişiklikleri, iki adımlı doğrulamanın açılıp kapatılması, hatalı doğrulama kodları ve süresi dolan risk kabulleri de kaydedilir.
+
+## İki adımlı doğrulama
+
+Her kullanıcı **Profilim** sayfasından iki adımlı doğrulamayı açabilir:
+
+1. **Doğrulayıcı uygulaması tanımla** düğmesine basın.
+2. Telefonunuzdaki doğrulayıcı uygulamasında (Google Authenticator, Microsoft Authenticator, Aegis, FreeOTP, 1Password vb.) yeni hesap ekleyip gösterilen kurulum anahtarını yazın. Panel telefonda açıksa **uygulamada aç** bağlantısı anahtarı doğrudan uygulamaya aktarır.
+3. Uygulamanın gösterdiği 6 haneli kodu ve parolanızı girip **Doğrula ve aç**'a basın.
+
+Açıldığında **10 yedek kod** bir kez gösterilir. Her biri, telefona erişilemediğinde bir kez giriş için kullanılabilir; güvenli bir yerde saklayın. Yedek kodlar aynı sayfadan yenilenebilir. Bu işlem parola ve geçerli bir kod ister ve eski kodları geçersiz kılar.
+
+Girişte parola doğrulandıktan sonra kod istenir. Kod 30 saniyede bir değişir; telefon saatinin ±30 saniyelik kaymasına izin verilir. Kullanılan bir kod ikinci kez kabul edilmez. Beş hatalı koddan sonra giriş baştan alınmalıdır.
+
+**Zorunlu kılma:** Yönetici **Sistem Ayarları → Güvenlik → Tüm kullanıcılar için iki adımlı doğrulamayı zorunlu kıl** seçeneğini açabilir. Doğrulayıcı tanımlamamış kullanıcılar, tanımlayana kadar yalnızca Profilim sayfasını açabilir. Zorunluyken kullanıcılar doğrulamayı kapatamaz.
+
+**Telefon kaybolursa:** Yönetici **Kullanıcı Yönetimi → kullanıcı → İki adımlı doğrulamayı sıfırla** ile kullanıcının doğrulayıcısını kaldırır; kullanıcının açık oturumları kapanır. Yöneticinin kendisi erişemiyorsa sunucuda `netio-patchman-server reset-mfa -email <adres>` komutu kullanılır (bkz. [kurulum.md](kurulum.md)).

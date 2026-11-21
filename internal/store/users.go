@@ -29,7 +29,13 @@ type User struct {
 	CreatedAt         time.Time
 	LastLoginAt       time.Time
 	PasswordChangedAt time.Time
+	// TOTPSecret is the base32 key of an enabled authenticator ("" = off).
+	TOTPSecret    string
+	TOTPEnabledAt time.Time
 }
+
+// MFAEnabled reports whether the user signs in with a second factor.
+func (u User) MFAEnabled() bool { return u.TOTPSecret != "" }
 
 // CanOperate reports whether the user may start jobs and change findings.
 func (u User) CanOperate() bool { return u.Role == RoleAdmin || u.Role == RoleOperator }
@@ -37,19 +43,95 @@ func (u User) CanOperate() bool { return u.Role == RoleAdmin || u.Role == RoleOp
 // IsAdmin reports whether the user is an administrator.
 func (u User) IsAdmin() bool { return u.Role == RoleAdmin }
 
-const userCols = `id, email, name, password_hash, role, disabled, created_at, last_login_at, password_changed_at`
+const userCols = `id, email, name, password_hash, role, disabled, created_at, last_login_at, password_changed_at, totp_secret, totp_enabled_at`
 
 func scanUser(row interface{ Scan(...any) error }) (User, error) {
 	var u User
 	var disabled int
-	var created, lastLogin, changed int64
-	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.PasswordHash, &u.Role, &disabled, &created, &lastLogin, &changed)
+	var created, lastLogin, changed, totpAt int64
+	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.PasswordHash, &u.Role, &disabled, &created, &lastLogin, &changed, &u.TOTPSecret, &totpAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return u, ErrNotFound
 	}
 	u.Disabled = disabled == 1
-	u.CreatedAt, u.LastLoginAt, u.PasswordChangedAt = fromTS(created), fromTS(lastLogin), fromTS(changed)
+	u.CreatedAt, u.LastLoginAt, u.PasswordChangedAt, u.TOTPEnabledAt = fromTS(created), fromTS(lastLogin), fromTS(changed), fromTS(totpAt)
 	return u, err
+}
+
+// EnableTOTP turns on two-factor authentication with a verified secret and
+// replaces the recovery codes (SHA-256 hashes). The verified step counts as
+// used. Other sessions of the user are ended.
+func (s *Store) EnableTOTP(ctx context.Context, id int64, secret string, usedStep int64, recoveryHashes []string, keepSessionHash string) error {
+	return s.tx(ctx, func(tx *sql.Tx) error {
+		if _, err := tx.ExecContext(ctx, `UPDATE users SET totp_secret = ?, totp_enabled_at = ?, totp_last_step = ? WHERE id = ?`, secret, now(), usedStep, id); err != nil {
+			return err
+		}
+		if err := replaceRecoveryCodes(ctx, tx, id, recoveryHashes); err != nil {
+			return err
+		}
+		_, err := tx.ExecContext(ctx, `DELETE FROM sessions WHERE user_id = ? AND token_hash <> ?`, id, keepSessionHash)
+		return err
+	})
+}
+
+// ReplaceRecoveryCodes stores a new set of recovery code hashes.
+func (s *Store) ReplaceRecoveryCodes(ctx context.Context, id int64, hashes []string) error {
+	return s.tx(ctx, func(tx *sql.Tx) error { return replaceRecoveryCodes(ctx, tx, id, hashes) })
+}
+
+func replaceRecoveryCodes(ctx context.Context, tx *sql.Tx, id int64, hashes []string) error {
+	if _, err := tx.ExecContext(ctx, `DELETE FROM user_recovery_codes WHERE user_id = ?`, id); err != nil {
+		return err
+	}
+	for _, h := range hashes {
+		if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO user_recovery_codes (user_id, code_hash) VALUES (?, ?)`, id, h); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// DisableTOTP turns off two-factor authentication, removes recovery codes and
+// ends the user's sessions except keepSessionHash ("" ends all).
+func (s *Store) DisableTOTP(ctx context.Context, id int64, keepSessionHash string) error {
+	return s.tx(ctx, func(tx *sql.Tx) error {
+		if _, err := tx.ExecContext(ctx, `UPDATE users SET totp_secret = '', totp_enabled_at = 0, totp_last_step = 0 WHERE id = ?`, id); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `DELETE FROM user_recovery_codes WHERE user_id = ?`, id); err != nil {
+			return err
+		}
+		_, err := tx.ExecContext(ctx, `DELETE FROM sessions WHERE user_id = ? AND token_hash <> ?`, id, keepSessionHash)
+		return err
+	})
+}
+
+// UseTOTPStep records a verified time step. It returns false when the step
+// (or a later one) was already used, which rejects replayed codes.
+func (s *Store) UseTOTPStep(ctx context.Context, id, step int64) (bool, error) {
+	res, err := s.db.ExecContext(ctx, `UPDATE users SET totp_last_step = ? WHERE id = ? AND totp_secret <> '' AND totp_last_step < ?`, step, id, step)
+	if err != nil {
+		return false, err
+	}
+	n, _ := res.RowsAffected()
+	return n == 1, nil
+}
+
+// UseRecoveryCode consumes a recovery code by its hash.
+func (s *Store) UseRecoveryCode(ctx context.Context, id int64, hash string) (bool, error) {
+	res, err := s.db.ExecContext(ctx, `DELETE FROM user_recovery_codes WHERE user_id = ? AND code_hash = ?`, id, hash)
+	if err != nil {
+		return false, err
+	}
+	n, _ := res.RowsAffected()
+	return n == 1, nil
+}
+
+// RecoveryCodesLeft returns the number of unused recovery codes.
+func (s *Store) RecoveryCodesLeft(ctx context.Context, id int64) (int, error) {
+	var n int
+	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM user_recovery_codes WHERE user_id = ?`, id).Scan(&n)
+	return n, err
 }
 
 // CountUsers returns the number of users.

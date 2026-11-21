@@ -50,6 +50,20 @@ type HostInfo struct {
 	RemoteUpdates  bool     `json:"remote_updates"`
 	SelfUpdate     bool     `json:"self_update"`
 	UptimeSeconds  int64    `json:"uptime_seconds"`
+	// Virtualization is the platform: systemd-detect-virt ids such as
+	// "vmware", "kvm", "microsoft", "docker", or "none" for physical machines.
+	// Empty when unknown (agents before 0.3.0).
+	Virtualization string `json:"virtualization,omitempty"`
+}
+
+var virtRE = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,31}$`)
+
+// CleanVirtualization returns v if it is a valid platform id, otherwise "".
+func CleanVirtualization(v string) string {
+	if virtRE.MatchString(v) {
+		return v
+	}
+	return ""
 }
 
 // RegisterRequest enrolls a new agent.

@@ -7,10 +7,13 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/scanner"
+	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
+	"netio.patchman/internal/timeutil"
 	"netio.patchman/internal/vuln"
 )
 
@@ -31,10 +34,17 @@ func (s *Server) dashboard(w http.ResponseWriter, r *http.Request) {
 	topVulns, _, _ := s.st.ListVulnSummaries(ctx, store.VulnFilter{}, store.Page{Number: 1, Size: 8})
 	topHosts, _ := s.st.TopVulnerableHosts(ctx, 8)
 	jobs, _, _ := s.st.ListJobs(ctx, store.JobFilter{}, store.Page{Number: 1, Size: 6})
+	to := calendarDay(timeutil.Now())
+	from := to.AddDate(0, 0, -29)
+	snaps, err := s.st.Snapshots(ctx, from, to)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
 	d := s.page(r, s.l.T("dashboard.title"), "dashboard")
 	d.Data = map[string]any{
 		"Stats": stats, "Sev": sev, "KEV": kev, "TopVulns": topVulns, "TopHosts": topHosts, "Jobs": jobs,
-		"Scan": s.o.Scanner.Status(),
+		"Scan": s.o.Scanner.Status(), "Trend": s.buildTrends(snaps, from, to),
 	}
 	s.render(w, r, http.StatusOK, "dashboard", d)
 }
@@ -43,7 +53,24 @@ func (s *Server) dashboard(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) hostFilter(r *http.Request) store.HostFilter {
 	q := r.URL.Query()
-	return store.HostFilter{Search: q.Get("q"), Status: q.Get("status"), OSID: q.Get("os"), OfflineAfter: s.offlineAfter()}
+	group, _ := strconv.ParseInt(q.Get("group"), 10, 64)
+	platform := q.Get("platform")
+	if platform != "virtual" && platform != "physical" && platform != "unknown" {
+		platform = protocol.CleanVirtualization(platform)
+	}
+	return store.HostFilter{Search: q.Get("q"), Status: q.Get("status"), OSID: q.Get("os"), GroupID: max(group, 0), Platform: platform, OfflineAfter: s.offlineAfter()}
+}
+
+// virtLabel names a platform id in Turkish; unknown ids are shown verbatim.
+func (s *Server) virtLabel(id string) string {
+	switch id {
+	case "":
+		return s.l.T("host.virt.unknown")
+	case "none", "vmware", "microsoft", "kvm", "qemu", "oracle", "xen", "amazon", "google", "parallels", "bochs", "vm-other",
+		"docker", "podman", "lxc", "lxc-libvirt", "openvz", "systemd-nspawn", "wsl":
+		return s.l.T("host.virt." + id)
+	}
+	return id
 }
 
 func (s *Server) servers(w http.ResponseWriter, r *http.Request) {
@@ -55,8 +82,11 @@ func (s *Server) servers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	osOpts, _ := s.st.OSOptions(r.Context())
+	groups, _ := s.st.ListGroups(r.Context())
+	platforms, _ := s.st.PlatformOptions(r.Context())
 	d := s.page(r, s.l.T("nav.servers"), "servers")
-	d.Data = map[string]any{"Hosts": hosts, "Filter": f, "OSOptions": osOpts, "Pager": newPager(r, pg, total), "Query": r.URL.RawQuery}
+	d.Data = map[string]any{"Hosts": hosts, "Filter": f, "OSOptions": osOpts, "Groups": groups, "Platforms": platforms,
+		"Pager": newPager(r, pg, total), "Query": r.URL.RawQuery}
 	s.render(w, r, http.StatusOK, "servers", d)
 }
 
@@ -109,7 +139,16 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 			s.serverError(w, r, err)
 			return
 		}
-		data["Schedules"] = scheds
+		groups, err := s.st.ListGroups(ctx)
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		member := map[int64]bool{}
+		for _, g := range h.Groups {
+			member[g.ID] = true
+		}
+		data["Schedules"], data["AllGroups"], data["Member"] = scheds, groups, member
 	default:
 		data["Tab"] = "vulns"
 		status := r.URL.Query().Get("status")
@@ -445,7 +484,7 @@ func (s *Server) vulnerability(w http.ResponseWriter, r *http.Request) {
 	}
 	d := s.page(r, v.CVEID, "vulnerabilities")
 	d.Data = map[string]any{"V": v, "Findings": rows, "Pager": newPager(r, pg, total), "Status": status,
-		"Remediation": remediation, "HasFix": len(fixes) > 0, "Statuses": manualStatuses}
+		"Remediation": remediation, "HasFix": len(fixes) > 0, "Statuses": manualStatuses, "RiskOptions": s.riskOptions(r)}
 	s.render(w, r, http.StatusOK, "vulnerability", d)
 }
 
@@ -464,13 +503,64 @@ func (s *Server) vulnerabilityStatus(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, back, "error", s.l.T("vuln.error.note_required"))
 		return
 	}
-	n, err := s.st.SetCVEStatus(r.Context(), id, status, note, sessionFrom(r).user.ID)
+	var expires time.Time
+	if status == store.StatusAcceptedRisk {
+		days, msg := s.riskDays(r)
+		if msg != "" {
+			s.redirect(w, r, back, "error", msg)
+			return
+		}
+		if days > 0 {
+			// The risk reopens at the end of that day in the display time zone.
+			y, m, dd := timeutil.Now().In(s.f.Location()).AddDate(0, 0, days).Date()
+			expires = time.Date(y, m, dd, 23, 59, 59, 0, s.f.Location())
+		}
+	}
+	n, err := s.st.SetCVEStatus(r.Context(), id, status, note, sessionFrom(r).user.ID, expires)
 	if err != nil {
 		s.serverError(w, r, err)
 		return
 	}
-	s.audit(r, "finding.status", id, "status="+status+" count="+strconv.FormatInt(n, 10)+" note="+note)
-	s.redirect(w, r, back, "success", s.l.T("vuln.status_updated", "count", n, "status", s.l.T("status."+status)))
+	details := "status=" + status + " count=" + strconv.FormatInt(n, 10) + " note=" + note
+	if !expires.IsZero() {
+		details += " expires=" + expires.UTC().Format(time.RFC3339)
+	}
+	s.audit(r, "finding.status", id, details)
+	msg := s.l.T("vuln.status_updated", "count", n, "status", s.l.T("status."+status))
+	if !expires.IsZero() {
+		msg += " " + s.l.T("vuln.risk_expires", "date", s.f.Date(expires))
+	}
+	s.redirect(w, r, back, "success", msg)
+}
+
+// riskDayOptions are the terms offered for accepting a risk (0 = no expiry).
+var riskDayOptions = []int{30, 90, 180, 365, 0}
+
+// riskOptions returns the terms allowed by the maximum term setting.
+func (s *Server) riskOptions(r *http.Request) []int {
+	cfg, _ := settings.Load(r.Context(), s.st)
+	var out []int
+	for _, d := range riskDayOptions {
+		if cfg.RiskMaxDays == 0 || (d > 0 && d < cfg.RiskMaxDays) {
+			out = append(out, d)
+		}
+	}
+	if cfg.RiskMaxDays > 0 {
+		out = append(out, cfg.RiskMaxDays) // the longest allowed term itself
+	}
+	return out
+}
+
+// riskDays reads the accepted-risk term and checks it against the setting.
+func (s *Server) riskDays(r *http.Request) (int, string) {
+	days, err := strconv.Atoi(r.PostFormValue("risk_days"))
+	for _, d := range s.riskOptions(r) {
+		if err == nil && d == days {
+			return days, ""
+		}
+	}
+	cfg, _ := settings.Load(r.Context(), s.st)
+	return 0, s.l.T("vuln.error.risk_days", "max", cfg.RiskMaxDays)
 }
 
 // vulnerabilityRemediate queues package upgrades on hosts affected by a CVE.
@@ -779,7 +869,8 @@ func (s *Server) serversCSV(w http.ResponseWriter, r *http.Request) {
 	l := s.l
 	_ = cw.Write([]string{l.T("host.field.hostname"), l.T("host.field.os"), l.T("host.field.ip"), l.T("host.field.status"),
 		l.T("host.field.last_seen"), l.T("severity.critical"), l.T("severity.high"), l.T("severity.medium"), l.T("severity.low"),
-		l.T("host.field.security_updates"), l.T("host.field.updates"), l.T("host.field.reboot_required"), l.T("host.field.agent_version")})
+		l.T("host.field.security_updates"), l.T("host.field.updates"), l.T("host.field.reboot_required"), l.T("host.field.agent_version"),
+		l.T("host.field.platform"), l.T("host.field.groups")})
 	f := s.hostFilter(r)
 	for pg := 1; ; pg++ {
 		hosts, _, err := s.st.ListHosts(r.Context(), f, store.Page{Number: pg, Size: 500})
@@ -797,13 +888,21 @@ func (s *Server) serversCSV(w http.ResponseWriter, r *http.Request) {
 			}
 			_ = cw.Write([]string{h.Hostname, h.OSName, strings.Join(h.IPAddresses, " "), status, s.f.DateTime(h.LastSeenAt),
 				strconv.Itoa(h.Vulns.Critical), strconv.Itoa(h.Vulns.High), strconv.Itoa(h.Vulns.Medium), strconv.Itoa(h.Vulns.Low),
-				strconv.Itoa(h.SecurityUpdateCount), strconv.Itoa(h.UpdateCount), reboot, h.AgentVersion})
+				strconv.Itoa(h.SecurityUpdateCount), strconv.Itoa(h.UpdateCount), reboot, h.AgentVersion, s.virtLabel(h.Virtualization), groupNames(h.Groups)})
 		}
 		if len(hosts) < 500 {
 			break
 		}
 	}
 	cw.Flush()
+}
+
+func groupNames(gs []store.GroupRef) string {
+	names := make([]string, len(gs))
+	for i, g := range gs {
+		names[i] = g.Name
+	}
+	return strings.Join(names, ", ")
 }
 
 func (s *Server) vulnerabilitiesCSV(w http.ResponseWriter, r *http.Request) {

@@ -119,8 +119,10 @@ func (c Collector) collect(ctx context.Context) (pkgs []protocol.Package, update
 		}
 		updates, err = aptUpdates(ctx)
 		addErr(err)
+		// Ubuntu's update-notifier writes the flag file; Debian has none, so
+		// a kernel image newer than the running one also counts.
 		_, statErr := os.Stat("/var/run/reboot-required")
-		reboot = statErr == nil
+		reboot = statErr == nil || aptKernelPending("/")
 	case protocol.PMDnf, protocol.PMYum:
 		pkgs, err = rpmPackages(ctx)
 		addErr(err)
@@ -153,6 +155,9 @@ func (c Collector) collect(ctx context.Context) (pkgs []protocol.Package, update
 		}
 		updates, err = apkUpdates(ctx)
 		addErr(err)
+		if rel, err := os.ReadFile("/proc/sys/kernel/osrelease"); err == nil {
+			reboot = apkKernelPending(string(rel), pkgs)
+		}
 	default:
 		errs = append(errs, "unsupported package manager")
 	}

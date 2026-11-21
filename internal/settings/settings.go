@@ -31,6 +31,8 @@ const (
 	KeyRetentionDays        = "retention.days"
 	KeyScannerLastDaily     = "scanner.last_daily"
 	KeyKEVUpdatedAt         = "kev.updated_at"
+	KeyAuthRequireMFA       = "auth.require_mfa"
+	KeyRiskMaxDays          = "risk.max_days"
 )
 
 // Values is a typed snapshot of all settings.
@@ -51,6 +53,10 @@ type Values struct {
 	RetentionDays        int
 	ScannerLastDaily     time.Time
 	KEVUpdatedAt         time.Time
+	// AuthRequireMFA sends users without an authenticator to set one up.
+	AuthRequireMFA bool
+	// RiskMaxDays caps how long a risk can be accepted (0 = no limit).
+	RiskMaxDays int
 }
 
 // OfflineAfter is the duration after which an agent counts as offline.
@@ -77,6 +83,7 @@ func Defaults() Values {
 		AgentAutoUpdate:      true,
 		ScanEnabled:          true,
 		RetentionDays:        90,
+		RiskMaxDays:          365,
 	}
 }
 
@@ -120,6 +127,8 @@ func FromMap(raw map[string]string) Values {
 	b(KeyEmailServerUpdate, &v.EmailServerUpdate)
 	b(KeyScanEnabled, &v.ScanEnabled)
 	b(KeyAgentAutoUpdate, &v.AgentAutoUpdate)
+	b(KeyAuthRequireMFA, &v.AuthRequireMFA)
+	i(KeyRiskMaxDays, &v.RiskMaxDays, 0, 3650)
 	i(KeyEmailDigestThreshold, &v.EmailDigestThreshold, 1, 1000)
 	i(KeyAgentOfflineMinutes, &v.AgentOfflineMinutes, 2, 10080)
 	i(KeyAgentCheckinSeconds, &v.AgentCheckinSeconds, 15, 3600)

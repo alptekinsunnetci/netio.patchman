@@ -38,7 +38,13 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 - **Zamanlanmış güncellemeler:** "Her pazar 03:00'te Ubuntu sunucularında güvenlik güncellemelerini uygula" gibi bakım pencereleri. Zamanlamalar sunucuları kendiliğinden yeniden başlatmaz.
 - **Otomatik ajan güncellemesi:** Merkezi sunucu yeni sürüme geçince ajanlar yeni sürümü indirir, SHA-256 özetini doğrular ve kendini günceller.
 - **Yeni sürüm bildirimi:** Panel, GitHub'da yeni bir netio.patchman sürümü yayımlandığında yöneticileri uyarır ve güncelleme komutlarını gösterir. İnternet erişimi olmayan kurulumlarda kapatılabilir.
-- **Bulgu yönetimi:** Açık, İşlemde, Risk Kabul Edildi, Hatalı Tespit durumları. Paket güncellenince bulgu otomatik olarak "Çözüldü" olur.
+- **Bulgu yönetimi:** Açık, İşlemde, Risk Kabul Edildi, Hatalı Tespit durumları. Paket güncellenince bulgu otomatik olarak "Çözüldü" olur. Risk kabulü süreli verilir (30, 90, 180, 365 gün; en uzun süre ayarlardan sınırlanır). Süre dolunca bulgu yeniden açılır, bildirim ve e-posta gönderilir.
+- **Sunucu grupları:** Sunucular "Üretim", "Test", "Veritabanı" gibi gruplara ayrılır. Bir sunucu birden fazla gruba üye olabilir. Listeler gruba göre süzülür, zamanlanmış güncellemeler bir grubu hedefleyebilir, raporlar grup için alınabilir.
+- **Platform bilgisi:** Ajan, sunucunun VMware, Hyper-V, KVM, Xen veya VirtualBox sanal makinesi, Docker/LXC konteyneri ya da fiziksel sunucu olduğunu bildirir. Sunucu listesi platforma göre süzülebilir.
+- **Yeniden başlatma takibi:** Yeni çekirdek kurulmuş ama sunucu yeniden başlatılmamışsa bu durum ne zamandan beri sürdüğüyle birlikte gösterilir. Gösterge panelinde ayrı bir kart ve süzgeç vardır. Debian'da (`/var/run/reboot-required` dosyası olmayan dağıtımlarda) ve Alpine'de de çekirdek karşılaştırmasıyla tespit edilir.
+- **Eğilim grafikleri:** Sunucu her gün filonun durumunu kaydeder. Gösterge panelinde son 30 günün kritik ve yüksek açık sayısı, aktif olarak istismar edilen açıklar, açık bulgular ve bekleyen güvenlik güncellemeleri grafik ve tablo olarak gösterilir.
+- **Uyumluluk raporu:** Seçilen dönem ve grup için yazdırılabilir rapor (tarayıcıdan PDF olarak kaydedilebilir). Raporda özet sayılar, dönemde tespit edilen ve kapatılan bulgular, ortalama kapatma süresi, CISA son tarihi geçmiş KEV açıkları, sunucu durumu, kabul edilen riskler (kabul eden kişi ve bitiş tarihiyle) ve güncelleme işleri yer alır. ISO 27001 ve KVKK denetimlerinde kanıt olarak kullanılabilir.
+- **İki adımlı doğrulama:** Google Authenticator, Microsoft Authenticator gibi uygulamalarla TOTP kodu ve tek kullanımlık yedek kodlar. Yönetici, iki adımlı doğrulamayı tüm kullanıcılar için zorunlu kılabilir; kaybolan bir telefon için kullanıcının doğrulamasını sıfırlayabilir.
 - **Bildirimler:** Bildirim merkezi ve Türkçe e-posta bildirimleri: yeni açıklar, bağlantısı kesilen ajanlar, başarısız veya kısmen tamamlanan güncelleme işleri.
 - **Kullanıcılar ve yetkiler:** Yönetici, Operatör ve İzleyici rolleri; denetim kayıtları.
 - **Paneldense yapılandırma:** SMTP, sunucu adresi, saat dilimi, veri kaynakları ve tüm işletim ayarları panelden değiştirilir. Değişiklikler yeniden başlatma gerektirmez.
@@ -256,6 +262,12 @@ docker compose exec server netio-patchman-server reset-password -email yonetici@
 ```
 
 Komut yeni bir parola üretip ekrana yazar.
+
+Telefonunu kaybeden bir kullanıcının iki adımlı doğrulamasını panelden (**Kullanıcı Yönetimi → kullanıcı → İki adımlı doğrulamayı sıfırla**) ya da komut satırından kaldırabilirsiniz:
+
+```sh
+docker compose exec server netio-patchman-server reset-mfa -email yonetici@your-domain
+```
 
 ### Kaldırma veya sıfırdan başlama
 

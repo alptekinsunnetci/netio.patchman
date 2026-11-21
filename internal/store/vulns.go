@@ -356,7 +356,7 @@ func (s *Store) ApplyFindings(ctx context.Context, hostID int64, detected []Dete
 			if e, ok := cur[key]; ok {
 				if e.status == StatusResolved {
 					created++
-					_, err = tx.ExecContext(ctx, `UPDATE findings SET status = 'open', status_note = '', status_changed_by = NULL, installed_version = ?, fixed_version = ?,
+					_, err = tx.ExecContext(ctx, `UPDATE findings SET status = 'open', status_note = '', status_changed_by = NULL, status_expires_at = 0, installed_version = ?, fixed_version = ?,
 						record_id = ?, first_detected_at = ?, last_checked_at = ?, resolved_at = 0, notified = 0 WHERE id = ?`,
 						d.InstalledVersion, d.FixedVersion, d.RecordID, n, n, e.id)
 				} else {
@@ -388,7 +388,7 @@ func (s *Store) ApplyFindings(ctx context.Context, hostID int64, detected []Dete
 func (s *Store) SetFindingStatus(ctx context.Context, ids []int64, status, note string, userID int64) error {
 	return s.tx(ctx, func(tx *sql.Tx) error {
 		for _, id := range ids {
-			if _, err := tx.ExecContext(ctx, `UPDATE findings SET status = ?, status_note = ?, status_changed_by = ? WHERE id = ? AND status <> 'resolved'`,
+			if _, err := tx.ExecContext(ctx, `UPDATE findings SET status = ?, status_note = ?, status_changed_by = ?, status_expires_at = 0 WHERE id = ? AND status <> 'resolved'`,
 				status, truncate(note, 1000), nullID(userID), id); err != nil {
 				return err
 			}
@@ -397,10 +397,14 @@ func (s *Store) SetFindingStatus(ctx context.Context, ids []int64, status, note 
 	})
 }
 
-// SetCVEStatus changes the status of all unresolved findings of a CVE.
-func (s *Store) SetCVEStatus(ctx context.Context, cveID, status, note string, userID int64) (int64, error) {
-	res, err := s.db.ExecContext(ctx, `UPDATE findings SET status = ?, status_note = ?, status_changed_by = ? WHERE cve_id = ? AND status <> 'resolved'`,
-		status, truncate(note, 1000), nullID(userID), cveID)
+// SetCVEStatus changes the status of all unresolved findings of a CVE. A
+// non-zero expires (accepted risk only) reopens the findings at that time.
+func (s *Store) SetCVEStatus(ctx context.Context, cveID, status, note string, userID int64, expires time.Time) (int64, error) {
+	if status != StatusAcceptedRisk {
+		expires = time.Time{}
+	}
+	res, err := s.db.ExecContext(ctx, `UPDATE findings SET status = ?, status_note = ?, status_changed_by = ?, status_expires_at = ? WHERE cve_id = ? AND status <> 'resolved'`,
+		status, truncate(note, 1000), nullID(userID), ts(expires), cveID)
 	if err != nil {
 		return 0, err
 	}
@@ -422,9 +426,12 @@ type FindingRow struct {
 	FixedVersion     string
 	Status           string
 	StatusNote       string
-	FirstDetectedAt  time.Time
-	LastCheckedAt    time.Time
-	ResolvedAt       time.Time
+	// StatusExpiresAt is when an accepted risk reopens (zero: no expiry).
+	StatusExpiresAt time.Time
+	StatusChangedBy string
+	FirstDetectedAt time.Time
+	LastCheckedAt   time.Time
+	ResolvedAt      time.Time
 }
 
 // FindingFilter narrows finding lists.
@@ -435,6 +442,7 @@ type FindingFilter struct {
 	Status   string // "" = active (open+in_progress), "all", or a specific status
 	Search   string
 	KEVOnly  bool
+	GroupID  int64
 }
 
 func findingWhere(f FindingFilter) (string, []any) {
@@ -447,6 +455,10 @@ func findingWhere(f FindingFilter) (string, []any) {
 	if f.CVEID != "" {
 		conds = append(conds, `f.cve_id = ?`)
 		args = append(args, f.CVEID)
+	}
+	if f.GroupID != 0 {
+		conds = append(conds, `f.host_id IN (SELECT host_id FROM host_group_members WHERE group_id = ?)`)
+		args = append(args, f.GroupID)
 	}
 	switch f.Status {
 	case "":
@@ -487,7 +499,7 @@ func (s *Store) ListFindings(ctx context.Context, f FindingFilter, p Page) ([]Fi
 	}
 	rows, err := s.db.QueryContext(ctx, `SELECT f.id, f.host_id, h.hostname, f.cve_id, COALESCE(v.title, ''), COALESCE(v.severity, 'unknown'), v.cvss_score,
 		CASE WHEN k.cve_id IS NULL THEN 0 ELSE 1 END, f.package_name, f.installed_version, f.fixed_version, f.status, f.status_note,
-		f.first_detected_at, f.last_checked_at, f.resolved_at`+findingFrom+where+
+		f.first_detected_at, f.last_checked_at, f.resolved_at, f.status_expires_at, COALESCE(cu.name, '')`+findingFrom+` LEFT JOIN users cu ON cu.id = f.status_changed_by`+where+
 		` ORDER BY `+severityOrder+`, v.cvss_score DESC, f.cve_id DESC, h.hostname LIMIT ? OFFSET ?`, append(args, p.limit(), p.Offset())...)
 	if err != nil {
 		return nil, 0, err
@@ -499,9 +511,9 @@ func (s *Store) ListFindings(ctx context.Context, f FindingFilter, p Page) ([]Fi
 		var sev string
 		var score sql.NullFloat64
 		var kev int
-		var fd, lc, rs int64
+		var fd, lc, rs, ex int64
 		if err := rows.Scan(&r.ID, &r.HostID, &r.Hostname, &r.CVEID, &r.Title, &sev, &score, &kev, &r.PackageName, &r.InstalledVersion,
-			&r.FixedVersion, &r.Status, &r.StatusNote, &fd, &lc, &rs); err != nil {
+			&r.FixedVersion, &r.Status, &r.StatusNote, &fd, &lc, &rs, &ex, &r.StatusChangedBy); err != nil {
 			return nil, 0, err
 		}
 		r.Severity = vuln.Severity(sev)
@@ -510,7 +522,7 @@ func (s *Store) ListFindings(ctx context.Context, f FindingFilter, p Page) ([]Fi
 			r.CVSSScore = &v
 		}
 		r.KnownExploited = kev == 1
-		r.FirstDetectedAt, r.LastCheckedAt, r.ResolvedAt = fromTS(fd), fromTS(lc), fromTS(rs)
+		r.FirstDetectedAt, r.LastCheckedAt, r.ResolvedAt, r.StatusExpiresAt = fromTS(fd), fromTS(lc), fromTS(rs), fromTS(ex)
 		out = append(out, r)
 	}
 	return out, total, rows.Err()

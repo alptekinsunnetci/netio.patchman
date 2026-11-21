@@ -1,0 +1,69 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$g := $d.G}}{{$root := .}}{{$op := .User.CanOperate}}
+<nav class="breadcrumb"><a href="/groups">{{t "nav.groups"}}</a> / <span>{{$g.Name}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{$g.Name}}</h1>
+    <p class="pagehead__sub">{{if $g.Description}}{{$g.Description}} · {{end}}{{t "group.host_count" "count" $g.HostCount}}</p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="button" href="/servers" title="{{t "group.add_hosts_hint"}}">{{template "icon" "server"}}{{t "group.add_hosts_link"}}</a>
+    <a class="button" href="/reports?group={{$g.ID}}">{{template "icon" "report"}}{{t "nav.reports"}}</a>
+  </div>
+</header>
+
+<section class="stats stats--compact">
+  <div class="stat"><p class="stat__label">{{t "dashboard.stat.critical"}}</p><p class="stat__value">{{$d.Sev.Critical}}</p><p class="stat__meta">{{t "dashboard.stat.high" "n" $d.Sev.High}}</p></div>
+  <div class="stat{{if $d.KEV}} stat--critical{{end}}"><p class="stat__label">{{t "dashboard.stat.kev"}}</p><p class="stat__value">{{$d.KEV}}</p><p class="stat__meta">{{t "dashboard.stat.kev_meta"}}</p></div>
+  <div class="stat"><p class="stat__label">{{t "group.field.hosts"}}</p><p class="stat__value">{{$g.HostCount}}</p><p class="stat__meta">{{t "group.field.created_at"}}: {{date $g.CreatedAt}}</p></div>
+</section>
+
+<form method="post" action="/servers/bulk-groups" data-confirm="{{t "group.remove_confirm" "name" $g.Name}}">
+{{template "csrf" .}}<input type="hidden" name="group_id" value="{{$g.ID}}"><input type="hidden" name="op" value="remove"><input type="hidden" name="back" value="/groups/{{$g.ID}}">
+<section class="panel panel--flush">
+  {{if $d.Hosts}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr>{{if $op}}<th class="check"><input type="checkbox" data-check-all="host_ids" aria-label="{{t "common.select_all"}}"></th>{{end}}<th>{{t "host.field.hostname"}}</th><th>{{t "host.field.os"}}</th><th>{{t "host.field.status"}}</th><th>{{t "host.field.vulns"}}</th><th class="num">{{t "host.field.security_updates"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Hosts}}
+    <tr>
+      {{if $op}}<td class="check"><input type="checkbox" name="host_ids" value="{{.ID}}" aria-label="{{.Hostname}}"></td>{{end}}
+      <td><a href="/servers/{{.ID}}"><strong>{{.Hostname}}</strong></a>{{if .RebootRequired}} <span class="pill pill--warning">{{t "host.reboot_required"}}</span>{{end}}</td>
+      <td>{{.OSName}}<div class="cell-sub">{{virt .Virtualization}}</div></td>
+      <td>{{template "hoststatus" .}}</td>
+      <td>{{template "sevcounts" .Vulns}}</td>
+      <td class="num">{{.SecurityUpdateCount}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{if $op}}<div class="panel__foot"><button class="button" type="submit">{{t "group.remove_selected"}}</button></div>{{end}}
+  {{else}}{{template "empty" (t "group.empty")}}{{end}}
+</section>
+</form>
+{{template "pager" $d.Pager}}
+
+{{if .User.IsAdmin}}
+<div class="grid-2">
+  <section class="panel">
+    <h2 class="panel__title">{{t "group.edit"}}</h2>
+    <form class="form" method="post" action="/groups/{{$g.ID}}">
+      {{template "csrf" $root}}
+      <label class="field"><span class="field__label">{{t "group.field.name"}}</span><input class="field__input" type="text" name="name" value="{{$g.Name}}" maxlength="60" required></label>
+      <label class="field"><span class="field__label">{{t "group.field.description"}}</span><input class="field__input" type="text" name="description" value="{{$g.Description}}" maxlength="500"></label>
+      <div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>
+    </form>
+  </section>
+  <section class="panel panel--danger">
+    <h2 class="panel__title">{{t "group.delete"}}</h2>
+    <p class="muted">{{t "group.delete_body"}}</p>
+    <form method="post" action="/groups/{{$g.ID}}/delete" data-confirm="{{t "group.delete_confirm" "name" $g.Name}}">{{template "csrf" $root}}
+      <button class="button button--danger" type="submit">{{t "group.delete"}}</button></form>
+  </section>
+</div>
+{{end}}
+{{end}}

@@ -1,0 +1,46 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.groups"}}</h1>
+    <p class="pagehead__sub">{{t "groups.subtitle"}}</p>
+  </div>
+</header>
+
+<section class="panel panel--flush">
+  {{if $d.Groups}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "group.field.name"}}</th><th>{{t "group.field.description"}}</th><th class="num">{{t "group.field.hosts"}}</th><th>{{t "group.field.created_at"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Groups}}
+    <tr>
+      <td><a href="/groups/{{.ID}}"><strong>{{.Name}}</strong></a></td>
+      <td>{{if .Description}}{{.Description}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td class="num"><a href="/servers?group={{.ID}}">{{.HostCount}}</a></td>
+      <td>{{date .CreatedAt}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "groups.empty")}}{{end}}
+</section>
+
+{{if .User.IsAdmin}}
+<section class="panel panel--narrow">
+  <h2 class="panel__title">{{t "groups.create"}}</h2>
+  <form class="form" method="post" action="/groups">
+    {{template "csrf" $root}}
+    <label class="field"><span class="field__label">{{t "group.field.name"}}</span>
+      <input class="field__input" type="text" name="name" value="{{index $d.Form "name"}}" maxlength="60" required placeholder="{{t "group.field.name_placeholder"}}"></label>
+    <label class="field"><span class="field__label">{{t "group.field.description"}}</span>
+      <input class="field__input" type="text" name="description" value="{{index $d.Form "description"}}" maxlength="500"></label>
+    <p class="field__hint">{{t "groups.hint"}}</p>
+    <div><button class="button button--primary" type="submit">{{template "icon" "plus"}}{{t "groups.create"}}</button></div>
+  </form>
+</section>
+{{end}}
+{{end}}

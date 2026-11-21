@@ -94,6 +94,10 @@ func (s *Server) require(min role) func(http.HandlerFunc) http.Handler {
 					return
 				}
 			}
+			if s.mfaRequired() && !sess.user.MFAEnabled() && !mfaAllowed(r.URL.Path) {
+				s.redirect(w, r, "/profile#mfa", "error", s.l.T("mfa.required_notice"))
+				return
+			}
 			if !hasRole(sess.user, min) {
 				s.errorPage(w, r, http.StatusForbidden, "error.forbidden")
 				return
@@ -194,6 +198,10 @@ func (s *Server) loginSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.limiter.Reset(emailKey)
+	if u.MFAEnabled() {
+		s.beginMFA(w, r, u, next)
+		return
+	}
 	if err := s.startSession(w, r, u); err != nil {
 		s.serverError(w, r, err)
 		return
@@ -288,17 +296,13 @@ func (s *Server) validateUserInput(name, email, pw, pw2 string, needPassword boo
 }
 
 func (s *Server) profile(w http.ResponseWriter, r *http.Request) {
-	s.render(w, r, http.StatusOK, "profile", s.page(r, s.l.T("profile.title"), "profile"))
+	s.renderProfile(w, r, http.StatusOK, "", nil)
 }
 
 func (s *Server) profilePassword(w http.ResponseWriter, r *http.Request) {
 	sess := sessionFrom(r)
 	cur, pw, pw2 := r.PostFormValue("current_password"), r.PostFormValue("password"), r.PostFormValue("password_confirm")
-	fail := func(msg string) {
-		d := s.page(r, s.l.T("profile.title"), "profile")
-		d.Error = msg
-		s.render(w, r, http.StatusBadRequest, "profile", d)
-	}
+	fail := func(msg string) { s.renderProfile(w, r, http.StatusBadRequest, msg, nil) }
 	if !auth.VerifyPassword(sess.user.PasswordHash, cur) {
 		fail(s.l.T("profile.wrong_password"))
 		return

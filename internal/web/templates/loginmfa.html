@@ -1,0 +1,23 @@
+{{define "body"}}
+<div class="auth">
+  <div class="auth__panel">
+    <div class="auth__brand">
+      {{template "wordmark"}}
+      <p class="auth__tagline">{{t "app.description"}}</p>
+    </div>
+    <form class="form" method="post" action="/login/mfa">
+      <h1 class="form__title">{{t "mfa.login.heading"}}</h1>
+      {{template "flash" .}}
+      <p class="auth__hint">{{t "mfa.login.body"}}</p>
+      <label class="field">
+        <span class="field__label">{{t "mfa.field.code"}}</span>
+        <input class="field__input mono" type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" required autofocus>
+        <span class="field__hint">{{t "mfa.login.recovery_hint"}}</span>
+      </label>
+      <button class="button button--primary button--block" type="submit">{{t "mfa.login.submit"}}</button>
+      <p class="auth__hint"><a href="/login">{{t "mfa.login.back"}}</a></p>
+    </form>
+    <p class="auth__foot">{{.Product}} {{.Version}}</p>
+  </div>
+</div>
+{{end}}

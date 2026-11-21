@@ -35,8 +35,27 @@
     </select>
   </label>
   {{end}}
+  {{if $d.Groups}}
+  <label class="field field--inline">
+    <span class="visually-hidden">{{t "host.field.groups"}}</span>
+    <select class="field__input" name="group">
+      <option value="">{{t "servers.filter.all_groups"}}</option>
+      {{range $d.Groups}}<option value="{{.ID}}"{{if eq $d.Filter.GroupID .ID}} selected{{end}}>{{.Name}}</option>{{end}}
+    </select>
+  </label>
+  {{end}}
+  <label class="field field--inline">
+    <span class="visually-hidden">{{t "host.field.platform"}}</span>
+    <select class="field__input" name="platform">
+      <option value="">{{t "servers.filter.all_platforms"}}</option>
+      <option value="virtual"{{if eq $d.Filter.Platform "virtual"}} selected{{end}}>{{t "servers.filter.virtual"}}</option>
+      <option value="physical"{{if eq $d.Filter.Platform "physical"}} selected{{end}}>{{t "host.virt.none"}}</option>
+      {{range $d.Platforms}}<option value="{{.}}"{{if eq $d.Filter.Platform .}} selected{{end}}>{{virt .}}</option>{{end}}
+      <option value="unknown"{{if eq $d.Filter.Platform "unknown"}} selected{{end}}>{{t "host.virt.unknown"}}</option>
+    </select>
+  </label>
   <button class="button" type="submit">{{t "common.filter"}}</button>
-  {{if or $d.Filter.Search $d.Filter.Status $d.Filter.OSID}}<a class="button button--ghost" href="/servers">{{t "common.clear"}}</a>{{end}}
+  {{if or $d.Filter.Search $d.Filter.Status $d.Filter.OSID $d.Filter.GroupID $d.Filter.Platform}}<a class="button button--ghost" href="/servers">{{t "common.clear"}}</a>{{end}}
 </form>
 
 {{$op := .User.CanOperate}}
@@ -54,6 +73,18 @@
   <button class="button button--primary" type="submit">{{t "servers.bulk.apply"}}</button>
   <span class="field__hint">{{t "servers.bulk.hint"}}</span>
 </div>
+{{if $d.Groups}}
+<div class="bulkbar">
+  <span class="bulkbar__label">{{t "servers.bulk.group_label"}}</span>
+  <select class="field__input" name="group_id" aria-label="{{t "host.field.groups"}}">
+    {{range $d.Groups}}<option value="{{.ID}}"{{if eq $d.Filter.GroupID .ID}} selected{{end}}>{{.Name}}</option>{{end}}
+  </select>
+  <button class="button" type="submit" formaction="/servers/bulk-groups" name="op" value="add" data-confirm="">{{template "icon" "tag"}}{{t "servers.bulk.group_add"}}</button>
+  <button class="button button--ghost" type="submit" formaction="/servers/bulk-groups" name="op" value="remove" data-confirm="{{t "servers.bulk.group_remove_confirm"}}">{{t "servers.bulk.group_remove"}}</button>
+</div>
+{{else if .User.IsAdmin}}
+<p class="field__hint">{{t "servers.bulk.no_groups"}} <a href="/groups">{{t "nav.groups"}}</a></p>
+{{end}}
 {{end}}
 <section class="panel panel--flush">
   {{if $d.Hosts}}
@@ -78,10 +109,11 @@
       {{if $op}}<td class="check"><input type="checkbox" name="host_ids" value="{{.ID}}" aria-label="{{.Hostname}}"></td>{{end}}
       <td>
         <a href="/servers/{{.ID}}"><strong>{{.Hostname}}</strong></a>
-        {{if .RebootRequired}}<span class="pill pill--warning" title="{{t "host.reboot_required_hint"}}">{{t "host.reboot_required"}}</span>{{end}}
+        {{if .RebootRequired}}<span class="pill pill--warning" title="{{t "host.reboot_required_hint"}}{{if not .RebootRequiredSince.IsZero}} {{t "host.reboot_since" "since" (ago .RebootRequiredSince)}}{{end}}">{{t "host.reboot_required"}}</span>{{end}}
         <div class="cell-sub mono">{{join .IPAddresses ", "}}</div>
+        {{if .Groups}}<div class="tags">{{range .Groups}}<a class="tag" href="/servers?group={{.ID}}">{{.Name}}</a>{{end}}</div>{{end}}
       </td>
-      <td>{{.OSName}}<div class="cell-sub mono">{{.Kernel}}</div></td>
+      <td>{{.OSName}}<div class="cell-sub"><span class="mono">{{.Kernel}}</span> · {{virt .Virtualization}}</div></td>
       <td>{{template "hoststatus" .}}</td>
       <td>{{template "sevcounts" .Vulns}}</td>
       <td class="num">{{if .SecurityUpdateCount}}<strong class="text-danger">{{.SecurityUpdateCount}}</strong>{{else}}0{{end}}</td>

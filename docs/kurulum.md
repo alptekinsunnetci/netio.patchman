@@ -297,6 +297,14 @@ docker compose exec server netio-patchman-server reset-password -email yonetici@
 
 Komut, yeni bir parola üretip ekrana yazar ve hesabı etkinleştirir.
 
+İki adımlı doğrulaması açık bir yönetici doğrulayıcı uygulamasına ve yedek kodlarına erişemiyorsa:
+
+```sh
+docker compose exec server netio-patchman-server reset-mfa -email yonetici@your-domain
+```
+
+Komut, kullanıcının doğrulayıcısını ve yedek kodlarını kaldırır, oturumlarını kapatır. Kullanıcı yalnızca parolayla giriş yapıp doğrulamayı yeniden tanımlar. “Zorunlu” ayarı açıksa ilk girişte Profilim sayfasına yönlendirilir.
+
 ## 8. İnternet erişimi olmayan ortamlar
 
 - **Ajanlar:** Panelin **Ajan Yönetimi** sayfasındaki indirme adreslerinden ajan dosyasını, `netio-patchman-agent.service` dosyasını ve `install-agent.sh` betiğini alın, sunucuya kopyalayıp `--binary` seçeneğiyle kurun.

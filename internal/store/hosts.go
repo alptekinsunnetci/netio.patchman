@@ -38,6 +38,13 @@ type Host struct {
 	RemoteUpdates  bool
 	SelfUpdate     bool // the agent accepts automatic updates
 	RebootRequired bool
+	// RebootRequiredSince is when the pending reboot was first reported.
+	RebootRequiredSince time.Time
+	// Virtualization is the platform id the agent reported (systemd-detect-virt
+	// names, "none" for physical machines, "" if unknown).
+	Virtualization string
+	// Groups the host belongs to (filled by list and detail queries).
+	Groups []GroupRef
 	// RestartServices still run code replaced by an update.
 	RestartServices []string
 	UptimeSeconds   int64
@@ -74,7 +81,7 @@ const activeStatuses = `('open','in_progress')`
 const hostSelect = `SELECT h.id, h.machine_id, h.hostname, h.fqdn, h.os_id, h.os_version_id, h.os_name, h.os_version,
  h.kernel, h.arch, h.ip_addresses, h.package_manager, h.ecosystem, h.agent_version, h.remote_updates,
  h.reboot_required, h.uptime_seconds, h.enrolled_at, h.last_seen_at, h.last_report_at, h.last_scan_at,
- h.report_errors, h.notes, h.self_update, h.restart_services,
+ h.report_errors, h.notes, h.self_update, h.restart_services, h.reboot_required_since, h.virtualization,
  (SELECT COUNT(*) FROM host_packages p WHERE p.host_id = h.id) AS pkg_count,
  (SELECT COUNT(*) FROM host_updates u WHERE u.host_id = h.id) AS upd_count,
  (SELECT COUNT(*) FROM host_updates u WHERE u.host_id = h.id AND u.security = 1) AS sec_count,
@@ -89,10 +96,10 @@ func scanHost(row interface{ Scan(...any) error }) (Host, error) {
 	var h Host
 	var ips, errs, svcs string
 	var remote, reboot, self int
-	var enrolled, seen, report, scan int64
+	var enrolled, seen, report, scan, rebootSince int64
 	err := row.Scan(&h.ID, &h.MachineID, &h.Hostname, &h.FQDN, &h.OSID, &h.OSVersionID, &h.OSName, &h.OSVersion,
 		&h.Kernel, &h.Arch, &ips, &h.PackageManager, &h.Ecosystem, &h.AgentVersion, &remote,
-		&reboot, &h.UptimeSeconds, &enrolled, &seen, &report, &scan, &errs, &h.Notes, &self, &svcs,
+		&reboot, &h.UptimeSeconds, &enrolled, &seen, &report, &scan, &errs, &h.Notes, &self, &svcs, &rebootSince, &h.Virtualization,
 		&h.PackageCount, &h.UpdateCount, &h.SecurityUpdateCount,
 		&h.Vulns.Critical, &h.Vulns.High, &h.Vulns.Medium, &h.Vulns.Low, &h.Vulns.Other)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -106,14 +113,21 @@ func scanHost(row interface{ Scan(...any) error }) (Host, error) {
 	_ = json.Unmarshal([]byte(svcs), &h.RestartServices)
 	h.RemoteUpdates, h.RebootRequired, h.SelfUpdate = remote == 1, reboot == 1, self == 1
 	h.EnrolledAt, h.LastSeenAt, h.LastReportAt, h.LastScanAt = fromTS(enrolled), fromTS(seen), fromTS(report), fromTS(scan)
+	h.RebootRequiredSince = fromTS(rebootSince)
 	return h, nil
 }
 
+// IsVirtual reports whether the platform is a virtual machine or container.
+func (h Host) IsVirtual() bool { return h.Virtualization != "" && h.Virtualization != "none" }
+
 // HostFilter narrows the host list.
 type HostFilter struct {
-	Search       string
-	Status       string // "", "online", "offline", "reboot", "vulnerable", "updates"
-	OSID         string
+	Search  string
+	Status  string // "", "online", "offline", "reboot", "vulnerable", "updates"
+	OSID    string
+	GroupID int64
+	// Platform is "virtual", "physical", "unknown" or one virtualization id.
+	Platform     string
 	OfflineAfter time.Duration
 }
 
@@ -137,7 +151,14 @@ func (s *Store) ListHosts(ctx context.Context, f HostFilter, p Page) ([]Host, in
 		}
 		out = append(out, h)
 	}
-	return out, total, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	}
+	rows.Close()
+	if err := s.fillGroups(ctx, out); err != nil {
+		return nil, 0, err
+	}
+	return out, total, nil
 }
 
 func hostWhere(f HostFilter) (string, []any) {
@@ -151,6 +172,22 @@ func hostWhere(f HostFilter) (string, []any) {
 	if f.OSID != "" {
 		conds = append(conds, `h.os_id = ?`)
 		args = append(args, f.OSID)
+	}
+	if f.GroupID != 0 {
+		conds = append(conds, `EXISTS (SELECT 1 FROM host_group_members m WHERE m.host_id = h.id AND m.group_id = ?)`)
+		args = append(args, f.GroupID)
+	}
+	switch f.Platform {
+	case "":
+	case "virtual":
+		conds = append(conds, `h.virtualization NOT IN ('', 'none')`)
+	case "physical":
+		conds = append(conds, `h.virtualization = 'none'`)
+	case "unknown":
+		conds = append(conds, `h.virtualization = ''`)
+	default:
+		conds = append(conds, `h.virtualization = ?`)
+		args = append(args, f.Platform)
 	}
 	cutoff := now() - int64(f.OfflineAfter.Seconds())
 	switch f.Status {
@@ -175,7 +212,31 @@ func hostWhere(f HostFilter) (string, []any) {
 
 // HostByID returns a host with aggregates.
 func (s *Store) HostByID(ctx context.Context, id int64) (Host, error) {
-	return scanHost(s.db.QueryRowContext(ctx, hostSelect+` WHERE h.id = ?`, id))
+	h, err := scanHost(s.db.QueryRowContext(ctx, hostSelect+` WHERE h.id = ?`, id))
+	if err != nil {
+		return h, err
+	}
+	hosts := []Host{h}
+	err = s.fillGroups(ctx, hosts)
+	return hosts[0], err
+}
+
+// PlatformOptions returns the distinct virtualization ids reported by agents.
+func (s *Store) PlatformOptions(ctx context.Context) ([]string, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT DISTINCT virtualization FROM hosts WHERE virtualization NOT IN ('', 'none') ORDER BY 1`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []string
+	for rows.Next() {
+		var v string
+		if err := rows.Scan(&v); err != nil {
+			return nil, err
+		}
+		out = append(out, v)
+	}
+	return out, rows.Err()
 }
 
 // HostIDBySecret authenticates an agent by its secret hash.
@@ -324,10 +385,11 @@ func (s *Store) RegisterHost(ctx context.Context, tokenHash string, info protoco
 			}
 		}
 		res, err := tx.ExecContext(ctx, `INSERT INTO hosts (machine_id, hostname, fqdn, os_id, os_version_id, os_name, os_version, kernel, arch,
-			ip_addresses, package_manager, ecosystem, agent_version, remote_updates, self_update, uptime_seconds, agent_secret_hash, enrolled_at, enrollment_token, last_seen_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			ip_addresses, package_manager, ecosystem, agent_version, remote_updates, self_update, uptime_seconds, agent_secret_hash, enrolled_at, enrollment_token, last_seen_at, virtualization)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			info.MachineID, info.Hostname, info.FQDN, info.OSID, info.OSVersionID, info.OSName, info.OSVersion, info.Kernel, info.Arch,
-			string(ips), info.PackageManager, ecosystem, info.AgentVersion, boolInt(info.RemoteUpdates), boolInt(info.SelfUpdate), info.UptimeSeconds, secretHash, n, tokenID, n)
+			string(ips), info.PackageManager, ecosystem, info.AgentVersion, boolInt(info.RemoteUpdates), boolInt(info.SelfUpdate), info.UptimeSeconds, secretHash, n, tokenID, n,
+			protocol.CleanVirtualization(info.Virtualization))
 		if err != nil {
 			return err
 		}
@@ -346,12 +408,14 @@ func nonNil(s []string) []string {
 
 func updateHostInfo(ctx context.Context, tx *sql.Tx, id int64, info protocol.HostInfo, ecosystem string) error {
 	ips, _ := json.Marshal(nonNil(info.IPAddresses))
+	virt := protocol.CleanVirtualization(info.Virtualization)
+	// Agents before 0.3.0 do not report the platform; keep what is known.
 	_, err := tx.ExecContext(ctx, `UPDATE hosts SET hostname = ?, fqdn = ?, os_id = ?, os_version_id = ?, os_name = ?, os_version = ?,
 		kernel = ?, arch = ?, ip_addresses = ?, package_manager = ?, ecosystem = ?, agent_version = ?, remote_updates = ?, self_update = ?,
-		uptime_seconds = ?, last_seen_at = ?, offline_notified = 0 WHERE id = ?`,
+		uptime_seconds = ?, last_seen_at = ?, offline_notified = 0, virtualization = CASE WHEN ? = '' THEN virtualization ELSE ? END WHERE id = ?`,
 		info.Hostname, info.FQDN, info.OSID, info.OSVersionID, info.OSName, info.OSVersion,
 		info.Kernel, info.Arch, string(ips), info.PackageManager, ecosystem, info.AgentVersion, boolInt(info.RemoteUpdates), boolInt(info.SelfUpdate),
-		info.UptimeSeconds, now(), id)
+		info.UptimeSeconds, now(), virt, virt, id)
 	return err
 }
 
@@ -385,8 +449,11 @@ func (s *Store) SaveReport(ctx context.Context, id int64, r protocol.Report, eco
 			}
 		}
 		svcs, _ := json.Marshal(nonNil(services))
-		if _, err := tx.ExecContext(ctx, `UPDATE hosts SET reboot_required = ?, restart_services = ?, last_report_at = ?, needs_scan = 1, report_errors = ? WHERE id = ?`,
-			boolInt(r.RebootRequired), string(svcs), now(), string(errs), id); err != nil {
+		// reboot_required_since keeps the first report of a pending reboot.
+		n := now()
+		if _, err := tx.ExecContext(ctx, `UPDATE hosts SET reboot_required_since = CASE WHEN ? = 0 THEN 0 WHEN reboot_required = 1 AND reboot_required_since > 0 THEN reboot_required_since ELSE ? END,
+			reboot_required = ?, restart_services = ?, last_report_at = ?, needs_scan = 1, report_errors = ? WHERE id = ?`,
+			boolInt(r.RebootRequired), n, boolInt(r.RebootRequired), string(svcs), n, string(errs), id); err != nil {
 			return err
 		}
 		if _, err := tx.ExecContext(ctx, `DELETE FROM host_packages WHERE host_id = ?`, id); err != nil {

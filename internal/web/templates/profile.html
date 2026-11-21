@@ -1,13 +1,58 @@
 {{define "body"}}{{template "shell" .}}{{end}}
 
 {{define "content"}}
-{{$root := .}}
+{{$root := .}}{{$d := .Data}}
 <header class="pagehead">
   <div>
     <h1 class="pagehead__title">{{t "profile.title"}}</h1>
     <p class="pagehead__sub">{{.User.Name}} · {{.User.Email}} · {{roleLabel .User.Role}}</p>
   </div>
 </header>
+{{with $d.Notice}}<p class="alert alert--success" role="status">{{.}}</p>{{end}}
+
+<section class="panel panel--narrow" id="mfa">
+  <h2 class="panel__title">{{t "mfa.title"}}</h2>
+  {{if $d.MissingMFA}}<p class="alert alert--warning">{{t "mfa.required_notice"}}</p>{{end}}
+  {{with $d.RecoveryCodes}}
+  <div class="panel--highlight">
+    <p class="alert alert--warning">{{t "mfa.codes_once"}}</p>
+    <div class="codes" id="recovery-codes">{{range .}}<span>{{.}}</span>{{end}}</div>
+    <button class="button button--sm" type="button" data-copy="recovery-codes">{{t "common.copy"}}</button>
+  </div>
+  {{end}}
+  {{if .User.MFAEnabled}}
+  <p><span class="pill pill--succeeded">{{t "mfa.status_on"}}</span> <span class="muted">{{t "mfa.enabled_at" "time" (long .User.TOTPEnabledAt)}} · {{t "mfa.codes_left" "count" $d.RecoveryLeft}}</span></p>
+  <form class="form" method="post" action="/profile/mfa/recovery">
+    {{template "csrf" $root}}
+    <h3 class="panel__title panel__title--spaced">{{t "mfa.manage"}}</h3>
+    <p class="field__hint">{{t "mfa.manage_hint"}}</p>
+    <label class="field"><span class="field__label">{{t "profile.current_password"}}</span><input class="field__input" type="password" name="current_password" required autocomplete="current-password"></label>
+    <label class="field"><span class="field__label">{{t "mfa.field.code"}}</span><input class="field__input mono" type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" required></label>
+    <div class="button-row">
+      <button class="button" type="submit">{{template "icon" "key"}}{{t "mfa.regenerate"}}</button>
+      {{if not $d.MFARequired}}<button class="button button--danger" type="submit" formaction="/profile/mfa/disable" data-confirm="{{t "mfa.disable_confirm"}}">{{t "mfa.disable"}}</button>{{end}}
+    </div>
+  </form>
+  {{else if $d.Setup}}
+  <ol class="plain-list steps">
+    <li>{{t "mfa.setup.step1"}}</li>
+    <li>{{t "mfa.setup.step2"}}<p class="secret" id="totp-secret">{{$d.Setup.Formatted}}</p>
+      <p class="field__hint">{{t "mfa.setup.params"}} <a href="{{$d.Setup.URI}}">{{t "mfa.setup.open_app"}}</a></p></li>
+    <li>{{t "mfa.setup.step3"}}</li>
+  </ol>
+  <form class="form" method="post" action="/profile/mfa/enable">
+    {{template "csrf" $root}}<input type="hidden" name="secret" value="{{$d.Setup.Secret}}">
+    <label class="field"><span class="field__label">{{t "mfa.field.code"}}</span><input class="field__input mono" type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="7" required autofocus></label>
+    <label class="field"><span class="field__label">{{t "profile.current_password"}}</span><input class="field__input" type="password" name="current_password" required autocomplete="current-password"></label>
+    <div><button class="button button--primary" type="submit">{{t "mfa.enable"}}</button></div>
+  </form>
+  {{else}}
+  <p><span class="pill pill--muted">{{t "mfa.status_off"}}</span></p>
+  <p class="muted">{{t "mfa.intro"}}</p>
+  <form method="post" action="/profile/mfa/setup">{{template "csrf" $root}}<button class="button button--primary" type="submit">{{template "icon" "key"}}{{t "mfa.start"}}</button></form>
+  {{end}}
+</section>
+
 <section class="panel panel--narrow">
   <h2 class="panel__title">{{t "profile.change_password"}}</h2>
   <form class="form" method="post" action="/profile/password">

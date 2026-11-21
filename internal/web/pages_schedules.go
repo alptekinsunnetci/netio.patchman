@@ -41,10 +41,12 @@ func (s *Server) scheduleDays(mask int) string {
 	return strings.Join(names, ", ")
 }
 
-func (s *Server) scheduleTarget(target, osID string, hostCount int) string {
+func (s *Server) scheduleTarget(target, osID string, hostCount int, groupName string) string {
 	switch target {
 	case store.TargetOS:
 		return s.l.T("schedule.target.os_value", "os", osID)
+	case store.TargetGroup:
+		return s.l.T("schedule.target.group_value", "group", groupName)
 	case store.TargetHosts:
 		return s.l.T("schedule.target.hosts_value", "count", hostCount)
 	}
@@ -98,6 +100,11 @@ func (s *Server) renderSchedule(w http.ResponseWriter, r *http.Request, status i
 		return
 	}
 	osOpts, _ := s.st.OSOptions(ctx)
+	groups, err := s.st.ListGroups(ctx)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
 	selected := map[int64]bool{}
 	for _, id := range sc.HostIDs {
 		selected[id] = true
@@ -110,7 +117,7 @@ func (s *Server) renderSchedule(w http.ResponseWriter, r *http.Request, status i
 	for _, d := range weekdayOrder {
 		days = append(days, dayOption{Value: int(d), Label: s.l.T("weekday." + strconv.Itoa(int(d))), Checked: sc.Days&(1<<uint(d)) != 0})
 	}
-	data := map[string]any{"S": sc, "Clock": schedule.Clock(sc.Minute), "Days": days, "Hosts": hostOpts, "OSOptions": osOpts,
+	data := map[string]any{"S": sc, "Clock": schedule.Clock(sc.Minute), "Days": days, "Hosts": hostOpts, "OSOptions": osOpts, "Groups": groups,
 		"JobTypes": schedule.JobTypes, "Timezone": s.f.Location().String(), "IsNew": sc.ID == 0}
 	title := s.l.T("schedule.new_title")
 	if sc.ID != 0 {
@@ -189,6 +196,7 @@ func (s *Server) parseScheduleForm(r *http.Request, sc *store.Schedule) []string
 	sc.Target = r.PostFormValue("target")
 	sc.OSID = strings.TrimSpace(r.PostFormValue("os_id"))
 	sc.HostIDs = formIDs(r, "host_ids")
+	sc.GroupID, _ = strconv.ParseInt(r.PostFormValue("group_id"), 10, 64)
 	if sc.Name == "" {
 		bad = append(bad, s.l.T("validation.required", "field", s.l.T("schedule.field.name")))
 	} else if utf8.RuneCountInString(sc.Name) > 100 {
@@ -216,6 +224,9 @@ func (s *Server) parseScheduleForm(r *http.Request, sc *store.Schedule) []string
 	if err != nil || win < schedule.MinWindowMinutes || win > schedule.MaxWindowMinutes {
 		bad = append(bad, s.l.T("validation.range", "field", s.l.T("schedule.field.window"), "min", schedule.MinWindowMinutes, "max", schedule.MaxWindowMinutes))
 	}
+	if sc.Target != store.TargetGroup {
+		sc.GroupID = 0
+	}
 	switch sc.Target {
 	case store.TargetAll:
 		sc.OSID, sc.HostIDs = "", nil
@@ -223,6 +234,14 @@ func (s *Server) parseScheduleForm(r *http.Request, sc *store.Schedule) []string
 		sc.HostIDs = nil
 		if sc.OSID == "" {
 			bad = append(bad, s.l.T("schedule.error.os"))
+		}
+	case store.TargetGroup:
+		sc.OSID, sc.HostIDs = "", nil
+		if g, err := s.st.GroupByID(r.Context(), sc.GroupID); err != nil {
+			sc.GroupID = 0
+			bad = append(bad, s.l.T("schedule.error.group"))
+		} else {
+			sc.GroupName = g.Name
 		}
 	case store.TargetHosts:
 		sc.OSID = ""
@@ -247,6 +266,9 @@ func scheduleAuditDetails(sc store.Schedule) string {
 	}
 	if len(sc.HostIDs) > 0 {
 		d += " hosts=" + strconv.Itoa(len(sc.HostIDs))
+	}
+	if sc.GroupID != 0 {
+		d += " group=" + sc.GroupName
 	}
 	return d
 }

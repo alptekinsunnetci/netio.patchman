@@ -36,9 +36,11 @@
       <dt>{{t "user.field.created_at"}}</dt><dd>{{datetime $u.CreatedAt}}</dd>
       <dt>{{t "user.field.last_login"}}</dt><dd>{{if $u.LastLoginAt.IsZero}}{{t "time.never"}}{{else}}{{datetime $u.LastLoginAt}}{{end}}</dd>
       <dt>{{t "user.field.password_changed"}}</dt><dd>{{datetime $u.PasswordChangedAt}}</dd>
+      <dt>{{t "mfa.title"}}</dt><dd>{{if $u.MFAEnabled}}<span class="pill pill--succeeded">{{t "mfa.status_on"}}</span> <span class="muted">{{datetime $u.TOTPEnabledAt}}</span>{{else}}<span class="pill pill--muted">{{t "mfa.status_off"}}</span>{{end}}</dd>
     </dl>
     <div class="button-row">
       <form method="post" action="/users/{{$u.ID}}/reset-password" data-confirm="{{t "user.reset_confirm"}}">{{template "csrf" $root}}<button class="button" type="submit">{{t "user.reset_password"}}</button></form>
+      {{if $u.MFAEnabled}}<form method="post" action="/users/{{$u.ID}}/reset-mfa" data-confirm="{{t "mfa.reset_confirm" "email" $u.Email}}">{{template "csrf" $root}}<button class="button" type="submit">{{t "mfa.reset"}}</button></form>{{end}}
       {{if ne $u.ID $root.User.ID}}
       <form method="post" action="/users/{{$u.ID}}/delete" data-confirm="{{t "user.delete_confirm" "email" $u.Email}}">{{template "csrf" $root}}<button class="button button--danger" type="submit">{{t "user.delete"}}</button></form>
       {{end}}

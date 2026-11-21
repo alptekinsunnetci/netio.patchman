@@ -62,6 +62,17 @@
     </div>
   </section>
 
+  <section class="panel" id="security">
+    <h2 class="panel__title">{{t "settings.security.title"}}</h2>
+    <label class="check-label"><input type="checkbox" name="auth_require_mfa" value="1"{{if $c.AuthRequireMFA}} checked{{end}}> {{t "settings.security.require_mfa"}}</label>
+    <p class="field__hint">{{t "settings.security.require_mfa_hint"}}</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "settings.risk.max_days"}}</span>
+        <input class="field__input" type="number" name="risk_max_days" min="0" max="3650" value="{{$c.RiskMaxDays}}">
+        <span class="field__hint">{{t "settings.risk.max_days_hint"}}</span></label>
+    </div>
+  </section>
+
   <div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>
 </form>
 

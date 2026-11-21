@@ -42,9 +42,16 @@
   <a class="stat{{if $d.Stats.Offline}} stat--warning{{end}}" href="/servers?status=offline">
     <p class="stat__label">{{t "dashboard.stat.offline_agents"}}</p>
     <p class="stat__value">{{$d.Stats.Offline}}</p>
-    <p class="stat__meta">{{t "dashboard.stat.reboot" "n" $d.Stats.RebootRequired}}</p>
+    <p class="stat__meta">{{t "dashboard.stat.offline_meta" "n" $d.Stats.NeverSeen}}</p>
+  </a>
+  <a class="stat{{if $d.Stats.RebootRequired}} stat--warning{{end}}" href="/servers?status=reboot">
+    <p class="stat__label">{{t "dashboard.stat.reboot_label"}}</p>
+    <p class="stat__value">{{$d.Stats.RebootRequired}}</p>
+    <p class="stat__meta">{{if $d.Stats.RebootOldest.IsZero}}{{t "dashboard.stat.reboot_none"}}{{else}}{{t "dashboard.stat.reboot_oldest" "ago" (ago $d.Stats.RebootOldest)}}{{end}}</p>
   </a>
 </section>
+
+{{template "trends" $d.Trend}}
 
 <section class="panel">
   <div class="panel__head">

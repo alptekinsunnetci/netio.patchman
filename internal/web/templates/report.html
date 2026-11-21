@@ -1,0 +1,116 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "report.title"}}{{with $d.Group}} · {{.Name}}{{end}}</h1>
+    <p class="pagehead__sub">{{t "report.period" "from" $d.FromLabel "to" $d.ToLabel}} · {{if $d.Group}}{{t "report.scope_group" "count" (len $d.Hosts)}}{{else}}{{t "report.scope_all" "count" (len $d.Hosts)}}{{end}}</p>
+    <p class="report__meta">{{t "report.generated" "time" (long $d.GeneratedAt) "user" .User.Name}} · {{.Product}} {{.Version}}</p>
+  </div>
+  <div class="pagehead__actions">
+    <button class="button button--primary" type="button" data-print>{{template "icon" "print"}}{{t "report.print"}}</button>
+  </div>
+</header>
+
+<form class="filters" method="get" action="/reports">
+  <label class="field field--inline"><span class="field__label">{{t "report.from"}}</span><input class="field__input" type="date" name="from" value="{{$d.From}}" required></label>
+  <label class="field field--inline"><span class="field__label">{{t "report.to"}}</span><input class="field__input" type="date" name="to" value="{{$d.To}}" required></label>
+  <label class="field field--inline"><span class="field__label">{{t "host.field.groups"}}</span>
+    <select class="field__input" name="group">
+      <option value="">{{t "report.all_hosts"}}</option>
+      {{range $d.Groups}}<option value="{{.ID}}"{{if $d.Group}}{{if eq .ID $d.Group.ID}} selected{{end}}{{end}}>{{.Name}}</option>{{end}}
+    </select></label>
+  <button class="button" type="submit">{{t "report.apply"}}</button>
+</form>
+
+<section class="stats report__section">
+  <div class="stat"><p class="stat__label">{{t "dashboard.stat.servers"}}</p><p class="stat__value">{{len $d.Hosts}}</p><p class="stat__meta">{{t "dashboard.stat.online" "n" $d.Online}}</p></div>
+  <div class="stat{{if $d.Sev.Critical}} stat--critical{{end}}"><p class="stat__label">{{t "dashboard.stat.critical"}}</p><p class="stat__value">{{$d.Sev.Critical}}</p><p class="stat__meta">{{t "dashboard.stat.high" "n" $d.Sev.High}}</p></div>
+  <div class="stat{{if $d.KEV}} stat--critical{{end}}"><p class="stat__label">{{t "dashboard.stat.kev"}}</p><p class="stat__value">{{$d.KEV}}</p><p class="stat__meta">{{t "dashboard.stat.kev_meta"}}</p></div>
+  <div class="stat"><p class="stat__label">{{t "report.opened"}}</p><p class="stat__value">{{$d.Flow.Opened}}</p><p class="stat__meta">{{t "report.resolved" "n" $d.Flow.Resolved}}</p></div>
+  <div class="stat"><p class="stat__label">{{t "report.mean_fix"}}</p><p class="stat__value">{{if $d.MeanFixDays}}{{$d.MeanFixDays}}{{else}}{{t "common.empty"}}{{end}}</p><p class="stat__meta">{{t "report.mean_fix_meta"}}</p></div>
+  <div class="stat{{if $d.Reboot}} stat--warning{{end}}"><p class="stat__label">{{t "dashboard.stat.reboot_label"}}</p><p class="stat__value">{{len $d.Reboot}}</p><p class="stat__meta">{{t "report.security_updates" "n" $d.SecurityUpdates}}</p></div>
+</section>
+
+{{if $d.Trend}}{{template "trends" $d.Trend}}{{else}}<p class="footnote">{{t "report.trend_fleet_only"}}</p>{{end}}
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">{{t "report.kev_title"}} <span class="muted">({{len $d.KEVOpen}})</span></h2></div>
+  {{if $d.KEVOpen}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "vuln.field.cve_id"}}</th><th>{{t "vuln.field.title"}}</th><th>{{t "report.kev_added"}}</th><th>{{t "report.kev_due"}}</th><th>{{t "vuln.field.affected_servers"}}</th></tr></thead>
+    <tbody>
+    {{range $d.KEVOpen}}
+    <tr>
+      <td><a class="mono" href="/vulnerabilities/{{.CVEID}}">{{.CVEID}}</a></td>
+      <td lang="en">{{truncate .Title 90}}</td>
+      <td class="mono">{{.DateAdded}}</td>
+      <td class="mono">{{.DueDate}}{{if .Overdue $d.Today}} <span class="pill pill--failed">{{t "report.overdue"}}</span>{{end}}</td>
+      <td>{{.HostCount}}<div class="cell-sub">{{join .Hostnames ", "}}</div></td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "report.kev_none")}}{{end}}
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">{{t "report.hosts_title"}}</h2></div>
+  {{if $d.Hosts}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "host.field.hostname"}}</th><th>{{t "host.field.os"}}</th><th>{{t "host.field.platform"}}</th><th>{{t "host.field.vulns"}}</th><th class="num">{{t "host.field.security_updates"}}</th><th>{{t "host.field.reboot_required"}}</th><th>{{t "host.field.last_seen"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Hosts}}
+    <tr>
+      <td><a href="/servers/{{.ID}}">{{.Hostname}}</a>{{if .Groups}}<div class="cell-sub">{{range $i, $g := .Groups}}{{if $i}}, {{end}}{{$g.Name}}{{end}}</div>{{end}}</td>
+      <td>{{.OSName}}</td>
+      <td>{{virt .Virtualization}}</td>
+      <td>{{template "sevcounts" .Vulns}}</td>
+      <td class="num">{{.SecurityUpdateCount}}</td>
+      <td>{{if .RebootRequired}}{{t "common.yes"}}{{if not .RebootRequiredSince.IsZero}} <span class="cell-sub">({{date .RebootRequiredSince}})</span>{{end}}{{else}}{{t "common.no"}}{{end}}</td>
+      <td>{{datetime .LastSeenAt}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "servers.empty")}}{{end}}
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">{{t "report.risks_title"}} <span class="muted">({{$d.RiskTotal}})</span></h2></div>
+  {{if $d.Risks}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "vuln.field.cve_id"}}</th><th>{{t "host.field.hostname"}}</th><th>{{t "vuln.field.affected_package"}}</th><th>{{t "vuln.status_note"}}</th><th>{{t "report.accepted_by"}}</th><th>{{t "report.expires"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Risks}}
+    <tr>
+      <td><a class="mono" href="/vulnerabilities/{{.CVEID}}">{{.CVEID}}</a> {{template "sev" .Severity}}</td>
+      <td>{{.Hostname}}</td>
+      <td class="mono">{{.PackageName}}</td>
+      <td>{{.StatusNote}}</td>
+      <td>{{if .StatusChangedBy}}{{.StatusChangedBy}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td>{{if .StatusExpiresAt.IsZero}}<span class="pill pill--warning">{{t "vuln.risk_no_expiry"}}</span>{{else}}{{date .StatusExpiresAt}}{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{if gt $d.RiskTotal (len $d.Risks)}}<p class="footnote">{{t "report.risks_truncated" "shown" (len $d.Risks) "total" $d.RiskTotal}}</p>{{end}}
+  {{else}}{{template "empty" (t "report.risks_none")}}{{end}}
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">{{t "report.jobs_title"}}</h2>
+  <dl class="dl">
+    {{range $d.JobStatuses}}<dt>{{jobStatus .}}</dt><dd class="text-num">{{index $d.Jobs .}}</dd>{{end}}
+  </dl>
+</section>
+
+<p class="footnote">{{t "report.footnote"}}</p>
+{{end}}

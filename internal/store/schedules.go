@@ -17,6 +17,8 @@ const (
 	TargetAll   = "all"
 	TargetOS    = "os"
 	TargetHosts = "hosts"
+	// TargetGroup is stored as target 'all' with group_id set.
+	TargetGroup = "group"
 )
 
 // Schedule is a recurring update rule (maintenance window).
@@ -31,6 +33,8 @@ type Schedule struct {
 	Target        string
 	OSID          string
 	HostIDs       []int64
+	GroupID       int64
+	GroupName     string
 	NextRunAt     time.Time
 	LastRunAt     time.Time
 	LastQueued    int
@@ -45,15 +49,15 @@ func (sc Schedule) Window() time.Duration { return time.Duration(sc.WindowMinute
 
 const scheduleSelect = `SELECT sc.id, sc.name, sc.enabled, sc.job_type, sc.days, sc.minute, sc.window_minutes, sc.target, sc.os_id,
  sc.next_run_at, sc.last_run_at, sc.last_queued, sc.last_skipped, COALESCE(u.name, ''), sc.created_at, sc.updated_at,
- (SELECT COUNT(*) FROM schedule_hosts sh WHERE sh.schedule_id = sc.id)
- FROM schedules sc LEFT JOIN users u ON u.id = sc.created_by`
+ (SELECT COUNT(*) FROM schedule_hosts sh WHERE sh.schedule_id = sc.id), COALESCE(sc.group_id, 0), COALESCE(g.name, '')
+ FROM schedules sc LEFT JOIN users u ON u.id = sc.created_by LEFT JOIN host_groups g ON g.id = sc.group_id`
 
 func scanSchedule(row interface{ Scan(...any) error }) (Schedule, int, error) {
 	var sc Schedule
 	var enabled, hostCount int
 	var next, last, created, updated int64
 	err := row.Scan(&sc.ID, &sc.Name, &enabled, &sc.JobType, &sc.Days, &sc.Minute, &sc.WindowMinutes, &sc.Target, &sc.OSID,
-		&next, &last, &sc.LastQueued, &sc.LastSkipped, &sc.CreatedBy, &created, &updated, &hostCount)
+		&next, &last, &sc.LastQueued, &sc.LastSkipped, &sc.CreatedBy, &created, &updated, &hostCount, &sc.GroupID, &sc.GroupName)
 	if errors.Is(err, sql.ErrNoRows) {
 		return sc, 0, ErrNotFound
 	}
@@ -61,6 +65,9 @@ func scanSchedule(row interface{ Scan(...any) error }) (Schedule, int, error) {
 		return sc, 0, err
 	}
 	sc.Enabled = enabled == 1
+	if sc.GroupID != 0 && sc.Target == TargetAll {
+		sc.Target = TargetGroup
+	}
 	sc.NextRunAt, sc.LastRunAt, sc.CreatedAt, sc.UpdatedAt = fromTS(next), fromTS(last), fromTS(created), fromTS(updated)
 	return sc, hostCount, nil
 }
@@ -110,6 +117,15 @@ func (s *Store) ScheduleByID(ctx context.Context, id int64) (Schedule, error) {
 	return sc, rows.Err()
 }
 
+// dbTarget maps a schedule to its stored target and group_id (NULL unless
+// the target is a group).
+func dbTarget(sc Schedule) (string, any) {
+	if sc.Target == TargetGroup {
+		return TargetAll, nullID(sc.GroupID)
+	}
+	return sc.Target, nil
+}
+
 func setScheduleHosts(ctx context.Context, tx *sql.Tx, id int64, sc Schedule) error {
 	if _, err := tx.ExecContext(ctx, `DELETE FROM schedule_hosts WHERE schedule_id = ?`, id); err != nil {
 		return err
@@ -131,9 +147,10 @@ func (s *Store) CreateSchedule(ctx context.Context, sc Schedule, userID int64) (
 	var id int64
 	err := s.tx(ctx, func(tx *sql.Tx) error {
 		n := now()
-		res, err := tx.ExecContext(ctx, `INSERT INTO schedules (name, enabled, job_type, days, minute, window_minutes, target, os_id, next_run_at, created_by, created_at, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			sc.Name, boolInt(sc.Enabled), sc.JobType, sc.Days, sc.Minute, sc.WindowMinutes, sc.Target, sc.OSID, toTS(sc.NextRunAt), nullID(userID), n, n)
+		target, group := dbTarget(sc)
+		res, err := tx.ExecContext(ctx, `INSERT INTO schedules (name, enabled, job_type, days, minute, window_minutes, target, os_id, next_run_at, created_by, created_at, updated_at, group_id)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			sc.Name, boolInt(sc.Enabled), sc.JobType, sc.Days, sc.Minute, sc.WindowMinutes, target, sc.OSID, toTS(sc.NextRunAt), nullID(userID), n, n, group)
 		if err != nil {
 			return err
 		}
@@ -148,9 +165,10 @@ func (s *Store) CreateSchedule(ctx context.Context, sc Schedule, userID int64) (
 // UpdateSchedule replaces a schedule's definition and next run time.
 func (s *Store) UpdateSchedule(ctx context.Context, sc Schedule) error {
 	return s.tx(ctx, func(tx *sql.Tx) error {
+		target, group := dbTarget(sc)
 		res, err := tx.ExecContext(ctx, `UPDATE schedules SET name = ?, enabled = ?, job_type = ?, days = ?, minute = ?, window_minutes = ?, target = ?, os_id = ?,
-			next_run_at = ?, updated_at = ? WHERE id = ?`,
-			sc.Name, boolInt(sc.Enabled), sc.JobType, sc.Days, sc.Minute, sc.WindowMinutes, sc.Target, sc.OSID, toTS(sc.NextRunAt), now(), sc.ID)
+			next_run_at = ?, updated_at = ?, group_id = ? WHERE id = ?`,
+			sc.Name, boolInt(sc.Enabled), sc.JobType, sc.Days, sc.Minute, sc.WindowMinutes, target, sc.OSID, toTS(sc.NextRunAt), now(), group, sc.ID)
 		if err != nil {
 			return err
 		}
@@ -242,6 +260,9 @@ func (s *Store) ScheduleTargets(ctx context.Context, sc Schedule) ([]Host, error
 	case TargetHosts:
 		q += ` WHERE h.id IN (SELECT host_id FROM schedule_hosts WHERE schedule_id = ?)`
 		args = append(args, sc.ID)
+	case TargetGroup:
+		q += ` WHERE h.id IN (SELECT host_id FROM host_group_members WHERE group_id = ?)`
+		args = append(args, sc.GroupID)
 	default:
 		return nil, nil
 	}
@@ -338,6 +359,14 @@ func (s *Store) SchedulesForHost(ctx context.Context, h Host) ([]ScheduleRow, er
 				return nil, err
 			}
 			if n == 0 {
+				continue
+			}
+		case TargetGroup:
+			member := false
+			for _, g := range h.Groups {
+				member = member || g.ID == sc.GroupID
+			}
+			if !member {
 				continue
 			}
 		}

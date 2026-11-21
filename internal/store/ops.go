@@ -542,11 +542,13 @@ func (s *Store) SearchInstalled(ctx context.Context, search string, p Page) ([]I
 
 // FleetStats summarizes the fleet for the dashboard.
 type FleetStats struct {
-	Hosts               int
-	Online              int
-	Offline             int
-	NeverSeen           int
-	RebootRequired      int
+	Hosts          int
+	Online         int
+	Offline        int
+	NeverSeen      int
+	RebootRequired int
+	// RebootOldest is the earliest pending reboot (zero if none).
+	RebootOldest        time.Time
 	HostsWithUpdates    int
 	PendingUpdates      int
 	SecurityUpdates     int
@@ -556,13 +558,16 @@ type FleetStats struct {
 // FleetStats computes dashboard counters.
 func (s *Store) FleetStats(ctx context.Context, offlineAfter time.Duration) (FleetStats, error) {
 	var st FleetStats
+	var oldest int64
 	cutoff := now() - int64(offlineAfter.Seconds())
 	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*), COALESCE(SUM(last_seen_at >= ?), 0), COALESCE(SUM(last_seen_at > 0 AND last_seen_at < ?), 0),
-		COALESCE(SUM(last_seen_at = 0), 0), COALESCE(SUM(reboot_required), 0) FROM hosts`, cutoff, cutoff).
-		Scan(&st.Hosts, &st.Online, &st.Offline, &st.NeverSeen, &st.RebootRequired)
+		COALESCE(SUM(last_seen_at = 0), 0), COALESCE(SUM(reboot_required), 0),
+		COALESCE(MIN(CASE WHEN reboot_required = 1 AND reboot_required_since > 0 THEN reboot_required_since END), 0) FROM hosts`, cutoff, cutoff).
+		Scan(&st.Hosts, &st.Online, &st.Offline, &st.NeverSeen, &st.RebootRequired, &oldest)
 	if err != nil {
 		return st, err
 	}
+	st.RebootOldest = fromTS(oldest)
 	err = s.db.QueryRowContext(ctx, `SELECT COUNT(DISTINCT host_id), COUNT(*), COALESCE(SUM(security), 0),
 		COUNT(DISTINCT CASE WHEN security = 1 THEN host_id END) FROM host_updates`).
 		Scan(&st.HostsWithUpdates, &st.PendingUpdates, &st.SecurityUpdates, &st.HostsWithSecUpdates)
