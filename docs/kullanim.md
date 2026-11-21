@@ -227,7 +227,7 @@ Kanal eklendikten sonra **Deneme mesajı gönder** ile ayarı doğrulayın. Gön
 
 ## Arayüz dili
 
-Arayüz Türkçe ve İngilizce kullanılabilir. Giriş ekranının altındaki **Türkçe · English** bağlantılarıyla ya da **Profilim → Arayüz dili** ile seçilir. Profilde kaydedilen dil, başka bir cihazdan giriş yapıldığında da geçerlidir. Dil yalnızca sizin panelinizi etkiler: e-postalar, sohbet kanalı mesajları ve sistem günlükleri sunucunun varsayılan dilindedir. Bildirim merkezindeki bildirimler ise sizin seçtiğiniz dilde gösterilir. İngilizce arayüzde tarihler `2026-11-21`, CSV dosyaları `,` ayraçlıdır.
+Arayüz Türkçe, İngilizce, Almanca ve Rusça kullanılabilir. Giriş ekranının altındaki **Türkçe · Deutsch · English · Русский** bağlantılarıyla ya da **Profilim → Arayüz dili** ile seçilir. Profilde kaydedilen dil, başka bir cihazdan giriş yapıldığında da geçerlidir. Dil yalnızca sizin panelinizi etkiler: e-postalar, sohbet kanalı mesajları ve sistem günlükleri sunucunun varsayılan dilindedir. Bildirim merkezindeki bildirimler ise sizin seçtiğiniz dilde gösterilir. İngilizce arayüzde tarihler `2026-11-21`, CSV dosyaları `,` ayraçlıdır; Almanca ve Rusçada Türkçedeki gibi `21.11.2026` ve `;` kullanılır.
 
 ## Denetim Kayıtları
 

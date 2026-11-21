@@ -2,15 +2,15 @@
 
 **Merkezi Linux Güvenlik Açığı ve Güncelleme Yönetimi**
 
-**Türkçe** · [English](README.en.md)
+**Türkçe** · [English](README.en.md) · [Deutsch](README.de.md) · [Русский](README.ru.md)
 
 netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket güncellemelerini tek bir panelden izlemenizi ve yönetmenizi sağlayan, kendi altyapınızda çalışan (self-hosted) bir platformdur.
 
 - Merkezi sunucu tek bir Docker konteyneridir. Gömülü SQLite veritabanı kullanır; ayrı bir veritabanı, kuyruk ya da önbellek servisi gerekmez.
 - Yönetilen her sunucuya küçük bir ajan kurulur. Ajan port açmaz; merkezi sunucuya kendisi bağlanır.
-- Arayüz Türkçe ve İngilizcedir; her kullanıcı kendi dilini seçer. E-postalar ve belgeler Türkçedir. CVE verileri kaynağındaki haliyle, çevrilmeden gösterilir.
+- Arayüz Türkçe, İngilizce, Almanca ve Rusçadır; her kullanıcı kendi dilini seçer. E-postalar ve belgeler Türkçedir. CVE verileri kaynağındaki haliyle, çevrilmeden gösterilir.
 
-> **English:** netio.patchman is a self-hosted platform for centralized Linux vulnerability and update management, with an English web interface. Read the English documentation in [README.en.md](README.en.md).
+> **English:** netio.patchman is a self-hosted platform for centralized Linux vulnerability and update management, with an English web interface. Read the English documentation in [README.en.md](README.en.md). · Deutsch: [README.de.md](README.de.md) · Русский: [README.ru.md](README.ru.md)
 
 > [!WARNING]
 > **Kullanım riski tamamen kullanıcıya aittir.** netio.patchman sunucularınızda paket güncelleyen, servisleri ve sunucuyu yeniden başlatan bir yazılımdır. "Olduğu gibi" sunulur ve hiçbir garanti verilmez. Kullanımdan doğabilecek veri kaybı, hizmet kesintisi, başarısız güncelleme, güvenlik açığı ve benzeri her türlü zarardan yazılımı kuran ve kullanan kişi ya da kurum sorumludur. Ayrıntılar: [Sorumluluk reddi](#sorumluluk-reddi).
@@ -52,7 +52,7 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 - **Bildirimler:** Bildirim merkezi ve e-posta bildirimleri: yeni açıklar, bağlantısı kesilen ajanlar, başarısız veya kısmen tamamlanan güncelleme işleri.
 - **Slack, Microsoft Teams, Telegram ve webhook:** Bildirimler seviyeye göre (bilgi, uyarı, kritik) sohbet kanallarına ve HMAC-SHA256 imzalı JSON webhook ile kendi sistemlerinize (SIEM, olay yönetimi) de gönderilir.
 - **Otomatik yedekleme:** Veritabanı her gün belirlenen saatte yedeklenir, en yeni N yedek saklanır. Yedekler panelden indirilebilir; başarısız yedekleme bildirilir.
-- **Türkçe ve İngilizce arayüz:** Her kullanıcı arayüz dilini seçer; tarih, ondalık ayracı ve CSV biçimi dile uyar.
+- **Çok dilli arayüz:** Türkçe, İngilizce, Almanca ve Rusça. Her kullanıcı arayüz dilini seçer; tarih, ondalık ayracı ve CSV biçimi dile uyar.
 - **Kullanıcılar ve yetkiler:** Yönetici, Operatör ve İzleyici rolleri; denetim kayıtları.
 - **Paneldense yapılandırma:** SMTP, sunucu adresi, saat dilimi, veri kaynakları ve tüm işletim ayarları panelden değiştirilir. Değişiklikler yeniden başlatma gerektirmez.
 - **Dışa aktarma:** Sunucu ve güvenlik açığı listeleri Excel uyumlu CSV olarak indirilebilir.
@@ -305,7 +305,7 @@ Yapılandırmanın tamamı yönetim panelinden yapılabilir:
 | `PATCHMAN_TRUST_PROXY` | `false` | Ters vekil arkasında istemci IP'sini `X-Forwarded-For` başlığından al | evet |
 | `PATCHMAN_TLS_CERT_FILE`, `PATCHMAN_TLS_KEY_FILE` | — | Sunucunun TLS'i kendisinin sonlandırması için sertifika ve anahtar | — |
 | `PATCHMAN_TIMEZONE` | `Europe/Istanbul` | Tarih ve saatlerin gösterildiği saat dilimi | evet |
-| `PATCHMAN_LOCALE` | `tr-TR` | Varsayılan dil (`tr-TR` veya `en-US`): yeni kullanıcıların arayüzü, e-postalar ve günlükler. Her kullanıcı kendi arayüz dilini ayrıca seçebilir | — |
+| `PATCHMAN_LOCALE` | `tr-TR` | Varsayılan dil (`tr-TR`, `en-US`, `de-DE` veya `ru-RU`): yeni kullanıcıların arayüzü, e-postalar ve günlükler. Her kullanıcı kendi arayüz dilini ayrıca seçebilir | — |
 | `PATCHMAN_BACKUP_DIR` | `/data/backups` | Otomatik yedeklerin yazıldığı dizin | — |
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API adresi (iç ağ yansısı kullanılabilir) | evet |
 | `PATCHMAN_KEV_URL` | CISA KEV adresi | KEV kataloğu adresi; `off` ile kapatılır | evet |
@@ -331,9 +331,9 @@ Ayrıntılı bilgi: [docs/kurulum.md](docs/kurulum.md) (kurulum ve işletim), [d
 
 ## Dil ve yerelleştirme
 
-- Varsayılan dil Türkçedir (`tr-TR`). Arayüz İngilizce (`en-US`) olarak da kullanılabilir: giriş ekranındaki **English** bağlantısı veya **Profilim → Arayüz dili**. Seçim kullanıcıya kaydedilir ve diğer cihazlarda da geçerli olur.
-- E-postalar, sohbet kanalı mesajları ve sistem günlükleri sunucunun varsayılan dilindedir (`PATCHMAN_LOCALE`). Ajan mesajlarının dili ajan kurulurken `--locale en-US` ile seçilir; panel İngilizceyken kurulum komutu bu seçeneği kendisi ekler.
-- Tarihler Türkçede `21.11.2026`, İngilizcede `2026-11-21` biçimindedir. CSV dosyaları Türkçede `;`, İngilizcede `,` ile ayrılır.
+- Varsayılan dil Türkçedir (`tr-TR`). Arayüz İngilizce (`en-US`), Almanca (`de-DE`) ve Rusça (`ru-RU`) olarak da kullanılabilir: giriş ekranındaki dil bağlantıları veya **Profilim → Arayüz dili**. Seçim kullanıcıya kaydedilir ve diğer cihazlarda da geçerli olur.
+- E-postalar, sohbet kanalı mesajları ve sistem günlükleri sunucunun varsayılan dilindedir (`PATCHMAN_LOCALE`). Ajan mesajlarının dili ajan kurulurken `--locale` ile seçilir (ör. `--locale de-DE`); panel Türkçe dışındaki bir dildeyken kurulum komutu bu seçeneği kendisi ekler.
+- Tarihler Türkçe, Almanca ve Rusçada `21.11.2026`, İngilizcede `2026-11-21` biçimindedir. CSV dosyaları İngilizcede `,`, diğer dillerde `;` ile ayrılır.
 - **Güvenlik açığı verileri çevrilmez.** CVE numaraları, resmî başlıklar, açıklamalar, CVSS değerleri, paket adları ve üretici duyuruları kaynağında yayımlandığı haliyle gösterilir.
 - Zaman bilgileri UTC olarak saklanır ve seçilen saat diliminde (varsayılan `Europe/Istanbul`) gösterilir.
 - Arayüz metinleri `internal/i18n/locales/` altındadır. Yeni bir dil, aynı anahtarlarla yeni bir dosya eklenerek desteklenir.

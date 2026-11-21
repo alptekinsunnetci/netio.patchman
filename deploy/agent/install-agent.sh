@@ -52,7 +52,7 @@ Seçenekler:
   --ca-file <dosya>          Sunucu sertifikasını doğrulamak için ek CA dosyası
   --disable-remote-updates   Panelden başlatılan paket güncelleme işlerini bu sunucuda kapat
   --disable-auto-update      Ajanın kendini otomatik güncellemesini bu sunucuda kapat
-  --locale <dil>             Ajan mesajlarının dili: tr-TR (varsayılan) veya en-US
+  --locale <dil>             Ajan mesajlarının dili: tr-TR (varsayılan), en-US, de-DE, ru-RU
   -h, --help                 Bu yardım metnini gösterir
 EOF
 }
@@ -85,7 +85,7 @@ fi
 [ -n "$SERVER_URL" ]        || hata "Merkezi sunucu adresi (--server-url) zorunludur."
 case "$AGENT_LOCALE" in
 	''|[a-z][a-z]-[A-Z][A-Z]) ;;
-	*) hata "Geçersiz dil: $AGENT_LOCALE (örnek: tr-TR, en-US)" ;;
+	*) hata "Geçersiz dil: $AGENT_LOCALE (örnek: tr-TR, en-US, de-DE, ru-RU)" ;;
 esac
 case "$SERVER_URL" in
 	https://*) ;;

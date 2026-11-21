@@ -309,6 +309,37 @@ func TestBackups(t *testing.T) {
 	expect(t, "failure shown", 200, 200, body, "Son yedekleme denemesi başarısız oldu")
 }
 
+func TestGermanAndRussianInterface(t *testing.T) {
+	e := newEnv(t)
+	admin := setupAdmin(t, e)
+	_, body, _ := e.do(newClient(), "GET", "/login", nil)
+	expect(t, "language links", 200, 200, body, ">Deutsch</a>", ">English</a>", ">Русский</a>", "<strong>Türkçe</strong>")
+	for _, tc := range []struct{ locale, lang, login, dashboard string }{
+		{"de-DE", `<html lang="de">`, "Am Dashboard anmelden", "Serverinventar"},
+		{"ru-RU", `<html lang="ru">`, "Вход в панель управления", "Инвентарь серверов"},
+	} {
+		c := newClient()
+		e.do(c, "GET", "/lang?to="+tc.locale+"&next=/login", nil)
+		_, body, _ = e.do(c, "GET", "/login", nil)
+		expect(t, tc.locale+" login", 200, 200, body, tc.lang, tc.login)
+		status, _, _ := e.do(admin, "POST", "/profile/language", url.Values{"_csrf": {e.csrf(admin)}, "locale": {tc.locale}})
+		if status != http.StatusSeeOther {
+			t.Fatalf("%s profile: %d", tc.locale, status)
+		}
+		_, body, _ = e.do(admin, "GET", "/dashboard", nil)
+		expect(t, tc.locale+" dashboard", 200, 200, body, tc.lang, tc.dashboard)
+		_, body, _ = e.do(admin, "GET", "/agents", nil)
+		if !strings.Contains(body, "--locale "+tc.locale) {
+			t.Errorf("%s install command lacks --locale", tc.locale)
+		}
+		// Day-first dates and ';' CSV like Turkish.
+		_, body, _ = e.do(admin, "GET", "/servers.csv", nil)
+		if !strings.Contains(body, ";") {
+			t.Errorf("%s CSV separator", tc.locale)
+		}
+	}
+}
+
 func TestEnglishInterface(t *testing.T) {
 	e := newEnv(t)
 	ctx := context.Background()

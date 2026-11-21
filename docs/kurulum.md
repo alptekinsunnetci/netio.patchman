@@ -185,7 +185,7 @@ Kayıt anahtarını süreli ve kullanım sınırlı oluşturup Ansible, Puppet v
 | `PATCHMAN_AUTO_UPDATE` | `true` | `false` ise ajan kendini otomatik olarak güncellemez (sürüm sabitleme) |
 | `PATCHMAN_REFRESH_PACKAGE_LISTS` | `true` | Paket listelerini en fazla 6 saatte bir yeniler (`apt-get update`, `zypper refresh`, `apk update`) |
 | `PATCHMAN_CA_FILE` | — | Ek CA sertifikası |
-| `PATCHMAN_LOCALE` | `tr-TR` | Ajan günlüklerinin ve panelde görünen iş mesajlarının dili (`tr-TR` veya `en-US`). Kurulumda `--locale en-US` ile yazılır |
+| `PATCHMAN_LOCALE` | `tr-TR` | Ajan günlüklerinin ve panelde görünen iş mesajlarının dili (`tr-TR`, `en-US`, `de-DE` veya `ru-RU`). Kurulumda `--locale` ile yazılır (ör. `--locale de-DE`) |
 
 Değişiklikten sonra: `systemctl restart netio-patchman-agent.service` (Alpine: `rc-service netio-patchman-agent restart`)
 

@@ -2,13 +2,13 @@
 
 **Central Linux Vulnerability and Update Management**
 
-[Türkçe](README.md) · **English**
+[Türkçe](README.md) · **English** · [Deutsch](README.de.md) · [Русский](README.ru.md)
 
 netio.patchman is a self-hosted platform for monitoring and managing the vulnerabilities and package updates of hundreds of Linux servers from a single dashboard.
 
 - The central server is a single Docker container with an embedded SQLite database. No separate database, queue or cache service is needed.
 - A small agent is installed on each managed server. The agent opens no ports; it connects to the central server itself.
-- The web interface is available in Turkish and English, and each user picks their own language. CVE data is shown exactly as published by its source, never translated.
+- The web interface is available in Turkish, English, German and Russian, and each user picks their own language. CVE data is shown exactly as published by its source, never translated.
 
 > [!WARNING]
 > **You use this software entirely at your own risk.** netio.patchman updates packages and restarts services and servers on your machines. It is provided "as is", without any warranty. The person or organization that installs and uses the software is responsible for any damage resulting from its use, including data loss, service outages, failed updates and security vulnerabilities. Details: [Disclaimer](#disclaimer).
@@ -51,7 +51,7 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 - **Notifications:** Notification center and email notifications for new vulnerabilities, disconnected agents and failed or partially completed update jobs.
 - **Slack, Microsoft Teams, Telegram and webhooks:** Notifications are also sent, filtered by level (info, warning, critical), to chat channels and to your own systems (SIEM, incident management) through JSON webhooks signed with HMAC-SHA256.
 - **Automatic backups:** The database is backed up every day at a set time and the newest N backups are kept. Backups can be downloaded from the dashboard; failed backups are reported.
-- **Turkish and English interface:** Each user picks the interface language; dates, decimal separators and CSV format follow the language.
+- **Multilingual interface:** Turkish, English, German and Russian. Each user picks the interface language; dates, decimal separators and CSV format follow the language.
 - **Users and roles:** Administrator, Operator and Viewer roles; audit log.
 - **Configuration from the dashboard:** SMTP, server address, time zone, data sources and all operational settings are changed in the dashboard. Changes apply without a restart.
 - **Export:** Server and vulnerability lists can be downloaded as Excel-compatible CSV files.
@@ -70,7 +70,7 @@ The agent runs on amd64 and arm64. It requires systemd or OpenRC (Alpine) as the
 
 ## Screenshots
 
-The screenshots show the Turkish interface; the English interface has the same layout. They were taken with six test servers running Ubuntu, Debian, Rocky Linux, AlmaLinux and Alpine. The vulnerabilities are real data from OSV.dev.
+The screenshots show the Turkish interface; the other languages have the same layout. They were taken with six test servers running Ubuntu, Debian, Rocky Linux, AlmaLinux and Alpine. The vulnerabilities are real data from OSV.dev.
 
 **Server inventory:** All servers with their vulnerabilities by severity, pending updates and agent status. Bulk updates can be started on selected servers.
 
@@ -307,7 +307,7 @@ The `PATCHMAN_`-prefixed variables in `.env` only provide the initial values; a 
 | `PATCHMAN_TRUST_PROXY` | `false` | Take the client IP from the `X-Forwarded-For` header behind a reverse proxy | yes |
 | `PATCHMAN_TLS_CERT_FILE`, `PATCHMAN_TLS_KEY_FILE` | — | Certificate and key for letting the server terminate TLS itself | — |
 | `PATCHMAN_TIMEZONE` | `Europe/Istanbul` | Time zone in which dates and times are shown | yes |
-| `PATCHMAN_LOCALE` | `tr-TR` | Default language (`tr-TR` or `en-US`): interface of new users, emails and logs. Each user can choose their own interface language | — |
+| `PATCHMAN_LOCALE` | `tr-TR` | Default language (`tr-TR`, `en-US`, `de-DE` or `ru-RU`): interface of new users, emails and logs. Each user can choose their own interface language | — |
 | `PATCHMAN_BACKUP_DIR` | `/data/backups` | Directory for automatic backups | — |
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API address (an internal mirror can be used) | yes |
 | `PATCHMAN_KEV_URL` | CISA KEV address | KEV catalog address; `off` turns it off | yes |
@@ -333,9 +333,9 @@ More information (in Turkish): [docs/kurulum.md](docs/kurulum.md) (installation 
 
 ## Language and localization
 
-- The default language is Turkish (`tr-TR`). The interface can also be used in English (`en-US`): the **English** link on the sign-in page or **My Profile → Interface language**. The choice is saved for the user and applies on other devices too.
-- Emails, chat channel messages and system logs use the server's default language (`PATCHMAN_LOCALE`). The language of agent messages is set with `--locale en-US` when installing the agent; the dashboard adds this option to the install command when it is in English.
-- Dates are shown as `21.11.2026` in Turkish and `2026-11-21` in English. CSV files are separated by `;` in Turkish and `,` in English.
+- The default language is Turkish (`tr-TR`). The interface is also available in English (`en-US`), German (`de-DE`) and Russian (`ru-RU`): the language links on the sign-in page or **My Profile → Interface language**. The choice is saved for the user and applies on other devices too.
+- Emails, chat channel messages and system logs use the server's default language (`PATCHMAN_LOCALE`). The language of agent messages is set with `--locale` when installing the agent (e.g. `--locale en-US`); the dashboard adds this option to the install command when it is not in Turkish.
+- Dates are shown as `21.11.2026` in Turkish, German and Russian and as `2026-11-21` in English. CSV files are separated by `,` in English and `;` in the other languages.
 - **Vulnerability data is never translated.** CVE IDs, official titles, descriptions, CVSS values, package names and vendor advisories are shown exactly as published by their source.
 - Times are stored in UTC and shown in the chosen time zone (default `Europe/Istanbul`).
 - Interface texts are in `internal/i18n/locales/`. A new language is added as a new file with the same keys; a test checks that every catalog has all keys and placeholders.
