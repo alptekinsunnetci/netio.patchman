@@ -134,15 +134,57 @@ func DetectPackageManager() string {
 	if runtime.GOOS == "windows" {
 		return protocol.PMWindowsUpdate
 	}
-	for _, c := range []struct{ bin, pm string }{
-		{"dpkg-query", protocol.PMApt},
-		{"apk", protocol.PMApk},
-		{"zypper", protocol.PMZypper},
-		{"dnf", protocol.PMDnf},
-		{"yum", protocol.PMYum},
-	} {
-		if _, err := exec.LookPath(c.bin); err == nil {
-			return c.pm
+	rel, _ := osRelease()
+	return pickPackageManager(rel, func(bin string) bool {
+		_, err := exec.LookPath(bin)
+		return err == nil
+	})
+}
+
+// pickPackageManager chooses by the os-release family (ID, then ID_LIKE)
+// first: tools of another family are often installed too, such as dpkg on
+// CloudLinux/cPanel servers or rpm on Debian. Without a known family the
+// first available package manager wins; apt needs apt-get, not only dpkg.
+func pickPackageManager(rel map[string]string, has func(string) bool) string {
+	apt := func() string {
+		if has("apt-get") && has("dpkg-query") {
+			return protocol.PMApt
+		}
+		return ""
+	}
+	rpm := func() string {
+		if has("dnf") {
+			return protocol.PMDnf
+		}
+		if has("yum") {
+			return protocol.PMYum
+		}
+		return ""
+	}
+	tool := func(bin, pm string) func() string {
+		return func() string {
+			if has(bin) {
+				return pm
+			}
+			return ""
+		}
+	}
+	families := map[string]func() string{
+		"debian": apt, "ubuntu": apt,
+		"rhel": rpm, "fedora": rpm, "centos": rpm,
+		"suse": tool("zypper", protocol.PMZypper), "opensuse": tool("zypper", protocol.PMZypper), "sles": tool("zypper", protocol.PMZypper),
+		"alpine": tool("apk", protocol.PMApk),
+	}
+	for _, f := range strings.Fields(strings.ToLower(rel["ID"] + " " + rel["ID_LIKE"])) {
+		if pick, ok := families[f]; ok {
+			if pm := pick(); pm != "" {
+				return pm
+			}
+		}
+	}
+	for _, pick := range []func() string{apt, tool("apk", protocol.PMApk), tool("zypper", protocol.PMZypper), rpm} {
+		if pm := pick(); pm != "" {
+			return pm
 		}
 	}
 	return ""

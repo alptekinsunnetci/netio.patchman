@@ -63,6 +63,7 @@ netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstell
 |---|---|---|
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
+| CloudLinux 8, 9 | dnf | ✓ (mit AlmaLinux-Sicherheitsdaten) |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
 | CentOS, Oracle Linux, Fedora und andere Distributionen (mit dnf, yum, zypper, apt oder apk) | ✓ | — |
@@ -71,6 +72,8 @@ netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstell
 Der Agent läuft auf amd64 und arm64. Als Dienstmanager wird systemd oder OpenRC (Alpine) benötigt. Physische, virtuelle (VMware, Hyper-V, KVM/Proxmox) und Cloud-Server werden gleichermaßen unterstützt.
 
 Unter Windows läuft der Agent auf x64-Systemen als Windows-Dienst und verwendet den Windows Update Agent; Server mit WSUS sehen die in WSUS genehmigten Updates. Der Schwachstellenscan unter Windows beschränkt sich auf Microsoft-Updates: Programme von Drittanbietern (Browser, 7-Zip usw.) erscheinen im Inventar, werden aber nicht gescannt. Updates, für die Microsoft keine CVE-Zuordnung veröffentlicht (etwa manche .NET-Rollups), werden als Sicherheitsupdates mit dem von Windows Update gemeldeten Schweregrad angezeigt.
+
+CloudLinux 8 und 9 werden aus AlmaLinux-Quellen gebaut und mit den AlmaLinux-Sicherheitsdaten gescannt. CloudLinux-eigene Pakete (LVE-Werkzeuge, alt-php usw.) sind in diesen Daten nicht enthalten und werden nicht gescannt; der LVE-Kernel wird mit derselben AlmaLinux-Kernelversion verglichen. Für CloudLinux 7 gibt es keine Schwachstellendaten.
 
 ## Screenshots
 

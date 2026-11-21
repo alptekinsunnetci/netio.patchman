@@ -56,6 +56,15 @@ func TargetFor(h protocol.HostInfo) Target {
 		return rpmTarget("AlmaLinux:" + major)
 	case "rocky":
 		return rpmTarget("Rocky Linux:" + major)
+	case "cloudlinux":
+		// CloudLinux 8 and 9 are built from AlmaLinux sources with the same package
+		// names and versions (verified against api.osv.dev; .lve/.cloudlinux release
+		// suffixes compare as newer builds of the same release). OSV has no CloudLinux
+		// ecosystem; CloudLinux 7 (CentOS 7 based) stays unsupported.
+		if major == "8" || major == "9" {
+			return rpmTarget("AlmaLinux:" + major)
+		}
+		return Target{}
 	case "rhel":
 		if major == "" {
 			return Target{}

@@ -64,6 +64,7 @@ netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve
 |---|---|---|
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
+| CloudLinux 8, 9 | dnf | ✓ (AlmaLinux güvenlik verileriyle) |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
 | CentOS, Oracle Linux, Fedora ve diğer dağıtımlar (dnf, yum, zypper, apt veya apk kullanan) | ✓ | — |
@@ -72,6 +73,8 @@ netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve
 Ajan amd64 ve arm64 mimarilerinde çalışır. Hizmet yöneticisi olarak systemd veya OpenRC (Alpine) gerekir. Sunucunun fiziksel, sanal (VMware, Hyper-V, KVM/Proxmox) veya bulutta olması fark etmez.
 
 Windows'ta ajan x64 sistemlerde Windows hizmeti olarak çalışır ve Windows Update Agent'ı kullanır; WSUS'a bağlı sunucularda WSUS'ta onaylanan güncellemeler görünür. Windows'ta güvenlik açığı taraması Microsoft güncellemeleriyle sınırlıdır: üçüncü taraf programlar (tarayıcılar, 7-Zip vb.) envanterde listelenir ancak taranmaz. Microsoft'un CVE eşlemesi yayımlamadığı güncellemeler (bazı .NET toplu güncellemeleri gibi) Windows Update'in bildirdiği önem derecesiyle güvenlik güncellemesi olarak gösterilir.
+
+CloudLinux 8 ve 9 AlmaLinux kaynaklarından derlendiği için AlmaLinux güvenlik verileriyle taranır. CloudLinux'a özgü paketler (LVE araçları, alt-php vb.) AlmaLinux verisinde bulunmadığından taranmaz; LVE çekirdeği AlmaLinux çekirdeğinin aynı sürümüyle karşılaştırılır. CloudLinux 7 için güvenlik açığı verisi yoktur.
 
 ## Ekran görüntüleri
 

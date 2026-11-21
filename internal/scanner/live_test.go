@@ -46,6 +46,11 @@ func TestLiveOSV(t *testing.T) {
 		{protocol.HostInfo{Hostname: "alma9", MachineID: "alma9", OSID: "almalinux", OSVersionID: "9.3"}, []protocol.Package{
 			{Name: "openssl", Version: "1:3.0.7-24.el9", Arch: "x86_64"},
 		}},
+		// CloudLinux 8 is matched with AlmaLinux 8 data; .lve kernel releases compare correctly.
+		{protocol.HostInfo{Hostname: "cl8", MachineID: "cl8", OSID: "cloudlinux", OSVersionID: "8.10", Kernel: "4.18.0-553.22.1.lve.el8.x86_64"}, []protocol.Package{
+			{Name: "openssl", Version: "1:1.1.1k-12.el8_9", Arch: "x86_64"},
+			{Name: "kernel", Version: "4.18.0-553.22.1.lve.el8", Arch: "x86_64"},
+		}},
 	}
 	for _, h := range hosts {
 		tokenHash := "tok-" + h.info.MachineID

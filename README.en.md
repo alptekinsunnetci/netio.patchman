@@ -63,6 +63,7 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 |---|---|---|
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
+| CloudLinux 8, 9 | dnf | ✓ (with AlmaLinux security data) |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
 | CentOS, Oracle Linux, Fedora and other distributions (using dnf, yum, zypper, apt or apk) | ✓ | — |
@@ -71,6 +72,8 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 The agent runs on amd64 and arm64. It requires systemd or OpenRC (Alpine) as the service manager. Physical, virtual (VMware, Hyper-V, KVM/Proxmox) and cloud servers are all supported.
 
 On Windows the agent runs as a Windows service on x64 systems and uses the Windows Update Agent; servers attached to WSUS see the updates approved in WSUS. Vulnerability scanning on Windows is limited to Microsoft updates: third-party programs (browsers, 7-Zip and so on) are listed in the inventory but not scanned. Updates for which Microsoft publishes no CVE mapping (some .NET rollups, for example) are shown as security updates with the severity Windows Update reports.
+
+CloudLinux 8 and 9 are built from AlmaLinux sources and are scanned with AlmaLinux security data. CloudLinux-specific packages (LVE tools, alt-php and so on) are not in the AlmaLinux data and are not scanned; the LVE kernel is compared with the same AlmaLinux kernel version. There is no vulnerability data for CloudLinux 7.
 
 ## Screenshots
 

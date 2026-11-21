@@ -63,6 +63,7 @@ netio.patchman — самостоятельно размещаемая (self-hos
 |---|---|---|
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
+| CloudLinux 8, 9 | dnf | ✓ (по данным безопасности AlmaLinux) |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
 | CentOS, Oracle Linux, Fedora и другие дистрибутивы (с dnf, yum, zypper, apt или apk) | ✓ | — |
@@ -71,6 +72,8 @@ netio.patchman — самостоятельно размещаемая (self-hos
 Агент работает на amd64 и arm64. В качестве менеджера служб нужен systemd или OpenRC (Alpine). Поддерживаются физические, виртуальные (VMware, Hyper-V, KVM/Proxmox) и облачные серверы.
 
 В Windows агент работает как служба Windows на системах x64 и использует Windows Update Agent; серверы с WSUS видят обновления, одобренные в WSUS. Сканирование уязвимостей в Windows ограничено обновлениями Microsoft: сторонние программы (браузеры, 7-Zip и т. п.) видны в инвентаре, но не сканируются. Обновления, для которых Microsoft не публикует сопоставление с CVE (например, некоторые накопительные обновления .NET), показываются как обновления безопасности с важностью, которую сообщает Windows Update.
+
+CloudLinux 8 и 9 собираются из исходников AlmaLinux и сканируются по данным безопасности AlmaLinux. Пакеты, специфичные для CloudLinux (инструменты LVE, alt-php и т. п.), в этих данных отсутствуют и не сканируются; ядро LVE сравнивается с той же версией ядра AlmaLinux. Для CloudLinux 7 данных об уязвимостях нет.
 
 ## Снимки экрана
 

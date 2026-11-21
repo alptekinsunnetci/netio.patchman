@@ -57,6 +57,10 @@ func TestTargetFor(t *testing.T) {
 		{protocol.HostInfo{OSID: "alpine", OSVersionID: "3.20.3"}, []string{"Alpine:v3.20"}, true},
 		{protocol.HostInfo{OSID: "opensuse-leap", OSVersionID: "15.5"}, []string{"openSUSE:Leap 15.5"}, false},
 		{protocol.HostInfo{OSID: "sles", OSVersionID: "15.5"}, []string{"SUSE:Linux Enterprise Server 15 SP5"}, false},
+		{protocol.HostInfo{OSID: "cloudlinux", OSVersionID: "8.10"}, []string{"AlmaLinux:8"}, false},
+		{protocol.HostInfo{OSID: "cloudlinux", OSVersionID: "9.4"}, []string{"AlmaLinux:9"}, false},
+		{protocol.HostInfo{OSID: "cloudlinux", OSVersionID: "7.9"}, nil, false},
+		{protocol.HostInfo{OSID: "windows", OSVersionID: "10.0.20348"}, []string{"Windows"}, false},
 		{protocol.HostInfo{OSID: "fedora", OSVersionID: "40"}, nil, false},
 	}
 	for _, c := range cases {

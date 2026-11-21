@@ -458,7 +458,7 @@
   "agents.install.offline_title": "Серверы без доступа в интернет",
   "agents.install.offline_body": "Скачайте файлы по этим адресам, скопируйте их на сервер и запустите сценарий установки с параметром --binary:",
   "agents.install.supported_title": "Поддерживаемые системы",
-  "agents.install.supported_body": "Инвентарь и обновления: все дистрибутивы с apt (Debian, Ubuntu), dnf/yum (RHEL, AlmaLinux, Rocky Linux), zypper (SUSE, openSUSE) или apk (Alpine) и systemd или OpenRC (включая CentOS, Oracle Linux и Fedora), а также Windows 10, Windows 11 и Windows Server 2016 / 2019 / 2022 / 2025 (x64, Windows Update). Физический сервер, VMware, Hyper-V, KVM/Proxmox или облако — не важно. Сканирование уязвимостей: Debian, Ubuntu, AlmaLinux, Rocky Linux, Red Hat Enterprise Linux, SUSE Linux Enterprise, openSUSE Leap, Alpine и Windows (CVE ожидающих обновлений Microsoft; сторонние программы Windows не сканируются).",
+  "agents.install.supported_body": "Инвентарь и обновления: все дистрибутивы с apt (Debian, Ubuntu), dnf/yum (RHEL, AlmaLinux, Rocky Linux), zypper (SUSE, openSUSE) или apk (Alpine) и systemd или OpenRC (включая CentOS, Oracle Linux и Fedora), а также Windows 10, Windows 11 и Windows Server 2016 / 2019 / 2022 / 2025 (x64, Windows Update). Физический сервер, VMware, Hyper-V, KVM/Proxmox или облако — не важно. Сканирование уязвимостей: Debian, Ubuntu, AlmaLinux, Rocky Linux, Red Hat Enterprise Linux, CloudLinux 8/9 (по данным AlmaLinux), SUSE Linux Enterprise, openSUSE Leap, Alpine и Windows (CVE ожидающих обновлений Microsoft; сторонние программы Windows не сканируются).",
   "agents.token.new": "Новый ключ регистрации",
   "agents.token.name": "Название ключа",
   "agents.token.name_placeholder": "Например: рабочие веб-серверы",
