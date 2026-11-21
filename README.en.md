@@ -1,0 +1,403 @@
+# netio.patchman
+
+**Central Linux Vulnerability and Update Management**
+
+[Türkçe](README.md) · **English**
+
+netio.patchman is a self-hosted platform for monitoring and managing the vulnerabilities and package updates of hundreds of Linux servers from a single dashboard.
+
+- The central server is a single Docker container with an embedded SQLite database. No separate database, queue or cache service is needed.
+- A small agent is installed on each managed server. The agent opens no ports; it connects to the central server itself.
+- The web interface is available in Turkish and English, and each user picks their own language. CVE data is shown exactly as published by its source, never translated.
+
+> [!WARNING]
+> **You use this software entirely at your own risk.** netio.patchman updates packages and restarts services and servers on your machines. It is provided "as is", without any warranty. The person or organization that installs and uses the software is responsible for any damage resulting from its use, including data loss, service outages, failed updates and security vulnerabilities. Details: [Disclaimer](#disclaimer).
+
+![Dashboard](docs/images/dashboard.png)
+
+## Contents
+
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [How it works](#how-it-works)
+- [Installation (Docker)](#installation-docker)
+- [Installing the agent on servers](#installing-the-agent-on-servers)
+- [Updating, backup and removal](#updating-backup-and-removal)
+- [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
+- [Language and localization](#language-and-localization)
+- [Security](#security)
+- [Development](#development)
+- [Disclaimer](#disclaimer)
+- [License](#license)
+
+## Features
+
+- **Server inventory:** Operating system, kernel, IP addresses, installed packages, pending updates, reboot status and services still running old code.
+- **Vulnerability scanning:** Installed package versions are matched against the distributions' official security data through [OSV.dev](https://osv.dev). CVSS score, severity, fixed version and vendor advisories are shown.
+- **Known exploited vulnerabilities:** Vulnerabilities in the CISA Known Exploited Vulnerabilities (KEV) catalog are flagged and prioritized.
+- **Central updates:** Install security updates, all updates or selected packages on one server, on selected servers or on all of them from the dashboard. **Apply fix** on a CVE updates the related packages on every affected server. After each job the agent verifies that the packages were really updated; packages that were not updated are listed and can be retried with one click.
+- **Service and server restarts:** Services still using old versions of updated libraries are detected and can be restarted from the dashboard; servers can be rebooted from the dashboard.
+- **Scheduled updates:** Maintenance windows such as "apply security updates to Ubuntu servers every Sunday at 03:00". Schedules never reboot servers by themselves.
+- **Automatic agent updates:** When the central server moves to a new version, agents download it, verify its SHA-256 digest and update themselves.
+- **New version notice:** The dashboard tells administrators when a new netio.patchman version is released on GitHub and shows the update commands. It can be turned off for installations without internet access.
+- **Finding management:** Open, In Progress, Risk Accepted and False Positive statuses. When a package is updated, its finding becomes "Resolved" automatically. Risks are accepted for a limited term (30, 90, 180 or 365 days; the maximum is set in Settings). When the term ends, the finding reopens and a notification and email are sent.
+- **Server groups:** Divide servers into groups such as "Production", "Test" or "Database". A server can belong to several groups. Lists can be filtered by group, scheduled updates can target a group and reports can be created for a group.
+- **Platform information:** The agent reports whether the server is a VMware, Hyper-V, KVM, Xen or VirtualBox virtual machine, a Docker/LXC container or a physical server. The server list can be filtered by platform.
+- **Reboot tracking:** If a new kernel is installed but the server has not been rebooted, this is shown together with how long it has been pending. The dashboard has a separate card and filter for it. It is also detected on Debian (no `/var/run/reboot-required` file) and Alpine by comparing kernels.
+- **Trend charts:** The server records the fleet status every day. The dashboard shows the last 30 days of critical and high vulnerabilities, actively exploited vulnerabilities, open findings and pending security updates as charts and a table.
+- **Compliance report:** A printable report (save it as PDF from the browser) for a chosen period and group: summary figures, findings detected and resolved in the period, mean time to remediate, KEV vulnerabilities past their CISA due date, server status, accepted risks (with who accepted them and when they expire) and update jobs. Useful as evidence in ISO 27001 and similar audits.
+- **Two-factor authentication:** TOTP codes from apps such as Google Authenticator or Microsoft Authenticator, plus single-use recovery codes. Administrators can require two-factor authentication for all users and reset it for a user who lost their phone.
+- **Notifications:** Notification center and email notifications for new vulnerabilities, disconnected agents and failed or partially completed update jobs.
+- **Slack, Microsoft Teams, Telegram and webhooks:** Notifications are also sent, filtered by level (info, warning, critical), to chat channels and to your own systems (SIEM, incident management) through JSON webhooks signed with HMAC-SHA256.
+- **Automatic backups:** The database is backed up every day at a set time and the newest N backups are kept. Backups can be downloaded from the dashboard; failed backups are reported.
+- **Turkish and English interface:** Each user picks the interface language; dates, decimal separators and CSV format follow the language.
+- **Users and roles:** Administrator, Operator and Viewer roles; audit log.
+- **Configuration from the dashboard:** SMTP, server address, time zone, data sources and all operational settings are changed in the dashboard. Changes apply without a restart.
+- **Export:** Server and vulnerability lists can be downloaded as Excel-compatible CSV files.
+
+### Supported distributions
+
+| Distribution | Inventory and updates | Vulnerability scanning |
+|---|---|---|
+| Debian, Ubuntu | apt | ✓ |
+| AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
+| SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
+| Alpine Linux | apk | ✓ |
+| CentOS, Oracle Linux, Fedora and other distributions (using dnf, yum, zypper, apt or apk) | ✓ | — |
+
+The agent runs on amd64 and arm64. It requires systemd or OpenRC (Alpine) as the service manager. Physical, virtual (VMware, Hyper-V, KVM/Proxmox) and cloud servers are all supported.
+
+## Screenshots
+
+The screenshots show the Turkish interface; the English interface has the same layout. They were taken with six test servers running Ubuntu, Debian, Rocky Linux, AlmaLinux and Alpine. The vulnerabilities are real data from OSV.dev.
+
+**Server inventory:** All servers with their vulnerabilities by severity, pending updates and agent status. Bulk updates can be started on selected servers.
+
+![Server inventory](docs/images/servers.png)
+
+**Server details:** The server's vulnerabilities with CVSS score, affected package, installed and fixed version. Security updates, all updates and reboots are started with one click.
+
+![Server details](docs/images/server.png)
+
+**Vulnerabilities:** All vulnerabilities found across the fleet, filterable by severity, exploitation and fix availability.
+
+![Vulnerabilities](docs/images/vulnerabilities.png)
+
+**Vulnerability details:** The original (untranslated) description, CVSS vector, affected servers and status.
+
+![Vulnerability details](docs/images/vulnerability.png)
+
+**Update job:** The agent sends the command output and verifies after the job that the packages were really updated.
+
+![Update job](docs/images/job.png)
+
+**Scheduled updates:** Maintenance window with days, time, duration and target servers (all, an operating system, a group or selected servers).
+
+![Scheduled update](docs/images/schedule.png)
+
+**Agent installation:** Pick the distribution and the install command is built for it (curl or wget, root or sudo).
+
+![Agents](docs/images/agents.png)
+
+**Dark theme:** The dashboard follows the operating system's light or dark theme setting.
+
+![Dashboard, dark theme](docs/images/dashboard-dark.png)
+
+## How it works
+
+```
+ Managed servers                         Central server (Docker)                 External sources
+┌──────────────────────┐   HTTPS   ┌──────────────────────────────┐   HTTPS   ┌──────────────┐
+│ netio-patchman-agent │ ────────▶ │ netio.patchman               │ ────────▶ │ api.osv.dev  │
+│  inventory, jobs     │ (outbound)│  dashboard + API + SQLite    │           │ CISA KEV     │
+└──────────────────────┘           └──────────────────────────────┘           └──────────────┘
+                                                 ▲
+                                     Browser ────┘  (dashboard)
+```
+
+1. The agent connects to the central server at regular intervals. It reports installed packages and pending updates, and picks up a job if one is queued.
+2. The central server matches package versions against the distributions' security data on OSV.dev and shows the findings in the dashboard.
+3. Update jobs from the dashboard are handed to the agent on its next connection. The agent runs them with fixed package manager commands and reports the result.
+
+No inbound ports need to be opened on managed servers.
+
+## Installation (Docker)
+
+### Requirements
+
+- A Linux server with Docker Engine 24 or later and Docker Compose v2.24 or later.
+- `git`.
+- **Internet access:** The first build downloads Docker images and Go modules. Vulnerability data also requires HTTPS access to `api.osv.dev` and `www.cisa.gov`. For environments without internet access, see [docs/kurulum.md](docs/kurulum.md#8-internet-erişimi-olmayan-ortamlar) (Turkish).
+- **Recommended resources:** up to 100 servers: 1 CPU core, 1 GB RAM and 5 GB disk.
+
+If Docker is not installed, you can install it with Docker's official script:
+
+```sh
+curl -fsSL https://get.docker.com | sudo sh
+```
+
+### 1. Download the repository
+
+```sh
+git clone https://github.com/alptekinsunnetci/netio.patchman.git
+cd netio.patchman
+```
+
+### 2. (Optional) Set the server address and language
+
+You can write the address that agents and users will use to reach the central server in the `.env` file. To make English the default language (for new users, emails, chat messages and logs), also set `PATCHMAN_LOCALE`:
+
+```sh
+cp .env.example .env
+nano .env        # PATCHMAN_BASE_URL=https://patchman.your-domain
+                 # PATCHMAN_LOCALE=en-US
+```
+
+If you skip this step, the address starts as `http://localhost:8080`. You can change it after installation under **Settings → Server configuration**. Make sure the address is correct before installing agents, because the install command uses it.
+
+### 3. Start
+
+```sh
+docker compose up -d --build
+```
+
+The first build takes a few minutes depending on your connection. Check the status:
+
+```sh
+docker compose ps                 # the STATUS column should show "healthy"
+docker compose logs -f server     # logs (Ctrl+C to exit)
+```
+
+### 4. Create the first administrator account
+
+Open `http://<server-address>:8080` in a browser. Because the database is empty, the **Initial Setup** page opens. Use the **English** link at the bottom of the page to switch the language, then create the administrator account. This page is only available while there are no users.
+
+### 5. Basic settings
+
+In the dashboard, under **Settings → Server configuration**:
+
+- **Server address:** The external address agents will use, for example `https://patchman.your-domain`.
+- **Email server (SMTP):** For email notifications. You can send a test email from the same page.
+
+Installation is complete. The next step is installing the agent on your servers.
+
+### HTTPS
+
+Agents and browsers should connect to the server over HTTPS. The recommended way is to put the server behind a reverse proxy such as nginx, Caddy or HAProxy. In that case, turn on **Trust the X-Forwarded-For and X-Forwarded-Proto headers of a reverse proxy** in the dashboard. For example configurations and for letting the server terminate TLS itself, see [docs/kurulum.md](docs/kurulum.md#3-tls-ve-ters-vekil) (Turkish).
+
+**Changing the port:** Set `PATCHMAN_PUBLISH_PORT=8899` in `.env` and run `docker compose up -d` again. If the reverse proxy runs on the same machine, use `PATCHMAN_PUBLISH_PORT=127.0.0.1:8899` so that the dashboard is not exposed over plain HTTP. Do not change the port with `PATCHMAN_HTTP_ADDR`; that setting is for installations without Docker and is ignored by Docker Compose.
+
+**Plesk:** Add the following to the domain's **Apache & nginx Settings → Additional nginx directives**. The regular expression form avoids a conflict with Plesk's own `location /` block:
+
+```nginx
+location ~ ^/ {
+    proxy_pass http://127.0.0.1:8899;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    client_max_body_size 64m;
+}
+```
+
+Then turn on the reverse proxy option in the dashboard (or set `PATCHMAN_TRUST_PROXY=true` in `.env`).
+
+## Installing the agent on servers
+
+1. Create an **enrollment token** on the **Agents** page. The token is shown only once. You can set a validity period and a use limit.
+2. Select the server's distribution on the page. The command is built for it: `wget` on Debian and Alpine, `curl` on the others. If you connect as root, leave **Run with sudo** unchecked (sudo is often not installed on CentOS, Debian and Alpine). When the dashboard is in English, the command includes `--locale en-US` so the agent's messages are in English too. Run the command on the server to be managed. Example (as root, RHEL/CentOS):
+
+   ```sh
+   curl -fsSL https://patchman.your-domain/downloads/install-agent.sh | \
+     sh -s -- --server-url https://patchman.your-domain --token <ENROLLMENT-TOKEN> --locale en-US
+   ```
+
+3. The server appears on the **Server Inventory** page within seconds and the first vulnerability scan starts automatically.
+
+The install script:
+
+- installs the agent as `/usr/local/bin/netio-patchman-agent`,
+- writes the configuration to `/etc/netio-patchman/agent.env`,
+- starts the service: `netio-patchman-agent.service` with systemd, `/etc/init.d/netio-patchman-agent` with OpenRC (Alpine).
+
+The output of the install script is in Turkish.
+
+To see the agent's status and logs:
+
+```sh
+systemctl status netio-patchman-agent
+journalctl -u netio-patchman-agent -f
+```
+
+For bulk deployment (Ansible etc.), offline installation, agent options and removal, see [docs/kurulum.md](docs/kurulum.md#4-ajan-kurulumu) (Turkish).
+
+## Updating, backup and removal
+
+### Moving to a new version
+
+```sh
+cd netio.patchman
+git pull
+docker compose up -d --build
+```
+
+- The database schema is updated automatically at startup; still, take a backup first.
+- The version is read from the `VERSION` file in the repository.
+- If **Settings → Agents → Update agents automatically** is on (the default), agents switch to the new version by themselves.
+
+### Backup and restore
+
+**Automatic backups** are on by default: the database is backed up every day at 02:30 to `/data/backups/` and the newest 7 backups are kept. The time, the number of backups to keep and the on/off switch are under **Settings → Automatic backup**. The same place has a **Back up now** button and download links. By default the backups live in the same Docker volume as the database; copy them elsewhere regularly or write them to a separate disk with `PATCHMAN_BACKUP_DIR` (see [docs/kurulum.md](docs/kurulum.md), section 5.1, Turkish).
+
+You can also take a consistent backup manually:
+
+```sh
+docker compose exec server netio-patchman-server backup -out /data/backup.db
+docker compose cp server:/data/backup.db ./backup-$(date +%Y%m%d).db
+```
+
+Restoring from a backup:
+
+```sh
+docker compose stop server
+docker compose cp ./backup-20261120.db server:/data/netio-patchman.db
+docker compose start server
+```
+
+The database is kept in the Docker volume `netio-patchman-data` (`/data/netio-patchman.db`). Backups also contain the SMTP password; protect them accordingly.
+
+### Resetting an administrator password
+
+```sh
+docker compose exec server netio-patchman-server reset-password -email admin@your-domain
+```
+
+The command generates a new password and prints it.
+
+The two-factor authentication of a user who lost their phone can be removed in the dashboard (**Users → user → Reset two-factor authentication**) or on the command line:
+
+```sh
+docker compose exec server netio-patchman-server reset-mfa -email admin@your-domain
+```
+
+### Removal or starting over
+
+```sh
+docker compose down        # stops the container, data is kept
+docker compose down -v     # deletes the container and the database (cannot be undone)
+```
+
+After `down -v`, `docker compose up -d` starts with an empty database at the **Initial Setup** step.
+
+## Configuration
+
+All configuration can be done in the dashboard:
+
+- **Settings:** Notification thresholds and recipients, agent connection intervals, automatic agent updates, scanning, retention, security (two-factor authentication, risk acceptance term) and automatic backups.
+- **Settings → Notification channels:** Slack, Microsoft Teams, Telegram and webhook channels.
+- **Settings → Server configuration:** Server address, reverse proxy, time zone, log level, SMTP and data sources (OSV, CISA KEV).
+
+The `PATCHMAN_`-prefixed variables in `.env` only provide the initial values; a value saved in the dashboard replaces them. Values marked "—" in the "Dashboard" column are needed when the server starts, so they can only be changed in `.env` and require a restart. All options are described in [.env.example](.env.example) (comments in Turkish).
+
+| Variable | Default | Description | Dashboard |
+|---|---|---|---|
+| `PATCHMAN_BASE_URL` | `http://localhost:8080` | External address used by the dashboard and agents | yes |
+| `PATCHMAN_PUBLISH_PORT` | `8080` | Port Docker publishes on the host; the `127.0.0.1:8899` form publishes on the local interface only | — |
+| `PATCHMAN_HTTP_ADDR` | `:8080` | Listen address for installations without Docker only; fixed at `:8080` in Docker Compose | — |
+| `PATCHMAN_TRUST_PROXY` | `false` | Take the client IP from the `X-Forwarded-For` header behind a reverse proxy | yes |
+| `PATCHMAN_TLS_CERT_FILE`, `PATCHMAN_TLS_KEY_FILE` | — | Certificate and key for letting the server terminate TLS itself | — |
+| `PATCHMAN_TIMEZONE` | `Europe/Istanbul` | Time zone in which dates and times are shown | yes |
+| `PATCHMAN_LOCALE` | `tr-TR` | Default language (`tr-TR` or `en-US`): interface of new users, emails and logs. Each user can choose their own interface language | — |
+| `PATCHMAN_BACKUP_DIR` | `/data/backups` | Directory for automatic backups | — |
+| `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API address (an internal mirror can be used) | yes |
+| `PATCHMAN_KEV_URL` | CISA KEV address | KEV catalog address; `off` turns it off | yes |
+| `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | Email server | yes |
+| `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP credentials | yes |
+| `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Sender name and address | yes |
+| `PATCHMAN_LOG_LEVEL`, `PATCHMAN_LOG_FORMAT` | `info`, `json` | Log level and format | level: yes, format: — |
+| `PATCHMAN_VERSION` | `VERSION` file | Server and agent version to build | — |
+
+If an environment variable has an invalid value, the server does not start and lists the errors in the default language.
+
+## Troubleshooting
+
+| Symptom | Check |
+|---|---|
+| The dashboard does not open | `docker compose ps` should show `0.0.0.0:<port>->8080/tcp` in the PORTS column. See errors with `docker compose logs server`. Is the `PATCHMAN_PUBLISH_PORT` port open in the firewall? |
+| The install command shows `localhost` | Change the server address on the **Server configuration** page to an address the agents can reach. |
+| The agent does not enroll | Does `curl -I https://patchman.your-domain/healthz` work from the agent's server? `journalctl -u netio-patchman-agent -n 50` |
+| Vulnerability scanning finds nothing | Can the central server reach `api.osv.dev`? Look for OSV errors in the logs. |
+| No emails arrive | Send a test email from the **Server configuration** page; the error is shown in the dashboard. |
+
+More information (in Turkish): [docs/kurulum.md](docs/kurulum.md) (installation and operation), [docs/kullanim.md](docs/kullanim.md) (using the dashboard).
+
+## Language and localization
+
+- The default language is Turkish (`tr-TR`). The interface can also be used in English (`en-US`): the **English** link on the sign-in page or **My Profile → Interface language**. The choice is saved for the user and applies on other devices too.
+- Emails, chat channel messages and system logs use the server's default language (`PATCHMAN_LOCALE`). The language of agent messages is set with `--locale en-US` when installing the agent; the dashboard adds this option to the install command when it is in English.
+- Dates are shown as `21.11.2026` in Turkish and `2026-11-21` in English. CSV files are separated by `;` in Turkish and `,` in English.
+- **Vulnerability data is never translated.** CVE IDs, official titles, descriptions, CVSS values, package names and vendor advisories are shown exactly as published by their source.
+- Times are stored in UTC and shown in the chosen time zone (default `Europe/Istanbul`).
+- Interface texts are in `internal/i18n/locales/`. A new language is added as a new file with the same keys; a test checks that every catalog has all keys and placeholders.
+- The documentation in `docs/` is in Turkish.
+
+## Security
+
+- Passwords are stored with PBKDF2-SHA256 (600,000 iterations). Sessions, enrollment tokens and agent credentials are stored in the database only as SHA-256 hashes.
+- All form actions are protected against CSRF. Failed sign-ins are rate-limited per IP and per account. Two-factor authentication (TOTP) is available and can be made mandatory.
+- The agent opens no ports and accepts no inbound connections. It only runs predefined package manager commands, without a shell; package names are validated on both sides.
+- To turn off remote updates completely on a server, set `PATCHMAN_REMOTE_UPDATES=false` in that server's `/etc/netio-patchman/agent.env`.
+- The dashboard is served with a strict Content-Security-Policy and uses no external resources (CDNs, fonts); it also works in networks without internet access.
+
+## Development
+
+Requirement: Go 1.26 or later.
+
+```sh
+go test ./...                                   # unit and end-to-end tests
+go vet ./...
+PATCHMAN_DATA_DIR=./data go run ./cmd/netio-patchman-server
+
+# Build the agent binaries into dist/agent/ in the server's distribution layout
+scripts/build-agent.sh                                    # Linux / macOS
+powershell -File scripts\build-agent.ps1                  # Windows
+
+# Live scan test against OSV.dev (requires internet access)
+go test -tags live -run Live -v ./internal/scanner/
+```
+
+Product requirements are in the [docs/spec/](docs/spec/) directory.
+
+## Disclaimer
+
+netio.patchman is provided "AS IS". No warranty of any kind is given, express or implied, including merchantability, fitness for a particular purpose, error-free or uninterrupted operation, and complete detection of vulnerabilities.
+
+**All risks and consequences of installing and using the software lie with the person or organization that installs and uses it.** To the fullest extent permitted by applicable law, the developer cannot be held liable for any direct or indirect damage, including:
+
+- Service outages, incompatibilities and data loss during or after package updates, service restarts or server reboots.
+- Failed, incomplete or unexpected update jobs and scheduled updates.
+- Vulnerabilities that are not detected, detected incorrectly or shown with a wrong severity. Security data comes from third-party sources (OSV.dev, CISA KEV, distribution advisories); its accuracy depends on those sources.
+- Misconfiguration of the software, the agents or the central server, leaving them open to unauthorized access, or misuse.
+
+Before using it:
+
+- Try the software in a non-production environment first.
+- Back up your servers and the netio.patchman database before updates.
+- Apply updates to critical servers in maintenance windows and in a controlled way.
+- Publish the central server only over HTTPS and only to trusted networks.
+
+By installing and using this software you accept these terms.
+
+## License
+
+Developer: **Alptekin Sünnetci**. Copyright © 2026 Alptekin Sünnetci.
+
+netio.patchman is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) with the **Commons Clause** condition. Full text: [LICENSE](LICENSE).
+
+- **Allowed:** Using the software free of charge (on your own infrastructure, including inside your organization), studying it, modifying it and distributing it free of charge.
+- **Not allowed:** Selling the software, or a product or service whose value derives entirely or substantially from it, to third parties. This includes sale, paid hosting and paid consulting/support services.
+- Copies you distribute must keep the LICENSE file and the copyright notice.
+
+Contact the developer for commercial use.
+
+The binding text of the license is the [LICENSE](LICENSE) file; this section is only a summary.

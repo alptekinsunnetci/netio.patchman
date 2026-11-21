@@ -2,13 +2,15 @@
 
 **Merkezi Linux Güvenlik Açığı ve Güncelleme Yönetimi**
 
+**Türkçe** · [English](README.en.md)
+
 netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket güncellemelerini tek bir panelden izlemenizi ve yönetmenizi sağlayan, kendi altyapınızda çalışan (self-hosted) bir platformdur.
 
 - Merkezi sunucu tek bir Docker konteyneridir. Gömülü SQLite veritabanı kullanır; ayrı bir veritabanı, kuyruk ya da önbellek servisi gerekmez.
 - Yönetilen her sunucuya küçük bir ajan kurulur. Ajan port açmaz; merkezi sunucuya kendisi bağlanır.
 - Arayüz Türkçe ve İngilizcedir; her kullanıcı kendi dilini seçer. E-postalar ve belgeler Türkçedir. CVE verileri kaynağındaki haliyle, çevrilmeden gösterilir.
 
-> **English:** netio.patchman is a self-hosted platform for centralized Linux vulnerability and update management. The web interface is available in English (choose *English* on the sign-in page or under *My Profile*); set `PATCHMAN_LOCALE=en-US` to make English the default for new users, emails and logs. The documentation below is in Turkish.
+> **English:** netio.patchman is a self-hosted platform for centralized Linux vulnerability and update management, with an English web interface. Read the English documentation in [README.en.md](README.en.md).
 
 > [!WARNING]
 > **Kullanım riski tamamen kullanıcıya aittir.** netio.patchman sunucularınızda paket güncelleyen, servisleri ve sunucuyu yeniden başlatan bir yazılımdır. "Olduğu gibi" sunulur ve hiçbir garanti verilmez. Kullanımdan doğabilecek veri kaybı, hizmet kesintisi, başarısız güncelleme, güvenlik açığı ve benzeri her türlü zarardan yazılımı kuran ve kullanan kişi ya da kurum sorumludur. Ayrıntılar: [Sorumluluk reddi](#sorumluluk-reddi).
