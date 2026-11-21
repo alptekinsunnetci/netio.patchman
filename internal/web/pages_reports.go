@@ -114,7 +114,7 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 		"From": from.Format("2006-01-02"), "To": to.AddDate(0, 0, -1).Format("2006-01-02"),
 		"FromLabel": s.f.Date(from), "ToLabel": s.f.Date(to.AddDate(0, 0, -1)),
 		"Groups": groups, "Group": group, "Hosts": hosts, "Online": online, "Reboot": reboot, "SecurityUpdates": secUpdates,
-		"Sev": sev, "KEV": kev, "Flow": flow, "MeanFixDays": days(flow.MeanFix), "KEVOpen": kevOpen,
+		"Sev": sev, "KEV": kev, "Flow": flow, "MeanFixDays": s.days(flow.MeanFix), "KEVOpen": kevOpen,
 		"Today": timeutil.Now().UTC().Format("2006-01-02"),
 		"Risks": risks, "RiskTotal": riskTotal, "Jobs": jobs, "JobStatuses": reportJobStatuses,
 		"GeneratedAt": timeutil.Now(),
@@ -135,11 +135,11 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 
 var reportJobStatuses = []string{"succeeded", "partial", "failed", "timed_out", "expired", "cancelled", "queued", "dispatched"}
 
-// days rounds a duration to days with one decimal and the Turkish decimal
-// comma ("" when zero).
-func days(d time.Duration) string {
+// days rounds a duration to days with one decimal and the locale's decimal
+// separator ("" when zero).
+func (s *Server) days(d time.Duration) string {
 	if d <= 0 {
 		return ""
 	}
-	return strings.Replace(strconv.FormatFloat(d.Hours()/24, 'f', 1, 64), ".", ",", 1)
+	return strings.Replace(strconv.FormatFloat(d.Hours()/24, 'f', 1, 64), ".", s.l.T("number.decimal"), 1)
 }

@@ -40,7 +40,7 @@
     for (var i = 0; i < boxes.length; i++) boxes[i].checked = e.target.checked;
   });
 
-  // Sections shown only for one radio choice: data-show-when="name=value".
+  // Sections shown only for some radio choices: data-show-when="name=a|b".
   // Without JS every section stays visible.
   function syncShowWhen() {
     var els = document.querySelectorAll("[data-show-when]");
@@ -48,7 +48,7 @@
       var rule = els[i].getAttribute("data-show-when").split("=");
       var form = els[i].closest("form");
       var checked = form && form.querySelector('input[name="' + rule[0] + '"]:checked');
-      els[i].hidden = !(checked && checked.value === rule[1]);
+      els[i].hidden = !(checked && rule[1].split("|").indexOf(checked.value) >= 0);
     }
   }
   document.addEventListener("change", function (e) {

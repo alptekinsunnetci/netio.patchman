@@ -25,6 +25,7 @@ import (
 	agentdist "netio.patchman/deploy/agent"
 	"netio.patchman/internal/agent"
 	"netio.patchman/internal/api"
+	"netio.patchman/internal/backup"
 	"netio.patchman/internal/config"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify"
@@ -121,6 +122,10 @@ type env struct {
 	client   *http.Client
 	updates  *updatecheck.Checker
 	latest   atomic.Value // VERSION served by the fake repository
+	backups  *backup.Runner
+	channels *notify.Dispatcher
+	telegram string // fake Telegram API base
+	hooks    *hooks // records webhook and Telegram requests
 }
 
 func newEnv(t *testing.T) *env { return newEnvWith(t, true) }
@@ -184,7 +189,12 @@ func newEnvWith(t *testing.T, capture bool) *env {
 		OnNewVersion: func(ctx context.Context, s updatecheck.Status) {
 			e.notifier.ServerUpdate(ctx, s.Current, s.Latest, s.ChangesURL())
 		}})
-	site, err := web.New(web.Options{Store: st, Localizer: l, Formatter: f, Logger: logger, Scanner: e.scan, Notifier: e.notifier, System: e.sys, API: apiSrv, Release: rel, Updates: e.updates})
+	e.backups = &backup.Runner{Store: st, Dir: t.TempDir(), Zone: f.Zone(), L: l, Logger: logger, OnFailure: e.notifier.BackupFailed}
+	e.hooks = newHooks(t)
+	e.telegram = e.hooks.srv.URL
+	e.channels = notify.NewDispatcher(notify.DispatcherOptions{Store: st, L: l, System: e.sys, Logger: logger, TelegramAPI: e.telegram, RetryDelays: []time.Duration{}})
+	site, err := web.New(web.Options{Store: st, Localizer: l, Formatter: f, Logger: logger, Scanner: e.scan, Notifier: e.notifier, System: e.sys, API: apiSrv, Release: rel, Updates: e.updates,
+		Bundle: i18n.MustLoad(), Backups: e.backups, Channels: e.channels})
 	if err != nil {
 		t.Fatal(err)
 	}

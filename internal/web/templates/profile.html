@@ -10,6 +10,19 @@
 </header>
 {{with $d.Notice}}<p class="alert alert--success" role="status">{{.}}</p>{{end}}
 
+{{if gt (len .Languages) 1}}
+<section class="panel panel--narrow" id="language">
+  <h2 class="panel__title">{{t "language.label"}}</h2>
+  <form class="form form--row" method="post" action="/profile/language">
+    {{template "csrf" $root}}
+    <label class="field field--grow"><span class="visually-hidden">{{t "language.label"}}</span>
+      <select class="field__input" name="locale">{{range .Languages}}<option value="{{.Locale}}"{{if .Current}} selected{{end}}>{{.Name}}</option>{{end}}</select></label>
+    <div class="field field--end"><button class="button" type="submit">{{t "common.save"}}</button></div>
+  </form>
+  <p class="field__hint">{{t "language.hint"}}</p>
+</section>
+{{end}}
+
 <section class="panel panel--narrow" id="mfa">
   <h2 class="panel__title">{{t "mfa.title"}}</h2>
   {{if $d.MissingMFA}}<p class="alert alert--warning">{{t "mfa.required_notice"}}</p>{{end}}

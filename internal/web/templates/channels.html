@@ -1,0 +1,82 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}{{$f := $d.Form}}
+<nav class="breadcrumb"><a href="/settings">{{t "nav.settings"}}</a> / <span>{{t "channels.title"}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "channels.title"}}</h1>
+    <p class="pagehead__sub">{{t "channels.subtitle"}}</p>
+  </div>
+</header>
+
+<section class="panel panel--flush">
+  {{if $d.Channels}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "channel.field.name"}}</th><th>{{t "channel.field.type"}}</th><th>{{t "channel.field.min_level"}}</th><th>{{t "channel.field.status"}}</th><th></th></tr></thead>
+    <tbody>
+    {{range $d.Channels}}
+    <tr>
+      <td><strong>{{.Name}}</strong><div class="cell-sub mono">{{channelTarget .}}</div></td>
+      <td>{{t (printf "channel.type.%s" .Type)}}</td>
+      <td>{{levelLabel .MinLevel}}</td>
+      <td>
+        {{if not .Enabled}}<span class="pill pill--muted">{{t "common.disabled"}}</span>
+        {{else if .Failing}}<span class="pill pill--failed">{{t "channel.status.failing"}}</span>
+        {{else if .LastSentAt.IsZero}}<span class="pill pill--muted">{{t "channel.status.unused"}}</span>
+        {{else}}<span class="pill pill--succeeded">{{t "channel.status.ok"}}</span>{{end}}
+        {{if not .LastSentAt.IsZero}}<div class="cell-sub">{{t "channel.last_sent" "time" (datetime .LastSentAt)}}</div>{{end}}
+        {{if .Failing}}<div class="cell-sub text-danger break">{{.LastError}} ({{datetime .LastErrorAt}})</div>{{end}}
+      </td>
+      <td>
+        <div class="button-row">
+          <form method="post" action="/settings/channels/{{.ID}}/test">{{template "csrf" $root}}<button class="button button--sm" type="submit">{{t "channel.test"}}</button></form>
+          <form method="post" action="/settings/channels/{{.ID}}/toggle">{{template "csrf" $root}}<button class="button button--sm button--ghost" type="submit">{{if .Enabled}}{{t "channel.disable"}}{{else}}{{t "channel.enable"}}{{end}}</button></form>
+          <form method="post" action="/settings/channels/{{.ID}}/delete" data-confirm="{{t "channel.delete_confirm" "name" .Name}}">{{template "csrf" $root}}<button class="button button--sm button--danger" type="submit">{{t "common.delete"}}</button></form>
+        </div>
+      </td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "channels.empty")}}{{end}}
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">{{t "channels.add"}}</h2>
+  <form class="form" method="post" action="/settings/channels">
+    {{template "csrf" $root}}
+    <div class="daypicker">
+      {{range $d.Types}}<label class="check-label"><input type="radio" name="type" value="{{.}}"{{if eq (index $f "type") .}} checked{{end}}> {{t (printf "channel.type.%s" .)}}</label>{{end}}
+    </div>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "channel.field.name"}}</span>
+        <input class="field__input" type="text" name="name" value="{{index $f "name"}}" maxlength="60" required placeholder="{{t "channel.field.name_placeholder"}}"></label>
+      <label class="field"><span class="field__label">{{t "channel.field.min_level"}}</span>
+        <select class="field__input" name="min_level">{{range $d.Levels}}<option value="{{.}}"{{if eq (index $f "min_level") .}} selected{{end}}>{{levelLabel .}}</option>{{end}}</select>
+        <span class="field__hint">{{t "channel.field.min_level_hint"}}</span></label>
+    </div>
+    <div data-show-when="type=slack|teams|webhook">
+      <label class="field"><span class="field__label">{{t "channel.field.url"}}</span>
+        <input class="field__input mono" type="url" name="url" autocomplete="off" placeholder="https://…"></label>
+      {{range list "slack" "teams" "webhook"}}<p class="field__hint" data-show-when="type={{.}}">{{t (printf "channel.help.%s" .)}}</p>{{end}}
+    </div>
+    <div data-show-when="type=webhook">
+      <label class="field"><span class="field__label">{{t "channel.field.secret"}}</span>
+        <input class="field__input mono" type="text" name="secret" maxlength="200" autocomplete="off">
+        <span class="field__hint">{{t "channel.help.secret"}}</span></label>
+    </div>
+    <div data-show-when="type=telegram" class="form-grid">
+      <label class="field"><span class="field__label">{{t "channel.field.bot_token"}}</span>
+        <input class="field__input mono" type="text" name="bot_token" autocomplete="off" placeholder="123456789:AA…"></label>
+      <label class="field"><span class="field__label">{{t "channel.field.chat_id"}}</span>
+        <input class="field__input mono" type="text" name="chat_id" value="{{index $f "chat_id"}}" autocomplete="off" placeholder="-1001234567890"></label>
+      <p class="field__hint">{{t "channel.help.telegram"}}</p>
+    </div>
+    <p class="field__hint">{{t "channels.secret_note"}}</p>
+    <div><button class="button button--primary" type="submit">{{template "icon" "plus"}}{{t "channels.add"}}</button></div>
+  </form>
+</section>
+{{end}}

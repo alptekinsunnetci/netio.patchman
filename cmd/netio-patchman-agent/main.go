@@ -20,7 +20,10 @@ import (
 )
 
 func main() {
-	l := i18n.MustLoad().Localizer(i18n.DefaultLocale)
+	bundle := i18n.MustLoad()
+	// PATCHMAN_LOCALE from the environment chooses the language of flag help
+	// and config errors; the value in agent.env applies after the config loads.
+	l := bundle.Localizer(os.Getenv(brand.EnvPrefix + "LOCALE"))
 
 	fs := flag.NewFlagSet(brand.AgentBinary, flag.ExitOnError)
 	configPath := fs.String("config", agent.DefaultConfigPath, l.T("flag.config"))
@@ -50,6 +53,8 @@ func main() {
 		logger.Error(l.T("log.config.failed"), slog.String("path", *configPath), slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+	// Log and job messages (shown in the panel) use the configured language.
+	l = bundle.Localizer(cfg.Locale)
 
 	runner, err := agent.NewRunner(cfg, l, logger)
 	if err != nil {

@@ -141,8 +141,30 @@ func (s *Server) startSession(w http.ResponseWriter, r *http.Request, u store.Us
 	http.SetCookie(w, &http.Cookie{
 		Name: sessionCookie, Value: token, Path: "/", HttpOnly: true, Secure: s.secureCookie(r), SameSite: http.SameSiteLaxMode,
 	})
+	if _, ok := s.variants[u.Locale]; ok {
+		s.setLangCookie(w, r, u.Locale)
+	}
 	_ = s.st.TouchLogin(r.Context(), u.ID)
 	return nil
+}
+
+// profileLanguage saves the user's interface language for this browser and
+// for future sign-ins.
+func (s *Server) profileLanguage(w http.ResponseWriter, r *http.Request) {
+	loc := r.PostFormValue("locale")
+	v, ok := s.variants[loc]
+	if !ok {
+		s.redirect(w, r, "/profile", "error", s.l.T("validation.invalid_choice"))
+		return
+	}
+	if err := s.st.SetUserLocale(r.Context(), sessionFrom(r).user.ID, loc); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	s.audit(r, "user.language", sessionFrom(r).user.Email, "locale="+loc)
+	s.setLangCookie(w, r, loc)
+	// The confirmation is shown in the new language.
+	v.redirect(w, r, "/profile", "success", v.l.T("profile.language_saved"))
 }
 
 func safeNext(next string) string {
@@ -262,6 +284,10 @@ func (s *Server) setupSubmit(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.serverError(w, r, err)
 		return
+	}
+	if s.l.Locale() != s.def {
+		// Set up in a language other than the default: keep it for this user.
+		_ = s.st.SetUserLocale(r.Context(), id, s.l.Locale())
 	}
 	u, err := s.st.UserByID(r.Context(), id)
 	if err != nil {

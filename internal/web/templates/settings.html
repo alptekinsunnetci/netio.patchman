@@ -9,6 +9,7 @@
   </div>
   <div class="pagehead__actions">
     <a class="button" href="/settings/system">{{template "icon" "settings"}}{{t "settings.system_link"}}</a>
+    <a class="button" href="/settings/channels">{{template "icon" "bell"}}{{t "channels.title"}}</a>
     <a class="button" href="/settings/audit">{{template "icon" "list"}}{{t "audit.title"}}</a>
   </div>
 </header>
@@ -29,7 +30,7 @@
         <span class="field__hint">{{t "settings.email.digest_threshold_hint"}}</span></label>
     </div>
     <label class="field"><span class="field__label">{{t "settings.email.recipients"}}</span>
-      <textarea class="field__input field__input--area" name="email_recipients" rows="3" placeholder="guvenlik@your-domain">{{$d.Recipients}}</textarea>
+      <textarea class="field__input field__input--area" name="email_recipients" rows="3" placeholder="{{t "settings.email.recipients_placeholder"}}">{{$d.Recipients}}</textarea>
       <span class="field__hint">{{t "settings.email.recipients_hint"}}</span></label>
     <label class="check-label"><input type="checkbox" name="email_kev_always" value="1"{{if $c.EmailKEVAlways}} checked{{end}}> {{t "settings.email.kev_always"}}</label>
     <label class="check-label"><input type="checkbox" name="email_agent_offline" value="1"{{if $c.EmailAgentOffline}} checked{{end}}> {{t "settings.email.agent_offline"}}</label>
@@ -73,8 +74,44 @@
     </div>
   </section>
 
+  <section class="panel" id="backup">
+    <h2 class="panel__title">{{t "settings.backup.title"}}</h2>
+    <label class="check-label"><input type="checkbox" name="backup_enabled" value="1"{{if $c.BackupEnabled}} checked{{end}}> {{t "settings.backup.enabled"}}</label>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "settings.backup.time"}}</span>
+        <input class="field__input" type="text" name="backup_time" value="{{$d.Backup.Clock}}" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" inputmode="numeric" maxlength="5" required></label>
+      <label class="field"><span class="field__label">{{t "settings.backup.keep"}}</span>
+        <input class="field__input" type="number" name="backup_keep" min="1" max="365" value="{{$c.BackupKeep}}" required></label>
+    </div>
+    <p class="field__hint">{{t "settings.backup.hint"}}</p>
+  </section>
+
   <div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>
 </form>
+
+{{with $d.Backup}}{{if .Enabled}}
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "backup.list_title"}}</h2>
+    <form method="post" action="/settings/backups/run">{{template "csrf" $root}}<button class="button button--sm" type="submit">{{template "icon" "download"}}{{t "backup.run_now"}}</button></form>
+  </div>
+  <div class="panel__body">
+    <p class="muted">{{t "backup.dir" "dir" .Dir}} · {{if $c.BackupLastAt.IsZero}}{{t "backup.never"}}{{else}}{{t "backup.last" "time" (long $c.BackupLastAt)}}{{end}}</p>
+    {{if .Failing}}<p class="alert alert--error">{{t "backup.last_failed" "time" (datetime $c.BackupLastErrorAt) "error" $c.BackupLastError}}</p>{{end}}
+    {{with .ListError}}<p class="alert alert--error">{{.}}</p>{{end}}
+  </div>
+  {{if .Files}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "backup.file"}}</th><th>{{t "backup.created"}}</th><th class="num">{{t "backup.size"}}</th><th></th></tr></thead>
+    <tbody>
+    {{range .Files}}<tr><td class="mono">{{.Name}}</td><td>{{datetime .ModTime}}</td><td class="num">{{size .Size}}</td><td><a class="button button--sm" href="/settings/backups/{{.Name}}">{{t "backup.download"}}</a></td></tr>{{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "backup.none")}}{{end}}
+</section>
+{{end}}{{end}}
 
 <div class="grid-2">
   <section class="panel">

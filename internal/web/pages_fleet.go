@@ -841,15 +841,18 @@ func (s *Server) jobRetry(w http.ResponseWriter, r *http.Request) {
 
 // ---------- CSV exports ----------
 
-// csvWriter writes UTF-8 with BOM and ';' separators, which Excel with
-// Turkish regional settings opens correctly. Cells that a spreadsheet would
+// csvWriter writes UTF-8 with BOM and the locale's separator (';' for
+// Turkish Excel, ',' for English). Cells that a spreadsheet would
 // evaluate as formulas are prefixed with an apostrophe.
-func csvWriter(w http.ResponseWriter, filename string) *safeCSV {
+func (s *Server) csvWriter(w http.ResponseWriter, filename string) *safeCSV {
 	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	w.Header().Set("Content-Disposition", `attachment; filename="`+filename+`"`)
 	_, _ = w.Write([]byte("\xEF\xBB\xBF"))
 	cw := csv.NewWriter(w)
 	cw.Comma = ';'
+	if sep := []rune(s.l.T("csv.separator")); len(sep) == 1 {
+		cw.Comma = sep[0] // Turkish Excel expects ';', English ','
+	}
 	return &safeCSV{cw}
 }
 
@@ -865,7 +868,7 @@ func (c *safeCSV) Write(rec []string) error {
 }
 
 func (s *Server) serversCSV(w http.ResponseWriter, r *http.Request) {
-	cw := csvWriter(w, "netio-patchman-sunucular.csv")
+	cw := s.csvWriter(w, s.l.T("csv.file.servers"))
 	l := s.l
 	_ = cw.Write([]string{l.T("host.field.hostname"), l.T("host.field.os"), l.T("host.field.ip"), l.T("host.field.status"),
 		l.T("host.field.last_seen"), l.T("severity.critical"), l.T("severity.high"), l.T("severity.medium"), l.T("severity.low"),
@@ -906,7 +909,7 @@ func groupNames(gs []store.GroupRef) string {
 }
 
 func (s *Server) vulnerabilitiesCSV(w http.ResponseWriter, r *http.Request) {
-	cw := csvWriter(w, "netio-patchman-guvenlik-aciklari.csv")
+	cw := s.csvWriter(w, s.l.T("csv.file.vulnerabilities"))
 	l := s.l
 	_ = cw.Write([]string{l.T("vuln.field.cve_id"), l.T("vuln.field.title"), l.T("vuln.field.severity"), l.T("vuln.field.cvss_score"),
 		l.T("vuln.field.known_exploited"), l.T("host.field.hostname"), l.T("vuln.field.affected_package"), l.T("vuln.field.installed_version"),

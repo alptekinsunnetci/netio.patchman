@@ -185,6 +185,7 @@ Kayıt anahtarını süreli ve kullanım sınırlı oluşturup Ansible, Puppet v
 | `PATCHMAN_AUTO_UPDATE` | `true` | `false` ise ajan kendini otomatik olarak güncellemez (sürüm sabitleme) |
 | `PATCHMAN_REFRESH_PACKAGE_LISTS` | `true` | Paket listelerini en fazla 6 saatte bir yeniler (`apt-get update`, `zypper refresh`, `apk update`) |
 | `PATCHMAN_CA_FILE` | — | Ek CA sertifikası |
+| `PATCHMAN_LOCALE` | `tr-TR` | Ajan günlüklerinin ve panelde görünen iş mesajlarının dili (`tr-TR` veya `en-US`). Kurulumda `--locale en-US` ile yazılır |
 
 Değişiklikten sonra: `systemctl restart netio-patchman-agent.service` (Alpine: `rc-service netio-patchman-agent restart`)
 
@@ -214,6 +215,29 @@ Ardından panelde sunucunun **Sistem Bilgisi** sekmesinden sunucuyu kaldırın.
 
 ## 5. Yedekleme ve geri yükleme
 
+### 5.1 Otomatik yedekleme
+
+Sunucu, veritabanını her gün belirlenen saatte (varsayılan 02:30, `PATCHMAN_TIMEZONE` saatine göre) tutarlı bir kopya olarak yedekler ve en yeni N yedeği saklar (varsayılan 7). Ayarlar **Sistem Ayarları → Otomatik yedekleme** bölümündedir. Sunucu yedekleme saatinde kapalıysa yedek, açıldıktan sonraki ilk dakikada alınır.
+
+- Dosya adı: `netio-patchman-YYYYAAGG-SSDDss.db`. Her dosya doğrudan açılabilen bir SQLite veritabanıdır.
+- Varsayılan dizin `/data/backups` (Docker biriminin içi). Birim ya da disk kaybına karşı yedekleri ayrı bir diske yazdırın:
+
+  ```yaml
+  # docker-compose.override.yml
+  services:
+    server:
+      environment:
+        PATCHMAN_BACKUP_DIR: /backups
+      volumes:
+        - /mnt/yedek/netio-patchman:/backups
+  ```
+
+  Konteyner 65532 numaralı kullanıcıyla çalışır; dizinin bu kullanıcıya yazma izni olmalıdır: `chown 65532:65532 /mnt/yedek/netio-patchman`.
+- Panelde **Şimdi yedek al** ile anında yedek alınır ve listedeki **İndir** bağlantısıyla yedek indirilir. Yedekler parola özetlerini ve SMTP parolasını içerdiği için yalnızca yöneticiler indirebilir; her indirme denetim kayıtlarına yazılır.
+- Yedekleme başarısız olursa (disk dolu, izin yok) bildirim merkezine kritik bir uyarı düşer ve e-posta bildirimleri açıksa e-posta gönderilir.
+
+### 5.2 Elle yedekleme
+
 Tutarlı bir veritabanı yedeği, sunucu çalışırken alınabilir:
 
 ```sh
@@ -221,7 +245,9 @@ docker compose exec server netio-patchman-server backup -out /data/yedek-$(date 
 docker compose cp server:/data/yedek-$(date +%Y%m%d).db ./
 ```
 
-Geri yükleme:
+### 5.3 Geri yükleme
+
+Otomatik ya da elle alınmış bir yedekten:
 
 ```sh
 docker compose stop server
@@ -229,7 +255,7 @@ docker compose cp ./yedek-20261119.db server:/data/netio-patchman.db
 docker compose start server
 ```
 
-Yedekleri düzenli olarak (örneğin günlük cron göreviyle) alın ve sunucu dışında saklayın.
+Otomatik yedek konteynerin içindeyse önce dışarı alın: `docker compose cp server:/data/backups/netio-patchman-20261119-023000.db ./yedek-20261119.db`. Yedekleri sunucu dışında da saklayın.
 
 ## 6. Sürüm yükseltme
 

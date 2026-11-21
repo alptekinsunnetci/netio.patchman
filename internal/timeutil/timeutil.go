@@ -80,7 +80,7 @@ func (f Formatter) Date(t time.Time) string {
 	if t.IsZero() {
 		return f.l.T("common.empty")
 	}
-	return t.In(f.Location()).Format(DateLayout)
+	return t.In(f.Location()).Format(f.layout("format.date", DateLayout))
 }
 
 // DateTime renders "19.11.2026 14:30".
@@ -88,7 +88,15 @@ func (f Formatter) DateTime(t time.Time) string {
 	if t.IsZero() {
 		return f.l.T("common.empty")
 	}
-	return t.In(f.Location()).Format(DateTimeLayout)
+	return t.In(f.Location()).Format(f.layout("format.datetime", DateTimeLayout))
+}
+
+// layout returns the locale's Go time layout from the catalog (key), or def.
+func (f Formatter) layout(key, def string) string {
+	if v := f.l.T(key); v != key {
+		return v
+	}
+	return def
 }
 
 // Long renders "19 Kasım 2026 14:30" using localized month names.

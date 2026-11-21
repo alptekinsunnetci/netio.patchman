@@ -39,6 +39,7 @@ type Config struct {
 	SMTP         SMTP
 
 	DataDir      string
+	BackupDir    string // automatic backups (default <DataDir>/backups)
 	AgentDistDir string
 	TLSCertFile  string
 	TLSKeyFile   string
@@ -140,6 +141,7 @@ func Load(b *i18n.Bundle, getenv func(string) string) (Config, error) {
 	}
 
 	cfg.DataDir = env("DATA_DIR", "/var/lib/netio-patchman")
+	cfg.BackupDir = env("BACKUP_DIR", filepath.Join(cfg.DataDir, "backups"))
 	cfg.AgentDistDir = env("AGENT_DIST_DIR", "/usr/share/netio-patchman/agent")
 	cfg.TLSCertFile = env("TLS_CERT_FILE", "")
 	cfg.TLSKeyFile = env("TLS_KEY_FILE", "")

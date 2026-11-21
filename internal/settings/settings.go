@@ -33,6 +33,12 @@ const (
 	KeyKEVUpdatedAt         = "kev.updated_at"
 	KeyAuthRequireMFA       = "auth.require_mfa"
 	KeyRiskMaxDays          = "risk.max_days"
+	KeyBackupEnabled        = "backup.enabled"
+	KeyBackupMinute         = "backup.minute"
+	KeyBackupKeep           = "backup.keep"
+	KeyBackupLastAt         = "backup.last_at"
+	KeyBackupLastError      = "backup.last_error"
+	KeyBackupLastErrorAt    = "backup.last_error_at"
 )
 
 // Values is a typed snapshot of all settings.
@@ -57,6 +63,14 @@ type Values struct {
 	AuthRequireMFA bool
 	// RiskMaxDays caps how long a risk can be accepted (0 = no limit).
 	RiskMaxDays int
+	// Automatic database backups: daily at BackupMinute (minutes after
+	// midnight, display zone), keeping the newest BackupKeep files.
+	BackupEnabled     bool
+	BackupMinute      int
+	BackupKeep        int
+	BackupLastAt      time.Time
+	BackupLastError   string
+	BackupLastErrorAt time.Time
 }
 
 // OfflineAfter is the duration after which an agent counts as offline.
@@ -84,6 +98,9 @@ func Defaults() Values {
 		ScanEnabled:          true,
 		RetentionDays:        90,
 		RiskMaxDays:          365,
+		BackupEnabled:        true,
+		BackupMinute:         2*60 + 30,
+		BackupKeep:           7,
 	}
 }
 
@@ -129,6 +146,12 @@ func FromMap(raw map[string]string) Values {
 	b(KeyAgentAutoUpdate, &v.AgentAutoUpdate)
 	b(KeyAuthRequireMFA, &v.AuthRequireMFA)
 	i(KeyRiskMaxDays, &v.RiskMaxDays, 0, 3650)
+	b(KeyBackupEnabled, &v.BackupEnabled)
+	i(KeyBackupMinute, &v.BackupMinute, 0, 24*60-1)
+	i(KeyBackupKeep, &v.BackupKeep, 1, 365)
+	t(KeyBackupLastAt, &v.BackupLastAt)
+	t(KeyBackupLastErrorAt, &v.BackupLastErrorAt)
+	v.BackupLastError = raw[KeyBackupLastError]
 	i(KeyEmailDigestThreshold, &v.EmailDigestThreshold, 1, 1000)
 	i(KeyAgentOfflineMinutes, &v.AgentOfflineMinutes, 2, 10080)
 	i(KeyAgentCheckinSeconds, &v.AgentCheckinSeconds, 15, 3600)

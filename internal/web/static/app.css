@@ -208,6 +208,8 @@ code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
 .panel__link { font-size: 13px; }
 .panel__foot { padding: 12px 16px; border-top: 1px solid var(--border); }
 .panel__note { padding: 10px 16px; color: var(--text-muted); border-bottom: 1px solid var(--border); font-size: 13px; }
+.panel__body { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--border); }
+.panel__body > p { margin: 0; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .grid-2--wide-left { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
 
@@ -424,6 +426,7 @@ select.field__input { padding-right: 28px; }
 .secret { font-family: var(--font-mono); font-size: 18px; letter-spacing: 0.08em; word-break: break-all; }
 .codes { display: grid; grid-template-columns: repeat(2, max-content); gap: 6px 24px; padding: 12px 16px; margin: 8px 0; border: 1px dashed var(--border-strong); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 15px; }
 .auth__hint { color: var(--text-muted); font-size: 13px; margin: 0; }
+.auth__langs { margin: 16px 0 0; text-align: center; font-size: 13px; color: var(--text-muted); }
 .plain-list.steps { list-style: decimal; padding-left: 20px; }
 .plain-list.steps > li { margin-bottom: 8px; }
 

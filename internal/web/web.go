@@ -23,6 +23,7 @@ import (
 
 	"netio.patchman/internal/api"
 	"netio.patchman/internal/auth"
+	"netio.patchman/internal/backup"
 	"netio.patchman/internal/brand"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify"
@@ -56,16 +57,30 @@ type Options struct {
 	Release release.Release
 	// Updates checks for new product versions (optional).
 	Updates *updatecheck.Checker
+	// Bundle offers every catalog as an interface language (optional; without
+	// it the dashboard only uses Localizer).
+	Bundle *i18n.Bundle
+	// Backups takes and lists automatic database backups (optional).
+	Backups *backup.Runner
+	// Channels sends notifications to chat and webhook channels (optional).
+	Channels *notify.Dispatcher
 }
 
-// Server is the dashboard.
+// Server is the dashboard in one language. New returns the default-language
+// Server; it keeps one Server per available locale (same store, shared state)
+// and Handler serves each request in the language the user picked.
 type Server struct {
-	o       Options
-	st      *store.Store
-	l       i18n.Localizer
-	f       timeutil.Formatter
-	logger  *slog.Logger
-	pages   map[string]*template.Template
+	o      Options
+	st     *store.Store
+	l      i18n.Localizer
+	f      timeutil.Formatter
+	logger *slog.Logger
+	pages  map[string]*template.Template
+	*shared
+}
+
+// shared is the state common to every language variant.
+type shared struct {
 	limiter *auth.Limiter
 	// offlineSec caches the agent offline threshold (seconds).
 	offlineSec atomic.Int64
@@ -73,6 +88,10 @@ type Server struct {
 	requireMFA atomic.Bool
 	// mfa holds pending second-step sign-ins.
 	mfa mfaChallenges
+	// variants maps a locale to its Server; def is the server's default locale.
+	variants map[string]*Server
+	locales  []string
+	def      string
 }
 
 func (s *Server) mfaRequired() bool { return s.requireMFA.Load() }
@@ -101,23 +120,91 @@ var navigation = []navItem{
 var pageNames = []string{
 	"login", "loginmfa", "setup", "error", "dashboard", "servers", "server", "vulnerabilities", "vulnerability",
 	"packages", "package", "jobs", "job", "schedules", "schedule", "agents", "notifications", "users", "user", "profile", "settings", "audit", "system",
-	"groups", "group", "report",
+	"groups", "group", "report", "channels",
 }
 
-// New parses templates and returns a Server.
+// New parses templates and returns the Server for the default language
+// (o.Localizer). With o.Bundle set, every other catalog gets its own variant.
 func New(o Options) (*Server, error) {
-	s := &Server{o: o, st: o.Store, l: o.Localizer, f: o.Formatter, logger: o.Logger,
-		pages: map[string]*template.Template{}, limiter: auth.NewLimiter(8, 15*time.Minute)}
-	for _, page := range pageNames {
-		t, err := template.New("").Funcs(s.funcs()).ParseFS(assets,
-			"templates/base.html", "templates/shell.html", "templates/"+page+".html")
-		if err != nil {
-			return nil, fmt.Errorf("web: parse %s: %w", page, err)
+	sh := &shared{limiter: auth.NewLimiter(8, 15*time.Minute), variants: map[string]*Server{}, def: o.Localizer.Locale()}
+	locales := []i18n.Localizer{o.Localizer}
+	if o.Bundle != nil {
+		for _, loc := range o.Bundle.Locales() {
+			if loc != sh.def {
+				locales = append(locales, o.Bundle.Localizer(loc))
+			}
 		}
-		s.pages[page] = t
 	}
-	s.reloadSettingsCache(context.Background())
-	return s, nil
+	var root *Server
+	for i, l := range locales {
+		f := o.Formatter
+		if i > 0 {
+			f = timeutil.NewZoneFormatter(o.Formatter.Zone(), l)
+		}
+		s := &Server{o: o, st: o.Store, l: l, f: f, logger: o.Logger, pages: map[string]*template.Template{}, shared: sh}
+		for _, page := range pageNames {
+			t, err := template.New("").Funcs(s.funcs()).ParseFS(assets,
+				"templates/base.html", "templates/shell.html", "templates/"+page+".html")
+			if err != nil {
+				return nil, fmt.Errorf("web: parse %s (%s): %w", page, l.Locale(), err)
+			}
+			s.pages[page] = t
+		}
+		sh.variants[l.Locale()] = s
+		sh.locales = append(sh.locales, l.Locale())
+		if i == 0 {
+			root = s
+		}
+	}
+	root.reloadSettingsCache(context.Background())
+	return root, nil
+}
+
+const langCookie = "np_lang"
+
+// variant returns the Server for the request's language: the np_lang cookie
+// if it names an available locale, otherwise the default.
+func (s *Server) variant(r *http.Request) *Server {
+	if c, err := r.Cookie(langCookie); err == nil {
+		if v, ok := s.variants[c.Value]; ok {
+			return v
+		}
+	}
+	return s.variants[s.def]
+}
+
+func (s *Server) setLangCookie(w http.ResponseWriter, r *http.Request, locale string) {
+	http.SetCookie(w, &http.Cookie{Name: langCookie, Value: locale, Path: "/", MaxAge: 365 * 24 * 3600,
+		HttpOnly: true, Secure: s.secureCookie(r), SameSite: http.SameSiteLaxMode})
+}
+
+// langSwitch sets the interface language for this browser (GET /lang?to=en-US).
+// Signed-in users keep their saved preference for new sessions on the profile page.
+func (s *Server) langSwitch(w http.ResponseWriter, r *http.Request) {
+	to := r.URL.Query().Get("to")
+	if _, ok := s.variants[to]; ok {
+		s.setLangCookie(w, r, to)
+	}
+	next := r.URL.Query().Get("next")
+	if !strings.HasPrefix(next, "/") || strings.HasPrefix(next, "//") || strings.HasPrefix(next, "/\\") {
+		next = "/dashboard"
+	}
+	http.Redirect(w, r, next, http.StatusFound)
+}
+
+// languageOption is one entry of a language picker.
+type languageOption struct {
+	Locale, Name string
+	Current      bool
+}
+
+// languages lists the available interface languages, each in its own language.
+func (s *Server) languages() []languageOption {
+	out := make([]languageOption, 0, len(s.locales))
+	for _, loc := range s.locales {
+		out = append(out, languageOption{Locale: loc, Name: s.variants[loc].l.T("language.name"), Current: loc == s.l.Locale()})
+	}
+	return out
 }
 
 func (s *Server) sys() settings.System { return s.o.System.Get() }
@@ -194,9 +281,12 @@ func (s *Server) funcs() template.FuncMap {
 		"agentOutdated": func(h store.Host) bool {
 			return s.o.Release.Outdated(h.AgentVersion, h.Arch)
 		},
-		"agentRelease": func() string { return s.o.Release.Version },
-		"virt":         s.virtLabel,
-		"has":          func(m map[int64]bool, id int64) bool { return m[id] },
+		"agentRelease":  func() string { return s.o.Release.Version },
+		"virt":          s.virtLabel,
+		"size":          s.size,
+		"channelTarget": s.channelTarget,
+		"levelLabel":    func(level string) string { return l.T("level." + level) },
+		"has":           func(m map[int64]bool, id int64) bool { return m[id] },
 		"riskTerm": func(days int) string {
 			if days == 0 {
 				return l.T("vuln.risk_days.none")
@@ -251,22 +341,21 @@ func (s *Server) uptime(sec int64) string {
 	return s.l.T("time.uptime_hours", "h", hours, "m", int(d.Minutes())%60)
 }
 
-func (s *Server) notificationText(n store.Notification) string {
-	args := make([]any, 0, len(n.Params)*2)
-	for k, v := range n.Params {
-		switch k {
-		case "severity":
-			v = s.l.T(vuln.Severity(v).LabelKey())
-		case "job_type":
-			v = s.l.T("job.type." + v)
-		}
-		args = append(args, k, v)
+func (s *Server) notificationText(n store.Notification) string { return notify.Text(s.l, n) }
+
+// Handler returns the root handler: each request is served by the variant
+// for its language.
+func (s *Server) Handler() http.Handler {
+	handlers := make(map[string]http.Handler, len(s.variants))
+	for loc, v := range s.variants {
+		handlers[loc] = v.mux()
 	}
-	return s.l.T("notification."+n.Kind, args...)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handlers[s.variant(r).l.Locale()].ServeHTTP(w, r)
+	})
 }
 
-// Handler returns the root handler.
-func (s *Server) Handler() http.Handler {
+func (s *Server) mux() http.Handler {
 	mux := http.NewServeMux()
 	static, _ := fs.Sub(assets, "static")
 	fileServer := http.StripPrefix("/static/", http.FileServerFS(static))
@@ -281,6 +370,7 @@ func (s *Server) Handler() http.Handler {
 
 	mux.HandleFunc("GET /login", s.loginPage)
 	mux.HandleFunc("POST /login", s.loginSubmit)
+	mux.HandleFunc("GET /lang", s.langSwitch)
 	mux.HandleFunc("GET /login/mfa", s.loginMFAPage)
 	mux.HandleFunc("POST /login/mfa", s.loginMFASubmit)
 	mux.HandleFunc("POST /logout", s.logout)
@@ -352,6 +442,7 @@ func (s *Server) Handler() http.Handler {
 
 	mux.Handle("GET /profile", view(s.profile))
 	mux.Handle("POST /profile/password", view(s.profilePassword))
+	mux.Handle("POST /profile/language", view(s.profileLanguage))
 	mux.Handle("POST /profile/mfa/setup", view(s.profileMFASetup))
 	mux.Handle("POST /profile/mfa/enable", view(s.profileMFAEnable))
 	mux.Handle("POST /profile/mfa/disable", view(s.profileMFADisable))
@@ -367,6 +458,13 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("POST /settings/system", admin(s.systemSave))
 	mux.Handle("POST /settings/system/reset", admin(s.systemReset))
 	mux.Handle("POST /settings/system/update-check", admin(s.updateCheck))
+	mux.Handle("POST /settings/backups/run", admin(s.backupRun))
+	mux.Handle("GET /settings/backups/{name}", admin(s.backupDownload))
+	mux.Handle("GET /settings/channels", admin(s.channels))
+	mux.Handle("POST /settings/channels", admin(s.channelCreate))
+	mux.Handle("POST /settings/channels/{id}/test", admin(s.channelTest))
+	mux.Handle("POST /settings/channels/{id}/toggle", admin(s.channelToggle))
+	mux.Handle("POST /settings/channels/{id}/delete", admin(s.channelDelete))
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		s.errorPage(w, r, http.StatusNotFound, "error.not_found")
@@ -440,10 +538,15 @@ type pageData struct {
 	Data    any
 	// Update is set for administrators when a newer product version exists.
 	Update *updatecheck.Status
+	// Languages offers the interface languages (login and profile pages).
+	Languages []languageOption
+	// Path is the current request URI (for the language switch).
+	Path string
 }
 
 func (s *Server) page(r *http.Request, title, active string) pageData {
-	d := pageData{Product: brand.Name, Version: version.Version, Lang: s.l.Lang(), Title: title, Active: active, Nav: navigation}
+	d := pageData{Product: brand.Name, Version: version.Version, Lang: s.l.Lang(), Title: title, Active: active, Nav: navigation,
+		Languages: s.languages(), Path: r.URL.RequestURI()}
 	if sess := sessionFrom(r); sess != nil {
 		u := sess.user
 		d.User, d.CSRF = &u, sess.csrf

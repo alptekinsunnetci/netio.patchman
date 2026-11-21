@@ -9,8 +9,10 @@ import (
 	"time"
 
 	"netio.patchman/internal/auth"
+	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify"
 	"netio.patchman/internal/release"
+	"netio.patchman/internal/schedule"
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
@@ -73,12 +75,17 @@ var installTargets = []installTarget{
 	{ID: "alpine", Wget: true},
 }
 
-func installCommands(base, token string, wget bool) (asRoot, withSudo string) {
+// installCommands builds the install command; a non-default locale makes the
+// agent write its log and job messages in that language.
+func installCommands(base, token, locale string, wget bool) (asRoot, withSudo string) {
 	fetch := "curl -fsSL " + base + "/downloads/install-agent.sh"
 	if wget {
 		fetch = "wget -qO- " + base + "/downloads/install-agent.sh"
 	}
 	args := " -s -- --server-url " + base + " --token " + token
+	if locale != "" && locale != i18n.DefaultLocale {
+		args += " --locale " + locale
+	}
 	return fetch + " | sh" + args, fetch + " | sudo sh" + args
 }
 
@@ -86,7 +93,7 @@ func (s *Server) installCommand(id, token string) installPicker {
 	base := s.baseURL()
 	p := installPicker{ID: id}
 	for _, t := range installTargets {
-		t.AsRoot, t.WithSudo = installCommands(base, token, t.Wget)
+		t.AsRoot, t.WithSudo = installCommands(base, token, s.l.Locale(), t.Wget)
 		p.Targets = append(p.Targets, t)
 	}
 	return p
@@ -375,7 +382,7 @@ func (s *Server) settings(w http.ResponseWriter, r *http.Request) {
 	d := s.page(r, s.l.T("nav.settings"), "settings")
 	d.Data = map[string]any{
 		"Cfg": cfg, "Recipients": strings.Join(cfg.EmailRecipients, "\n"), "EmailConfigured": s.o.Notifier.EmailConfigured(),
-		"Scan": s.o.Scanner.Status(), "KEVCount": kevCount,
+		"Scan": s.o.Scanner.Status(), "KEVCount": kevCount, "Backup": s.backupData(cfg),
 		"Severities": []vuln.Severity{vuln.SeverityCritical, vuln.SeverityHigh, vuln.SeverityMedium, vuln.SeverityLow},
 	}
 	s.render(w, r, http.StatusOK, "settings", d)
@@ -398,6 +405,10 @@ func (s *Server) settingsSave(w http.ResponseWriter, r *http.Request) {
 		settings.KeyAgentAutoUpdate:   b("agent_auto_update"),
 		settings.KeyAuthRequireMFA:    b("auth_require_mfa"),
 	}
+	// Forms without the backup section (older pages, tests) keep the stored values.
+	if _, ok := r.PostForm["backup_time"]; ok {
+		kv[settings.KeyBackupEnabled] = b("backup_enabled")
+	}
 	var bad []string
 	for _, f := range []struct {
 		form, key, label string
@@ -409,8 +420,9 @@ func (s *Server) settingsSave(w http.ResponseWriter, r *http.Request) {
 		{"agent_report_minutes", settings.KeyAgentReportMinutes, "settings.agent.report_minutes", 5, 1440},
 		{"retention_days", settings.KeyRetentionDays, "settings.retention.days", 7, 3650},
 		{"risk_max_days", settings.KeyRiskMaxDays, "settings.risk.max_days", 0, 3650},
+		{"backup_keep", settings.KeyBackupKeep, "settings.backup.keep", 1, 365},
 	} {
-		if f.form == "risk_max_days" && strings.TrimSpace(r.PostFormValue(f.form)) == "" {
+		if (f.form == "risk_max_days" || f.form == "backup_keep") && strings.TrimSpace(r.PostFormValue(f.form)) == "" {
 			continue // not on the form (older page): keep the stored value
 		}
 		v, ok := intIn(f.form, f.lo, f.hi)
@@ -433,6 +445,13 @@ func (s *Server) settingsSave(w http.ResponseWriter, r *http.Request) {
 		bad = append(bad, s.l.T("validation.invalid_email"))
 	}
 	kv[settings.KeyEmailRecipients] = strings.Join(recipients, ",")
+	if raw, ok := r.PostForm["backup_time"]; ok {
+		if m, ok := schedule.ParseClock(strings.TrimSpace(raw[0])); ok {
+			kv[settings.KeyBackupMinute] = strconv.Itoa(m)
+		} else {
+			bad = append(bad, s.l.T("schedule.error.time"))
+		}
+	}
 	if len(bad) > 0 {
 		s.redirect(w, r, "/settings", "error", strings.Join(bad, " "))
 		return

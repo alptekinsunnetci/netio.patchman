@@ -6,7 +6,9 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 
 - Merkezi sunucu tek bir Docker konteyneridir. Gömülü SQLite veritabanı kullanır; ayrı bir veritabanı, kuyruk ya da önbellek servisi gerekmez.
 - Yönetilen her sunucuya küçük bir ajan kurulur. Ajan port açmaz; merkezi sunucuya kendisi bağlanır.
-- Arayüz, e-postalar ve belgeler Türkçedir. CVE verileri kaynağındaki haliyle, çevrilmeden gösterilir.
+- Arayüz Türkçe ve İngilizcedir; her kullanıcı kendi dilini seçer. E-postalar ve belgeler Türkçedir. CVE verileri kaynağındaki haliyle, çevrilmeden gösterilir.
+
+> **English:** netio.patchman is a self-hosted platform for centralized Linux vulnerability and update management. The web interface is available in English (choose *English* on the sign-in page or under *My Profile*); set `PATCHMAN_LOCALE=en-US` to make English the default for new users, emails and logs. The documentation below is in Turkish.
 
 > [!WARNING]
 > **Kullanım riski tamamen kullanıcıya aittir.** netio.patchman sunucularınızda paket güncelleyen, servisleri ve sunucuyu yeniden başlatan bir yazılımdır. "Olduğu gibi" sunulur ve hiçbir garanti verilmez. Kullanımdan doğabilecek veri kaybı, hizmet kesintisi, başarısız güncelleme, güvenlik açığı ve benzeri her türlü zarardan yazılımı kuran ve kullanan kişi ya da kurum sorumludur. Ayrıntılar: [Sorumluluk reddi](#sorumluluk-reddi).
@@ -45,7 +47,10 @@ netio.patchman, yüzlerce Linux sunucunun güvenlik açıklarını ve paket gün
 - **Eğilim grafikleri:** Sunucu her gün filonun durumunu kaydeder. Gösterge panelinde son 30 günün kritik ve yüksek açık sayısı, aktif olarak istismar edilen açıklar, açık bulgular ve bekleyen güvenlik güncellemeleri grafik ve tablo olarak gösterilir.
 - **Uyumluluk raporu:** Seçilen dönem ve grup için yazdırılabilir rapor (tarayıcıdan PDF olarak kaydedilebilir). Raporda özet sayılar, dönemde tespit edilen ve kapatılan bulgular, ortalama kapatma süresi, CISA son tarihi geçmiş KEV açıkları, sunucu durumu, kabul edilen riskler (kabul eden kişi ve bitiş tarihiyle) ve güncelleme işleri yer alır. ISO 27001 ve KVKK denetimlerinde kanıt olarak kullanılabilir.
 - **İki adımlı doğrulama:** Google Authenticator, Microsoft Authenticator gibi uygulamalarla TOTP kodu ve tek kullanımlık yedek kodlar. Yönetici, iki adımlı doğrulamayı tüm kullanıcılar için zorunlu kılabilir; kaybolan bir telefon için kullanıcının doğrulamasını sıfırlayabilir.
-- **Bildirimler:** Bildirim merkezi ve Türkçe e-posta bildirimleri: yeni açıklar, bağlantısı kesilen ajanlar, başarısız veya kısmen tamamlanan güncelleme işleri.
+- **Bildirimler:** Bildirim merkezi ve e-posta bildirimleri: yeni açıklar, bağlantısı kesilen ajanlar, başarısız veya kısmen tamamlanan güncelleme işleri.
+- **Slack, Microsoft Teams, Telegram ve webhook:** Bildirimler seviyeye göre (bilgi, uyarı, kritik) sohbet kanallarına ve HMAC-SHA256 imzalı JSON webhook ile kendi sistemlerinize (SIEM, olay yönetimi) de gönderilir.
+- **Otomatik yedekleme:** Veritabanı her gün belirlenen saatte yedeklenir, en yeni N yedek saklanır. Yedekler panelden indirilebilir; başarısız yedekleme bildirilir.
+- **Türkçe ve İngilizce arayüz:** Her kullanıcı arayüz dilini seçer; tarih, ondalık ayracı ve CSV biçimi dile uyar.
 - **Kullanıcılar ve yetkiler:** Yönetici, Operatör ve İzleyici rolleri; denetim kayıtları.
 - **Paneldense yapılandırma:** SMTP, sunucu adresi, saat dilimi, veri kaynakları ve tüm işletim ayarları panelden değiştirilir. Değişiklikler yeniden başlatma gerektirmez.
 - **Dışa aktarma:** Sunucu ve güvenlik açığı listeleri Excel uyumlu CSV olarak indirilebilir.
@@ -238,7 +243,9 @@ docker compose up -d --build
 
 ### Yedekleme ve geri yükleme
 
-Sunucu çalışırken tutarlı bir yedek alabilirsiniz:
+**Otomatik yedekleme** varsayılan olarak açıktır: veritabanı her gün 02:30'da `/data/backups/` dizinine yedeklenir ve en yeni 7 yedek saklanır. Saat, saklanacak yedek sayısı ve kapatma **Sistem Ayarları → Otomatik yedekleme** bölümündedir. Aynı yerde **Şimdi yedek al** düğmesi ve yedekleri indirme bağlantıları bulunur. Yedekler varsayılan olarak veritabanıyla aynı Docker biriminde durur; diskin kaybına karşı onları düzenli olarak başka bir yere kopyalayın ya da `PATCHMAN_BACKUP_DIR` ile ayrı bir diske yazdırın (bkz. [docs/kurulum.md](docs/kurulum.md)).
+
+Elle de tutarlı bir yedek alabilirsiniz:
 
 ```sh
 docker compose exec server netio-patchman-server backup -out /data/yedek.db
@@ -282,7 +289,8 @@ docker compose down -v     # konteyneri ve veritabanını siler (geri alınamaz)
 
 Yapılandırmanın tamamı yönetim panelinden yapılabilir:
 
-- **Sistem Ayarları:** Bildirim eşikleri ve alıcıları, ajan bağlantı aralıkları, otomatik ajan güncellemesi, tarama ve kayıt saklama süresi.
+- **Sistem Ayarları:** Bildirim eşikleri ve alıcıları, ajan bağlantı aralıkları, otomatik ajan güncellemesi, tarama, kayıt saklama süresi, güvenlik (iki adımlı doğrulama, risk kabulü süresi) ve otomatik yedekleme.
+- **Sistem Ayarları → Bildirim kanalları:** Slack, Microsoft Teams, Telegram ve webhook kanalları.
 - **Sistem Ayarları → Sunucu yapılandırması:** Sunucu adresi, ters vekil, saat dilimi, günlük seviyesi, SMTP ve veri kaynakları (OSV, CISA KEV).
 
 `.env` dosyasındaki `PATCHMAN_` önekli değişkenler yalnızca ilk değerleri verir; panelde kaydedilen değer bunların yerine geçer. Aşağıdaki tabloda "Panelden" sütununda "—" ile işaretli değerler sunucu başlarken gerektiği için yalnızca `.env` ile değiştirilebilir ve yeniden başlatma gerektirir. Tüm seçenekler açıklamalarıyla [.env.example](.env.example) dosyasındadır.
@@ -295,7 +303,8 @@ Yapılandırmanın tamamı yönetim panelinden yapılabilir:
 | `PATCHMAN_TRUST_PROXY` | `false` | Ters vekil arkasında istemci IP'sini `X-Forwarded-For` başlığından al | evet |
 | `PATCHMAN_TLS_CERT_FILE`, `PATCHMAN_TLS_KEY_FILE` | — | Sunucunun TLS'i kendisinin sonlandırması için sertifika ve anahtar | — |
 | `PATCHMAN_TIMEZONE` | `Europe/Istanbul` | Tarih ve saatlerin gösterildiği saat dilimi | evet |
-| `PATCHMAN_LOCALE` | `tr-TR` | Arayüz dili | — |
+| `PATCHMAN_LOCALE` | `tr-TR` | Varsayılan dil (`tr-TR` veya `en-US`): yeni kullanıcıların arayüzü, e-postalar ve günlükler. Her kullanıcı kendi arayüz dilini ayrıca seçebilir | — |
+| `PATCHMAN_BACKUP_DIR` | `/data/backups` | Otomatik yedeklerin yazıldığı dizin | — |
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API adresi (iç ağ yansısı kullanılabilir) | evet |
 | `PATCHMAN_KEV_URL` | CISA KEV adresi | KEV kataloğu adresi; `off` ile kapatılır | evet |
 | `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | E-posta sunucusu | evet |
@@ -320,7 +329,9 @@ Ayrıntılı bilgi: [docs/kurulum.md](docs/kurulum.md) (kurulum ve işletim), [d
 
 ## Dil ve yerelleştirme
 
-- Varsayılan dil Türkçedir (`tr-TR`).
+- Varsayılan dil Türkçedir (`tr-TR`). Arayüz İngilizce (`en-US`) olarak da kullanılabilir: giriş ekranındaki **English** bağlantısı veya **Profilim → Arayüz dili**. Seçim kullanıcıya kaydedilir ve diğer cihazlarda da geçerli olur.
+- E-postalar, sohbet kanalı mesajları ve sistem günlükleri sunucunun varsayılan dilindedir (`PATCHMAN_LOCALE`). Ajan mesajlarının dili ajan kurulurken `--locale en-US` ile seçilir; panel İngilizceyken kurulum komutu bu seçeneği kendisi ekler.
+- Tarihler Türkçede `21.11.2026`, İngilizcede `2026-11-21` biçimindedir. CSV dosyaları Türkçede `;`, İngilizcede `,` ile ayrılır.
 - **Güvenlik açığı verileri çevrilmez.** CVE numaraları, resmî başlıklar, açıklamalar, CVSS değerleri, paket adları ve üretici duyuruları kaynağında yayımlandığı haliyle gösterilir.
 - Zaman bilgileri UTC olarak saklanır ve seçilen saat diliminde (varsayılan `Europe/Istanbul`) gösterilir.
 - Arayüz metinleri `internal/i18n/locales/` altındadır. Yeni bir dil, aynı anahtarlarla yeni bir dosya eklenerek desteklenir.

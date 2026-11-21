@@ -301,8 +301,16 @@ type Notification struct {
 // AddNotification stores a notification.
 func (s *Store) AddNotification(ctx context.Context, level, kind string, params map[string]string, link string) error {
 	b, _ := json.Marshal(params)
-	_, err := s.db.ExecContext(ctx, `INSERT INTO notifications (created_at, level, kind, params, link) VALUES (?, ?, ?, ?, ?)`, now(), level, kind, string(b), link)
-	return err
+	at := now()
+	res, err := s.db.ExecContext(ctx, `INSERT INTO notifications (created_at, level, kind, params, link) VALUES (?, ?, ?, ?, ?)`, at, level, kind, string(b), link)
+	if err != nil {
+		return err
+	}
+	if fn := s.notifyHook.Load(); fn != nil {
+		id, _ := res.LastInsertId()
+		(*fn)(Notification{ID: id, CreatedAt: fromTS(at), Level: level, Kind: kind, Params: params, Link: link})
+	}
+	return nil
 }
 
 // ListNotifications returns notifications newest first.

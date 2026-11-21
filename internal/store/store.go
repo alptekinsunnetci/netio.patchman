@@ -16,6 +16,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	_ "modernc.org/sqlite" // pure Go SQLite driver
@@ -30,6 +31,8 @@ var ErrNotFound = errors.New("store: not found")
 // Store wraps the database handle.
 type Store struct {
 	db *sql.DB
+	// notifyHook is called after AddNotification (see OnNotification).
+	notifyHook atomic.Pointer[func(Notification)]
 }
 
 // Open opens (creating if needed) the SQLite database at path and applies

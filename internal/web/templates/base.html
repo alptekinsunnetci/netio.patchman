@@ -52,6 +52,8 @@
 </nav>
 {{else if .Total}}<p class="pager__info pager__info--single">{{t "pager.total" "total" .Total}}</p>{{end}}{{end}}
 
+{{define "langlinks"}}{{if gt (len .Languages) 1}}<p class="auth__langs" aria-label="{{t "language.label"}}">{{range $i, $l := .Languages}}{{if $i}} · {{end}}{{if $l.Current}}<strong>{{$l.Name}}</strong>{{else}}<a href="/lang?to={{$l.Locale}}&amp;next={{$.Path}}" hreflang="{{$l.Locale}}">{{$l.Name}}</a>{{end}}{{end}}</p>{{end}}{{end}}
+
 {{define "trends"}}
 <section class="panel" aria-labelledby="trend-title">
   <div class="panel__head">

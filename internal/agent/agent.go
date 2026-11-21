@@ -38,6 +38,8 @@ type Config struct {
 	AutoUpdate      bool
 	RefreshLists    bool
 	StateDir        string
+	// Locale is the language of agent logs and job messages (PATCHMAN_LOCALE).
+	Locale string
 }
 
 // LoadConfig reads KEY=VALUE pairs from path; environment variables override
@@ -78,6 +80,7 @@ func LoadConfig(l i18n.Localizer, path string, getenv func(string) string) (Conf
 		AutoUpdate:      boolean("AUTO_UPDATE", true),
 		RefreshLists:    boolean("REFRESH_PACKAGE_LISTS", true),
 		StateDir:        get("STATE_DIR", DefaultStateDir),
+		Locale:          get("LOCALE", i18n.DefaultLocale),
 	}
 	raw := get("SERVER_URL", "")
 	switch u, err := url.Parse(raw); {

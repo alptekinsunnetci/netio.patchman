@@ -393,6 +393,30 @@ func (n *Notifier) RisksExpired(ctx context.Context, risks []store.ExpiredRisk) 
 	}
 }
 
+// BackupFailed records a failed database backup and emails the recipients
+// when email notifications are on.
+func (n *Notifier) BackupFailed(ctx context.Context, err error) {
+	_ = n.st.AddNotification(ctx, store.LevelCritical, "backup_failed", map[string]string{"error": err.Error()}, "/settings#backup")
+	cfg, lerr := settings.Load(ctx, n.st)
+	if lerr != nil || !n.emailEnabled(cfg) {
+		return
+	}
+	to := n.recipients(ctx, cfg)
+	if len(to) == 0 {
+		return
+	}
+	m, merr := n.renderer.Notice(email.Notice{
+		Subject: n.l.T("email.backup_failed.subject"),
+		Heading: n.l.T("email.backup_failed.heading"),
+		Body:    n.l.T("email.backup_failed.body"),
+		Rows:    []email.NoticeRow{{Label: n.l.T("backup.error"), Value: err.Error(), Mono: true}},
+		LinkURL: n.baseURL() + "/settings#backup", LinkText: n.l.T("email.vuln.dashboard_link"),
+	}, to)
+	if merr == nil {
+		n.send(ctx, m)
+	}
+}
+
 // SendTest sends a test email to the given address synchronously.
 func (n *Notifier) SendTest(ctx context.Context, to string) error {
 	sender, from := n.mailer()

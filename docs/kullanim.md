@@ -208,6 +208,27 @@ E-postaların gönderileceği SMTP sunucusu **Sistem Ayarları → Sunucu yapıl
 [KRİTİK] CVE-2026-12345 - 12 sunucuda güvenlik açığı tespit edildi
 ```
 
+### Slack, Microsoft Teams, Telegram ve webhook
+
+**Sistem Ayarları → Bildirim kanalları** sayfasında (yalnızca yöneticiler) bildirim merkezine düşen her bildirim ayrıca sohbet kanallarına gönderilebilir. Her kanal için en düşük seviye seçilir: **Bilgi** her şeyi, **Uyarı** yalnızca uyarı ve kritik olanları, **Kritik** yalnızca kritik olanları (kritik açıklar, KEV açıkları, başarısız yedekleme) gönderir.
+
+| Tür | Gerekenler |
+|---|---|
+| Slack | Kanal için **Incoming Webhook** adresi (`https://hooks.slack.com/services/…`) |
+| Microsoft Teams | Kanalda **Workflows → "Post to a channel when a webhook request is received"** ile oluşturulan adres. Mesaj, "Panelde aç" düğmeli bir Adaptive Card olarak gelir. |
+| Telegram | @BotFather ile oluşturulan botun anahtarı ve sohbet kimliği (grup için `-100…`, kanal için `@kanal_adi`). Bot gruba eklenmiş olmalıdır. |
+| Webhook (JSON) | Kendi sisteminizin adresi. Her bildirim `kind`, `level`, `text`, `url`, `params`, `created_at` alanlarıyla POST edilir. İmza anahtarı girilirse gövdenin HMAC-SHA256 imzası `X-Netio-Patchman-Signature: sha256=<hex>` başlığında gönderilir. |
+
+Kanal eklendikten sonra **Deneme mesajı gönder** ile ayarı doğrulayın. Gönderim başarısız olursa iki kez yeniden denenir; hata, kanal listesinde "Hata" durumuyla ve mesajıyla gösterilir (bildirim merkezine ayrıca bildirim düşmez). Webhook adresleri ve bot anahtarları gizli bilgidir; kaydedildikten sonra tam olarak gösterilmez, değiştirmek için kanal silinip yeniden eklenir. Kanallar geçici olarak **Devre dışı bırak** ile durdurulabilir.
+
+## Otomatik yedekleme
+
+**Sistem Ayarları → Otomatik yedekleme** bölümünde günlük yedekleme saati ve saklanacak yedek sayısı ayarlanır (varsayılan her gün 02:30, 7 yedek). Aynı sayfanın altındaki **Yedekler** listesinde alınan yedekler, boyutları ve **İndir** bağlantıları bulunur; **Şimdi yedek al** anında bir yedek alır. Başarısız bir yedekleme bildirim merkezinde kritik uyarı olarak görünür ve e-posta ile bildirilir. Yedekleri sunucu dışında saklamak ve geri yükleme için bkz. [kurulum.md](kurulum.md), bölüm 5.
+
+## Arayüz dili
+
+Arayüz Türkçe ve İngilizce kullanılabilir. Giriş ekranının altındaki **Türkçe · English** bağlantılarıyla ya da **Profilim → Arayüz dili** ile seçilir. Profilde kaydedilen dil, başka bir cihazdan giriş yapıldığında da geçerlidir. Dil yalnızca sizin panelinizi etkiler: e-postalar, sohbet kanalı mesajları ve sistem günlükleri sunucunun varsayılan dilindedir. Bildirim merkezindeki bildirimler ise sizin seçtiğiniz dilde gösterilir. İngilizce arayüzde tarihler `2026-11-21`, CSV dosyaları `,` ayraçlıdır.
+
 ## Denetim Kayıtları
 
 **Sistem Ayarları → Denetim Kayıtları** sayfasında girişler, başarısız giriş denemeleri, kullanıcı ve ayar değişiklikleri, başlatılan işler, kayıt anahtarı işlemleri ve sunucu kaldırma işlemleri kullanıcı ve IP adresiyle birlikte listelenir. Grup değişiklikleri, iki adımlı doğrulamanın açılıp kapatılması, hatalı doğrulama kodları ve süresi dolan risk kabulleri de kaydedilir.

@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -21,6 +23,43 @@ func TestDefaultCatalogLoads(t *testing.T) {
 	for _, k := range b.Keys(DefaultLocale) {
 		if strings.TrimSpace(b.catalogs[DefaultLocale][k]) == "" {
 			t.Errorf("empty message for key %q", k)
+		}
+	}
+}
+
+// TestCatalogsMatch requires every catalog to have exactly the default
+// catalog's keys, with the same {placeholders} in each message.
+func TestCatalogsMatch(t *testing.T) {
+	b := MustLoad()
+	ph := regexp.MustCompile(`\{[a-z_]+\}`)
+	set := func(s string) string {
+		m := ph.FindAllString(s, -1)
+		sort.Strings(m)
+		return strings.Join(slices.Compact(m), ",")
+	}
+	def := b.catalogs[DefaultLocale]
+	if len(b.Locales()) < 2 {
+		t.Fatal("only one catalog")
+	}
+	for _, loc := range b.Locales() {
+		if loc == DefaultLocale {
+			continue
+		}
+		cat := b.catalogs[loc]
+		for k, v := range def {
+			other, ok := cat[k]
+			if !ok {
+				t.Errorf("%s: missing key %q", loc, k)
+				continue
+			}
+			if set(v) != set(other) {
+				t.Errorf("%s: %q placeholders %s, want %s", loc, k, set(other), set(v))
+			}
+		}
+		for k := range cat {
+			if _, ok := def[k]; !ok {
+				t.Errorf("%s: extra key %q", loc, k)
+			}
 		}
 	}
 }
@@ -113,7 +152,9 @@ func TestReferencedKeysExist(t *testing.T) {
 		"level.":      {"critical", "warning", "info"},
 		"nav.":        {"dashboard", "servers", "groups", "vulnerabilities", "packages", "reports", "jobs", "schedules", "agents", "notifications", "users", "settings"},
 		"notification.": {"vuln_detected", "vulns_detected", "agent_offline", "agent_online", "agent_enrolled", "agent_reenrolled", "job_succeeded", "job_failed", "job_partial", "scan_failed", "email_failed",
-			"schedule_ran", "schedule_expired", "schedule_missed", "server_update", "risk_expired"},
+			"schedule_ran", "schedule_expired", "schedule_missed", "server_update", "risk_expired", "backup_failed", "channel_test"},
+		"channel.type.": {"slack", "teams", "telegram", "webhook"},
+		"channel.help.": {"slack", "teams", "webhook", "secret", "telegram"},
 		"host.virt.": {"unknown", "none", "vmware", "microsoft", "kvm", "qemu", "oracle", "xen", "amazon", "google", "parallels", "bochs", "vm-other",
 			"docker", "podman", "lxc", "lxc-libvirt", "openvz", "systemd-nspawn", "wsl"},
 		"trend.metric.": {"critical_high", "kev", "open_findings", "security_updates"},
@@ -123,7 +164,8 @@ func TestReferencedKeysExist(t *testing.T) {
 			"host.rescan", "host.notes", "host.delete", "finding.status", "settings.update", "settings.test_email", "scan.trigger",
 			"settings.system_update", "settings.system_reset", "schedule.create", "schedule.update", "schedule.delete", "schedule.run", "schedule.run_now",
 			"group.create", "group.update", "group.delete", "group.add_hosts", "group.remove_hosts", "host.groups", "user.mfa_enabled", "user.mfa_disabled",
-			"user.mfa_recovery_codes", "user.mfa_reset", "auth.mfa_failed", "finding.risk_expired"},
+			"user.mfa_recovery_codes", "user.mfa_reset", "auth.mfa_failed", "finding.risk_expired",
+			"backup.run", "backup.download", "channel.create", "channel.update", "channel.delete", "channel.test", "user.language"},
 		"schedule.target.":   {"all", "os", "group", "hosts"},
 		"system.log_level.":  {"debug", "info", "warn", "error"},
 		"weekday.":           {"0", "1", "2", "3", "4", "5", "6"},

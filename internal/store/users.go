@@ -32,6 +32,14 @@ type User struct {
 	// TOTPSecret is the base32 key of an enabled authenticator ("" = off).
 	TOTPSecret    string
 	TOTPEnabledAt time.Time
+	// Locale is the user's interface language ("" = server default).
+	Locale string
+}
+
+// SetUserLocale stores the user's interface language.
+func (s *Store) SetUserLocale(ctx context.Context, id int64, locale string) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET locale = ? WHERE id = ?`, locale, id)
+	return err
 }
 
 // MFAEnabled reports whether the user signs in with a second factor.
@@ -43,13 +51,13 @@ func (u User) CanOperate() bool { return u.Role == RoleAdmin || u.Role == RoleOp
 // IsAdmin reports whether the user is an administrator.
 func (u User) IsAdmin() bool { return u.Role == RoleAdmin }
 
-const userCols = `id, email, name, password_hash, role, disabled, created_at, last_login_at, password_changed_at, totp_secret, totp_enabled_at`
+const userCols = `id, email, name, password_hash, role, disabled, created_at, last_login_at, password_changed_at, totp_secret, totp_enabled_at, locale`
 
 func scanUser(row interface{ Scan(...any) error }) (User, error) {
 	var u User
 	var disabled int
 	var created, lastLogin, changed, totpAt int64
-	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.PasswordHash, &u.Role, &disabled, &created, &lastLogin, &changed, &u.TOTPSecret, &totpAt)
+	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.PasswordHash, &u.Role, &disabled, &created, &lastLogin, &changed, &u.TOTPSecret, &totpAt, &u.Locale)
 	if errors.Is(err, sql.ErrNoRows) {
 		return u, ErrNotFound
 	}

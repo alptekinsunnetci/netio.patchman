@@ -29,6 +29,7 @@ BINARY_SRC=""
 CA_FILE=""
 REMOTE_UPDATES="true"
 AUTO_UPDATE="true"
+AGENT_LOCALE=""
 TMP_DIR=""
 
 bilgi() { printf '[netio.patchman] %s\n' "$*"; }
@@ -51,6 +52,7 @@ Seçenekler:
   --ca-file <dosya>          Sunucu sertifikasını doğrulamak için ek CA dosyası
   --disable-remote-updates   Panelden başlatılan paket güncelleme işlerini bu sunucuda kapat
   --disable-auto-update      Ajanın kendini otomatik güncellemesini bu sunucuda kapat
+  --locale <dil>             Ajan mesajlarının dili: tr-TR (varsayılan) veya en-US
   -h, --help                 Bu yardım metnini gösterir
 EOF
 }
@@ -63,6 +65,7 @@ while [ $# -gt 0 ]; do
 		--ca-file)    [ $# -ge 2 ] || hata "--ca-file için değer belirtilmedi."; CA_FILE="$2"; shift 2 ;;
 		--disable-remote-updates) REMOTE_UPDATES="false"; shift ;;
 		--disable-auto-update) AUTO_UPDATE="false"; shift ;;
+		--locale)     [ $# -ge 2 ] || hata "--locale için değer belirtilmedi."; AGENT_LOCALE="$2"; shift 2 ;;
 		-h|--help)    kullanim; exit 0 ;;
 		*)            kullanim >&2; hata "Bilinmeyen seçenek: $1" ;;
 	esac
@@ -80,6 +83,10 @@ else
 	hata "Desteklenen bir hizmet yöneticisi bulunamadı. Ajan systemd veya OpenRC (Alpine) kullanan dağıtımlarda çalışır."
 fi
 [ -n "$SERVER_URL" ]        || hata "Merkezi sunucu adresi (--server-url) zorunludur."
+case "$AGENT_LOCALE" in
+	''|[a-z][a-z]-[A-Z][A-Z]) ;;
+	*) hata "Geçersiz dil: $AGENT_LOCALE (örnek: tr-TR, en-US)" ;;
+esac
 case "$SERVER_URL" in
 	https://*) ;;
 	http://*) bilgi "UYARI: Sunucu adresi şifrelenmemiş HTTP kullanıyor. Üretim ortamında HTTPS kullanın." ;;
@@ -169,6 +176,7 @@ umask 077
 	if [ -n "$CA_FILE" ]; then echo "PATCHMAN_CA_FILE=${CONFIG_DIR}/ca.pem"; fi
 	echo "PATCHMAN_REMOTE_UPDATES=${REMOTE_UPDATES}"
 	echo "PATCHMAN_AUTO_UPDATE=${AUTO_UPDATE}"
+	if [ -n "$AGENT_LOCALE" ]; then echo "PATCHMAN_LOCALE=${AGENT_LOCALE}"; fi
 } > "$CONFIG_FILE"
 chmod 0600 "$CONFIG_FILE"
 
