@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -259,6 +260,10 @@ func (s *Server) checkin(w http.ResponseWriter, r *http.Request, hostID int64) {
 		s.internal(w, err)
 		return
 	}
+	if err := s.attachExcludes(r.Context(), hostID, cfg, jobs); err != nil {
+		s.internal(w, err)
+		return
+	}
 	writeJSON(w, protocol.CheckinResponse{
 		Jobs:                   jobs,
 		ReportRequested:        reportDue,
@@ -283,6 +288,15 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request, hostID int64) {
 	if err := s.o.Store.SaveReport(r.Context(), hostID, rep, ecosystemString(rep.Host)); err != nil {
 		s.internal(w, err)
 		return
+	}
+	// Schedules with the reboot option restart hosts that still need it
+	// after their update job, within the maintenance window.
+	if rep.RebootRequired && rep.Host.RemoteUpdates {
+		if id, err := s.o.Store.QueueScheduledReboot(r.Context(), hostID); err != nil {
+			s.o.Logger.Warn(s.o.L.T("log.api.failed"), slog.String("error", err.Error()))
+		} else if id != 0 {
+			s.o.Logger.Info(s.o.L.T("log.schedule.reboot_queued"), slog.Int64("host_id", hostID), slog.String("hostname", rep.Host.Hostname), slog.Int64("job_id", id))
+		}
 	}
 	s.o.Logger.Info(s.o.L.T("log.api.report"), slog.Int64("host_id", hostID), slog.String("hostname", rep.Host.Hostname),
 		slog.Int("packages", len(rep.Packages)), slog.Int("updates", len(rep.Updates)))
@@ -364,4 +378,36 @@ func (s *Server) asset(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	_, _ = w.Write(data)
+}
+
+// attachExcludes passes the host's effective exclusion list (fleet, groups,
+// host) to package jobs; the agent leaves matching packages alone.
+func (s *Server) attachExcludes(ctx context.Context, hostID int64, cfg settings.Values, jobs []protocol.Job) error {
+	var list []string
+	for i := range jobs {
+		switch jobs[i].Type {
+		case protocol.JobUpgradeAll, protocol.JobUpgradeSecurity, protocol.JobUpgradePackages:
+		default:
+			continue
+		}
+		if list == nil {
+			raw, err := s.o.Store.HostExcludes(ctx, hostID)
+			if err != nil {
+				return err
+			}
+			own, _ := protocol.ParseExcludePatterns(raw)
+			list, _ = protocol.ParseExcludePatterns(strings.Join(append(slices.Clone(cfg.UpdateExclude), own...), ","))
+			if list == nil {
+				list = []string{}
+			}
+		}
+		if len(list) == 0 {
+			return nil
+		}
+		if jobs[i].Params == nil {
+			jobs[i].Params = map[string]string{}
+		}
+		jobs[i].Params[protocol.ParamExclude] = strings.Join(list, ",")
+	}
+	return nil
 }

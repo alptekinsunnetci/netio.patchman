@@ -253,6 +253,13 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 				}
 			}()
 		}
+		if cur.EPSSURL != "" && old.EPSSURL != cur.EPSSURL {
+			go func() {
+				if err := scan.RefreshEPSS(ctx); err != nil {
+					logger.Warn(l.T("log.scan.epss_failed"), slog.String("error", err.Error()))
+				}
+			}()
+		}
 		if cur.UpdateURL != "" && old.UpdateURL != cur.UpdateURL {
 			go updates.Check(ctx)
 		}
@@ -347,6 +354,7 @@ func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched
 			logger.Info(l.T("log.risk.expired"), slog.Int("findings", len(risks)))
 			n.RisksExpired(ctx, risks)
 		}
+		n.SLAOverdue(ctx)
 		// The trend chart keeps one row per day with the latest state.
 		if now.Sub(lastSnapshot) >= 15*time.Minute {
 			if err := st.TakeSnapshot(ctx, now); err != nil {

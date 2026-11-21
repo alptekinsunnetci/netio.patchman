@@ -35,13 +35,16 @@ type Schedule struct {
 	HostIDs       []int64
 	GroupID       int64
 	GroupName     string
-	NextRunAt     time.Time
-	LastRunAt     time.Time
-	LastQueued    int
-	LastSkipped   int
-	CreatedBy     string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	// Reboot restarts hosts that report a pending reboot after their update
+	// job, while the maintenance window is still open (opt-in).
+	Reboot      bool
+	NextRunAt   time.Time
+	LastRunAt   time.Time
+	LastQueued  int
+	LastSkipped int
+	CreatedBy   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 // Window returns the maintenance window length.
@@ -49,22 +52,22 @@ func (sc Schedule) Window() time.Duration { return time.Duration(sc.WindowMinute
 
 const scheduleSelect = `SELECT sc.id, sc.name, sc.enabled, sc.job_type, sc.days, sc.minute, sc.window_minutes, sc.target, sc.os_id,
  sc.next_run_at, sc.last_run_at, sc.last_queued, sc.last_skipped, COALESCE(u.name, ''), sc.created_at, sc.updated_at,
- (SELECT COUNT(*) FROM schedule_hosts sh WHERE sh.schedule_id = sc.id), COALESCE(sc.group_id, 0), COALESCE(g.name, '')
+ (SELECT COUNT(*) FROM schedule_hosts sh WHERE sh.schedule_id = sc.id), COALESCE(sc.group_id, 0), COALESCE(g.name, ''), sc.reboot
  FROM schedules sc LEFT JOIN users u ON u.id = sc.created_by LEFT JOIN host_groups g ON g.id = sc.group_id`
 
 func scanSchedule(row interface{ Scan(...any) error }) (Schedule, int, error) {
 	var sc Schedule
-	var enabled, hostCount int
+	var enabled, hostCount, reboot int
 	var next, last, created, updated int64
 	err := row.Scan(&sc.ID, &sc.Name, &enabled, &sc.JobType, &sc.Days, &sc.Minute, &sc.WindowMinutes, &sc.Target, &sc.OSID,
-		&next, &last, &sc.LastQueued, &sc.LastSkipped, &sc.CreatedBy, &created, &updated, &hostCount, &sc.GroupID, &sc.GroupName)
+		&next, &last, &sc.LastQueued, &sc.LastSkipped, &sc.CreatedBy, &created, &updated, &hostCount, &sc.GroupID, &sc.GroupName, &reboot)
 	if errors.Is(err, sql.ErrNoRows) {
 		return sc, 0, ErrNotFound
 	}
 	if err != nil {
 		return sc, 0, err
 	}
-	sc.Enabled = enabled == 1
+	sc.Enabled, sc.Reboot = enabled == 1, reboot == 1
 	if sc.GroupID != 0 && sc.Target == TargetAll {
 		sc.Target = TargetGroup
 	}
@@ -148,9 +151,9 @@ func (s *Store) CreateSchedule(ctx context.Context, sc Schedule, userID int64) (
 	err := s.tx(ctx, func(tx *sql.Tx) error {
 		n := now()
 		target, group := dbTarget(sc)
-		res, err := tx.ExecContext(ctx, `INSERT INTO schedules (name, enabled, job_type, days, minute, window_minutes, target, os_id, next_run_at, created_by, created_at, updated_at, group_id)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			sc.Name, boolInt(sc.Enabled), sc.JobType, sc.Days, sc.Minute, sc.WindowMinutes, target, sc.OSID, toTS(sc.NextRunAt), nullID(userID), n, n, group)
+		res, err := tx.ExecContext(ctx, `INSERT INTO schedules (name, enabled, job_type, days, minute, window_minutes, target, os_id, next_run_at, created_by, created_at, updated_at, group_id, reboot)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			sc.Name, boolInt(sc.Enabled), sc.JobType, sc.Days, sc.Minute, sc.WindowMinutes, target, sc.OSID, toTS(sc.NextRunAt), nullID(userID), n, n, group, boolInt(sc.Reboot))
 		if err != nil {
 			return err
 		}
@@ -167,8 +170,8 @@ func (s *Store) UpdateSchedule(ctx context.Context, sc Schedule) error {
 	return s.tx(ctx, func(tx *sql.Tx) error {
 		target, group := dbTarget(sc)
 		res, err := tx.ExecContext(ctx, `UPDATE schedules SET name = ?, enabled = ?, job_type = ?, days = ?, minute = ?, window_minutes = ?, target = ?, os_id = ?,
-			next_run_at = ?, updated_at = ?, group_id = ? WHERE id = ?`,
-			sc.Name, boolInt(sc.Enabled), sc.JobType, sc.Days, sc.Minute, sc.WindowMinutes, target, sc.OSID, toTS(sc.NextRunAt), now(), group, sc.ID)
+			next_run_at = ?, updated_at = ?, group_id = ?, reboot = ? WHERE id = ?`,
+			sc.Name, boolInt(sc.Enabled), sc.JobType, sc.Days, sc.Minute, sc.WindowMinutes, target, sc.OSID, toTS(sc.NextRunAt), now(), group, boolInt(sc.Reboot), sc.ID)
 		if err != nil {
 			return err
 		}
@@ -380,4 +383,48 @@ func toTS(t time.Time) int64 {
 		return 0
 	}
 	return t.Unix()
+}
+
+// QueueScheduledReboot queues a reboot job for a host that reported a pending
+// reboot when its latest update job came from a schedule with the reboot
+// option, finished (succeeded or partial) and its maintenance window is still
+// open. It returns the new job ID, or 0 when nothing was queued. Each update
+// job leads to at most one reboot.
+func (s *Store) QueueScheduledReboot(ctx context.Context, hostID int64) (int64, error) {
+	var rebootID int64
+	err := s.tx(ctx, func(tx *sql.Tx) error {
+		var jobID, scheduleID, expires int64
+		err := tx.QueryRowContext(ctx, `SELECT j.id, j.schedule_id, j.expires_at FROM jobs j JOIN schedules sc ON sc.id = j.schedule_id
+			WHERE j.host_id = ? AND sc.reboot = 1 AND j.reboot_job_id = 0 AND j.type IN ('upgrade_security', 'upgrade_all')
+			AND j.status IN ('succeeded', 'partial') AND j.expires_at > ? ORDER BY j.finished_at DESC LIMIT 1`, hostID, now()).
+			Scan(&jobID, &scheduleID, &expires)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		// A reboot already waiting for this host is enough.
+		var pending int
+		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM jobs WHERE host_id = ? AND type = 'reboot' AND status IN ('queued', 'dispatched')`, hostID).Scan(&pending); err != nil {
+			return err
+		}
+		if pending == 0 {
+			res, err := tx.ExecContext(ctx, `INSERT INTO jobs (host_id, type, packages, params, status, created_by, created_at, schedule_id, expires_at)
+				VALUES (?, 'reboot', '[]', '{}', 'queued', NULL, ?, ?, ?)`, hostID, now(), scheduleID, expires)
+			if err != nil {
+				return err
+			}
+			if rebootID, err = res.LastInsertId(); err != nil {
+				return err
+			}
+		}
+		mark := rebootID
+		if mark == 0 {
+			mark = -1
+		}
+		_, err = tx.ExecContext(ctx, `UPDATE jobs SET reboot_job_id = ? WHERE id = ?`, mark, jobID)
+		return err
+	})
+	return rebootID, err
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 
@@ -221,7 +222,8 @@ func scanJob(row interface{ Scan(...any) error }, withOutput bool) (Job, error) 
 
 // JobByID returns a job including output.
 func (s *Store) JobByID(ctx context.Context, id int64) (Job, error) {
-	return scanJob(s.db.QueryRowContext(ctx, jobSelect+` WHERE j.id = ?`, id), true)
+	where, args := andScope(ctx, ` WHERE j.id = ?`, []any{id}, "j.host_id")
+	return scanJob(s.db.QueryRowContext(ctx, jobSelect+where, args...), true)
 }
 
 // JobFilter narrows job lists.
@@ -251,6 +253,7 @@ func (s *Store) ListJobs(ctx context.Context, f JobFilter, p Page) ([]Job, int, 
 	if len(conds) > 0 {
 		where = " WHERE " + strings.Join(conds, " AND ")
 	}
+	where, args = andScope(ctx, where, args, "j.host_id")
 	var total int
 	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM jobs j`+where, args...).Scan(&total); err != nil {
 		return nil, 0, err
@@ -302,7 +305,10 @@ type Notification struct {
 func (s *Store) AddNotification(ctx context.Context, level, kind string, params map[string]string, link string) error {
 	b, _ := json.Marshal(params)
 	at := now()
-	res, err := s.db.ExecContext(ctx, `INSERT INTO notifications (created_at, level, kind, params, link) VALUES (?, ?, ?, ?, ?)`, at, level, kind, string(b), link)
+	hostID, jobID := linkTarget(link)
+	res, err := s.db.ExecContext(ctx, `INSERT INTO notifications (created_at, level, kind, params, link, host_id)
+		VALUES (?, ?, ?, ?, ?, CASE WHEN ? > 0 THEN ? ELSE COALESCE((SELECT host_id FROM jobs WHERE id = ?), 0) END)`,
+		at, level, kind, string(b), link, hostID, hostID, jobID)
 	if err != nil {
 		return err
 	}
@@ -313,17 +319,48 @@ func (s *Store) AddNotification(ctx context.Context, level, kind string, params 
 	return nil
 }
 
+// linkTarget returns the host or job id of a notification link
+// ("/servers/12", "/jobs/40"), 0 when it names neither.
+func linkTarget(link string) (hostID, jobID int64) {
+	path, _, _ := strings.Cut(link, "?")
+	for _, prefix := range []string{"/servers/", "/jobs/"} {
+		if rest, ok := strings.CutPrefix(path, prefix); ok {
+			id, err := strconv.ParseInt(strings.SplitN(rest, "/", 2)[0], 10, 64)
+			if err != nil {
+				return 0, 0
+			}
+			if prefix == "/servers/" {
+				return id, 0
+			}
+			return 0, id
+		}
+	}
+	return 0, 0
+}
+
+// notificationScope limits notifications to the hosts of the scope of ctx;
+// limited users see only notifications about one of their hosts.
+func notificationScope(ctx context.Context, where string, args []any) (string, []any) {
+	if _, ok := ScopeFrom(ctx); !ok {
+		return where, args
+	}
+	where, args = andScope(ctx, where, args, "host_id")
+	return where + " AND host_id > 0", args
+}
+
 // ListNotifications returns notifications newest first.
 func (s *Store) ListNotifications(ctx context.Context, unreadOnly bool, p Page) ([]Notification, int, error) {
 	where := ""
 	if unreadOnly {
 		where = " WHERE read_at = 0"
 	}
+	var args []any
+	where, args = notificationScope(ctx, where, args)
 	var total int
-	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM notifications`+where).Scan(&total); err != nil {
+	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM notifications`+where, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.db.QueryContext(ctx, `SELECT id, created_at, level, kind, params, link, read_at FROM notifications`+where+` ORDER BY id DESC LIMIT ? OFFSET ?`, p.limit(), p.Offset())
+	rows, err := s.db.QueryContext(ctx, `SELECT id, created_at, level, kind, params, link, read_at FROM notifications`+where+` ORDER BY id DESC LIMIT ? OFFSET ?`, append(args, p.limit(), p.Offset())...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -346,17 +383,19 @@ func (s *Store) ListNotifications(ctx context.Context, unreadOnly bool, p Page) 
 // UnreadNotifications returns the unread count.
 func (s *Store) UnreadNotifications(ctx context.Context) (int, error) {
 	var n int
-	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM notifications WHERE read_at = 0`).Scan(&n)
+	where, args := notificationScope(ctx, " WHERE read_at = 0", nil)
+	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM notifications`+where, args...).Scan(&n)
 	return n, err
 }
 
 // MarkNotificationsRead marks one (id > 0) or all (id == 0) notifications read.
 func (s *Store) MarkNotificationsRead(ctx context.Context, id int64) error {
+	where, args := " WHERE read_at = 0", []any(nil)
 	if id > 0 {
-		_, err := s.db.ExecContext(ctx, `UPDATE notifications SET read_at = ? WHERE id = ? AND read_at = 0`, now(), id)
-		return err
+		where, args = " WHERE id = ? AND read_at = 0", []any{id}
 	}
-	_, err := s.db.ExecContext(ctx, `UPDATE notifications SET read_at = ? WHERE read_at = 0`, now())
+	where, args = notificationScope(ctx, where, args)
+	_, err := s.db.ExecContext(ctx, `UPDATE notifications SET read_at = ?`+where, append([]any{now()}, args...)...)
 	return err
 }
 
@@ -442,6 +481,7 @@ func (s *Store) ListFleetUpdates(ctx context.Context, search string, securityOnl
 	if len(conds) > 0 {
 		where = " WHERE " + strings.Join(conds, " AND ")
 	}
+	where, args = andScope(ctx, where, args, "host_id")
 	var total int
 	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(DISTINCT name) FROM host_updates`+where, args...).Scan(&total); err != nil {
 		return nil, 0, err
@@ -478,20 +518,23 @@ type HostRef struct {
 
 // HostsWithUpdate returns hosts that have a pending update for a package.
 func (s *Store) HostsWithUpdate(ctx context.Context, name string) ([]HostRef, error) {
-	return s.hostRefs(ctx, `SELECT h.id, h.hostname, h.remote_updates, u.current_version, u.available_version FROM host_updates u JOIN hosts h ON h.id = u.host_id
-		WHERE u.name = ? ORDER BY h.hostname`, name)
+	where, args := andScope(ctx, ` WHERE u.name = ?`, []any{name}, "h.id")
+	return s.hostRefs(ctx, `SELECT h.id, h.hostname, h.remote_updates, u.current_version, u.available_version FROM host_updates u JOIN hosts h ON h.id = u.host_id`+
+		where+` ORDER BY h.hostname`, args...)
 }
 
 // HostsWithPackage returns hosts that have a package installed.
 func (s *Store) HostsWithPackage(ctx context.Context, name string) ([]HostRef, error) {
-	return s.hostRefs(ctx, `SELECT h.id, h.hostname, h.remote_updates, p.version, p.arch FROM host_packages p JOIN hosts h ON h.id = p.host_id
-		WHERE p.name = ? ORDER BY h.hostname, p.arch`, name)
+	where, args := andScope(ctx, ` WHERE p.name = ?`, []any{name}, "h.id")
+	return s.hostRefs(ctx, `SELECT h.id, h.hostname, h.remote_updates, p.version, p.arch FROM host_packages p JOIN hosts h ON h.id = p.host_id`+
+		where+` ORDER BY h.hostname, p.arch`, args...)
 }
 
 // HostsWithSecurityUpdates returns hosts that have at least one pending security update.
 func (s *Store) HostsWithSecurityUpdates(ctx context.Context) ([]HostRef, error) {
-	return s.hostRefs(ctx, `SELECT h.id, h.hostname, h.remote_updates, '', COUNT(*) FROM host_updates u JOIN hosts h ON h.id = u.host_id
-		WHERE u.security = 1 GROUP BY h.id ORDER BY h.hostname`)
+	where, args := andScope(ctx, ` WHERE u.security = 1`, nil, "h.id")
+	return s.hostRefs(ctx, `SELECT h.id, h.hostname, h.remote_updates, '', COUNT(*) FROM host_updates u JOIN hosts h ON h.id = u.host_id`+
+		where+` GROUP BY h.id ORDER BY h.hostname`, args...)
 }
 
 func (s *Store) hostRefs(ctx context.Context, q string, args ...any) ([]HostRef, error) {
@@ -526,13 +569,13 @@ func (s *Store) SearchInstalled(ctx context.Context, search string, p Page) ([]I
 	if q == "" {
 		return nil, 0, nil
 	}
-	l := likeEscape(q)
+	where, args := andScope(ctx, ` WHERE name LIKE ? ESCAPE '\'`, []any{likeEscape(q)}, "host_id")
 	var total int
-	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM (SELECT 1 FROM host_packages WHERE name LIKE ? ESCAPE '\' GROUP BY name, version)`, l).Scan(&total); err != nil {
+	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM (SELECT 1 FROM host_packages`+where+` GROUP BY name, version)`, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.db.QueryContext(ctx, `SELECT name, version, COUNT(DISTINCT host_id) FROM host_packages WHERE name LIKE ? ESCAPE '\' GROUP BY name, version ORDER BY name, version LIMIT ? OFFSET ?`,
-		l, p.limit(), p.Offset())
+	rows, err := s.db.QueryContext(ctx, `SELECT name, version, COUNT(DISTINCT host_id) FROM host_packages`+where+` GROUP BY name, version ORDER BY name, version LIMIT ? OFFSET ?`,
+		append(args, p.limit(), p.Offset())...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -568,23 +611,26 @@ func (s *Store) FleetStats(ctx context.Context, offlineAfter time.Duration) (Fle
 	var st FleetStats
 	var oldest int64
 	cutoff := now() - int64(offlineAfter.Seconds())
+	hw, ha := andScope(ctx, "", nil, "id")
 	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*), COALESCE(SUM(last_seen_at >= ?), 0), COALESCE(SUM(last_seen_at > 0 AND last_seen_at < ?), 0),
 		COALESCE(SUM(last_seen_at = 0), 0), COALESCE(SUM(reboot_required), 0),
-		COALESCE(MIN(CASE WHEN reboot_required = 1 AND reboot_required_since > 0 THEN reboot_required_since END), 0) FROM hosts`, cutoff, cutoff).
+		COALESCE(MIN(CASE WHEN reboot_required = 1 AND reboot_required_since > 0 THEN reboot_required_since END), 0) FROM hosts`+hw, append([]any{cutoff, cutoff}, ha...)...).
 		Scan(&st.Hosts, &st.Online, &st.Offline, &st.NeverSeen, &st.RebootRequired, &oldest)
 	if err != nil {
 		return st, err
 	}
 	st.RebootOldest = fromTS(oldest)
+	uw, ua := andScope(ctx, "", nil, "host_id")
 	err = s.db.QueryRowContext(ctx, `SELECT COUNT(DISTINCT host_id), COUNT(*), COALESCE(SUM(security), 0),
-		COUNT(DISTINCT CASE WHEN security = 1 THEN host_id END) FROM host_updates`).
+		COUNT(DISTINCT CASE WHEN security = 1 THEN host_id END) FROM host_updates`+uw, ua...).
 		Scan(&st.HostsWithUpdates, &st.PendingUpdates, &st.SecurityUpdates, &st.HostsWithSecUpdates)
 	return st, err
 }
 
 // TopVulnerableHosts returns hosts with the most critical/high findings.
 func (s *Store) TopVulnerableHosts(ctx context.Context, limit int) ([]Host, error) {
-	rows, err := s.db.QueryContext(ctx, hostSelect+` ORDER BY crit_count DESC, high_count DESC, sec_count DESC, h.hostname LIMIT ?`, limit)
+	where, args := andScope(ctx, "", nil, "h.id")
+	rows, err := s.db.QueryContext(ctx, hostSelect+where+` ORDER BY crit_count DESC, high_count DESC, sec_count DESC, h.hostname LIMIT ?`, append(args, limit)...)
 	if err != nil {
 		return nil, err
 	}

@@ -306,8 +306,17 @@ func (s *Server) user(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	groups, err := s.st.ListGroups(r.Context())
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	member := map[int64]bool{}
+	for _, id := range u.GroupIDs {
+		member[id] = true
+	}
 	d := s.page(r, u.Name, "users")
-	d.Data = map[string]any{"U": u, "Roles": []string{store.RoleAdmin, store.RoleOperator, store.RoleViewer}}
+	d.Data = map[string]any{"U": u, "Roles": []string{store.RoleAdmin, store.RoleOperator, store.RoleViewer}, "Groups": groups, "Member": member}
 	s.render(w, r, http.StatusOK, "user", d)
 }
 
@@ -345,7 +354,20 @@ func (s *Server) userUpdate(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
-	s.audit(r, "user.update", u.Email, "role="+role+" disabled="+strconv.FormatBool(disabled))
+	// Administrators always see every host.
+	scoped := r.PostFormValue("scope") == "groups" && role != store.RoleAdmin
+	groups := formIDs(r, "group_ids")
+	if _, ok := r.PostForm["scope"]; ok {
+		if err := s.st.SetUserGroups(r.Context(), u.ID, scoped, groups); err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+	}
+	details := "role=" + role + " disabled=" + strconv.FormatBool(disabled)
+	if scoped {
+		details += " groups=" + strconv.Itoa(len(groups))
+	}
+	s.audit(r, "user.update", u.Email, details)
 	s.redirect(w, r, back, "success", s.l.T("common.saved"))
 }
 
@@ -467,6 +489,30 @@ func (s *Server) settingsSave(w http.ResponseWriter, r *http.Request) {
 		bad = append(bad, s.l.T("validation.invalid_email"))
 	}
 	kv[settings.KeyEmailRecipients] = strings.Join(recipients, ",")
+	// Sections missing from the form (older pages, tests) keep the stored values.
+	if _, ok := r.PostForm["sla_critical_days"]; ok {
+		for _, f := range []struct{ form, key, label string }{
+			{"sla_critical_days", settings.KeySLACriticalDays, "settings.sla.critical"},
+			{"sla_high_days", settings.KeySLAHighDays, "settings.sla.high"},
+			{"sla_medium_days", settings.KeySLAMediumDays, "settings.sla.medium"},
+			{"sla_low_days", settings.KeySLALowDays, "settings.sla.low"},
+		} {
+			v, ok := intIn(f.form, 0, 3650)
+			if !ok {
+				bad = append(bad, s.l.T("validation.range", "field", s.l.T(f.label), "min", 0, "max", 3650))
+				continue
+			}
+			kv[f.key] = v
+		}
+		kv[settings.KeyEmailSLAOverdue] = b("email_sla_overdue")
+	}
+	if raw, ok := r.PostForm["update_exclude"]; ok {
+		patterns, invalid := protocol.ParseExcludePatterns(raw[0])
+		if len(invalid) > 0 {
+			bad = append(bad, s.l.T("exclude.error.invalid", "patterns", strings.Join(invalid, ", ")))
+		}
+		kv[settings.KeyUpdateExclude] = strings.Join(patterns, ", ")
+	}
 	if raw, ok := r.PostForm["backup_time"]; ok {
 		if m, ok := schedule.ParseClock(strings.TrimSpace(raw[0])); ok {
 			kv[settings.KeyBackupMinute] = strconv.Itoa(m)

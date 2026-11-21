@@ -39,7 +39,12 @@
     <p class="stat__value">{{$d.Stats.SecurityUpdates}}</p>
     <p class="stat__meta">{{t "dashboard.stat.updates_meta" "total" $d.Stats.PendingUpdates "hosts" $d.Stats.HostsWithUpdates}}</p>
   </a>
-  <a class="stat{{if $d.Stats.Offline}} stat--warning{{end}}" href="/servers?status=offline">
+  {{if $d.SLAEnabled}}<a class="stat{{if $d.Overdue}} stat--warning{{end}}" href="/vulnerabilities?overdue=1">
+    <p class="stat__label">{{t "dashboard.stat.overdue"}}</p>
+    <p class="stat__value">{{$d.Overdue}}</p>
+    <p class="stat__meta">{{t "dashboard.stat.overdue_meta" "n" $d.OverdueCVEs}}</p>
+  </a>
+  {{end}}<a class="stat{{if $d.Stats.Offline}} stat--warning{{end}}" href="/servers?status=offline">
     <p class="stat__label">{{t "dashboard.stat.offline_agents"}}</p>
     <p class="stat__value">{{$d.Stats.Offline}}</p>
     <p class="stat__meta">{{t "dashboard.stat.offline_meta" "n" $d.Stats.NeverSeen}}</p>

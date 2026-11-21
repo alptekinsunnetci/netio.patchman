@@ -153,18 +153,18 @@ type VulnRecord struct {
 
 const vulnCols = `v.cve_id, v.title, v.description, v.description_lang, v.cvss_score, v.cvss_vector, v.cvss_version, v.severity,
  v.published_at, v.modified_at, v.fetched_at, v.source, v.refs,
- CASE WHEN k.cve_id IS NULL THEN 0 ELSE 1 END, COALESCE(k.date_added, ''), COALESCE(k.due_date, '')`
+ CASE WHEN k.cve_id IS NULL THEN 0 ELSE 1 END, COALESCE(k.date_added, ''), COALESCE(k.due_date, ''), e.score, e.percentile`
 
-const vulnFrom = ` FROM vulnerabilities v LEFT JOIN kev k ON k.cve_id = v.cve_id`
+const vulnFrom = ` FROM vulnerabilities v LEFT JOIN kev k ON k.cve_id = v.cve_id LEFT JOIN epss e ON e.cve_id = v.cve_id`
 
 func scanVuln(row interface{ Scan(...any) error }) (VulnRecord, error) {
 	var r VulnRecord
-	var score sql.NullFloat64
+	var score, epss, pct sql.NullFloat64
 	var sev, refs string
 	var pub, mod, fetched int64
 	var kev int
 	err := row.Scan(&r.CVEID, &r.Title, &r.Description, &r.DescriptionLang, &score, &r.CVSSVector, &r.CVSSVersion, &sev,
-		&pub, &mod, &fetched, &r.Source, &refs, &kev, &r.KEVDateAdded, &r.KEVDueDate)
+		&pub, &mod, &fetched, &r.Source, &refs, &kev, &r.KEVDateAdded, &r.KEVDueDate, &epss, &pct)
 	if errors.Is(err, sql.ErrNoRows) {
 		return r, ErrNotFound
 	}
@@ -178,6 +178,7 @@ func scanVuln(row interface{ Scan(...any) error }) (VulnRecord, error) {
 	r.Severity = vuln.Severity(sev)
 	r.PublishedAt, r.ModifiedAt, r.FetchedAt = fromTS(pub), fromTS(mod), fromTS(fetched)
 	r.KnownExploited = kev == 1
+	r.EPSS, r.EPSSPercentile = nullFloat(epss), nullFloat(pct)
 	_ = json.Unmarshal([]byte(refs), &r.References)
 	return r, nil
 }
@@ -388,8 +389,9 @@ func (s *Store) ApplyFindings(ctx context.Context, hostID int64, detected []Dete
 func (s *Store) SetFindingStatus(ctx context.Context, ids []int64, status, note string, userID int64) error {
 	return s.tx(ctx, func(tx *sql.Tx) error {
 		for _, id := range ids {
-			if _, err := tx.ExecContext(ctx, `UPDATE findings SET status = ?, status_note = ?, status_changed_by = ?, status_expires_at = 0 WHERE id = ? AND status <> 'resolved'`,
-				status, truncate(note, 1000), nullID(userID), id); err != nil {
+			where, args := andScope(ctx, ` WHERE id = ? AND status <> 'resolved'`, []any{id}, "host_id")
+			if _, err := tx.ExecContext(ctx, `UPDATE findings SET status = ?, status_note = ?, status_changed_by = ?, status_expires_at = 0`+where,
+				append([]any{status, truncate(note, 1000), nullID(userID)}, args...)...); err != nil {
 				return err
 			}
 		}
@@ -403,8 +405,9 @@ func (s *Store) SetCVEStatus(ctx context.Context, cveID, status, note string, us
 	if status != StatusAcceptedRisk {
 		expires = time.Time{}
 	}
-	res, err := s.db.ExecContext(ctx, `UPDATE findings SET status = ?, status_note = ?, status_changed_by = ?, status_expires_at = ? WHERE cve_id = ? AND status <> 'resolved'`,
-		status, truncate(note, 1000), nullID(userID), ts(expires), cveID)
+	where, args := andScope(ctx, ` WHERE cve_id = ? AND status <> 'resolved'`, []any{cveID}, "host_id")
+	res, err := s.db.ExecContext(ctx, `UPDATE findings SET status = ?, status_note = ?, status_changed_by = ?, status_expires_at = ?`+where,
+		append([]any{status, truncate(note, 1000), nullID(userID), ts(expires)}, args...)...)
 	if err != nil {
 		return 0, err
 	}
@@ -432,6 +435,15 @@ type FindingRow struct {
 	FirstDetectedAt time.Time
 	LastCheckedAt   time.Time
 	ResolvedAt      time.Time
+	// EPSS is the exploitation probability (0..1), nil when unknown.
+	EPSS *float64
+	// DueAt is the remediation deadline from the SLA (zero: no target).
+	DueAt time.Time
+}
+
+// Overdue reports whether an active finding is past its SLA deadline.
+func (r FindingRow) Overdue() bool {
+	return !r.DueAt.IsZero() && time.Now().After(r.DueAt) && (r.Status == StatusOpen || r.Status == StatusInProgress)
 }
 
 // FindingFilter narrows finding lists.
@@ -443,9 +455,12 @@ type FindingFilter struct {
 	Search   string
 	KEVOnly  bool
 	GroupID  int64
+	// SLA computes due dates; OverdueOnly keeps findings past them.
+	SLA         SLA
+	OverdueOnly bool
 }
 
-func findingWhere(f FindingFilter) (string, []any) {
+func findingWhere(ctx context.Context, f FindingFilter) (string, []any) {
 	var conds []string
 	var args []any
 	if f.HostID != 0 {
@@ -480,26 +495,35 @@ func findingWhere(f FindingFilter) (string, []any) {
 		conds = append(conds, `(f.cve_id LIKE ? ESCAPE '\' OR f.package_name LIKE ? ESCAPE '\' OR v.title LIKE ? ESCAPE '\')`)
 		args = append(args, l, l, l)
 	}
+	if f.OverdueOnly && f.SLA.Enabled() {
+		due := f.SLA.dueSQL("f", "v")
+		conds = append(conds, `f.status IN `+activeStatuses+` AND `+due+` > 0 AND `+due+` < ?`)
+		args = append(args, now())
+	}
+	if cond, cargs := hostScope(ctx, "f.host_id"); cond != "" {
+		conds = append(conds, cond)
+		args = append(args, cargs...)
+	}
 	if len(conds) == 0 {
 		return "", nil
 	}
 	return " WHERE " + strings.Join(conds, " AND "), args
 }
 
-const findingFrom = ` FROM findings f JOIN hosts h ON h.id = f.host_id LEFT JOIN vulnerabilities v ON v.cve_id = f.cve_id LEFT JOIN kev k ON k.cve_id = f.cve_id`
+const findingFrom = ` FROM findings f JOIN hosts h ON h.id = f.host_id LEFT JOIN vulnerabilities v ON v.cve_id = f.cve_id LEFT JOIN kev k ON k.cve_id = f.cve_id LEFT JOIN epss e ON e.cve_id = f.cve_id`
 
 const severityOrder = `CASE COALESCE(v.severity, 'unknown') WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END`
 
 // ListFindings returns findings for a host or CVE.
 func (s *Store) ListFindings(ctx context.Context, f FindingFilter, p Page) ([]FindingRow, int, error) {
-	where, args := findingWhere(f)
+	where, args := findingWhere(ctx, f)
 	var total int
 	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*)`+findingFrom+where, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	rows, err := s.db.QueryContext(ctx, `SELECT f.id, f.host_id, h.hostname, f.cve_id, COALESCE(v.title, ''), COALESCE(v.severity, 'unknown'), v.cvss_score,
 		CASE WHEN k.cve_id IS NULL THEN 0 ELSE 1 END, f.package_name, f.installed_version, f.fixed_version, f.status, f.status_note,
-		f.first_detected_at, f.last_checked_at, f.resolved_at, f.status_expires_at, COALESCE(cu.name, '')`+findingFrom+` LEFT JOIN users cu ON cu.id = f.status_changed_by`+where+
+		f.first_detected_at, f.last_checked_at, f.resolved_at, f.status_expires_at, COALESCE(cu.name, ''), e.score, `+f.SLA.dueSQL("f", "v")+findingFrom+` LEFT JOIN users cu ON cu.id = f.status_changed_by`+where+
 		` ORDER BY `+severityOrder+`, v.cvss_score DESC, f.cve_id DESC, h.hostname LIMIT ? OFFSET ?`, append(args, p.limit(), p.Offset())...)
 	if err != nil {
 		return nil, 0, err
@@ -509,11 +533,11 @@ func (s *Store) ListFindings(ctx context.Context, f FindingFilter, p Page) ([]Fi
 	for rows.Next() {
 		var r FindingRow
 		var sev string
-		var score sql.NullFloat64
+		var score, epss sql.NullFloat64
 		var kev int
-		var fd, lc, rs, ex int64
+		var fd, lc, rs, ex, due int64
 		if err := rows.Scan(&r.ID, &r.HostID, &r.Hostname, &r.CVEID, &r.Title, &sev, &score, &kev, &r.PackageName, &r.InstalledVersion,
-			&r.FixedVersion, &r.Status, &r.StatusNote, &fd, &lc, &rs, &ex, &r.StatusChangedBy); err != nil {
+			&r.FixedVersion, &r.Status, &r.StatusNote, &fd, &lc, &rs, &ex, &r.StatusChangedBy, &epss, &due); err != nil {
 			return nil, 0, err
 		}
 		r.Severity = vuln.Severity(sev)
@@ -523,6 +547,7 @@ func (s *Store) ListFindings(ctx context.Context, f FindingFilter, p Page) ([]Fi
 		}
 		r.KnownExploited = kev == 1
 		r.FirstDetectedAt, r.LastCheckedAt, r.ResolvedAt, r.StatusExpiresAt = fromTS(fd), fromTS(lc), fromTS(rs), fromTS(ex)
+		r.EPSS, r.DueAt = nullFloat(epss), fromTS(due)
 		out = append(out, r)
 	}
 	return out, total, rows.Err()
@@ -540,20 +565,36 @@ type VulnSummary struct {
 	FixAvailable    bool
 	FirstDetectedAt time.Time
 	LastCheckedAt   time.Time
+	// EPSS is the exploitation probability (0..1), nil when unknown.
+	EPSS *float64
+	// DueAt is the earliest SLA deadline of the active findings (zero: none).
+	DueAt time.Time
 }
+
+// Overdue reports whether the earliest deadline has passed.
+func (v VulnSummary) Overdue() bool { return !v.DueAt.IsZero() && time.Now().After(v.DueAt) }
 
 // VulnFilter narrows the fleet vulnerability list.
 type VulnFilter struct {
-	Severity string
-	Search   string
-	KEVOnly  bool
-	FixOnly  bool
-	Status   string // "" active, or a specific status
+	Severity    string
+	Search      string
+	KEVOnly     bool
+	FixOnly     bool
+	Status      string // "" active, or a specific status
+	SLA         SLA
+	OverdueOnly bool
+	// Sort is "" (severity, KEV, CVSS) or "epss" (KEV, then EPSS).
+	Sort string
 }
 
 // ListVulnSummaries returns CVEs with active findings, most severe first.
 func (s *Store) ListVulnSummaries(ctx context.Context, f VulnFilter, p Page) ([]VulnSummary, int, error) {
-	where, args := findingWhere(FindingFilter{Severity: f.Severity, Search: f.Search, KEVOnly: f.KEVOnly, Status: f.Status})
+	where, args := findingWhere(ctx, FindingFilter{Severity: f.Severity, Search: f.Search, KEVOnly: f.KEVOnly, Status: f.Status, SLA: f.SLA, OverdueOnly: f.OverdueOnly})
+	order := `MIN(` + severityOrder + `), MAX(k.cve_id IS NOT NULL) DESC, MAX(v.cvss_score) DESC`
+	if f.Sort == "epss" {
+		order = `MAX(k.cve_id IS NOT NULL) DESC, COALESCE(MAX(e.score), -1) DESC, MIN(` + severityOrder + `)`
+	}
+	due := f.SLA.dueSQL("f", "v")
 	having := ""
 	if f.FixOnly {
 		having = ` HAVING MAX(f.fixed_version <> '') = 1`
@@ -564,8 +605,9 @@ func (s *Store) ListVulnSummaries(ctx context.Context, f VulnFilter, p Page) ([]
 	}
 	rows, err := s.db.QueryContext(ctx, `SELECT f.cve_id, COALESCE(MAX(v.title), ''), COALESCE(MAX(v.severity), 'unknown'), MAX(v.cvss_score),
 		MAX(CASE WHEN k.cve_id IS NULL THEN 0 ELSE 1 END), COUNT(DISTINCT f.host_id), GROUP_CONCAT(DISTINCT f.package_name),
-		MAX(f.fixed_version <> ''), MIN(f.first_detected_at), MAX(f.last_checked_at)`+findingFrom+where+
-		` GROUP BY f.cve_id`+having+` ORDER BY MIN(`+severityOrder+`), MAX(k.cve_id IS NOT NULL) DESC, MAX(v.cvss_score) DESC, COUNT(DISTINCT f.host_id) DESC, f.cve_id DESC LIMIT ? OFFSET ?`,
+		MAX(f.fixed_version <> ''), MIN(f.first_detected_at), MAX(f.last_checked_at), MAX(e.score),
+		MIN(CASE WHEN f.status IN `+activeStatuses+` AND `+due+` > 0 THEN `+due+` END)`+findingFrom+where+
+		` GROUP BY f.cve_id`+having+` ORDER BY `+order+`, COUNT(DISTINCT f.host_id) DESC, f.cve_id DESC LIMIT ? OFFSET ?`,
 		append(args, p.limit(), p.Offset())...)
 	if err != nil {
 		return nil, 0, err
@@ -575,10 +617,11 @@ func (s *Store) ListVulnSummaries(ctx context.Context, f VulnFilter, p Page) ([]
 	for rows.Next() {
 		var r VulnSummary
 		var sev, pkgs string
-		var score sql.NullFloat64
+		var score, epss sql.NullFloat64
 		var kev, fix int
 		var fd, lc int64
-		if err := rows.Scan(&r.CVEID, &r.Title, &sev, &score, &kev, &r.HostCount, &pkgs, &fix, &fd, &lc); err != nil {
+		var due sql.NullInt64
+		if err := rows.Scan(&r.CVEID, &r.Title, &sev, &score, &kev, &r.HostCount, &pkgs, &fix, &fd, &lc, &epss, &due); err != nil {
 			return nil, 0, err
 		}
 		r.Severity = vuln.Severity(sev)
@@ -589,6 +632,7 @@ func (s *Store) ListVulnSummaries(ctx context.Context, f VulnFilter, p Page) ([]
 		r.KnownExploited, r.FixAvailable = kev == 1, fix == 1
 		r.Packages = splitSorted(pkgs)
 		r.FirstDetectedAt, r.LastCheckedAt = fromTS(fd), fromTS(lc)
+		r.EPSS, r.DueAt = nullFloat(epss), fromTS(due.Int64)
 		out = append(out, r)
 	}
 	return out, total, rows.Err()
@@ -606,8 +650,8 @@ func splitSorted(csv string) []string {
 // FleetSeverityCounts counts distinct CVEs with active findings by severity.
 func (s *Store) FleetSeverityCounts(ctx context.Context) (SeverityCounts, int, error) {
 	var c SeverityCounts
-	rows, err := s.db.QueryContext(ctx, `SELECT COALESCE(v.severity, 'unknown'), COUNT(DISTINCT f.cve_id) FROM findings f LEFT JOIN vulnerabilities v ON v.cve_id = f.cve_id
-		WHERE f.status IN `+activeStatuses+` GROUP BY 1`)
+	sc, sargs := andScope(ctx, " WHERE f.status IN "+activeStatuses, nil, "f.host_id")
+	rows, err := s.db.QueryContext(ctx, `SELECT COALESCE(v.severity, 'unknown'), COUNT(DISTINCT f.cve_id) FROM findings f LEFT JOIN vulnerabilities v ON v.cve_id = f.cve_id`+sc+` GROUP BY 1`, sargs...)
 	if err != nil {
 		return c, 0, err
 	}
@@ -636,7 +680,7 @@ func (s *Store) FleetSeverityCounts(ctx context.Context) (SeverityCounts, int, e
 	}
 	rows.Close()
 	var kev int
-	err = s.db.QueryRowContext(ctx, `SELECT COUNT(DISTINCT f.cve_id) FROM findings f JOIN kev k ON k.cve_id = f.cve_id WHERE f.status IN `+activeStatuses).Scan(&kev)
+	err = s.db.QueryRowContext(ctx, `SELECT COUNT(DISTINCT f.cve_id) FROM findings f JOIN kev k ON k.cve_id = f.cve_id`+sc, sargs...).Scan(&kev)
 	return c, kev, err
 }
 
@@ -728,4 +772,12 @@ func (s *Store) AlertDetailsFor(ctx context.Context, cveID string) (AlertDetails
 func (s *Store) PruneResolvedFindings(ctx context.Context, olderThan time.Duration) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM findings WHERE status = 'resolved' AND resolved_at > 0 AND resolved_at < ?`, now()-int64(olderThan.Seconds()))
 	return err
+}
+
+func nullFloat(v sql.NullFloat64) *float64 {
+	if !v.Valid {
+		return nil
+	}
+	f := v.Float64
+	return &f
 }

@@ -29,6 +29,9 @@ type command struct {
 	// fn, when set, runs the step in-process instead of exec (Windows Update);
 	// name and args are then only shown in the output.
 	fn func(ctx context.Context, out io.Writer) int
+	// soft steps do not stop the job when they fail (one winget package);
+	// the verification reports what is left.
+	soft bool
 }
 
 // tailBuffer keeps the last max bytes written. A lone carriage return
@@ -83,6 +86,8 @@ type JobRunner struct {
 	L             i18n.Localizer
 	PM            string
 	RemoteUpdates bool
+	// Winget is the winget executable for third-party Windows programs, "" without.
+	Winget string
 	// Pending lists pending updates without refreshing the package lists.
 	// It sets the job's targets and verifies them afterwards; nil skips both.
 	Pending func(ctx context.Context) ([]protocol.Update, error)
@@ -201,6 +206,10 @@ func (r JobRunner) Run(ctx context.Context, job protocol.Job) protocol.JobResult
 	s.note(msg)
 	for _, c := range cmds {
 		if code, failed := s.step(ctx, c); failed {
+			if c.soft && ctx.Err() == nil {
+				s.note(r.L.T("agent.job.command_failed", "command", c.name, "code", code))
+				continue
+			}
 			s.res.Remaining = r.stillPending(ctx, targets)
 			return r.failStep(s, ctx, c, code)
 		}
@@ -229,18 +238,47 @@ func (r JobRunner) refreshCommand() *command {
 // plan returns the commands and the packages they are expected to upgrade.
 // before is the pending update list (valid when known).
 func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) (cmds []command, targets []string, msg string, err error) {
+	// Packages on the exclusion lists (fleet, group, host) are never targeted.
+	exclude, _ := protocol.ParseExcludePatterns(job.Params[protocol.ParamExclude])
+	var excluded []string
+	keep := func(name string) bool {
+		if !protocol.Excluded(exclude, name) {
+			return true
+		}
+		if !slices.Contains(excluded, name) {
+			excluded = append(excluded, name)
+		}
+		return false
+	}
 	pending := map[string]bool{}
 	var all, security []string
 	for _, u := range before {
 		if !pending[u.Name] {
 			pending[u.Name] = true
+			if !keep(u.Name) {
+				continue
+			}
 			all = append(all, u.Name)
 			if u.Security {
 				security = append(security, u.Name)
 			}
 		}
 	}
-	pkgs := job.Packages
+	pkgs := slices.DeleteFunc(slices.Clone(job.Packages), func(p string) bool { return !keep(p) })
+	var notes []string
+	if len(excluded) > 0 {
+		notes = append(notes, r.L.T("agent.job.excluded", "packages", listNames(excluded)))
+	}
+	defer func() {
+		if len(notes) > 0 {
+			msg = strings.Join(append(notes, msg), "\n")
+			msg = strings.TrimSpace(msg)
+		}
+	}()
+	// Without the pending list the exclusions can only be passed to dnf/yum.
+	if len(exclude) > 0 && !known && r.PM != protocol.PMDnf && r.PM != protocol.PMYum && job.Type != protocol.JobUpgradePackages {
+		return nil, nil, "", errors.New(r.L.T("agent.job.exclude_unknown"))
+	}
 	switch job.Type {
 	case protocol.JobUpgradeAll:
 		targets = all
@@ -250,12 +288,16 @@ func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) 
 	case protocol.JobUpgradeSecurity:
 		targets = security
 	case protocol.JobUpgradePackages:
+		if len(pkgs) == 0 {
+			return nil, nil, r.L.T("agent.job.nothing_pending"), nil
+		}
 		if known {
 			// Packages without a pending update (already upgraded, not
 			// installed) would be skipped silently by the package manager.
 			var skipped []string
+			candidates := pkgs
 			pkgs, skipped = nil, nil
-			for _, p := range job.Packages {
+			for _, p := range candidates {
 				if pending[p] {
 					pkgs = append(pkgs, p)
 				} else {
@@ -263,7 +305,7 @@ func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) 
 				}
 			}
 			if len(skipped) > 0 {
-				msg = r.L.T("agent.job.packages_skipped", "packages", listNames(skipped))
+				notes = append(notes, r.L.T("agent.job.packages_skipped", "packages", listNames(skipped)))
 			}
 			if len(pkgs) == 0 {
 				return nil, nil, r.L.T("agent.job.nothing_pending"), nil
@@ -277,6 +319,11 @@ func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) 
 	case protocol.PMApt:
 		switch job.Type {
 		case protocol.JobUpgradeAll:
+			if len(exclude) > 0 {
+				// apt-get upgrade cannot exclude packages: upgrade the rest by name.
+				cmds = []command{{name: "apt-get", args: append(append(aptOpts, "install", "--only-upgrade"), all...)}}
+				break
+			}
 			cmds = []command{{name: "apt-get", args: append(aptOpts, "upgrade", "--with-new-pkgs")}}
 		case protocol.JobUpgradeSecurity:
 			if !known {
@@ -292,9 +339,9 @@ func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) 
 	case protocol.PMDnf, protocol.PMYum:
 		switch job.Type {
 		case protocol.JobUpgradeAll:
-			cmds = []command{{name: r.PM, args: []string{"-y", "upgrade"}}}
+			cmds = []command{{name: r.PM, args: append([]string{"-y", "upgrade"}, dnfExcludes(exclude)...)}}
 		case protocol.JobUpgradeSecurity:
-			cmds = []command{{name: r.PM, args: []string{"-y", "upgrade", "--security"}}}
+			cmds = []command{{name: r.PM, args: append([]string{"-y", "upgrade", "--security"}, dnfExcludes(exclude)...)}}
 		case protocol.JobUpgradePackages:
 			cmds = []command{{name: r.PM, args: append([]string{"-y", "upgrade"}, pkgs...)}}
 		}
@@ -303,8 +350,16 @@ func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) 
 		ok := []int{102, 103}
 		switch job.Type {
 		case protocol.JobUpgradeAll:
+			if len(exclude) > 0 {
+				cmds = []command{{name: "zypper", args: append([]string{"--non-interactive", "update"}, all...), okCodes: ok}}
+				break
+			}
 			cmds = []command{{name: "zypper", args: []string{"--non-interactive", "update"}, okCodes: ok}}
 		case protocol.JobUpgradeSecurity:
+			if len(exclude) > 0 {
+				// Patches do not map to package names.
+				return nil, nil, "", errors.New(r.L.T("agent.job.exclude_unknown"))
+			}
 			// Patches do not map to the package list; the result is not verified.
 			targets = nil
 			cmds = []command{{name: "zypper", args: []string{"--non-interactive", "patch", "--category", "security"}, okCodes: ok}}
@@ -314,6 +369,10 @@ func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) 
 	case protocol.PMApk:
 		switch job.Type {
 		case protocol.JobUpgradeAll:
+			if len(exclude) > 0 {
+				cmds = []command{{name: "apk", args: append([]string{"upgrade"}, all...)}}
+				break
+			}
 			cmds = []command{{name: "apk", args: []string{"upgrade"}}}
 		case protocol.JobUpgradeSecurity:
 			return nil, nil, "", errors.New(r.L.T("agent.job.security_unsupported"))
@@ -321,10 +380,34 @@ func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) 
 			cmds = []command{{name: "apk", args: append([]string{"upgrade"}, pkgs...)}}
 		}
 	case protocol.PMWindowsUpdate:
+		// winget packages (third-party programs) and Windows Update KBs.
+		winget := map[string]bool{}
+		for _, u := range before {
+			if u.Repository == WingetRepository {
+				winget[u.Name] = true
+			}
+		}
+		windowsCmds := func(names []string) []command {
+			var kbs []string
+			var out []command
+			for _, n := range names {
+				if winget[n] {
+					if r.Winget != "" {
+						out = append(out, wingetUpgradeCommand(r.Winget, n))
+					}
+					continue
+				}
+				kbs = append(kbs, n)
+			}
+			if len(kbs) > 0 {
+				out = append([]command{windowsInstallCommand(r.L, kbs, "")}, out...)
+			}
+			return out
+		}
 		switch job.Type {
 		case protocol.JobUpgradeAll:
 			if known {
-				cmds = []command{windowsInstallCommand(r.L, all, "")}
+				cmds = windowsCmds(all)
 			} else {
 				cmds = []command{windowsInstallCommand(r.L, nil, "all")}
 			}
@@ -336,9 +419,9 @@ func (r JobRunner) plan(job protocol.Job, before []protocol.Update, known bool) 
 			if len(security) == 0 {
 				return nil, nil, r.L.T("agent.job.no_security_updates"), nil
 			}
-			cmds = []command{windowsInstallCommand(r.L, security, "")}
+			cmds = windowsCmds(security)
 		case protocol.JobUpgradePackages:
-			cmds = []command{windowsInstallCommand(r.L, pkgs, "")}
+			cmds = windowsCmds(pkgs)
 		}
 	default:
 		return nil, nil, "", errors.New(r.L.T("agent.job.pm_unsupported"))
@@ -512,4 +595,13 @@ func (r JobRunner) reboot(s *jobState) protocol.JobResult {
 	}
 	_ = c.Process.Release()
 	return s.finish(true, 0, r.L.T("agent.job.reboot_scheduled"))
+}
+
+// dnfExcludes returns dnf/yum --exclude options for the patterns.
+func dnfExcludes(patterns []string) []string {
+	out := make([]string, 0, len(patterns))
+	for _, p := range patterns {
+		out = append(out, "--exclude="+p)
+	}
+	return out
 }

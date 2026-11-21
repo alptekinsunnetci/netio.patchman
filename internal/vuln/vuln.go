@@ -113,6 +113,10 @@ type Vulnerability struct {
 	// KEVDateAdded and KEVDueDate are verbatim CISA KEV dates (YYYY-MM-DD).
 	KEVDateAdded string `json:"kev_date_added,omitempty"`
 	KEVDueDate   string `json:"kev_due_date,omitempty"`
+	// EPSS is the FIRST.org probability of exploitation in the next 30 days
+	// (0..1) and EPSSPercentile its rank among all CVEs; nil when unknown.
+	EPSS           *float64 `json:"epss,omitempty"`
+	EPSSPercentile *float64 `json:"epss_percentile,omitempty"`
 	// Source names the feed the record came from, e.g. "nvd", "osv". Verbatim.
 	Source string `json:"source"`
 	// Advisories are vendor advisories referencing this vulnerability.

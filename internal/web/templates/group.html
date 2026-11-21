@@ -55,6 +55,7 @@
       {{template "csrf" $root}}
       <label class="field"><span class="field__label">{{t "group.field.name"}}</span><input class="field__input" type="text" name="name" value="{{$g.Name}}" maxlength="60" required></label>
       <label class="field"><span class="field__label">{{t "group.field.description"}}</span><input class="field__input" type="text" name="description" value="{{$g.Description}}" maxlength="500"></label>
+      <label class="field"><span class="field__label">{{t "exclude.field"}}</span><textarea class="field__input mono" name="exclude" rows="2" maxlength="4000">{{$g.Exclude}}</textarea><span class="field__hint">{{t "exclude.group_hint"}}</span></label>
       <div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>
     </form>
   </section>

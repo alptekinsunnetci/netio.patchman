@@ -2,6 +2,7 @@ package agent
 
 import (
 	"slices"
+	"strings"
 	"testing"
 
 	"netio.patchman/internal/protocol"
@@ -31,6 +32,20 @@ func TestPickPackageManager(t *testing.T) {
 	for _, c := range cases {
 		if got := pickPackageManager(c.rel, c.has); got != c.want {
 			t.Errorf("%s: %q, want %q", c.name, got, c.want)
+		}
+	}
+}
+
+func TestUpstreamRelease(t *testing.T) {
+	cases := map[string]map[string]string{
+		"ubuntu:jammy":    {"ID": "linuxmint", "ID_LIKE": "ubuntu debian", "UBUNTU_CODENAME": "jammy"},
+		"debian:bookworm": {"ID": "linuxmint", "ID_LIKE": "debian", "DEBIAN_CODENAME": "bookworm"},
+		"":                {"ID": "ubuntu", "UBUNTU_CODENAME": "noble"},
+		" ":               {"ID": "pop", "UBUNTU_CODENAME": "Bad Name!"},
+	}
+	for want, rel := range cases {
+		if got := upstreamRelease(rel); got != strings.TrimSpace(want) {
+			t.Errorf("%v: %q, want %q", rel, got, want)
 		}
 	}
 }

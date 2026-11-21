@@ -105,6 +105,16 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	sla := s.sla(ctx)
+	var overdue []store.FindingRow
+	overdueTotal := 0
+	if sla.Enabled() {
+		overdue, overdueTotal, err = s.st.ListFindings(ctx, store.FindingFilter{GroupID: gid, SLA: sla, OverdueOnly: true}, store.Page{Number: 1, Size: 500})
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+	}
 	jobs, err := s.st.JobCounts(ctx, from, to, gid)
 	if err != nil {
 		s.serverError(w, r, err)
@@ -117,9 +127,10 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 		"Sev": sev, "KEV": kev, "Flow": flow, "MeanFixDays": s.days(flow.MeanFix), "KEVOpen": kevOpen,
 		"Today": timeutil.Now().UTC().Format("2006-01-02"),
 		"Risks": risks, "RiskTotal": riskTotal, "Jobs": jobs, "JobStatuses": reportJobStatuses,
+		"SLAEnabled": sla.Enabled(), "Overdue": overdue, "OverdueTotal": overdueTotal,
 		"GeneratedAt": timeutil.Now(),
 	}
-	if group == nil {
+	if group == nil && !s.limited(r) {
 		snaps, err := s.st.Snapshots(ctx, calendarDay(from), calendarDay(to.AddDate(0, 0, -1)))
 		if err != nil {
 			s.serverError(w, r, err)

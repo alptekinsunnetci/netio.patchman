@@ -24,6 +24,8 @@ const (
 	DefaultKEVURL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 	// DefaultMSRCURL is the Microsoft Security Update Guide API (CVE details for Windows hosts).
 	DefaultMSRCURL = "https://api.msrc.microsoft.com/sug/v2.0/en-US"
+	// DefaultEPSSURL is the daily EPSS score file (FIRST.org model, CSV, gzip).
+	DefaultEPSSURL = "https://epss.empiricalsecurity.com/epss_scores-current.csv.gz"
 	// DefaultUpdateURL is the VERSION file on the default branch: the version
 	// an operator gets with "git pull" (see internal/updatecheck).
 	DefaultUpdateURL = "https://raw.githubusercontent.com/" + brand.RepositoryPath + "/main/VERSION"
@@ -49,6 +51,7 @@ type Config struct {
 	OSVURL       string
 	KEVURL       string // empty disables the KEV feed
 	MSRCURL      string // empty disables MSRC lookups
+	EPSSURL      string // empty disables EPSS scores
 	UpdateURL    string // empty disables the new-version check
 }
 
@@ -172,6 +175,12 @@ func Load(b *i18n.Bundle, getenv func(string) string) (Config, error) {
 		cfg.MSRCURL = ""
 	} else if u, err := url.Parse(cfg.MSRCURL); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
 		fail("config.error.invalid_url", "name", "PATCHMAN_MSRC_URL", "value", cfg.MSRCURL)
+	}
+	cfg.EPSSURL = env("EPSS_URL", DefaultEPSSURL)
+	if strings.EqualFold(cfg.EPSSURL, "off") {
+		cfg.EPSSURL = ""
+	} else if u, err := url.Parse(cfg.EPSSURL); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		fail("config.error.invalid_url", "name", "PATCHMAN_EPSS_URL", "value", cfg.EPSSURL)
 	}
 	cfg.UpdateURL = env("UPDATE_CHECK_URL", DefaultUpdateURL)
 	if strings.EqualFold(cfg.UpdateURL, "off") {

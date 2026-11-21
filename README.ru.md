@@ -24,6 +24,7 @@ netio.patchman — самостоятельно размещаемая (self-hos
 - [Установка агента на серверы](#установка-агента-на-серверы)
 - [Обновление, резервное копирование и удаление](#обновление-резервное-копирование-и-удаление)
 - [Настройка](#настройка)
+- [REST API и Prometheus](#rest-api-и-prometheus)
 - [Устранение неполадок](#устранение-неполадок)
 - [Язык и локализация](#язык-и-локализация)
 - [Безопасность](#безопасность)
@@ -56,6 +57,14 @@ netio.patchman — самостоятельно размещаемая (self-hos
 - **Пользователи и роли:** роли «Администратор», «Оператор» и «Наблюдатель»; журнал аудита.
 - **Настройка из панели:** SMTP, адрес сервера, часовой пояс, источники данных и все рабочие параметры меняются в панели. Изменения применяются без перезапуска.
 - **Экспорт:** списки серверов и уязвимостей можно скачать в CSV, совместимом с Excel.
+- **Живое исправление ядра:** обнаруживаются KernelCare (CloudLinux, AlmaLinux, Rocky, RHEL) и Canonical Livepatch (Ubuntu). Для находок ядра используется версия, до которой KernelCare исправил ядро; CVE, закрытые Livepatch, не считаются открытыми; обновление ядра, покрытое KernelCare, не помечает сервер как требующий перезагрузки.
+- **Пакеты, которые не обновлять:** шаблоны вроде `kernel*`, `mysql-*` или `KB5034439` для всех серверов, группы или одного сервера. Все задания обновления из панели, расписаний и API пропускают эти пакеты.
+- **Приоритизация по EPSS:** для каждой уязвимости показывается оценка FIRST EPSS (вероятность эксплуатации в ближайшие 30 дней); список можно сортировать по KEV и EPSS.
+- **Сроки устранения (SLA):** число дней по важности (по умолчанию критическая 15, высокая 30, средняя 90, низкая 180). Просроченные находки помечаются, видны на панели и в отчёте, по ним отправляются уведомление и письмо.
+- **Доступ по группам:** операторов и наблюдателей можно ограничить серверами определённых групп (команды или клиенты).
+- **Перезагрузка в расписаниях (по выбору):** серверы, которым после обновления нужна перезагрузка, перезагружаются, пока открыто окно обслуживания (для каждого правила, по умолчанию выключено).
+- **Сторонние программы Windows:** на серверах с winget показываются и устанавливаются обновления программ вроде Chrome, 7-Zip или Git.
+- **REST API и Prometheus:** API-ключи читают серверы, уязвимости, обновления и задания и запускают задания обновления; `/metrics` отдаёт метрики для Grafana/Prometheus. См. [docs/api.md](docs/api.md).
 
 ### Поддерживаемые системы
 
@@ -64,9 +73,13 @@ netio.patchman — самостоятельно размещаемая (self-hos
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
 | CloudLinux 8, 9 | dnf | ✓ (по данным безопасности AlmaLinux) |
+| CentOS 7, CloudLinux 7, Oracle Linux 7 | yum | ✓ (по данным Red Hat 7 и TuxCare ELS) |
+| Oracle Linux 8, 9; CentOS Linux 8 | dnf | ✓ (по данным AlmaLinux) |
+| Mageia, openEuler | dnf | ✓ |
+| Linux Mint, Pop!_OS, Zorin OS, elementary OS, LMDE, Raspberry Pi OS | apt | ✓ (по данным их выпуска Ubuntu/Debian) |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
-| CentOS, Oracle Linux, Fedora и другие дистрибутивы (с dnf, yum, zypper, apt или apk) | ✓ | — |
+| CentOS Stream, Amazon Linux, Fedora и другие дистрибутивы (с dnf, yum, zypper, apt или apk) | ✓ | — |
 | Windows Server 2016, 2019, 2022, 2025; Windows 10, 11 (x64) | Windows Update | ✓ (ожидающие обновления Microsoft) |
 
 Агент работает на amd64 и arm64. В качестве менеджера служб нужен systemd или OpenRC (Alpine). Поддерживаются физические, виртуальные (VMware, Hyper-V, KVM/Proxmox) и облачные серверы.
@@ -337,6 +350,7 @@ docker compose down -v     # удаляет контейнер и базу да�
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | Адрес API OSV (можно использовать внутреннее зеркало) | да |
 | `PATCHMAN_KEV_URL` | адрес CISA KEV | Адрес каталога KEV; `off` отключает его | да |
 | `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Адрес Microsoft Security Update Guide для сопоставления CVE серверов Windows; `off` отключает его | да |
+| `PATCHMAN_EPSS_URL` | `https://epss.empiricalsecurity.com/epss_scores-current.csv.gz` | Ежедневный файл оценок EPSS; `off` отключает его | да |
 | `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | Почтовый сервер | да |
 | `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | Учётные данные SMTP | да |
 | `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Имя и адрес отправителя | да |
@@ -344,6 +358,26 @@ docker compose down -v     # удаляет контейнер и базу да�
 | `PATCHMAN_VERSION` | файл `VERSION` | Собираемая версия сервера и агента | — |
 
 Если у переменной окружения недопустимое значение, сервер не запускается и выводит список ошибок на языке по умолчанию.
+
+## REST API и Prometheus
+
+Создайте ключ в разделе **Профиль → API-ключи**. Ключ действует с ролью и доступом к серверам создавшего его пользователя; ключи только для чтения ничего не изменяют. Конечные точки, поля и примеры: [docs/api.md](docs/api.md) (на турецком).
+
+```sh
+curl -H "Authorization: Bearer npat_..." https://patchman.your-domain/api/v1/hosts
+curl -H "Authorization: Bearer npat_..." "https://patchman.your-domain/api/v1/vulnerabilities?sort=epss&overdue=1"
+curl -X POST -H "Authorization: Bearer npat_..." -H "Content-Type: application/json" \
+  -d '{"type":"upgrade_security"}' https://patchman.your-domain/api/v1/hosts/12/jobs
+```
+
+```yaml
+# prometheus.yml
+scrape_configs:
+  - job_name: netio-patchman
+    scheme: https
+    authorization: { credentials: npat_... }
+    static_configs: [{ targets: ["patchman.your-domain"] }]
+```
 
 ## Устранение неполадок
 

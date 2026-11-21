@@ -57,6 +57,32 @@
   {{else}}{{template "empty" (t "report.kev_none")}}{{end}}
 </section>
 
+{{if $d.SLAEnabled}}
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">{{t "report.overdue_title"}} <span class="muted">({{$d.OverdueTotal}})</span></h2></div>
+  {{if $d.Overdue}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "host.field.hostname"}}</th><th>{{t "vuln.field.cve_id"}}</th><th>{{t "vuln.field.severity"}}</th><th>{{t "vuln.field.affected_package"}}</th><th>{{t "vuln.field.first_detected"}}</th><th>{{t "vuln.field.due"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Overdue}}
+    <tr>
+      <td>{{.Hostname}}</td>
+      <td><a class="mono" href="/vulnerabilities/{{.CVEID}}">{{.CVEID}}</a>{{if .KnownExploited}} {{template "kev"}}{{end}}</td>
+      <td>{{template "sev" .Severity}}</td>
+      <td class="mono">{{.PackageName}}</td>
+      <td>{{date .FirstDetectedAt}}</td>
+      <td>{{date .DueAt}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{if gt $d.OverdueTotal (len $d.Overdue)}}<p class="footnote">{{t "report.risks_truncated" "shown" (len $d.Overdue) "total" $d.OverdueTotal}}</p>{{end}}
+  {{else}}{{template "empty" (t "report.overdue_none")}}{{end}}
+</section>
+{{end}}
+
 <section class="panel panel--flush report__section">
   <div class="panel__head"><h2 class="panel__title">{{t "report.hosts_title"}}</h2></div>
   {{if $d.Hosts}}

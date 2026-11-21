@@ -179,8 +179,19 @@ func (c Collector) collectWindows(ctx context.Context) (pkgs []protocol.Package,
 	if err != nil {
 		errs = append(errs, err.Error())
 	}
+	if exe := wingetExe(); exe != "" && wingetEnabled {
+		more, err := wingetList(ctx, exe)
+		if err != nil {
+			errs = append(errs, err.Error())
+		}
+		updates = append(updates, more...)
+	}
 	return pkgs, updates, reboot, errs
 }
+
+// wingetEnabled turns third-party updates through winget on or off
+// (PATCHMAN_WINGET, default on).
+var wingetEnabled = true
 
 // cleanProgram trims a registry program entry: no control characters,
 // bounded lengths. The text is otherwise kept verbatim.

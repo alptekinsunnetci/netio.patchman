@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/vuln"
 )
@@ -39,6 +40,13 @@ const (
 	KeyBackupLastAt         = "backup.last_at"
 	KeyBackupLastError      = "backup.last_error"
 	KeyBackupLastErrorAt    = "backup.last_error_at"
+	KeyUpdateExclude        = "updates.exclude"
+	KeySLACriticalDays      = "sla.critical_days"
+	KeySLAHighDays          = "sla.high_days"
+	KeySLAMediumDays        = "sla.medium_days"
+	KeySLALowDays           = "sla.low_days"
+	KeyEmailSLAOverdue      = "email.sla_overdue"
+	KeyEPSSUpdatedAt        = "epss.updated_at"
 )
 
 // Values is a typed snapshot of all settings.
@@ -71,6 +79,13 @@ type Values struct {
 	BackupLastAt      time.Time
 	BackupLastError   string
 	BackupLastErrorAt time.Time
+	// UpdateExclude are package name patterns no job updates on any host.
+	UpdateExclude []string
+	// SLA: days to remediate a finding by severity, counted from detection
+	// (0 = no target for that severity).
+	SLACriticalDays, SLAHighDays, SLAMediumDays, SLALowDays int
+	EmailSLAOverdue                                         bool
+	EPSSUpdatedAt                                           time.Time
 }
 
 // OfflineAfter is the duration after which an agent counts as offline.
@@ -101,6 +116,11 @@ func Defaults() Values {
 		BackupEnabled:        true,
 		BackupMinute:         2*60 + 30,
 		BackupKeep:           7,
+		SLACriticalDays:      15,
+		SLAHighDays:          30,
+		SLAMediumDays:        90,
+		SLALowDays:           180,
+		EmailSLAOverdue:      true,
 	}
 }
 
@@ -166,6 +186,13 @@ func FromMap(raw map[string]string) Values {
 		}
 	}
 	v.EmailRecipients = ParseRecipients(raw[KeyEmailRecipients])
+	v.UpdateExclude, _ = protocol.ParseExcludePatterns(raw[KeyUpdateExclude])
+	i(KeySLACriticalDays, &v.SLACriticalDays, 0, 3650)
+	i(KeySLAHighDays, &v.SLAHighDays, 0, 3650)
+	i(KeySLAMediumDays, &v.SLAMediumDays, 0, 3650)
+	i(KeySLALowDays, &v.SLALowDays, 0, 3650)
+	b(KeyEmailSLAOverdue, &v.EmailSLAOverdue)
+	t(KeyEPSSUpdatedAt, &v.EPSSUpdatedAt)
 	return v
 }
 
@@ -190,4 +217,24 @@ func ParseRecipients(s string) []string {
 // Stamp stores a timestamp setting.
 func Stamp(ctx context.Context, st *store.Store, key string, t time.Time) error {
 	return st.SaveSettings(ctx, map[string]string{key: strconv.FormatInt(t.UTC().Unix(), 10)})
+}
+
+// SLADays returns the remediation target in days for a severity (0 = none).
+func (v Values) SLADays(sev vuln.Severity) int {
+	switch sev {
+	case vuln.SeverityCritical:
+		return v.SLACriticalDays
+	case vuln.SeverityHigh:
+		return v.SLAHighDays
+	case vuln.SeverityMedium:
+		return v.SLAMediumDays
+	case vuln.SeverityLow:
+		return v.SLALowDays
+	}
+	return 0
+}
+
+// SLA returns the targets for the store's due date queries.
+func (v Values) SLA() store.SLA {
+	return store.SLA{Critical: v.SLACriticalDays, High: v.SLAHighDays, Medium: v.SLAMediumDays, Low: v.SLALowDays}
 }

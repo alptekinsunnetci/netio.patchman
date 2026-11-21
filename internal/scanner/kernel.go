@@ -136,3 +136,50 @@ func filterRPMKernels(pkgs []protocol.Package, running string) ([]protocol.Packa
 	}
 	return out, true
 }
+
+// ApplyKernelCare replaces the version of the running kernel's packages with
+// the release KernelCare patched the kernel up to, so kernel findings follow
+// the effective kernel. Only RPM distributions qualify: their uname -r is
+// "<version>-<release>.<arch>", the package version without the arch.
+// Debian/Ubuntu kernel package versions cannot be derived from uname -r.
+func ApplyKernelCare(pkgs []protocol.Package, running, effective string) []protocol.Package {
+	running, effective = strings.TrimSpace(running), strings.TrimSpace(effective)
+	if effective == "" || effective == running {
+		return pkgs
+	}
+	ver := ""
+	for _, arch := range []string{".x86_64", ".aarch64", ".ppc64le", ".s390x", ".i686"} {
+		if v, ok := strings.CutSuffix(effective, arch); ok {
+			ver = v
+		}
+	}
+	if ver == "" {
+		return pkgs
+	}
+	out := make([]protocol.Package, len(pkgs))
+	copy(out, pkgs)
+	for i, p := range out {
+		if !isRPMKernel(p.Name) || !rpmKernelRunning(p.Version, running) {
+			continue
+		}
+		v := ver
+		if epoch, _, ok := strings.Cut(p.Version, ":"); ok {
+			v = epoch + ":" + ver
+		}
+		out[i].Version = v
+		if out[i].SourceVersion != "" {
+			out[i].SourceVersion = v
+		}
+	}
+	return out
+}
+
+// isKernelPackage reports whether a finding's package is a kernel package:
+// Debian/Ubuntu source packages (linux, linux-hwe-6.8, linux-aws, …) or RPM
+// kernel packages.
+func isKernelPackage(name string) bool {
+	if name == "linux" || (strings.HasPrefix(name, "linux-") && !strings.HasPrefix(name, "linux-firmware")) {
+		return true
+	}
+	return isRPMKernel(name)
+}

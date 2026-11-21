@@ -192,6 +192,7 @@ func (s *Server) parseScheduleForm(r *http.Request, sc *store.Schedule) []string
 	var bad []string
 	sc.Name = strings.TrimSpace(r.PostFormValue("name"))
 	sc.Enabled = r.PostFormValue("enabled") == "1"
+	sc.Reboot = r.PostFormValue("reboot") == "1"
 	sc.JobType = r.PostFormValue("job_type")
 	sc.Target = r.PostFormValue("target")
 	sc.OSID = strings.TrimSpace(r.PostFormValue("os_id"))
@@ -260,7 +261,7 @@ func (s *Server) parseScheduleForm(r *http.Request, sc *store.Schedule) []string
 
 func scheduleAuditDetails(sc store.Schedule) string {
 	d := "type=" + sc.JobType + " days=" + strconv.Itoa(sc.Days) + " time=" + schedule.Clock(sc.Minute) +
-		" window=" + strconv.Itoa(sc.WindowMinutes) + " target=" + sc.Target + " enabled=" + strconv.FormatBool(sc.Enabled)
+		" window=" + strconv.Itoa(sc.WindowMinutes) + " target=" + sc.Target + " enabled=" + strconv.FormatBool(sc.Enabled) + " reboot=" + strconv.FormatBool(sc.Reboot)
 	if sc.OSID != "" {
 		d += " os=" + sc.OSID
 	}

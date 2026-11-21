@@ -33,6 +33,11 @@
   </select>
   <label class="check-label"><input type="checkbox" name="kev" value="1"{{if $d.Filter.KEVOnly}} checked{{end}}> {{t "vulns.filter.kev"}}</label>
   <label class="check-label"><input type="checkbox" name="fix" value="1"{{if $d.Filter.FixOnly}} checked{{end}}> {{t "vulns.filter.fix"}}</label>
+  {{if $d.Filter.SLA.Enabled}}<label class="check-label"><input type="checkbox" name="overdue" value="1"{{if $d.Filter.OverdueOnly}} checked{{end}}> {{t "vulns.filter.overdue"}}</label>{{end}}
+  <select class="field__input" name="sort" aria-label="{{t "vulns.sort.label"}}">
+    <option value="">{{t "vulns.sort.severity"}}</option>
+    <option value="epss"{{if eq $d.Filter.Sort "epss"}} selected{{end}}>{{t "vulns.sort.epss"}}</option>
+  </select>
   <button class="button" type="submit">{{t "common.filter"}}</button>
   {{if $d.Query}}<a class="button button--ghost" href="/vulnerabilities">{{t "common.clear"}}</a>{{end}}
 </form>
@@ -46,10 +51,12 @@
         <th>{{t "vuln.field.cve_id"}}</th>
         <th>{{t "vuln.field.severity"}}</th>
         <th class="num">{{t "vuln.field.cvss_score"}}</th>
+        <th class="num" title="{{t "vuln.field.epss_hint"}}">{{t "vuln.field.epss"}}</th>
         <th>{{t "vuln.field.affected_package"}}</th>
         <th class="num">{{t "vuln.field.affected_servers"}}</th>
         <th>{{t "vulns.col.fix"}}</th>
         <th>{{t "vuln.field.first_detected"}}</th>
+        {{if $d.Filter.SLA.Enabled}}<th>{{t "vuln.field.due"}}</th>{{end}}
       </tr>
     </thead>
     <tbody>
@@ -61,10 +68,12 @@
       </td>
       <td>{{template "sev" .Severity}}</td>
       <td class="num mono">{{cvss .CVSSScore}}</td>
+      <td class="num mono">{{epss .EPSS}}</td>
       <td class="mono">{{join .Packages ", "}}</td>
       <td class="num">{{.HostCount}}</td>
       <td>{{if .FixAvailable}}<span class="pill pill--online">{{t "vulns.fix_available"}}</span>{{else}}<span class="pill pill--muted">{{t "vuln.fix_not_available"}}</span>{{end}}</td>
       <td><time datetime="{{iso .FirstDetectedAt}}">{{date .FirstDetectedAt}}</time></td>
+      {{if $d.Filter.SLA.Enabled}}<td>{{if .DueAt.IsZero}}<span class="muted">{{t "common.empty"}}</span>{{else}}<time datetime="{{iso .DueAt}}">{{date .DueAt}}</time>{{if .Overdue}} <span class="pill pill--danger">{{t "sla.overdue"}}</span>{{end}}{{end}}</td>{{end}}
     </tr>
     {{end}}
     </tbody>

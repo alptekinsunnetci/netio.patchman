@@ -24,6 +24,7 @@ netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstell
 - [Agent auf Servern installieren](#agent-auf-servern-installieren)
 - [Aktualisierung, Sicherung und Entfernung](#aktualisierung-sicherung-und-entfernung)
 - [Konfiguration](#konfiguration)
+- [REST-API und Prometheus](#rest-api-und-prometheus)
 - [Fehlerbehebung](#fehlerbehebung)
 - [Sprache und Lokalisierung](#sprache-und-lokalisierung)
 - [Sicherheit](#sicherheit)
@@ -56,6 +57,14 @@ netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstell
 - **Benutzer und Rollen:** Rollen Administrator, Operator und Betrachter; Prüfprotokoll.
 - **Konfiguration im Dashboard:** SMTP, Serveradresse, Zeitzone, Datenquellen und alle Betriebseinstellungen werden im Dashboard geändert. Änderungen gelten ohne Neustart.
 - **Export:** Server- und Schwachstellenlisten lassen sich als Excel-kompatible CSV-Dateien herunterladen.
+- **Kernel-Live-Patching:** KernelCare (CloudLinux, AlmaLinux, Rocky, RHEL) und Canonical Livepatch (Ubuntu) werden erkannt. Die von KernelCare gepatchte Kernelversion gilt für Kernel-Befunde, von Livepatch behobene CVEs zählen nicht als offen, und ein von KernelCare abgedecktes Kernel-Update markiert den Server nicht als neustartbedürftig.
+- **Nicht zu aktualisierende Pakete:** Muster wie `kernel*`, `mysql-*` oder `KB5034439` für alle Server, eine Gruppe oder einen Server. Alle Update-Aufträge aus Dashboard, Zeitplänen und API überspringen diese Pakete.
+- **EPSS-Priorisierung:** Der FIRST-EPSS-Wert (Wahrscheinlichkeit der Ausnutzung in den nächsten 30 Tagen) wird je Schwachstelle angezeigt; die Liste lässt sich nach KEV und EPSS sortieren.
+- **Behebungsfristen (SLA):** Tage je Schweregrad (Standard kritisch 15, hoch 30, mittel 90, niedrig 180). Überfällige Befunde werden markiert, erscheinen im Dashboard und im Bericht und lösen Benachrichtigung und E-Mail aus.
+- **Gruppenbasierter Zugriff:** Operatoren und Betrachter lassen sich auf die Server bestimmter Gruppen beschränken (Teams oder Kunden).
+- **Optionaler Neustart in Zeitplänen:** Server, die nach dem Update einen Neustart brauchen, können bei offenem Wartungsfenster neu gestartet werden (je Regel, standardmäßig aus).
+- **Windows-Programme von Drittanbietern:** Auf Servern mit winget werden Updates von Programmen wie Chrome, 7-Zip oder Git angezeigt und installiert.
+- **REST-API und Prometheus:** API-Schlüssel lesen Server, Schwachstellen, Updates und Aufträge und starten Update-Aufträge; `/metrics` liefert Metriken für Grafana/Prometheus. Siehe [docs/api.md](docs/api.md).
 
 ### Unterstützte Systeme
 
@@ -64,9 +73,13 @@ netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstell
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
 | CloudLinux 8, 9 | dnf | ✓ (mit AlmaLinux-Sicherheitsdaten) |
+| CentOS 7, CloudLinux 7, Oracle Linux 7 | yum | ✓ (mit Red-Hat-7- und TuxCare-ELS-Daten) |
+| Oracle Linux 8, 9; CentOS Linux 8 | dnf | ✓ (mit AlmaLinux-Daten) |
+| Mageia, openEuler | dnf | ✓ |
+| Linux Mint, Pop!_OS, Zorin OS, elementary OS, LMDE, Raspberry Pi OS | apt | ✓ (mit den Daten ihrer Ubuntu/Debian-Version) |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
-| CentOS, Oracle Linux, Fedora und andere Distributionen (mit dnf, yum, zypper, apt oder apk) | ✓ | — |
+| CentOS Stream, Amazon Linux, Fedora und andere Distributionen (mit dnf, yum, zypper, apt oder apk) | ✓ | — |
 | Windows Server 2016, 2019, 2022, 2025; Windows 10, 11 (x64) | Windows Update | ✓ (ausstehende Microsoft-Updates) |
 
 Der Agent läuft auf amd64 und arm64. Als Dienstmanager wird systemd oder OpenRC (Alpine) benötigt. Physische, virtuelle (VMware, Hyper-V, KVM/Proxmox) und Cloud-Server werden gleichermaßen unterstützt.
@@ -337,6 +350,7 @@ Die Variablen mit dem Präfix `PATCHMAN_` in `.env` liefern nur die Anfangswerte
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV-API-Adresse (ein interner Spiegel ist möglich) | ja |
 | `PATCHMAN_KEV_URL` | CISA-KEV-Adresse | Adresse des KEV-Katalogs; `off` schaltet ihn ab | ja |
 | `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Adresse des Microsoft Security Update Guide für die CVE-Zuordnung von Windows-Servern; `off` schaltet ihn ab | ja |
+| `PATCHMAN_EPSS_URL` | `https://epss.empiricalsecurity.com/epss_scores-current.csv.gz` | Tägliche EPSS-Datei; `off` schaltet sie ab | ja |
 | `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | E-Mail-Server | ja |
 | `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP-Zugangsdaten | ja |
 | `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Absendername und -adresse | ja |
@@ -344,6 +358,26 @@ Die Variablen mit dem Präfix `PATCHMAN_` in `.env` liefern nur die Anfangswerte
 | `PATCHMAN_VERSION` | Datei `VERSION` | Zu bauende Server- und Agentenversion | — |
 
 Hat eine Umgebungsvariable einen ungültigen Wert, startet der Server nicht und listet die Fehler in der Standardsprache auf.
+
+## REST-API und Prometheus
+
+Erstellen Sie einen Schlüssel unter **Profil → API-Schlüssel**. Ein Schlüssel arbeitet mit Rolle und Serverzugriff des erstellenden Benutzers; schreibgeschützte Schlüssel können nichts ändern. Endpunkte, Felder und Beispiele: [docs/api.md](docs/api.md) (Türkisch).
+
+```sh
+curl -H "Authorization: Bearer npat_..." https://patchman.your-domain/api/v1/hosts
+curl -H "Authorization: Bearer npat_..." "https://patchman.your-domain/api/v1/vulnerabilities?sort=epss&overdue=1"
+curl -X POST -H "Authorization: Bearer npat_..." -H "Content-Type: application/json" \
+  -d '{"type":"upgrade_security"}' https://patchman.your-domain/api/v1/hosts/12/jobs
+```
+
+```yaml
+# prometheus.yml
+scrape_configs:
+  - job_name: netio-patchman
+    scheme: https
+    authorization: { credentials: npat_... }
+    static_configs: [{ targets: ["patchman.your-domain"] }]
+```
 
 ## Fehlerbehebung
 

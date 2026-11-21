@@ -217,7 +217,13 @@ func (s *Server) renderProfile(w http.ResponseWriter, r *http.Request, status in
 	}
 	d := s.page(r, s.l.T("profile.title"), "profile")
 	d.Error = errMsg
-	data := map[string]any{"RecoveryLeft": left, "MFARequired": s.mfaRequired(), "MissingMFA": s.mfaRequired() && !sess.user.MFAEnabled()}
+	tokens, err := s.st.ListAPITokens(r.Context(), sess.user.ID)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	data := map[string]any{"RecoveryLeft": left, "MFARequired": s.mfaRequired(), "MissingMFA": s.mfaRequired() && !sess.user.MFAEnabled(),
+		"APITokens": tokens, "BaseURL": s.baseURL()}
 	for k, v := range extra {
 		data[k] = v
 	}

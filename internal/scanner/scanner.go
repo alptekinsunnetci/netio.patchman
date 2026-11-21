@@ -10,6 +10,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"slices"
 	"sync"
 	"time"
 
@@ -30,6 +31,8 @@ type Options struct {
 	KEVURL string // empty disables KEV
 	// MSRCURL is the Security Update Guide API for Windows hosts (empty disables).
 	MSRCURL string
+	// EPSSURL is the EPSS score file (empty disables); System overrides it.
+	EPSSURL string
 	// System, when set, supplies the OSV and KEV addresses (editable at
 	// runtime); OSV is then only a template for the HTTP settings.
 	System   *settings.Live
@@ -163,6 +166,11 @@ func (s *Scanner) cycle(ctx context.Context) error {
 				s.o.Logger.Warn(s.o.L.T("log.scan.kev_failed"), slog.String("error", err.Error()))
 			}
 		}
+		if s.epssURL() != "" && cfg.ScanEnabled {
+			if err := s.RefreshEPSS(ctx); err != nil {
+				s.o.Logger.Warn(s.o.L.T("log.scan.epss_failed"), slog.String("error", err.Error()))
+			}
+		}
 	}
 	if !cfg.ScanEnabled {
 		return nil
@@ -218,6 +226,7 @@ func (s *Scanner) ScanHost(ctx context.Context, hostID int64) error {
 		return err
 	}
 	pkgs = ActiveKernelPackages(pkgs, host.Kernel)
+	pkgs = ApplyKernelCare(pkgs, host.Kernel, host.KernelEffective)
 	start := time.Now()
 
 	// 1. OSV package queries (cached).
@@ -313,6 +322,14 @@ func (s *Scanner) ScanHost(ctx context.Context, hostID int64) error {
 		}
 	}
 
+	// Canonical Livepatch fixed these CVEs in the running kernel.
+	if len(host.LivepatchCVEs) > 0 {
+		for key := range detected {
+			if isKernelPackage(key[1]) && slices.Contains(host.LivepatchCVEs, key[0]) {
+				delete(detected, key)
+			}
+		}
+	}
 	// 4. Vulnerability details for CVEs that are new or stale.
 	cveIDs := make([]string, 0, len(byCVE))
 	for id := range byCVE {

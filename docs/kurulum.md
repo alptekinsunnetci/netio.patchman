@@ -184,6 +184,7 @@ Kayıt anahtarını süreli ve kullanım sınırlı oluşturup Ansible, Puppet v
 | `PATCHMAN_ENROLLMENT_TOKEN` | — | İlk kayıt için anahtar |
 | `PATCHMAN_REMOTE_UPDATES` | `true` | `false` ise panelden başlatılan paket güncelleme işleri bu sunucuda çalıştırılmaz |
 | `PATCHMAN_AUTO_UPDATE` | `true` | `false` ise ajan kendini otomatik olarak güncellemez (sürüm sabitleme) |
+| `PATCHMAN_WINGET` | `true` | Windows: üçüncü taraf program güncellemelerini winget ile listeler ve kurar (kurulumda `-DisableWinget`) |
 | `PATCHMAN_REFRESH_PACKAGE_LISTS` | `true` | Paket listelerini en fazla 6 saatte bir yeniler (`apt-get update`, `zypper refresh`, `apk update`) |
 | `PATCHMAN_CA_FILE` | — | Ek CA sertifikası |
 | `PATCHMAN_LOCALE` | `tr-TR` | Ajan günlüklerinin ve panelde görünen iş mesajlarının dili (`tr-TR`, `en-US`, `de-DE` veya `ru-RU`). Kurulumda `--locale` ile yazılır (ör. `--locale de-DE`) |
@@ -398,7 +399,11 @@ Komut, kullanıcının doğrulayıcısını ve yedek kodlarını kaldırır, otu
 - **Yeni sürüm denetimi:** **Sunucu yapılandırması → Sürüm denetimi** bölümünden kapatın veya iç ağdaki bir `VERSION` dosyasına yönlendirin (`PATCHMAN_UPDATE_CHECK_URL=off`).
 - Panel dış kaynak (CDN, yazı tipi) kullanmaz.
 
-## 9. Sorun giderme
+## 9. REST API ve izleme
+
+REST API ve Prometheus metrikleri için bkz. [api.md](api.md). Anahtarlar **Profilim → API anahtarları** bölümünden oluşturulur; `/metrics` aynı anahtarla korunur.
+
+## 10. Sorun giderme
 
 | Belirti | Kontrol |
 |---|---|

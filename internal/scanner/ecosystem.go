@@ -56,15 +56,50 @@ func TargetFor(h protocol.HostInfo) Target {
 		return rpmTarget("AlmaLinux:" + major)
 	case "rocky":
 		return rpmTarget("Rocky Linux:" + major)
-	case "cloudlinux":
-		// CloudLinux 8 and 9 are built from AlmaLinux sources with the same package
-		// names and versions (verified against api.osv.dev; .lve/.cloudlinux release
-		// suffixes compare as newer builds of the same release). OSV has no CloudLinux
-		// ecosystem; CloudLinux 7 (CentOS 7 based) stays unsupported.
-		if major == "8" || major == "9" {
+	case "cloudlinux", "ol":
+		// CloudLinux and Oracle Linux 8 and 9 are rebuilds with the same package
+		// names and versions as AlmaLinux (verified against api.osv.dev; .lve,
+		// .cloudlinux and .0.1 release suffixes compare as newer builds of the same
+		// release). OSV has no CloudLinux or Oracle Linux ecosystem. Version 7 is
+		// a CentOS/RHEL 7 rebuild.
+		switch major {
+		case "8", "9":
 			return rpmTarget("AlmaLinux:" + major)
+		case "7":
+			return el7Target()
 		}
 		return Target{}
+	case "centos":
+		// CentOS Stream runs ahead of RHEL: no matching data.
+		if strings.Contains(strings.ToLower(h.OSName), "stream") {
+			return Target{}
+		}
+		switch major {
+		case "7":
+			return el7Target()
+		case "8":
+			return rpmTarget("AlmaLinux:8")
+		}
+		return Target{}
+	case "mageia":
+		return rpmTarget("Mageia:" + major)
+	case "openeuler":
+		// VERSION="22.03 (LTS-SP1)" -> "openEuler:22.03-LTS-SP1".
+		if ver == "" {
+			return Target{}
+		}
+		eco := "openEuler:" + ver
+		if _, rest, ok := strings.Cut(h.OSVersion, "("); ok {
+			if edition := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(rest), ")")); edition != "" {
+				eco += "-" + edition
+			}
+		}
+		return Target{Ecosystems: []string{eco}}
+	case "raspbian":
+		if major == "" {
+			return Target{}
+		}
+		return Target{Ecosystems: []string{"Debian:" + major}, UseSource: true}
 	case "rhel":
 		if major == "" {
 			return Target{}
@@ -91,9 +126,47 @@ func TargetFor(h protocol.HostInfo) Target {
 		}
 		return Target{Ecosystems: []string{eco}}
 	}
-	return Target{}
+	return upstreamTarget(h.Upstream)
 }
 
+// el7Target covers CentOS 7 and its rebuilds: Red Hat data for the release
+// and TuxCare's extended lifecycle support fixes published after its end of
+// life (package versions verified against api.osv.dev).
+func el7Target() Target {
+	return Target{Ecosystems: []string{"Red Hat:enterprise_linux:7::server", "TuxCare:CentOS:7"}}
+}
+
+// Ubuntu and Debian releases by codename, for derivatives that name their
+// upstream release (Linux Mint, Pop!_OS, Zorin OS, elementary OS, LMDE).
+var (
+	ubuntuReleases = map[string]string{
+		"xenial": "16.04", "bionic": "18.04", "focal": "20.04", "jammy": "22.04", "noble": "24.04",
+		"lunar": "23.04", "mantic": "23.10", "oracular": "24.10", "plucky": "25.04", "questing": "25.10",
+	}
+	debianReleases = map[string]string{"buster": "10", "bullseye": "11", "bookworm": "12", "trixie": "13"}
+)
+
+func upstreamTarget(upstream string) Target {
+	distro, codename, _ := strings.Cut(upstream, ":")
+	switch distro {
+	case "ubuntu":
+		ver, ok := ubuntuReleases[codename]
+		if !ok {
+			return Target{}
+		}
+		eco := "Ubuntu:" + ver
+		// LTS releases come out in April of even years.
+		if strings.HasSuffix(ver, ".04") && (ver[1]-'0')%2 == 0 {
+			eco += ":LTS"
+		}
+		return Target{Ecosystems: []string{eco}, UseSource: true}
+	case "debian":
+		if ver, ok := debianReleases[codename]; ok {
+			return Target{Ecosystems: []string{"Debian:" + ver}, UseSource: true}
+		}
+	}
+	return Target{}
+}
 func rpmTarget(eco string) Target {
 	if strings.HasSuffix(eco, ":") {
 		return Target{}

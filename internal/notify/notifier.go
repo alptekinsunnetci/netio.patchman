@@ -393,6 +393,50 @@ func (n *Notifier) RisksExpired(ctx context.Context, risks []store.ExpiredRisk) 
 	}
 }
 
+// SLAOverdue reports findings that passed their remediation deadline since the
+// last check: one summary notification and, when enabled, one email.
+func (n *Notifier) SLAOverdue(ctx context.Context) {
+	cfg, err := settings.Load(ctx, n.st)
+	if err != nil {
+		return
+	}
+	hosts, err := n.st.ClaimOverdue(ctx, cfg.SLA())
+	if err != nil || len(hosts) == 0 {
+		return
+	}
+	total := 0
+	for _, h := range hosts {
+		total += h.Count
+	}
+	_ = n.st.AddNotification(ctx, store.LevelWarning, "sla_overdue", map[string]string{
+		"count": strconv.Itoa(total), "hosts": strconv.Itoa(len(hosts)),
+	}, "/vulnerabilities?overdue=1")
+	if !cfg.EmailSLAOverdue || !n.emailEnabled(cfg) {
+		return
+	}
+	to := n.recipients(ctx, cfg)
+	if len(to) == 0 {
+		return
+	}
+	rows := make([]email.NoticeRow, 0, len(hosts))
+	for i, h := range hosts {
+		if i == 50 {
+			break
+		}
+		rows = append(rows, email.NoticeRow{Label: h.Hostname, Value: n.l.T("email.sla_overdue.row", "count", h.Count)})
+	}
+	m, err := n.renderer.Notice(email.Notice{
+		Subject: n.l.T("email.sla_overdue.subject", "count", total),
+		Heading: n.l.T("email.sla_overdue.heading"),
+		Body:    n.l.T("email.sla_overdue.body", "count", total, "hosts", len(hosts)),
+		Rows:    rows,
+		LinkURL: n.baseURL() + "/vulnerabilities?overdue=1", LinkText: n.l.T("email.vuln.dashboard_link"),
+	}, to)
+	if err == nil {
+		n.send(ctx, m)
+	}
+}
+
 // BackupFailed records a failed database backup and emails the recipients
 // when email notifications are on.
 func (n *Notifier) BackupFailed(ctx context.Context, err error) {

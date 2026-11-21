@@ -27,6 +27,15 @@
       <label class="field"><span class="field__label">{{t "user.field.role"}}</span>
         <select class="field__input" name="role">{{range $d.Roles}}<option value="{{.}}"{{if eq $u.Role .}} selected{{end}}>{{roleLabel .}}</option>{{end}}</select></label>
       <label class="check-label"><input type="checkbox" name="disabled" value="1"{{if $u.Disabled}} checked{{end}}> {{t "user.disable_account"}}</label>
+      <fieldset class="field">
+        <legend class="field__label">{{t "user.field.access"}}</legend>
+        <label class="check-label"><input type="radio" name="scope" value="all"{{if not $u.GroupScoped}} checked{{end}}> {{t "user.access.all"}}</label>
+        <label class="check-label"><input type="radio" name="scope" value="groups"{{if $u.GroupScoped}} checked{{end}}> {{t "user.access.groups"}}</label>
+        <div class="checklist" data-show-when="scope=groups">
+          {{range $d.Groups}}<label class="check-label"><input type="checkbox" name="group_ids" value="{{.ID}}"{{if has $d.Member .ID}} checked{{end}}> {{.Name}} <small class="muted">{{t "group.host_count" "count" .HostCount}}</small></label>{{else}}<p class="muted">{{t "groups.empty"}}</p>{{end}}
+        </div>
+        <span class="field__hint">{{t "user.access.hint"}}</span>
+      </fieldset>
       <div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>
     </form>
   </section>

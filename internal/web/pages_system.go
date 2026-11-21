@@ -36,6 +36,8 @@ type systemForm struct {
 	KEVURL          string
 	MSRCEnabled     bool
 	MSRCURL         string
+	EPSSEnabled     bool
+	EPSSURL         string
 	UpdateEnabled   bool
 	UpdateURL       string
 }
@@ -47,6 +49,7 @@ func systemFormFrom(sys settings.System) systemForm {
 		SMTPFromName: sys.SMTP.From.Name, SMTPFromAddress: sys.SMTP.From.Address,
 		OSVURL: sys.OSVURL, KEVEnabled: sys.KEVURL != "", KEVURL: sys.KEVSourceURL,
 		MSRCEnabled: sys.MSRCURL != "", MSRCURL: sys.MSRCSourceURL,
+		EPSSEnabled: sys.EPSSURL != "", EPSSURL: sys.EPSSSourceURL,
 		UpdateEnabled: sys.UpdateURL != "", UpdateURL: sys.UpdateSourceURL,
 	}
 }
@@ -102,6 +105,7 @@ func (s *Server) systemSave(w http.ResponseWriter, r *http.Request) {
 		SMTPFromName: in("smtp_from_name"), SMTPFromAddress: in("smtp_from_address"),
 		OSVURL: in("osv_url"), KEVEnabled: r.PostFormValue("kev_enabled") == "1", KEVURL: in("kev_url"),
 		MSRCEnabled: r.PostFormValue("msrc_enabled") == "1", MSRCURL: in("msrc_url"),
+		EPSSEnabled: r.PostFormValue("epss_enabled") == "1", EPSSURL: in("epss_url"),
 		UpdateEnabled: r.PostFormValue("update_enabled") == "1", UpdateURL: in("update_url"),
 	}
 	password := r.PostFormValue("smtp_password") // not trimmed
@@ -183,6 +187,16 @@ func (s *Server) systemSave(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			kv[settings.KeyMSRCURL] = u
+		}
+	}
+	if _, ok := r.PostForm["epss_url"]; ok {
+		kv[settings.KeyEPSSEnabled] = strconv.FormatBool(f.EPSSEnabled)
+		if u, err := settings.ParseSourceURL(f.EPSSURL); err != nil {
+			if f.EPSSEnabled || f.EPSSURL != "" {
+				bad = append(bad, s.l.T("system.error.url", "field", field("system.epss_url")))
+			}
+		} else {
+			kv[settings.KeyEPSSURL] = u
 		}
 	}
 	kv[settings.KeyUpdateEnabled] = strconv.FormatBool(f.UpdateEnabled)

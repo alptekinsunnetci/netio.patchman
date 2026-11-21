@@ -74,6 +74,28 @@
     </div>
   </section>
 
+  <section class="panel" id="updates">
+    <h2 class="panel__title">{{t "settings.updates.title"}}</h2>
+    <label class="field"><span class="field__label">{{t "settings.updates.exclude"}}</span>
+      <textarea class="field__input mono" name="update_exclude" rows="3" maxlength="4000">{{join $c.UpdateExclude ", "}}</textarea>
+      <span class="field__hint">{{t "settings.updates.exclude_hint"}}</span></label>
+  </section>
+
+  <section class="panel" id="sla">
+    <h2 class="panel__title">{{t "settings.sla.title"}}</h2>
+    <p class="field__hint">{{t "settings.sla.hint"}}</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "settings.sla.critical"}}</span>
+        <input class="field__input" type="number" name="sla_critical_days" min="0" max="3650" value="{{$c.SLACriticalDays}}"></label>
+      <label class="field"><span class="field__label">{{t "settings.sla.high"}}</span>
+        <input class="field__input" type="number" name="sla_high_days" min="0" max="3650" value="{{$c.SLAHighDays}}"></label>
+      <label class="field"><span class="field__label">{{t "settings.sla.medium"}}</span>
+        <input class="field__input" type="number" name="sla_medium_days" min="0" max="3650" value="{{$c.SLAMediumDays}}"></label>
+      <label class="field"><span class="field__label">{{t "settings.sla.low"}}</span>
+        <input class="field__input" type="number" name="sla_low_days" min="0" max="3650" value="{{$c.SLALowDays}}"></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="email_sla_overdue" value="1"{{if $c.EmailSLAOverdue}} checked{{end}}> {{t "settings.sla.email"}}</label>
+  </section>
   <section class="panel" id="backup">
     <h2 class="panel__title">{{t "settings.backup.title"}}</h2>
     <label class="check-label"><input type="checkbox" name="backup_enabled" value="1"{{if $c.BackupEnabled}} checked{{end}}> {{t "settings.backup.enabled"}}</label>

@@ -23,6 +23,8 @@ type session struct {
 	tokenHash string
 	user      store.User
 	csrf      string
+	// apiToken is the name of the API key a REST request used ("" in the dashboard).
+	apiToken string
 }
 
 type sessionKey struct{}
@@ -87,7 +89,18 @@ func (s *Server) require(min role) func(http.HandlerFunc) http.Handler {
 				http.Redirect(w, r, "/login"+next, http.StatusFound)
 				return
 			}
-			r = r.WithContext(context.WithValue(r.Context(), sessionKey{}, sess))
+			ctx := context.WithValue(r.Context(), sessionKey{}, sess)
+			// Group-limited users: every store query sees only their hosts;
+			// fleet-wide pages (schedules, agents) are not available.
+			if ids, ok := sess.user.Scope(); ok {
+				ctx = store.WithScope(ctx, ids)
+				if fleetWidePath(r.URL.Path) {
+					r = r.WithContext(ctx)
+					s.errorPage(w, r, http.StatusForbidden, "error.forbidden")
+					return
+				}
+			}
+			r = r.WithContext(ctx)
 			if r.Method == http.MethodPost {
 				if !s.sameOrigin(r) || subtle.ConstantTimeCompare([]byte(r.PostFormValue("_csrf")), []byte(sess.csrf)) != 1 {
 					s.errorPage(w, r, http.StatusForbidden, "error.csrf")
@@ -352,4 +365,21 @@ func (s *Server) profilePassword(w http.ResponseWriter, r *http.Request) {
 	}
 	s.audit(r, "user.password_changed", sess.user.Email, "")
 	s.redirect(w, r, "/profile", "success", s.l.T("profile.password_changed"))
+}
+
+// fleetWidePath reports pages that concern every host (schedules, agent
+// enrollment and versions): group-limited users cannot open them.
+func fleetWidePath(p string) bool {
+	for _, prefix := range []string{"/schedules", "/agents"} {
+		if p == prefix || strings.HasPrefix(p, prefix+"/") {
+			return true
+		}
+	}
+	return false
+}
+
+// limited reports whether the signed-in user only sees some groups' hosts.
+func (s *Server) limited(r *http.Request) bool {
+	sess := sessionFrom(r)
+	return sess != nil && sess.user.Limited()
 }

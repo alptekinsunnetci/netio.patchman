@@ -11,7 +11,9 @@
 package protocol
 
 import (
+	"path"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -56,6 +58,10 @@ type HostInfo struct {
 	// "vmware", "kvm", "microsoft", "docker", or "none" for physical machines.
 	// Empty when unknown (agents before 0.3.0).
 	Virtualization string `json:"virtualization,omitempty"`
+	// Upstream is the release a derivative distribution is built on, from
+	// os-release UBUNTU_CODENAME or DEBIAN_CODENAME: "ubuntu:jammy", "debian:bookworm".
+	// Empty for Ubuntu and Debian themselves.
+	Upstream string `json:"upstream,omitempty"`
 }
 
 var virtRE = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,31}$`)
@@ -63,6 +69,16 @@ var virtRE = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,31}$`)
 // CleanVirtualization returns v if it is a valid platform id, otherwise "".
 func CleanVirtualization(v string) string {
 	if virtRE.MatchString(v) {
+		return v
+	}
+	return ""
+}
+
+var upstreamRE = regexp.MustCompile(`^(ubuntu|debian):[a-z]{3,20}$`)
+
+// CleanUpstream returns v if it is a valid upstream release, otherwise "".
+func CleanUpstream(v string) string {
+	if upstreamRE.MatchString(v) {
 		return v
 	}
 	return ""
@@ -128,6 +144,24 @@ type Report struct {
 	RestartServices []string  `json:"restart_services,omitempty"`
 	CollectedAt     time.Time `json:"collected_at"`
 	Errors          []string  `json:"errors,omitempty"`
+	// KernelPatch is the live kernel patching service, nil when none.
+	KernelPatch *KernelPatch `json:"kernel_patch,omitempty"`
+}
+
+// Live kernel patching services.
+const (
+	KernelCare = "kernelcare" // TuxCare KernelCare: kcarectl --uname is the effective kernel
+	Livepatch  = "livepatch"  // Canonical Livepatch: a list of patched CVEs
+)
+
+// KernelPatch describes live patches applied to the running kernel.
+type KernelPatch struct {
+	Provider string `json:"provider"`
+	// EffectiveKernel is the kernel release the patched kernel corresponds to
+	// (KernelCare), in uname -r form.
+	EffectiveKernel string `json:"effective_kernel,omitempty"`
+	// CVEs are fixed in the running kernel by live patches (Livepatch).
+	CVEs []string `json:"cves,omitempty"`
 }
 
 // Job types.
@@ -152,6 +186,9 @@ func ValidJobType(t string) bool {
 
 // Agent update job parameters.
 const (
+	// ParamExclude is set on package jobs: comma separated name patterns the
+	// job must not update (see Excluded).
+	ParamExclude = "exclude"
 	ParamVersion = "version" // target agent version
 	ParamSHA256  = "sha256"  // hex SHA-256 of the binary
 	ParamPath    = "path"    // download path on the server, under AgentDownloadPrefix
@@ -240,3 +277,37 @@ var serviceNameRE = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9@._:\-]{0,199}$`)
 // ValidServiceName accepts systemd unit names (sshd.service, getty@tty1.service)
 // and OpenRC service names. Both sides check it.
 func ValidServiceName(name string) bool { return serviceNameRE.MatchString(name) }
+
+var excludeRE = regexp.MustCompile(`^[A-Za-z0-9.+_:~@*?\[\]-]{1,100}$`)
+
+// MaxExcludePatterns bounds an exclusion list.
+const MaxExcludePatterns = 200
+
+// ParseExcludePatterns splits a comma, space or newline separated list of
+// package name patterns ("kernel*", "mysql-server", "KB5034439"). Shell-style
+// wildcards: * ? [..]. Invalid entries are returned separately.
+func ParseExcludePatterns(s string) (patterns, invalid []string) {
+	seen := map[string]bool{}
+	for _, f := range strings.FieldsFunc(s, func(r rune) bool { return r == ',' || r == ';' || r == ' ' || r == '\n' || r == '\r' || r == '\t' }) {
+		if _, err := path.Match(f, ""); err != nil || !excludeRE.MatchString(f) {
+			invalid = append(invalid, f)
+			continue
+		}
+		if !seen[strings.ToLower(f)] && len(patterns) < MaxExcludePatterns {
+			seen[strings.ToLower(f)] = true
+			patterns = append(patterns, f)
+		}
+	}
+	return patterns, invalid
+}
+
+// Excluded reports whether name matches one of the patterns (case-insensitive).
+func Excluded(patterns []string, name string) bool {
+	n := strings.ToLower(name)
+	for _, p := range patterns {
+		if ok, _ := path.Match(strings.ToLower(p), n); ok {
+			return true
+		}
+	}
+	return false
+}

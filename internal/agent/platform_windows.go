@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
@@ -140,6 +141,45 @@ func runWU(ctx context.Context, env []string) ([]byte, error) {
 		return nil, fmt.Errorf("powershell: %w: %s", err, strings.TrimSpace(lastLines(stderr.String(), 3)))
 	}
 	return stdout.Bytes(), nil
+}
+
+// wingetExe returns the newest winget (App Installer) executable. A service
+// running as SYSTEM has no WindowsApps alias in PATH, so the package
+// directory is searched; servers without App Installer have none.
+func wingetExe() string {
+	if p, err := exec.LookPath("winget.exe"); err == nil {
+		return p
+	}
+	pf := os.Getenv("ProgramFiles")
+	if pf == "" {
+		pf = `C:\Program Files`
+	}
+	matches, _ := filepath.Glob(filepath.Join(pf, "WindowsApps", "Microsoft.DesktopAppInstaller_*_x64__8wekyb3d8bbwe", "winget.exe"))
+	best, bestVer := "", ""
+	for _, m := range matches {
+		// Microsoft.DesktopAppInstaller_1.29.280.0_x64__8wekyb3d8bbwe
+		parts := strings.Split(filepath.Base(filepath.Dir(m)), "_")
+		if len(parts) < 2 {
+			continue
+		}
+		if best == "" || rpmVerCmp(parts[1], bestVer) > 0 {
+			best, bestVer = m, parts[1]
+		}
+	}
+	return best
+}
+
+// wingetList returns the program updates winget offers.
+func wingetList(ctx context.Context, exe string) ([]protocol.Update, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, exe, append([]string{"upgrade"}, wingetArgs...)...)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout, cmd.Stderr = &stdout, &stderr
+	if err := cmd.Run(); err != nil && stdout.Len() == 0 {
+		return nil, fmt.Errorf("winget: %w: %s", err, strings.TrimSpace(lastLines(stderr.String(), 3)))
+	}
+	return parseWingetUpgrade(stdout.Bytes()), nil
 }
 
 // windowsPrograms lists installed programs from the Uninstall registry keys

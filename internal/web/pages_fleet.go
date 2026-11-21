@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"encoding/csv"
 	"errors"
 	"net/http"
@@ -37,9 +38,15 @@ func (s *Server) dashboard(w http.ResponseWriter, r *http.Request) {
 	topVulns, _, _ := s.st.ListVulnSummaries(ctx, store.VulnFilter{}, store.Page{Number: 1, Size: 8})
 	topHosts, _ := s.st.TopVulnerableHosts(ctx, 8)
 	jobs, _, _ := s.st.ListJobs(ctx, store.JobFilter{}, store.Page{Number: 1, Size: 6})
+	sla := s.sla(ctx)
+	overdue, overdueCVEs, _ := s.st.OverdueCounts(ctx, sla)
 	to := calendarDay(timeutil.Now())
 	from := to.AddDate(0, 0, -29)
-	snaps, err := s.st.Snapshots(ctx, from, to)
+	// Trends are fleet-wide; group-limited users do not see them.
+	var snaps []store.Snapshot
+	if !s.limited(r) {
+		snaps, err = s.st.Snapshots(ctx, from, to)
+	}
 	if err != nil {
 		s.serverError(w, r, err)
 		return
@@ -47,6 +54,7 @@ func (s *Server) dashboard(w http.ResponseWriter, r *http.Request) {
 	d := s.page(r, s.l.T("dashboard.title"), "dashboard")
 	d.Data = map[string]any{
 		"Stats": stats, "Sev": sev, "KEV": kev, "TopVulns": topVulns, "TopHosts": topHosts, "Jobs": jobs,
+		"SLAEnabled": sla.Enabled(), "Overdue": overdue, "OverdueCVEs": overdueCVEs,
 		"Scan": s.o.Scanner.Status(), "Trend": s.buildTrends(snaps, from, to),
 	}
 	s.render(w, r, http.StatusOK, "dashboard", d)
@@ -121,6 +129,12 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		data["Updates"] = ups
+		patterns := s.effectiveExcludes(ctx, id)
+		excluded := map[string]bool{}
+		for _, u := range ups {
+			excluded[u.Name] = protocol.Excluded(patterns, u.Name)
+		}
+		data["ExcludePatterns"], data["Excluded"] = patterns, excluded
 	case "packages":
 		q := r.URL.Query().Get("q")
 		pkgs, total, err := s.st.SearchHostPackages(ctx, id, q, store.Page{Number: pg, Size: pageSize})
@@ -155,12 +169,13 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 	default:
 		data["Tab"] = "vulns"
 		status := r.URL.Query().Get("status")
-		rows, total, err := s.st.ListFindings(ctx, store.FindingFilter{HostID: id, Status: status}, store.Page{Number: pg, Size: pageSize})
+		overdue := r.URL.Query().Get("overdue") == "1"
+		rows, total, err := s.st.ListFindings(ctx, store.FindingFilter{HostID: id, Status: status, SLA: s.sla(ctx), OverdueOnly: overdue}, store.Page{Number: pg, Size: pageSize})
 		if err != nil {
 			s.serverError(w, r, err)
 			return
 		}
-		data["Findings"], data["Pager"], data["Status"] = rows, newPager(r, pg, total), status
+		data["Findings"], data["Pager"], data["Status"], data["Overdue"] = rows, newPager(r, pg, total), status, overdue
 	}
 	d := s.page(r, h.Hostname, "servers")
 	d.Data = data
@@ -424,8 +439,18 @@ func (s *Server) serverDelete(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) vulnFilter(r *http.Request) store.VulnFilter {
 	q := r.URL.Query()
-	return store.VulnFilter{Search: q.Get("q"), Severity: q.Get("severity"), Status: q.Get("status"),
-		KEVOnly: q.Get("kev") == "1", FixOnly: q.Get("fix") == "1"}
+	f := store.VulnFilter{Search: q.Get("q"), Severity: q.Get("severity"), Status: q.Get("status"),
+		KEVOnly: q.Get("kev") == "1", FixOnly: q.Get("fix") == "1", SLA: s.sla(r.Context()), OverdueOnly: q.Get("overdue") == "1"}
+	if q.Get("sort") == "epss" {
+		f.Sort = "epss"
+	}
+	return f
+}
+
+// sla returns the remediation targets from the settings.
+func (s *Server) sla(ctx context.Context) store.SLA {
+	cfg, _ := settings.Load(ctx, s.st)
+	return cfg.SLA()
 }
 
 func (s *Server) vulnerabilities(w http.ResponseWriter, r *http.Request) {
@@ -456,7 +481,7 @@ func (s *Server) vulnerability(w http.ResponseWriter, r *http.Request) {
 	}
 	status := r.URL.Query().Get("status")
 	pg := pageNumber(r)
-	rows, total, err := s.st.ListFindings(ctx, store.FindingFilter{CVEID: id, Status: status}, store.Page{Number: pg, Size: pageSize})
+	rows, total, err := s.st.ListFindings(ctx, store.FindingFilter{CVEID: id, Status: status, SLA: s.sla(ctx)}, store.Page{Number: pg, Size: pageSize})
 	if err != nil {
 		s.serverError(w, r, err)
 		return
@@ -924,9 +949,10 @@ func (s *Server) vulnerabilitiesCSV(w http.ResponseWriter, r *http.Request) {
 	l := s.l
 	_ = cw.Write([]string{l.T("vuln.field.cve_id"), l.T("vuln.field.title"), l.T("vuln.field.severity"), l.T("vuln.field.cvss_score"),
 		l.T("vuln.field.known_exploited"), l.T("host.field.hostname"), l.T("vuln.field.affected_package"), l.T("vuln.field.installed_version"),
-		l.T("vuln.field.fixed_version"), l.T("vuln.field.status"), l.T("vuln.field.first_detected"), l.T("vuln.field.last_checked")})
+		l.T("vuln.field.fixed_version"), l.T("vuln.field.status"), l.T("vuln.field.first_detected"), l.T("vuln.field.last_checked"),
+		l.T("vuln.field.epss"), l.T("vuln.field.due")})
 	vf := s.vulnFilter(r)
-	ff := store.FindingFilter{Severity: vf.Severity, Search: vf.Search, KEVOnly: vf.KEVOnly, Status: vf.Status}
+	ff := store.FindingFilter{Severity: vf.Severity, Search: vf.Search, KEVOnly: vf.KEVOnly, Status: vf.Status, SLA: vf.SLA, OverdueOnly: vf.OverdueOnly}
 	for pg := 1; ; pg++ {
 		rows, _, err := s.st.ListFindings(r.Context(), ff, store.Page{Number: pg, Size: 500})
 		if err != nil || len(rows) == 0 {
@@ -941,8 +967,15 @@ func (s *Server) vulnerabilitiesCSV(w http.ResponseWriter, r *http.Request) {
 			if f.KnownExploited {
 				kev = l.T("common.yes")
 			}
+			epss, due := "", ""
+			if f.EPSS != nil {
+				epss = strconv.FormatFloat(*f.EPSS, 'f', 5, 64)
+			}
+			if !f.DueAt.IsZero() {
+				due = s.f.Date(f.DueAt)
+			}
 			_ = cw.Write([]string{f.CVEID, f.Title, l.T(vuln.Severity(f.Severity).LabelKey()), score, kev, f.Hostname, f.PackageName,
-				f.InstalledVersion, f.FixedVersion, l.T("status." + f.Status), s.f.DateTime(f.FirstDetectedAt), s.f.DateTime(f.LastCheckedAt)})
+				f.InstalledVersion, f.FixedVersion, l.T("status." + f.Status), s.f.DateTime(f.FirstDetectedAt), s.f.DateTime(f.LastCheckedAt), epss, due})
 		}
 		if len(rows) < 500 {
 			break
@@ -959,4 +992,32 @@ func validPackageView(name string) bool {
 		return false
 	}
 	return !strings.ContainsFunc(name, unicode.IsControl)
+}
+
+// effectiveExcludes returns the package patterns no job updates on a host:
+// the fleet-wide list, the host's own and its groups'.
+func (s *Server) effectiveExcludes(ctx context.Context, hostID int64) []string {
+	cfg, _ := settings.Load(ctx, s.st)
+	raw, _ := s.st.HostExcludes(ctx, hostID)
+	list, _ := protocol.ParseExcludePatterns(strings.Join(cfg.UpdateExclude, ",") + "," + raw)
+	return list
+}
+
+func (s *Server) serverExclude(w http.ResponseWriter, r *http.Request) {
+	h, ok := s.hostOr404(w, r)
+	if !ok {
+		return
+	}
+	back := "/servers/" + strconv.FormatInt(h.ID, 10) + "?tab=info"
+	patterns, invalid := protocol.ParseExcludePatterns(r.PostFormValue("exclude"))
+	if len(invalid) > 0 {
+		s.redirect(w, r, back, "error", s.l.T("exclude.error.invalid", "patterns", strings.Join(invalid, ", ")))
+		return
+	}
+	if err := s.st.SetHostExclude(r.Context(), h.ID, patterns); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	s.audit(r, "host.exclude", h.Hostname, strings.Join(patterns, ", "))
+	s.redirect(w, r, back, "success", s.l.T("common.saved"))
 }

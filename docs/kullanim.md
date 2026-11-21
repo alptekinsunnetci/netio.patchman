@@ -10,6 +10,18 @@ Bu belge, yönetim panelinin günlük kullanımını anlatır.
 | **Operatör** | Görüntüleme, güncelleme işi başlatma, envanter yenileme, bulgu durumunu değiştirme |
 | **İzleyici** | Yalnızca görüntüleme ve CSV dışa aktarma |
 
+### Grup bazlı erişim
+
+Bir operatör veya izleyici yalnızca belirli gruplardaki sunucularla sınırlandırılabilir (ör. web ekibi yalnızca "Web" grubunu, bir müşteri yalnızca kendi grubunu görür). **Kullanıcı Yönetimi → kullanıcı → Sunucu erişimi → Yalnızca seçili gruplardaki sunucular** seçilip gruplar işaretlenir.
+
+Sınırlı kullanıcı:
+
+- yalnızca bu gruplardaki sunucuları, onların bulgularını, güncellemelerini, işlerini ve bu sunucularla ilgili bildirimleri görür; iş başlatma, durum değiştirme ve **Düzeltmeyi uygula** da yalnızca bu sunucularda çalışır,
+- zamanlamaları, ajan yönetimini ve filo geneli eğilim grafiklerini görmez,
+- API anahtarları da aynı sınırla çalışır.
+
+Gruptan çıkarılan sunucu bu kullanıcılara görünmez olur. Hiç grup seçilmemiş sınırlı kullanıcı hiçbir sunucu görmez. Yöneticiler her zaman tüm sunucuları görür.
+
 ## Gösterge Paneli
 
 Altyapının genel durumunu gösterir:
@@ -62,12 +74,33 @@ Ajan sunucunun hangi platformda çalıştığını bildirir: VMware, Hyper-V, KV
 Windows sunucuları Linux sunucularla aynı listelerde görünür; işletim sistemi kimliği `windows`'tur (filtrelerde ve zamanlama kapsamında bu ad kullanılır). Farklar:
 
 - **Bekleyen Güncellemeler** sekmesinde paket yerine Windows Update güncellemeleri listelenir: KB numarası, başlık, Microsoft önem derecesi, sınıflandırma (Security Updates, Update Rollups vb.) ve yayın tarihi. Windows Update güncellemenin CVE'lerini bildirmişse sayısı başlığın yanında görünür. Güncellemeleri seçip **Seçili paketleri güncelle** ile yalnızca bu KB'leri kurabilirsiniz.
-- **Kurulu Paketler** sekmesinde "Programlar ve Özellikler" listesindeki programlar görünür. Bu programlar envanter içindir; güvenlik açığı taramasına girmez ve panelden güncellenemez.
+- **Kurulu Paketler** sekmesinde "Programlar ve Özellikler" listesindeki programlar görünür. Bu programlar güvenlik açığı taramasına girmez.
+- **winget** (App Installer) kurulu sunucularda üçüncü taraf programların (Chrome, 7-Zip, Git vb.) güncellemeleri de Bekleyen Güncellemeler'de **winget** sınıflandırmasıyla listelenir ve **Tüm güncellemeler** ya da seçili paketlerle kurulur (güvenlik güncellemesi işi bunları kurmaz). Ajan SYSTEM hesabıyla çalıştığı için yalnızca tüm kullanıcılar için kurulmuş programlar görünür. Windows Server 2016/2019/2022'de App Installer genellikle kurulu değildir; winget yoksa bu özellik kendiliğinden devre dışıdır. `PATCHMAN_WINGET=false` ile kapatılır.
 - **Güvenlik Açıkları:** Bekleyen her KB'nin düzelttiği CVE'ler Microsoft Security Update Guide'dan alınır. Bulguda **Etkilenen Paket** KB numarasıdır, **Kurulu Sürüm** sunucunun Windows derlemesi (örneğin `10.0.20348.2700`), **Düzeltilmiş Sürüm** düzeltmeyi içeren derlemedir. Sunucu birkaç ay geride kalmışsa, bekleyen toplu güncellemenin yerini aldığı önceki ayların CVE'leri de aynı KB altında gösterilir; tek KB'yi kurmak hepsini kapatır. **Düzeltmeyi uygula** ilgili KB'yi kurar. Microsoft'un CVE eşlemesi yayımlamadığı güncellemeler (bazı .NET toplu güncellemeleri gibi) güvenlik güncellemesi olarak listelenir ama CVE bulgusu oluşturmaz.
 - **Güncelleme işleri** Windows Update üzerinden indirip kurar; iş çıktısında her KB için sonuç (kuruldu ya da sonuç kodu ve HRESULT ile kurulamadı) yazar. Doğrulama Linux'taki gibidir. Kurulum yeniden başlatma gerektiriyorsa çıktıda belirtilir ve sunucu “Yeniden başlatma gerekli” olarak işaretlenir. Yeniden başlatma ihtiyacı Windows Update ve Windows'un bileşen hizmetinin (CBS) kayıtlarından okunur.
 - **Yeniden başlat** düğmesi Windows'ta `shutdown.exe /r /t 60` çalıştırır. Oturum açmış kullanıcılar uyarıyı görür.
 - **Yeniden başlatılması gereken servisler** Windows'ta tespit edilmez; güncellemeler gerektiğinde zaten yeniden başlatma ister.
 - Platform bilgisi BIOS (SMBIOS) üretici ve ürün adından belirlenir (Hyper-V, VMware, KVM vb.).
+
+### Güncellenmeyecek paketler
+
+Bazı paketlerin hiçbir güncelleme işinde değişmemesi gerekiyorsa (veritabanı sunucusu, çekirdek, sorun çıkardığı bilinen bir KB) desen listesi tanımlayın:
+
+- **Sistem Ayarları → Güncellemeler:** tüm sunucular için,
+- **Sunucu Grupları → grup:** gruptaki sunucular için,
+- **Sunucu → Sistem Bilgisi → Güncellenmeyecek paketler:** tek sunucu için.
+
+Desenler virgül, boşluk veya satırla ayrılır; `*` ve `?` kullanılabilir (`kernel*`, `mysql-*`, `KB5034439`, `7zip.7zip`). Üç liste birleştirilir. Merkezi sunucu işi ajana verirken listeyi iletir; ajan eşleşen paketleri atlar ve iş çıktısında belirtir. Bu, panelden, zamanlamalardan, **Düzeltmeyi uygula**'dan ve API'den gelen tüm işler için geçerlidir. Bekleyen Güncellemeler sekmesinde bu paketler **Dışlandı** etiketiyle görünür; güvenlik açıkları gösterilmeye devam eder.
+
+Not: SUSE'de güvenlik yamaları (`zypper patch`) paket adına göre süzülemez; liste tanımlıysa SUSE güvenlik işi çalıştırılmaz, **Tüm güncellemeler** veya seçili paketler kullanılır.
+
+### Canlı çekirdek yaması (KernelCare, Livepatch)
+
+Ajan KernelCare (`kcarectl`) veya Canonical Livepatch (`canonical-livepatch`) kuruluysa bunu bildirir; sunucu başlığında ve **Sistem Bilgisi**'nde gösterilir.
+
+- **KernelCare (RPM dağıtımları: CloudLinux, AlmaLinux, Rocky, RHEL):** Çekirdek bulguları, KernelCare'in yamaladığı çekirdek sürümüne (`kcarectl --uname`) göre değerlendirilir. Yeni çekirdek paketi kurulduğunda KernelCare bu sürümü zaten kapsıyorsa sunucu "Yeniden başlatma gerekli" olarak işaretlenmez; glibc veya systemd gibi güncellenen çekirdek kitaplıkları yine yeniden başlatma ister.
+- **Canonical Livepatch (Ubuntu):** Livepatch'in kapattığı CVE'ler çekirdek paketleri için açık sayılmaz. Yeni çekirdek paketinin etkinleşmesi için yeniden başlatma uyarısı kalır.
+- Debian/Ubuntu'da KernelCare sürümü paket sürümüne çevrilemediği için çekirdek bulguları paket sürümüne göre gösterilir.
 
 ## Sunucu Grupları
 
@@ -122,6 +155,16 @@ Risk Kabul Edildi ve Hatalı Tespit durumundaki bulgular sayımlara ve bildiriml
 
 **Risk kabulü süreli verilir.** Durumu “Risk Kabul Edildi” yaparken **Risk kabulü süresi** seçilir: 30, 90, 180 veya 365 gün. Yönetici **Sistem Ayarları → Güvenlik → En uzun risk kabulü süresi** ile üst sınırı belirler (varsayılan 365 gün; 0 süresiz kabule izin verir). Süre, seçilen günün sonunda (gece 23:59) dolar. O anda bulgular yeniden **Açık** olur, bildirim merkezine her CVE için bir uyarı düşer, e-posta bildirimleri açıksa özet e-posta gider ve denetim kayıtlarına yazılır. Bulgu listelerinde ve raporda kabulün bitiş tarihi ile kabul eden kullanıcı görünür.
 
+### Düzeltme süreleri (SLA) ve EPSS
+
+**Sistem Ayarları → Düzeltme süreleri (SLA)** bölümünde her önem derecesi için gün sayısı belirlenir (varsayılan: kritik 15, yüksek 30, orta 90, düşük 180; 0 = süre yok). Son tarih, bulgunun ilk tespitinden itibaren hesaplanır.
+
+- Bulgu listelerinde **Son tarih** sütunu ve süresi geçenlerde **Süresi geçti** etiketi görünür; **Süresi geçenler** süzgeciyle yalnızca bunlar listelenir.
+- Gösterge panelinde **Süresi geçen bulgular** kartı, Uyumluluk Raporu'nda ayrı bir bölüm vardır.
+- Bir bulgunun süresi dolduğunda bildirim merkezine tek bir özet bildirim düşer; ayarda açıksa e-posta gönderilir. Her bulgu için bir kez bildirilir.
+
+**EPSS** (FIRST Exploit Prediction Scoring System), açığın önümüzdeki 30 günde istismar edilme olasılığıdır ve her gün güncellenir. Açık listesinde EPSS sütunu bulunur; **İstismar olasılığına göre (KEV, EPSS)** sıralaması önce aktif olarak istismar edilenleri, sonra EPSS'i yüksek olanları gösterir. Hangi açığın önce kapatılacağına karar verirken CVSS'ten daha iyi bir göstergedir.
+
 ## Uyumluluk Raporu
 
 **Uyumluluk Raporu** sayfası seçilen dönem (varsayılan son 30 gün, en fazla 366 gün) ve isteğe bağlı bir grup için denetime hazır bir özet üretir:
@@ -163,7 +206,7 @@ Nasıl çalışır:
 - **Şimdi çalıştır** düğmesi kuralı hemen çalıştırır (bakım penceresi o andan başlar); normal zamanlama değişmez.
 - Bir zamanlama silinirse henüz ajana iletilmemiş işleri iptal edilir; tamamlanmış işlerin geçmişi korunur.
 
-Zamanlanmış güncellemeler sunucuları yeniden başlatmaz. Çekirdek güncellemelerinden sonra yeniden başlatmayı sunucu ayrıntısındaki **Yeniden başlat** düğmesiyle ya da kendi yönteminizle planlayın; gereken sunucular “Yeniden başlatma gerekli” etiketiyle gösterilir. Bir sunucuyu kapsayan zamanlamalar, sunucu ayrıntısındaki **Sistem Bilgisi** sekmesinde listelenir.
+Zamanlanmış güncellemeler, **Güncellemeden sonra gerekiyorsa sunucuyu bakım penceresi içinde yeniden başlat** seçeneği işaretlenmedikçe sunucuları yeniden başlatmaz. Seçenek işaretliyse güncelleme işi başarıyla (veya kısmen) bittikten sonra sunucu yeniden başlatma gerektirdiğini bildirirse ve bakım penceresi hâlâ açıksa 1 dakika sonra yeniden başlatılır; her güncelleme işi için en fazla bir kez. Seçenek kapalıyken çekirdek güncellemelerinden sonra yeniden başlatmayı sunucu ayrıntısındaki **Yeniden başlat** düğmesiyle ya da kendi yönteminizle planlayın; gereken sunucular “Yeniden başlatma gerekli” etiketiyle gösterilir. Bir sunucuyu kapsayan zamanlamalar, sunucu ayrıntısındaki **Sistem Bilgisi** sekmesinde listelenir.
 
 ## Güncelleme İşleri
 

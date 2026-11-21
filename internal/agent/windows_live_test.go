@@ -24,6 +24,12 @@ func TestLiveWindows(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("%d programs, first: %+v", len(pkgs), pkgs[:min(3, len(pkgs))])
+	if exe := wingetExe(); exe != "" {
+		ups, err := wingetList(context.Background(), exe)
+		t.Logf("winget %s: %d updates, err=%v, first: %+v", exe, len(ups), err, ups[:min(3, len(ups))])
+	} else {
+		t.Log("winget not installed")
+	}
 	for _, online := range []bool{false, true} {
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 		start := time.Now()

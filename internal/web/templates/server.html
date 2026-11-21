@@ -6,7 +6,7 @@
 <header class="pagehead">
   <div>
     <h1 class="pagehead__title">{{$h.Hostname}} {{template "hoststatus" $h}} {{if $h.RebootRequired}}<span class="pill pill--warning">{{t "host.reboot_required"}}{{if not $h.RebootRequiredSince.IsZero}} · {{ago $h.RebootRequiredSince}}{{end}}</span>{{end}}</h1>
-    <p class="pagehead__sub">{{$h.OSName}} · <span class="mono">{{$h.Kernel}}</span> · {{virt $h.Virtualization}} · {{t "host.last_seen_ago" "ago" (ago $h.LastSeenAt)}}</p>
+    <p class="pagehead__sub">{{$h.OSName}} · <span class="mono">{{$h.Kernel}}</span>{{if $h.KernelPatch}} <span class="pill pill--muted">{{t (printf "kernel_patch.%s" $h.KernelPatch)}}</span>{{end}} · {{virt $h.Virtualization}} · {{t "host.last_seen_ago" "ago" (ago $h.LastSeenAt)}}</p>
     {{if $h.Groups}}<div class="tags">{{range $h.Groups}}<a class="tag" href="/groups/{{.ID}}">{{.Name}}</a>{{end}}</div>{{end}}
   </div>
   {{if .User.CanOperate}}
@@ -75,6 +75,7 @@
     <option value="resolved"{{if eq $d.Status "resolved"}} selected{{end}}>{{t "status.resolved"}}</option>
     <option value="all"{{if eq $d.Status "all"}} selected{{end}}>{{t "vulns.filter.all"}}</option>
   </select>
+  <label class="check-label"><input type="checkbox" name="overdue" value="1"{{if $d.Overdue}} checked{{end}}> {{t "vulns.filter.overdue"}}</label>
   <button class="button" type="submit">{{t "common.filter"}}</button>
 </form>
 {{if .User.CanOperate}}
@@ -84,18 +85,20 @@
   {{if $d.Findings}}
   <div class="table-wrap">
   <table class="table">
-    <thead><tr><th>{{t "vuln.field.cve_id"}}</th><th>{{t "vuln.field.severity"}}</th><th class="num">{{t "vuln.field.cvss_score"}}</th><th>{{t "vuln.field.affected_package"}}</th><th>{{t "vuln.field.installed_version"}}</th><th>{{t "vuln.field.fixed_version"}}</th><th>{{t "vuln.field.status"}}</th><th>{{t "vuln.field.first_detected"}}</th></tr></thead>
+    <thead><tr><th>{{t "vuln.field.cve_id"}}</th><th>{{t "vuln.field.severity"}}</th><th class="num">{{t "vuln.field.cvss_score"}}</th><th class="num" title="{{t "vuln.field.epss_hint"}}">{{t "vuln.field.epss"}}</th><th>{{t "vuln.field.affected_package"}}</th><th>{{t "vuln.field.installed_version"}}</th><th>{{t "vuln.field.fixed_version"}}</th><th>{{t "vuln.field.status"}}</th><th>{{t "vuln.field.first_detected"}}</th><th>{{t "vuln.field.due"}}</th></tr></thead>
     <tbody>
     {{range $d.Findings}}
     <tr>
       <td><a class="mono" href="/vulnerabilities/{{.CVEID}}">{{.CVEID}}</a> {{if .KnownExploited}}{{template "kev"}}{{end}}{{if .Title}}<div class="cell-sub" lang="en">{{truncate .Title 90}}</div>{{end}}</td>
       <td>{{template "sev" .Severity}}</td>
       <td class="num mono">{{cvss .CVSSScore}}</td>
+      <td class="num mono">{{epss .EPSS}}</td>
       <td class="mono">{{.PackageName}}</td>
       <td class="mono">{{.InstalledVersion}}</td>
       <td>{{if .FixedVersion}}<span class="mono">{{.FixedVersion}}</span>{{else}}<span class="muted">{{t "vuln.fix_not_available"}}</span>{{end}}</td>
       <td>{{template "findingstatus" .Status}}{{template "riskexpiry" .}}</td>
       <td><time datetime="{{iso .FirstDetectedAt}}">{{date .FirstDetectedAt}}</time></td>
+      <td>{{if .DueAt.IsZero}}<span class="muted">{{t "common.empty"}}</span>{{else}}<time datetime="{{iso .DueAt}}">{{date .DueAt}}</time>{{if .Overdue}} <span class="pill pill--danger">{{t "sla.overdue"}}</span>{{end}}{{end}}</td>
     </tr>
     {{end}}
     </tbody>
@@ -107,6 +110,7 @@
 
 {{else if eq $d.Tab "updates"}}
 <section class="panel panel--flush">
+  {{with $d.ExcludePatterns}}<p class="panel__note muted">{{t "exclude.active"}} <span class="mono">{{join . ", "}}</span></p>{{end}}
   {{if $d.Updates}}
   <form method="post" action="/servers/{{$h.ID}}/jobs" data-confirm="{{t "server.action.selected_confirm"}}">
     {{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_packages"><input type="hidden" name="back_tab" value="updates">
@@ -122,8 +126,8 @@
         <td class="cell-sub">{{.Title}}{{with .CVEs}} <span class="muted mono">{{t "package.cve_count" "count" (len .)}}</span>{{end}}</td>
         <td class="cell-sub">{{if .Severity}}{{.Severity}}{{else}}<span class="muted">—</span>{{end}}</td>
         <td class="cell-sub">{{.Repository}}</td>
-        <td class="mono nowrap">{{.AvailableVersion}}</td>
-        <td>{{if .Security}}<span class="pill pill--danger">{{t "package.security"}}</span>{{else}}<span class="pill pill--muted">{{t "package.regular"}}</span>{{end}}</td>
+        <td class="mono nowrap">{{if eq .Repository "winget"}}{{.CurrentVersion}} → {{.AvailableVersion}}{{else}}{{.AvailableVersion}}{{end}}</td>
+        <td>{{if .Security}}<span class="pill pill--danger">{{t "package.security"}}</span>{{else}}<span class="pill pill--muted">{{t "package.regular"}}</span>{{end}}{{if index $d.Excluded .Name}} <span class="pill pill--muted" title="{{t "exclude.excluded_hint"}}">{{t "exclude.excluded"}}</span>{{end}}</td>
       </tr>
       {{end}}
       </tbody>
@@ -139,7 +143,7 @@
         <td class="mono">{{if .CurrentVersion}}{{.CurrentVersion}}{{else}}<span class="muted">{{t "package.new_install"}}</span>{{end}}</td>
         <td class="mono">{{.AvailableVersion}}</td>
         <td class="mono cell-sub">{{.Repository}}</td>
-        <td>{{if .Security}}<span class="pill pill--danger">{{t "package.security"}}</span>{{else}}<span class="pill pill--muted">{{t "package.regular"}}</span>{{end}}</td>
+        <td>{{if .Security}}<span class="pill pill--danger">{{t "package.security"}}</span>{{else}}<span class="pill pill--muted">{{t "package.regular"}}</span>{{end}}{{if index $d.Excluded .Name}} <span class="pill pill--muted" title="{{t "exclude.excluded_hint"}}">{{t "exclude.excluded"}}</span>{{end}}</td>
       </tr>
       {{end}}
       </tbody>
@@ -198,6 +202,7 @@
       <dt>{{t "host.field.ip"}}</dt><dd class="mono">{{join $h.IPAddresses ", "}}</dd>
       <dt>{{t "host.field.os"}}</dt><dd>{{$h.OSName}}</dd>
       <dt>{{t "host.field.kernel"}}</dt><dd class="mono">{{$h.Kernel}}</dd>
+      {{if $h.KernelPatch}}<dt>{{t "host.field.kernel_patch"}}</dt><dd>{{t (printf "kernel_patch.%s" $h.KernelPatch)}}{{if $h.KernelEffective}} · {{t "kernel_patch.effective"}} <span class="mono">{{$h.KernelEffective}}</span>{{end}}{{with $h.LivepatchCVEs}} · {{t "kernel_patch.cves" "count" (len .)}}{{end}}</dd>{{end}}
       <dt>{{t "host.field.arch"}}</dt><dd class="mono">{{$h.Arch}}</dd>
       <dt>{{t "host.field.platform"}}</dt><dd>{{virt $h.Virtualization}}{{if $h.Virtualization}} <span class="muted mono">({{$h.Virtualization}})</span>{{end}}</dd>
       <dt>{{t "host.field.reboot_required"}}</dt><dd>{{if $h.RebootRequired}}<strong class="text-warning">{{t "common.yes"}}</strong>{{if not $h.RebootRequiredSince.IsZero}} <span class="muted">— {{t "host.reboot_since" "since" (long $h.RebootRequiredSince)}}</span>{{end}}{{else}}{{t "common.no"}}{{end}}</dd>
@@ -254,6 +259,17 @@
     <div><button class="button" type="submit">{{t "common.save"}}</button></div>
   </form>
   {{else}}<p class="prewrap">{{if $h.Notes}}{{$h.Notes}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</p>{{end}}
+</section>
+<section class="panel">
+  <h2 class="panel__title">{{t "exclude.title"}}</h2>
+  {{if .User.CanOperate}}
+  <form class="form" method="post" action="/servers/{{$h.ID}}/exclude">
+    {{template "csrf" $root}}
+    <textarea class="field__input mono" name="exclude" rows="2" maxlength="4000" aria-label="{{t "exclude.title"}}">{{$h.Exclude}}</textarea>
+    <span class="field__hint">{{t "exclude.host_hint"}}</span>
+    <div><button class="button" type="submit">{{t "common.save"}}</button></div>
+  </form>
+  {{else}}<p class="mono">{{if $h.Exclude}}{{$h.Exclude}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</p>{{end}}
 </section>
 {{if .User.IsAdmin}}
 <section class="panel panel--danger">

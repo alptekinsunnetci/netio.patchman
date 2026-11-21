@@ -65,6 +65,8 @@ type Inventory struct {
 	// Services still running replaced code; see RestartServices.
 	Services []string
 	Errors   []string
+	// KernelPatch is the live kernel patching service, nil when none.
+	KernelPatch *protocol.KernelPatch
 }
 
 // Collect gathers packages, pending updates, the reboot flag and services
@@ -73,7 +75,17 @@ type Inventory struct {
 func (c Collector) Collect(ctx context.Context) Inventory {
 	pkgs, updates, reboot, errs := c.collect(ctx)
 	services, kernelPending := RestartServices(ctx, c.PM)
-	return Inventory{Packages: pkgs, Updates: updates, Reboot: reboot || kernelPending, Services: services, Errors: errs}
+	var kp *protocol.KernelPatch
+	if c.PM != protocol.PMWindowsUpdate {
+		kp = kernelPatch(ctx)
+	}
+	// A kernel update already active through KernelCare needs no reboot;
+	// updated core libraries (glibc, systemd) still do.
+	if reboot && kp != nil && kp.Provider == protocol.KernelCare && (c.PM == protocol.PMDnf || c.PM == protocol.PMYum) &&
+		kernelCareCovers(kp.EffectiveKernel, newestKernel(ctx, pkgs)) {
+		reboot = rpmNonKernelReboot(ctx)
+	}
+	return Inventory{Packages: pkgs, Updates: updates, Reboot: reboot || kernelPending, Services: services, Errors: errs, KernelPatch: kp}
 }
 
 // PendingUpdates lists pending updates without refreshing the package lists.
@@ -98,7 +110,15 @@ func PendingUpdates(ctx context.Context, pm string) ([]protocol.Update, error) {
 	case protocol.PMWindowsUpdate:
 		// Jobs ask the update service so targets match what will be installed.
 		ups, _, err := wuPending(ctx, true)
-		return ups, err
+		if err != nil {
+			return nil, err
+		}
+		if exe := wingetExe(); exe != "" && wingetEnabled {
+			if more, err := wingetList(ctx, exe); err == nil {
+				ups = append(ups, more...)
+			}
+		}
+		return ups, nil
 	}
 	return nil, errors.New("unsupported package manager")
 }
@@ -404,6 +424,17 @@ func rpmRebootRequired(ctx context.Context, pkgs []protocol.Package) bool {
 	// Only kernel packages that are actually installed are queried: rpm prints
 	// "package X is not installed" to stdout for the others, and containers
 	// have no kernel package at all.
+	running, err := os.ReadFile("/proc/sys/kernel/osrelease")
+	if err != nil {
+		return false
+	}
+	newest := newestKernel(ctx, pkgs)
+	return newest != "" && newest != strings.TrimSpace(string(running))
+}
+
+// newestKernel returns the most recently installed kernel as
+// "<version>-<release>.<arch>" (uname -r form), "" without kernel packages.
+func newestKernel(ctx context.Context, pkgs []protocol.Package) string {
 	var names []string
 	for _, p := range pkgs {
 		if rpmKernelPackages[p.Name] && !slices.Contains(names, p.Name) {
@@ -411,16 +442,11 @@ func rpmRebootRequired(ctx context.Context, pkgs []protocol.Package) bool {
 		}
 	}
 	if len(names) == 0 {
-		return false
-	}
-	running, err := os.ReadFile("/proc/sys/kernel/osrelease")
-	if err != nil {
-		return false
+		return ""
 	}
 	args := append([]string{"-q", "--qf", `%{INSTALLTIME} %{VERSION}-%{RELEASE}.%{ARCH}\n`}, names...)
 	out, _, _ := run(ctx, time.Minute, "rpm", args...)
-	newest := newestRPMKernel(out)
-	return newest != "" && newest != strings.TrimSpace(string(running))
+	return newestRPMKernel(out)
 }
 
 // rpmKernelPackages are the package names whose VERSION-RELEASE.ARCH equals

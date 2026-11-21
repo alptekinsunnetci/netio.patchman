@@ -24,6 +24,7 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 - [Installing the agent on servers](#installing-the-agent-on-servers)
 - [Updating, backup and removal](#updating-backup-and-removal)
 - [Configuration](#configuration)
+- [REST API and Prometheus](#rest-api-and-prometheus)
 - [Troubleshooting](#troubleshooting)
 - [Language and localization](#language-and-localization)
 - [Security](#security)
@@ -56,6 +57,14 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 - **Users and roles:** Administrator, Operator and Viewer roles; audit log.
 - **Configuration from the dashboard:** SMTP, server address, time zone, data sources and all operational settings are changed in the dashboard. Changes apply without a restart.
 - **Export:** Server and vulnerability lists can be downloaded as Excel-compatible CSV files.
+- **Live kernel patching:** KernelCare (CloudLinux, AlmaLinux, Rocky, RHEL) and Canonical Livepatch (Ubuntu) are detected. The kernel version KernelCare patched up to is used for kernel findings, CVEs fixed by Livepatch do not count as open, and a kernel update covered by KernelCare does not mark the server as needing a restart.
+- **Packages not to update:** Patterns such as `kernel*`, `mysql-*` or `KB5034439` for all servers, a group or one server. Every update job from the dashboard, schedules or the API skips these packages.
+- **EPSS prioritization:** The FIRST EPSS score (probability of exploitation in the next 30 days) is shown for each vulnerability; the list can be sorted by KEV and EPSS.
+- **Remediation targets (SLA):** Days per severity (default critical 15, high 30, medium 90, low 180). Overdue findings are marked, appear on the dashboard and in the report, and trigger a notification and email.
+- **Group-based access:** Operators and viewers can be limited to the servers of some groups (separate teams or customers).
+- **Optional restart in schedules:** Servers that need a restart after the update can be restarted while the maintenance window is open (per rule, off by default).
+- **Third-party Windows programs:** On servers with winget, updates of programs such as Chrome, 7-Zip or Git are listed and installed.
+- **REST API and Prometheus:** API keys read servers, vulnerabilities, updates and jobs and start update jobs; `/metrics` serves metrics for Grafana/Prometheus. See [docs/api.md](docs/api.md).
 
 ### Supported systems
 
@@ -64,9 +73,13 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
 | CloudLinux 8, 9 | dnf | ✓ (with AlmaLinux security data) |
+| CentOS 7, CloudLinux 7, Oracle Linux 7 | yum | ✓ (with Red Hat 7 and TuxCare ELS data) |
+| Oracle Linux 8, 9; CentOS Linux 8 | dnf | ✓ (with AlmaLinux data) |
+| Mageia, openEuler | dnf | ✓ |
+| Linux Mint, Pop!_OS, Zorin OS, elementary OS, LMDE, Raspberry Pi OS | apt | ✓ (with the data of their Ubuntu/Debian release) |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
-| CentOS, Oracle Linux, Fedora and other distributions (using dnf, yum, zypper, apt or apk) | ✓ | — |
+| CentOS Stream, Amazon Linux, Fedora and other distributions (using dnf, yum, zypper, apt or apk) | ✓ | — |
 | Windows Server 2016, 2019, 2022, 2025; Windows 10, 11 (x64) | Windows Update | ✓ (pending Microsoft updates) |
 
 The agent runs on amd64 and arm64. It requires systemd or OpenRC (Alpine) as the service manager. Physical, virtual (VMware, Hyper-V, KVM/Proxmox) and cloud servers are all supported.
@@ -337,6 +350,7 @@ The `PATCHMAN_`-prefixed variables in `.env` only provide the initial values; a 
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API address (an internal mirror can be used) | yes |
 | `PATCHMAN_KEV_URL` | CISA KEV address | KEV catalog address; `off` turns it off | yes |
 | `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Microsoft Security Update Guide address for the CVE mapping of Windows servers; `off` turns it off | yes |
+| `PATCHMAN_EPSS_URL` | `https://epss.empiricalsecurity.com/epss_scores-current.csv.gz` | Daily EPSS score file; `off` turns it off | yes |
 | `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | Email server | yes |
 | `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP credentials | yes |
 | `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Sender name and address | yes |
@@ -344,6 +358,26 @@ The `PATCHMAN_`-prefixed variables in `.env` only provide the initial values; a 
 | `PATCHMAN_VERSION` | `VERSION` file | Server and agent version to build | — |
 
 If an environment variable has an invalid value, the server does not start and lists the errors in the default language.
+
+## REST API and Prometheus
+
+Create a key under **Profile → API keys**. A key works with the role and server access of the user who created it; read-only keys cannot change anything. Endpoints, fields and examples: [docs/api.md](docs/api.md) (Turkish).
+
+```sh
+curl -H "Authorization: Bearer npat_..." https://patchman.your-domain/api/v1/hosts
+curl -H "Authorization: Bearer npat_..." "https://patchman.your-domain/api/v1/vulnerabilities?sort=epss&overdue=1"
+curl -X POST -H "Authorization: Bearer npat_..." -H "Content-Type: application/json" \
+  -d '{"type":"upgrade_security"}' https://patchman.your-domain/api/v1/hosts/12/jobs
+```
+
+```yaml
+# prometheus.yml
+scrape_configs:
+  - job_name: netio-patchman
+    scheme: https
+    authorization: { credentials: npat_... }
+    static_configs: [{ targets: ["patchman.your-domain"] }]
+```
 
 ## Troubleshooting
 

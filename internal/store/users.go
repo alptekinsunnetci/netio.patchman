@@ -34,6 +34,21 @@ type User struct {
 	TOTPEnabledAt time.Time
 	// Locale is the user's interface language ("" = server default).
 	Locale string
+	// GroupScoped limits an operator or viewer to the hosts of GroupIDs
+	// (no groups: no hosts). Administrators are never limited.
+	GroupScoped bool
+	GroupIDs    []int64
+}
+
+// Limited reports whether the user only sees the hosts of some groups.
+func (u User) Limited() bool { _, ok := u.Scope(); return ok }
+
+// Scope returns the user's host limit; ok is false when unrestricted.
+func (u User) Scope() (groupIDs []int64, ok bool) {
+	if !u.GroupScoped || u.Role == "admin" {
+		return nil, false
+	}
+	return u.GroupIDs, true
 }
 
 // SetUserLocale stores the user's interface language.
@@ -51,17 +66,17 @@ func (u User) CanOperate() bool { return u.Role == RoleAdmin || u.Role == RoleOp
 // IsAdmin reports whether the user is an administrator.
 func (u User) IsAdmin() bool { return u.Role == RoleAdmin }
 
-const userCols = `id, email, name, password_hash, role, disabled, created_at, last_login_at, password_changed_at, totp_secret, totp_enabled_at, locale`
+const userCols = `id, email, name, password_hash, role, disabled, created_at, last_login_at, password_changed_at, totp_secret, totp_enabled_at, locale, group_scoped`
 
 func scanUser(row interface{ Scan(...any) error }) (User, error) {
 	var u User
-	var disabled int
+	var disabled, scoped int
 	var created, lastLogin, changed, totpAt int64
-	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.PasswordHash, &u.Role, &disabled, &created, &lastLogin, &changed, &u.TOTPSecret, &totpAt, &u.Locale)
+	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.PasswordHash, &u.Role, &disabled, &created, &lastLogin, &changed, &u.TOTPSecret, &totpAt, &u.Locale, &scoped)
 	if errors.Is(err, sql.ErrNoRows) {
 		return u, ErrNotFound
 	}
-	u.Disabled = disabled == 1
+	u.Disabled, u.GroupScoped = disabled == 1, scoped == 1
 	u.CreatedAt, u.LastLoginAt, u.PasswordChangedAt, u.TOTPEnabledAt = fromTS(created), fromTS(lastLogin), fromTS(changed), fromTS(totpAt)
 	return u, err
 }
@@ -176,12 +191,61 @@ var ErrDuplicate = errors.New("store: duplicate")
 
 // UserByID returns a user.
 func (s *Store) UserByID(ctx context.Context, id int64) (User, error) {
-	return scanUser(s.db.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE id = ?`, id))
+	u, err := scanUser(s.db.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE id = ?`, id))
+	if err != nil {
+		return u, err
+	}
+	u.GroupIDs, err = s.userGroupIDs(ctx, id)
+	return u, err
+}
+
+func (s *Store) userGroupIDs(ctx context.Context, userID int64) ([]int64, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT group_id FROM user_groups WHERE user_id = ? ORDER BY group_id`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out = append(out, id)
+	}
+	return out, rows.Err()
+}
+
+// SetUserGroups limits a user to the hosts of groupIDs (scoped) or lifts the
+// limit. Groups that no longer exist are ignored.
+func (s *Store) SetUserGroups(ctx context.Context, userID int64, scoped bool, groupIDs []int64) error {
+	return s.tx(ctx, func(tx *sql.Tx) error {
+		if _, err := tx.ExecContext(ctx, `UPDATE users SET group_scoped = ? WHERE id = ?`, boolInt(scoped), userID); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `DELETE FROM user_groups WHERE user_id = ?`, userID); err != nil {
+			return err
+		}
+		if !scoped {
+			return nil
+		}
+		for _, g := range groupIDs {
+			if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO user_groups (user_id, group_id) SELECT ?, id FROM host_groups WHERE id = ?`, userID, g); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 // UserByEmail returns a user by email (case-insensitive).
 func (s *Store) UserByEmail(ctx context.Context, email string) (User, error) {
-	return scanUser(s.db.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE email = ?`, strings.TrimSpace(email)))
+	u, err := scanUser(s.db.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE email = ?`, strings.TrimSpace(email)))
+	if err != nil {
+		return u, err
+	}
+	u.GroupIDs, err = s.userGroupIDs(ctx, u.ID)
+	return u, err
 }
 
 // ListUsers returns all users ordered by name.
@@ -199,7 +263,16 @@ func (s *Store) ListUsers(ctx context.Context) ([]User, error) {
 		}
 		out = append(out, u)
 	}
-	return out, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	rows.Close()
+	for i := range out {
+		if out[i].GroupIDs, err = s.userGroupIDs(ctx, out[i].ID); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
 }
 
 // ActiveAdminEmails returns emails of enabled administrators.

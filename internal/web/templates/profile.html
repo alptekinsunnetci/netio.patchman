@@ -66,6 +66,44 @@
   {{end}}
 </section>
 
+<section class="panel" id="api">
+  <h2 class="panel__title">{{t "apitoken.title"}}</h2>
+  <p class="field__hint">{{t "apitoken.intro"}}</p>
+  {{with $d.NewAPIToken}}
+  <div class="panel panel--highlight">
+    <p class="alert alert--warning">{{t "apitoken.new_once"}}</p>
+    <span class="copy"><input class="field__input mono" type="text" value="{{.}}" readonly id="new-api-token"><button class="button button--sm" type="button" data-copy="new-api-token">{{t "common.copy"}}</button></span>
+    <pre class="code">curl -H "Authorization: Bearer {{.}}" {{$d.BaseURL}}/api/v1/hosts</pre>
+  </div>
+  {{end}}
+  {{if $d.APITokens}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "apitoken.field.name"}}</th><th>{{t "apitoken.field.key"}}</th><th>{{t "apitoken.field.access"}}</th><th>{{t "apitoken.field.expires"}}</th><th>{{t "apitoken.field.last_used"}}</th><th></th></tr></thead>
+    <tbody>
+    {{range $d.APITokens}}
+    <tr>
+      <td>{{.Name}}</td>
+      <td class="mono">{{.Prefix}}…</td>
+      <td>{{if .ReadOnly}}{{t "apitoken.read_only"}}{{else}}{{t "apitoken.read_write"}}{{end}}</td>
+      <td>{{if .ExpiresAt.IsZero}}{{t "apitoken.no_expiry"}}{{else}}{{date .ExpiresAt}}{{end}}</td>
+      <td>{{if .LastUsedAt.IsZero}}{{t "time.never"}}{{else}}{{datetime .LastUsedAt}}{{end}}</td>
+      <td class="actions">{{if .Active}}<form method="post" action="/profile/api-tokens/{{.ID}}/revoke" data-confirm="{{t "apitoken.revoke_confirm" "name" .Name}}">{{template "csrf" $root}}<button class="button button--sm button--ghost" type="submit">{{t "apitoken.revoke"}}</button></form>{{else}}<span class="pill pill--muted">{{t "apitoken.inactive"}}</span>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{end}}
+  <form class="form form--row" method="post" action="/profile/api-tokens">
+    {{template "csrf" $root}}
+    <label class="field"><span class="field__label">{{t "apitoken.field.name"}}</span><input class="field__input" type="text" name="name" maxlength="100" required placeholder="{{t "apitoken.name_placeholder"}}"></label>
+    <label class="field"><span class="field__label">{{t "apitoken.field.valid_days"}}</span><input class="field__input" type="number" name="valid_days" min="0" max="3650" value="90" required></label>
+    {{if $root.User.CanOperate}}<label class="check-label"><input type="checkbox" name="write" value="1"> {{t "apitoken.allow_write"}}</label>{{end}}
+    <div><button class="button" type="submit">{{t "apitoken.create"}}</button></div>
+  </form>
+</section>
+
 <section class="panel panel--narrow">
   <h2 class="panel__title">{{t "profile.change_password"}}</h2>
   <form class="form" method="post" action="/profile/password">

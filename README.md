@@ -26,6 +26,7 @@ netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve
 - [Sunuculara ajan kurulumu](#sunuculara-ajan-kurulumu)
 - [Güncelleme, yedekleme ve kaldırma](#güncelleme-yedekleme-ve-kaldırma)
 - [Yapılandırma](#yapılandırma)
+- [REST API ve Prometheus](#rest-api-ve-prometheus)
 - [Sorun giderme](#sorun-giderme)
 - [Güvenlik](#güvenlik)
 - [Geliştirme](#geliştirme)
@@ -57,6 +58,14 @@ netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve
 - **Kullanıcılar ve yetkiler:** Yönetici, Operatör ve İzleyici rolleri; denetim kayıtları.
 - **Paneldense yapılandırma:** SMTP, sunucu adresi, saat dilimi, veri kaynakları ve tüm işletim ayarları panelden değiştirilir. Değişiklikler yeniden başlatma gerektirmez.
 - **Dışa aktarma:** Sunucu ve güvenlik açığı listeleri Excel uyumlu CSV olarak indirilebilir.
+- **Canlı çekirdek yaması:** KernelCare (CloudLinux, AlmaLinux, Rocky, RHEL) ve Canonical Livepatch (Ubuntu) algılanır. KernelCare'in yamaladığı çekirdek sürümü çekirdek bulgularında kullanılır, Livepatch'in kapattığı CVE'ler açık sayılmaz; KernelCare'in kapsadığı çekirdek güncellemesi için sunucu gereksiz yere "yeniden başlatma gerekli" olarak işaretlenmez.
+- **Güncellenmeyecek paketler:** Tüm sunucular, bir grup veya tek bir sunucu için `kernel*`, `mysql-*`, `KB5034439` gibi desenler. Bu paketler panelden, zamanlamalardan ve API'den gelen tüm güncelleme işlerinde atlanır.
+- **EPSS önceliklendirmesi:** FIRST EPSS puanı (önümüzdeki 30 günde istismar edilme olasılığı) her açıkta gösterilir; açık listesi KEV ve EPSS'e göre sıralanabilir.
+- **Düzeltme süreleri (SLA):** Önem derecesine göre gün sayısı (varsayılan kritik 15, yüksek 30, orta 90, düşük 180). Süresi geçen bulgular işaretlenir, gösterge panelinde ve raporda yer alır, bildirim ve e-posta gönderilir.
+- **Grup bazlı yetki:** Operatör ve izleyiciler yalnızca belirli gruplardaki sunucuları görecek ve yönetecek şekilde sınırlandırılabilir (ekip veya müşteri ayrımı).
+- **Zamanlamada isteğe bağlı yeniden başlatma:** Güncellemeden sonra yeniden başlatma gerektiren sunucular, bakım penceresi açıkken yeniden başlatılabilir (kural bazında, varsayılan kapalı).
+- **Windows üçüncü taraf programlar:** winget kurulu sunucularda Chrome, 7-Zip, Git gibi programların güncellemeleri listelenir ve kurulur.
+- **REST API ve Prometheus:** API anahtarlarıyla sunucu, açık, güncelleme ve iş verileri okunur, güncelleme işi başlatılır; `/metrics` Grafana/Prometheus için metrik verir. Bkz. [docs/api.md](docs/api.md).
 
 ### Desteklenen sistemler
 
@@ -65,9 +74,13 @@ netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
 | CloudLinux 8, 9 | dnf | ✓ (AlmaLinux güvenlik verileriyle) |
+| CentOS 7, CloudLinux 7, Oracle Linux 7 | yum | ✓ (Red Hat 7 ve TuxCare ELS verileriyle) |
+| Oracle Linux 8, 9; CentOS Linux 8 | dnf | ✓ (AlmaLinux verileriyle) |
+| Mageia, openEuler | dnf | ✓ |
+| Linux Mint, Pop!_OS, Zorin OS, elementary OS, LMDE, Raspberry Pi OS | apt | ✓ (dayandıkları Ubuntu/Debian sürümünün verileriyle) |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
-| CentOS, Oracle Linux, Fedora ve diğer dağıtımlar (dnf, yum, zypper, apt veya apk kullanan) | ✓ | — |
+| CentOS Stream, Amazon Linux, Fedora ve diğer dağıtımlar (dnf, yum, zypper, apt veya apk kullanan) | ✓ | — |
 | Windows Server 2016, 2019, 2022, 2025; Windows 10, 11 (x64) | Windows Update | ✓ (bekleyen Microsoft güncellemeleri) |
 
 Ajan amd64 ve arm64 mimarilerinde çalışır. Hizmet yöneticisi olarak systemd veya OpenRC (Alpine) gerekir. Sunucunun fiziksel, sanal (VMware, Hyper-V, KVM/Proxmox) veya bulutta olması fark etmez.
@@ -335,6 +348,7 @@ Yapılandırmanın tamamı yönetim panelinden yapılabilir:
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API adresi (iç ağ yansısı kullanılabilir) | evet |
 | `PATCHMAN_KEV_URL` | CISA KEV adresi | KEV kataloğu adresi; `off` ile kapatılır | evet |
 | `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Windows sunucularının CVE eşlemesi için Microsoft Security Update Guide adresi; `off` ile kapatılır | evet |
+| `PATCHMAN_EPSS_URL` | `https://epss.empiricalsecurity.com/epss_scores-current.csv.gz` | Günlük EPSS puan dosyası; `off` ile kapatılır | evet |
 | `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | E-posta sunucusu | evet |
 | `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP kimlik bilgileri | evet |
 | `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Gönderen adı ve adresi | evet |
@@ -342,6 +356,26 @@ Yapılandırmanın tamamı yönetim panelinden yapılabilir:
 | `PATCHMAN_VERSION` | `VERSION` dosyası | Derlenen sunucu ve ajan sürümü | — |
 
 Ortam değişkenlerinde hatalı bir değer varsa sunucu başlamaz ve hataları Türkçe olarak listeler.
+
+## REST API ve Prometheus
+
+**Profilim → API anahtarları** bölümünden anahtar oluşturun. Anahtar, oluşturan kullanıcının rolü ve sunucu erişimiyle çalışır; salt okunur anahtarlar hiçbir şeyi değiştiremez. Uç noktalar, alanlar ve örnekler: [docs/api.md](docs/api.md).
+
+```sh
+curl -H "Authorization: Bearer npat_..." https://patchman.your-domain/api/v1/hosts
+curl -H "Authorization: Bearer npat_..." "https://patchman.your-domain/api/v1/vulnerabilities?sort=epss&overdue=1"
+curl -X POST -H "Authorization: Bearer npat_..." -H "Content-Type: application/json" \
+  -d '{"type":"upgrade_security"}' https://patchman.your-domain/api/v1/hosts/12/jobs
+```
+
+```yaml
+# prometheus.yml
+scrape_configs:
+  - job_name: netio-patchman
+    scheme: https
+    authorization: { credentials: npat_... }
+    static_configs: [{ targets: ["patchman.your-domain"] }]
+```
 
 ## Sorun giderme
 

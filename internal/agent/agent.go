@@ -31,7 +31,9 @@ type Config struct {
 	RemoteUpdates   bool
 	AutoUpdate      bool
 	RefreshLists    bool
-	StateDir        string
+	// Winget lists and installs third-party program updates on Windows.
+	Winget   bool
+	StateDir string
 	// Locale is the language of agent logs and job messages (PATCHMAN_LOCALE).
 	Locale string
 }
@@ -73,6 +75,7 @@ func LoadConfig(l i18n.Localizer, path string, getenv func(string) string) (Conf
 		RemoteUpdates:   boolean("REMOTE_UPDATES", true),
 		AutoUpdate:      boolean("AUTO_UPDATE", true),
 		RefreshLists:    boolean("REFRESH_PACKAGE_LISTS", true),
+		Winget:          boolean("WINGET", true),
 		StateDir:        get("STATE_DIR", DefaultStateDir),
 		Locale:          get("LOCALE", i18n.DefaultLocale),
 	}
@@ -230,6 +233,7 @@ func readLinuxPlatform(h *protocol.HostInfo) error {
 		return err
 	}
 	h.OSID, h.OSIDLike, h.OSVersionID, h.OSVersion, h.OSName = rel["ID"], rel["ID_LIKE"], rel["VERSION_ID"], rel["VERSION"], rel["PRETTY_NAME"]
+	h.Upstream = upstreamRelease(rel)
 	return nil
 }
 
@@ -269,4 +273,17 @@ func ipAddresses() []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// upstreamRelease names the Ubuntu or Debian release a derivative (Linux
+// Mint, Pop!_OS, Zorin OS, elementary OS, LMDE) is built on.
+func upstreamRelease(rel map[string]string) string {
+	id := strings.ToLower(rel["ID"])
+	if c := strings.ToLower(strings.TrimSpace(rel["UBUNTU_CODENAME"])); c != "" && id != "ubuntu" {
+		return protocol.CleanUpstream("ubuntu:" + c)
+	}
+	if c := strings.ToLower(strings.TrimSpace(rel["DEBIAN_CODENAME"])); c != "" && id != "debian" && id != "ubuntu" {
+		return protocol.CleanUpstream("debian:" + c)
+	}
+	return ""
 }

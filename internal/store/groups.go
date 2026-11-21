@@ -16,6 +16,8 @@ type HostGroup struct {
 	Description string
 	CreatedAt   time.Time
 	HostCount   int
+	// Exclude are package name patterns no job updates on the members.
+	Exclude string
 }
 
 // GroupRef is a group as shown next to a host.
@@ -30,8 +32,8 @@ const MaxGroupName = 60
 // ListGroups returns all groups with their member counts, ordered by name.
 func (s *Store) ListGroups(ctx context.Context) ([]HostGroup, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT g.id, g.name, g.description, g.created_at,
-		(SELECT COUNT(*) FROM host_group_members m WHERE m.group_id = g.id)
-		FROM host_groups g ORDER BY g.name COLLATE NOCASE`)
+		(SELECT COUNT(*) FROM host_group_members m WHERE m.group_id = g.id), g.exclude_packages
+		FROM host_groups g`+groupWhere(ctx)+` ORDER BY g.name COLLATE NOCASE`, groupArgs(ctx)...)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +42,7 @@ func (s *Store) ListGroups(ctx context.Context) ([]HostGroup, error) {
 	for rows.Next() {
 		var g HostGroup
 		var c int64
-		if err := rows.Scan(&g.ID, &g.Name, &g.Description, &c, &g.HostCount); err != nil {
+		if err := rows.Scan(&g.ID, &g.Name, &g.Description, &c, &g.HostCount, &g.Exclude); err != nil {
 			return nil, err
 		}
 		g.CreatedAt = fromTS(c)
@@ -54,13 +56,26 @@ func (s *Store) GroupByID(ctx context.Context, id int64) (HostGroup, error) {
 	var g HostGroup
 	var c int64
 	err := s.db.QueryRowContext(ctx, `SELECT g.id, g.name, g.description, g.created_at,
-		(SELECT COUNT(*) FROM host_group_members m WHERE m.group_id = g.id)
-		FROM host_groups g WHERE g.id = ?`, id).Scan(&g.ID, &g.Name, &g.Description, &c, &g.HostCount)
+		(SELECT COUNT(*) FROM host_group_members m WHERE m.group_id = g.id), g.exclude_packages
+		FROM host_groups g WHERE g.id = ?`+strings.Replace(groupWhere(ctx), " WHERE ", " AND ", 1), append([]any{id}, groupArgs(ctx)...)...).Scan(&g.ID, &g.Name, &g.Description, &c, &g.HostCount, &g.Exclude)
 	if errors.Is(err, sql.ErrNoRows) {
 		return g, ErrNotFound
 	}
 	g.CreatedAt = fromTS(c)
 	return g, err
+}
+
+// groupWhere limits groups to the scope of ctx.
+func groupWhere(ctx context.Context) string {
+	if cond, _ := groupScope(ctx, "g.id"); cond != "" {
+		return " WHERE " + cond
+	}
+	return ""
+}
+
+func groupArgs(ctx context.Context) []any {
+	_, args := groupScope(ctx, "g.id")
+	return args
 }
 
 func uniqueErr(err error) error {

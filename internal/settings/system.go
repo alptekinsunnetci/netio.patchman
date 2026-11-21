@@ -35,6 +35,8 @@ const (
 	KeyKEVURL          = "sources.kev_url"
 	KeyMSRCEnabled     = "sources.msrc_enabled"
 	KeyMSRCURL         = "sources.msrc_url"
+	KeyEPSSEnabled     = "sources.epss_enabled"
+	KeyEPSSURL         = "sources.epss_url"
 	KeyUpdateEnabled   = "updates.check_enabled"
 	KeyUpdateURL       = "updates.check_url"
 )
@@ -42,7 +44,7 @@ const (
 // SystemKeys lists every server configuration key.
 var SystemKeys = []string{
 	KeyBaseURL, KeyTrustProxy, KeyTimezone, KeyLogLevel, KeySMTPHost, KeySMTPPort, KeySMTPUsername, KeySMTPPassword,
-	KeySMTPFromName, KeySMTPFromAddress, KeyOSVURL, KeyKEVEnabled, KeyKEVURL, KeyMSRCEnabled, KeyMSRCURL,
+	KeySMTPFromName, KeySMTPFromAddress, KeyOSVURL, KeyKEVEnabled, KeyKEVURL, KeyMSRCEnabled, KeyMSRCURL, KeyEPSSEnabled, KeyEPSSURL,
 	KeyUpdateEnabled, KeyUpdateURL,
 }
 
@@ -65,6 +67,10 @@ type System struct {
 	// MSRCSourceURL is kept while it is off.
 	MSRCURL       string
 	MSRCSourceURL string
+	// EPSSURL is the EPSS score file, empty when disabled; EPSSSourceURL is
+	// kept while it is off.
+	EPSSURL       string
+	EPSSSourceURL string
 	// UpdateURL is where the latest product version is read; empty when the
 	// new-version check is disabled. UpdateSourceURL is kept while it is off.
 	UpdateURL       string
@@ -87,13 +93,16 @@ func SystemFromEnv(c config.Config) System {
 	sys := System{
 		BaseURL: c.BaseURL, TrustProxy: c.TrustProxy, Timezone: c.TimezoneName, Location: c.Timezone,
 		LogLevel: c.LogLevel, SMTP: c.SMTP, OSVURL: c.OSVURL, KEVURL: c.KEVURL, KEVSourceURL: c.KEVURL,
-		MSRCURL: c.MSRCURL, MSRCSourceURL: c.MSRCURL, UpdateURL: c.UpdateURL, UpdateSourceURL: c.UpdateURL,
+		MSRCURL: c.MSRCURL, MSRCSourceURL: c.MSRCURL, EPSSURL: c.EPSSURL, EPSSSourceURL: c.EPSSURL, UpdateURL: c.UpdateURL, UpdateSourceURL: c.UpdateURL,
 	}
 	if sys.KEVSourceURL == "" {
 		sys.KEVSourceURL = config.DefaultKEVURL
 	}
 	if sys.MSRCSourceURL == "" {
 		sys.MSRCSourceURL = config.DefaultMSRCURL
+	}
+	if sys.EPSSSourceURL == "" {
+		sys.EPSSSourceURL = config.DefaultEPSSURL
 	}
 	if sys.UpdateSourceURL == "" {
 		sys.UpdateSourceURL = config.DefaultUpdateURL
@@ -191,6 +200,22 @@ func SystemFrom(raw map[string]string, c config.Config) System {
 			sys.MSRCURL = ""
 			if b {
 				sys.MSRCURL = sys.MSRCSourceURL
+			}
+		}
+	}
+	if v, ok := raw[KeyEPSSURL]; ok {
+		if u, err := ParseSourceURL(v); err == nil {
+			sys.EPSSSourceURL = u
+			if sys.EPSSURL != "" {
+				sys.EPSSURL = u
+			}
+		}
+	}
+	if v, ok := raw[KeyEPSSEnabled]; ok {
+		if b, err := strconv.ParseBool(v); err == nil {
+			sys.EPSSURL = ""
+			if b {
+				sys.EPSSURL = sys.EPSSSourceURL
 			}
 		}
 	}

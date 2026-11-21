@@ -123,12 +123,20 @@ func (s *Store) PruneSnapshots(ctx context.Context, d time.Duration) error {
 
 // ---------- finding flow and report queries ----------
 
-// groupCond restricts a findings alias to a group's hosts.
-func groupCond(alias string, groupID int64) (string, []any) {
-	if groupID == 0 {
-		return "", nil
+// groupCond restricts an alias (findings, jobs) to a group's hosts and to
+// the scope of ctx.
+func groupCond(ctx context.Context, alias string, groupID int64) (string, []any) {
+	var cond string
+	var args []any
+	if groupID != 0 {
+		cond = ` AND ` + alias + `.host_id IN (SELECT host_id FROM host_group_members WHERE group_id = ?)`
+		args = []any{groupID}
 	}
-	return ` AND ` + alias + `.host_id IN (SELECT host_id FROM host_group_members WHERE group_id = ?)`, []any{groupID}
+	if sc, sa := hostScope(ctx, alias+".host_id"); sc != "" {
+		cond += ` AND ` + sc
+		args = append(args, sa...)
+	}
+	return cond, args
 }
 
 // Flow counts findings opened and resolved in [from, to) and the mean time
@@ -144,7 +152,7 @@ type Flow struct {
 // FindingFlow computes the flow for a period, optionally for one group.
 func (s *Store) FindingFlow(ctx context.Context, from, to time.Time, groupID int64) (Flow, error) {
 	var fl Flow
-	gc, ga := groupCond("f", groupID)
+	gc, ga := groupCond(ctx, "f", groupID)
 	var mean sql.NullFloat64
 	args := append([]any{from.Unix(), to.Unix()}, ga...)
 	args = append(args, from.Unix(), to.Unix())
@@ -172,7 +180,7 @@ func (s *Store) SeverityCountsFor(ctx context.Context, groupID int64) (SeverityC
 		return s.FleetSeverityCounts(ctx)
 	}
 	var c SeverityCounts
-	gc, ga := groupCond("f", groupID)
+	gc, ga := groupCond(ctx, "f", groupID)
 	rows, err := s.db.QueryContext(ctx, `SELECT COALESCE(v.severity, 'unknown'), COUNT(DISTINCT f.cve_id) FROM findings f LEFT JOIN vulnerabilities v ON v.cve_id = f.cve_id
 		WHERE f.status IN `+activeStatuses+gc+` GROUP BY 1`, ga...)
 	if err != nil {
@@ -224,7 +232,7 @@ func (k KEVOpen) Overdue(day string) bool { return k.DueDate != "" && k.DueDate 
 
 // OpenKEV lists KEV CVEs with active findings, earliest due date first.
 func (s *Store) OpenKEV(ctx context.Context, groupID int64) ([]KEVOpen, error) {
-	gc, ga := groupCond("f", groupID)
+	gc, ga := groupCond(ctx, "f", groupID)
 	rows, err := s.db.QueryContext(ctx, `SELECT f.cve_id, COALESCE(MAX(v.title), ''), MAX(k.date_added), MAX(k.due_date), COUNT(DISTINCT f.host_id), GROUP_CONCAT(DISTINCT h.hostname)
 		FROM findings f JOIN kev k ON k.cve_id = f.cve_id JOIN hosts h ON h.id = f.host_id LEFT JOIN vulnerabilities v ON v.cve_id = f.cve_id
 		WHERE f.status IN `+activeStatuses+gc+` GROUP BY f.cve_id ORDER BY MAX(k.due_date), f.cve_id`, ga...)
@@ -247,7 +255,7 @@ func (s *Store) OpenKEV(ctx context.Context, groupID int64) ([]KEVOpen, error) {
 
 // JobCounts counts jobs created in [from, to) by status, optionally for a group.
 func (s *Store) JobCounts(ctx context.Context, from, to time.Time, groupID int64) (map[string]int, error) {
-	gc, ga := groupCond("j", groupID)
+	gc, ga := groupCond(ctx, "j", groupID)
 	rows, err := s.db.QueryContext(ctx, `SELECT j.status, COUNT(*) FROM jobs j WHERE j.created_at >= ? AND j.created_at < ?`+gc+` GROUP BY j.status`,
 		append([]any{from.Unix(), to.Unix()}, ga...)...)
 	if err != nil {

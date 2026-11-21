@@ -16,6 +16,7 @@ param(
     [string]$CaFile,
     [switch]$DisableRemoteUpdates,
     [switch]$DisableAutoUpdate,
+    [switch]$DisableWinget,
     [string]$Locale,
     [switch]$Uninstall,
     [switch]$Help
@@ -54,6 +55,7 @@ Seçenekler:
   -CaFile <dosya>           Ajanın sunucu sertifikasını doğrulaması için ek CA dosyası (PEM)
   -DisableRemoteUpdates     Panelden başlatılan güncelleme işlerini bu sunucuda kapat
   -DisableAutoUpdate        Ajanın kendini otomatik güncellemesini bu sunucuda kapat
+  -DisableWinget            Üçüncü taraf programların winget ile güncellenmesini kapat
   -Locale <dil>             Ajan mesajlarının dili: tr-TR (varsayılan), en-US, de-DE, ru-RU
   -Uninstall                Ajanı, hizmeti ve yapılandırmayı kaldır
   -Help                     Bu yardım metnini gösterir
@@ -173,6 +175,7 @@ try {
     }
     $lines += "PATCHMAN_REMOTE_UPDATES=$((-not $DisableRemoteUpdates).ToString().ToLowerInvariant())"
     $lines += "PATCHMAN_AUTO_UPDATE=$((-not $DisableAutoUpdate).ToString().ToLowerInvariant())"
+    if ($DisableWinget) { $lines += "PATCHMAN_WINGET=false" }
     if ($Locale) { $lines += "PATCHMAN_LOCALE=$Locale" }
     Write-Info "Yapılandırma yazılıyor: $ConfigFile"
     [IO.File]::WriteAllText($ConfigFile, (($lines -join "`n") + "`n"), (New-Object Text.UTF8Encoding $false))

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/store"
 )
 
@@ -111,10 +112,18 @@ func (s *Server) groupUpdate(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, back, "error", msg)
 		return
 	}
+	patterns, invalid := protocol.ParseExcludePatterns(r.PostFormValue("exclude"))
+	if len(invalid) > 0 {
+		s.redirect(w, r, back, "error", s.l.T("exclude.error.invalid", "patterns", strings.Join(invalid, ", ")))
+		return
+	}
 	err := s.st.UpdateGroup(r.Context(), g.ID, name, desc)
 	if errors.Is(err, store.ErrDuplicate) {
 		s.redirect(w, r, back, "error", s.l.T("group.error.duplicate", "name", name))
 		return
+	}
+	if err == nil {
+		err = s.st.SetGroupExclude(r.Context(), g.ID, patterns)
 	}
 	if err != nil {
 		s.serverError(w, r, err)
@@ -165,6 +174,11 @@ func (s *Server) groupMembers(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, back, "error", s.l.T("servers.bulk.none_selected"))
 		return
 	}
+	// Limited users can only change hosts they see.
+	if ids, err = s.st.VisibleHostIDs(r.Context(), ids); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
 	var n int
 	action, key := "group.add_hosts", "group.hosts_added"
 	if r.PostFormValue("op") == "remove" {
@@ -188,6 +202,31 @@ func (s *Server) serverGroups(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ids := formIDs(r, "group_ids")
+	// A limited user changes memberships of the groups they see only; the
+	// host stays in its other groups.
+	if s.limited(r) {
+		visible, err := s.st.ListGroups(r.Context())
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		seen := map[int64]bool{}
+		for _, g := range visible {
+			seen[g.ID] = true
+		}
+		var keep []int64
+		for _, id := range ids {
+			if seen[id] {
+				keep = append(keep, id)
+			}
+		}
+		for _, g := range h.Groups {
+			if !seen[g.ID] {
+				keep = append(keep, g.ID)
+			}
+		}
+		ids = keep
+	}
 	if err := s.st.SetHostGroups(r.Context(), h.ID, ids); err != nil {
 		s.serverError(w, r, err)
 		return

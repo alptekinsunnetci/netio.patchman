@@ -270,7 +270,15 @@ func (s *Server) funcs() template.FuncMap {
 			}
 			return strconv.FormatFloat(*p, 'f', 1, 64)
 		},
-		"join":      strings.Join,
+		"join": strings.Join,
+		// epss formats an exploitation probability as a percentage.
+		"epss": func(p *float64) string {
+			if p == nil {
+				return l.T("common.empty")
+			}
+			n := strconv.FormatFloat(*p*100, 'f', 1, 64)
+			return l.T("format.percent", "n", strings.Replace(n, ".", l.T("number.decimal"), 1))
+		},
 		"list":      func(v ...string) []string { return v },
 		"add":       func(a, b int) int { return a + b },
 		"notifText": s.notificationText,
@@ -392,6 +400,7 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("POST /servers/{id}/jobs", operate(s.serverCreateJob))
 	mux.Handle("POST /servers/{id}/rescan", operate(s.serverRescan))
 	mux.Handle("POST /servers/{id}/notes", operate(s.serverNotes))
+	mux.Handle("POST /servers/{id}/exclude", operate(s.serverExclude))
 	mux.Handle("POST /servers/{id}/delete", admin(s.serverDelete))
 	mux.Handle("POST /servers/{id}/groups", operate(s.serverGroups))
 	mux.Handle("POST /servers/bulk-groups", operate(s.groupMembers))
@@ -468,6 +477,21 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("POST /settings/channels/{id}/test", admin(s.channelTest))
 	mux.Handle("POST /settings/channels/{id}/toggle", admin(s.channelToggle))
 	mux.Handle("POST /settings/channels/{id}/delete", admin(s.channelDelete))
+
+	mux.Handle("POST /profile/api-tokens", view(s.apiTokenCreate))
+	mux.Handle("POST /profile/api-tokens/{id}/revoke", view(s.apiTokenRevoke))
+	// REST API and Prometheus metrics (API key, no cookies).
+	mux.Handle("GET /api/v1/hosts", s.apiAuth(false, s.apiHosts))
+	mux.Handle("GET /api/v1/hosts/{id}", s.apiAuth(false, s.apiHost))
+	mux.Handle("GET /api/v1/hosts/{id}/findings", s.apiAuth(false, s.apiHostFindings))
+	mux.Handle("GET /api/v1/hosts/{id}/updates", s.apiAuth(false, s.apiHostUpdates))
+	mux.Handle("POST /api/v1/hosts/{id}/jobs", s.apiAuth(true, s.apiCreateJob))
+	mux.Handle("GET /api/v1/vulnerabilities", s.apiAuth(false, s.apiVulnerabilities))
+	mux.Handle("GET /api/v1/vulnerabilities/{id}", s.apiAuth(false, s.apiVulnerability))
+	mux.Handle("GET /api/v1/groups", s.apiAuth(false, s.apiGroups))
+	mux.Handle("GET /api/v1/jobs", s.apiAuth(false, s.apiJobs))
+	mux.Handle("GET /api/v1/jobs/{id}", s.apiAuth(false, s.apiJob))
+	mux.Handle("GET /metrics", s.apiAuth(false, s.metrics))
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		s.errorPage(w, r, http.StatusNotFound, "error.not_found")
@@ -554,6 +578,15 @@ func (s *Server) page(r *http.Request, title, active string) pageData {
 		u := sess.user
 		d.User, d.CSRF = &u, sess.csrf
 		d.Unread, _ = s.st.UnreadNotifications(r.Context())
+		if u.Limited() {
+			// Group-limited users do not get the fleet-wide pages.
+			d.Nav = nil
+			for _, n := range navigation {
+				if !fleetWidePath(n.Href) {
+					d.Nav = append(d.Nav, n)
+				}
+			}
+		}
 		if u.IsAdmin() && s.o.Updates != nil {
 			if st := s.o.Updates.Status(); st.Enabled && st.Available() {
 				d.Update = &st
@@ -630,6 +663,9 @@ func (s *Server) audit(r *http.Request, action, target, details string) {
 	e := store.AuditEntry{Action: action, Target: target, Details: details, IP: s.clientIP(r)}
 	if sess := sessionFrom(r); sess != nil {
 		e.UserID, e.UserEmail = sess.user.ID, sess.user.Email
+		if sess.apiToken != "" {
+			e.Details = strings.TrimSpace(e.Details + " api_token=" + sess.apiToken)
+		}
 	}
 	if err := s.st.Audit(r.Context(), e); err != nil {
 		s.logger.Warn(s.l.T("log.audit.failed"), slog.String("error", err.Error()))
