@@ -19,7 +19,8 @@ type ExpiredRisk struct {
 // ExpireAcceptedRisks reopens accepted risks whose expiry is at or before at.
 func (s *Store) ExpireAcceptedRisks(ctx context.Context, at time.Time) ([]ExpiredRisk, error) {
 	var out []ExpiredRisk
-	err := s.tx(ctx, func(tx *sql.Tx) error {
+	err := s.tx(ctx, func(tx *Tx) error {
+		out = nil
 		rows, err := tx.QueryContext(ctx, `SELECT f.id, f.cve_id, f.host_id, h.hostname, f.package_name FROM findings f JOIN hosts h ON h.id = f.host_id
 			WHERE f.status = 'accepted_risk' AND f.status_expires_at > 0 AND f.status_expires_at <= ? ORDER BY f.cve_id, h.hostname`, at.Unix())
 		if err != nil {
@@ -164,7 +165,7 @@ func (s *Store) FindingFlow(ctx context.Context, from, to time.Time, groupID int
 	err := s.db.QueryRowContext(ctx, `SELECT
 		(SELECT COUNT(*) FROM findings f WHERE f.first_detected_at >= ? AND f.first_detected_at < ?`+gc+`),
 		(SELECT COUNT(*) FROM findings f WHERE f.status = 'resolved' AND f.resolved_at >= ? AND f.resolved_at < ?`+gc+`),
-		(SELECT AVG(f.resolved_at - f.first_detected_at) FROM findings f WHERE f.status = 'resolved' AND f.resolved_at >= ? AND f.resolved_at < ?`+gc+`),
+		(SELECT CAST(AVG(f.resolved_at - f.first_detected_at) AS DOUBLE PRECISION) FROM findings f WHERE f.status = 'resolved' AND f.resolved_at >= ? AND f.resolved_at < ?`+gc+`),
 		(SELECT COUNT(*) FROM findings f WHERE f.status IN `+activeStatuses+` AND f.first_detected_at < ?`+gc+`)`, args...).
 		Scan(&fl.Opened, &fl.Resolved, &mean, &fl.Backlog)
 	if mean.Valid && mean.Float64 > 0 {

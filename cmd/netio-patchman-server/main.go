@@ -3,7 +3,8 @@
 // Subcommands:
 //
 //	netio-patchman-server                     run the server (default)
-//	netio-patchman-server backup -out FILE    write a consistent database copy
+//	netio-patchman-server backup -out FILE    write a consistent database copy (a SQLite file)
+//	netio-patchman-server restore -in FILE    replace all data with a backup (stop the server first)
 //	netio-patchman-server reset-password -email ADDRESS
 //	netio-patchman-server reset-mfa -email ADDRESS   remove a lost authenticator
 //	netio-patchman-server healthcheck         exit 0 when /healthz answers
@@ -20,6 +21,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -58,6 +61,7 @@ func main() {
 	fs := flag.NewFlagSet(brand.ServerBinary, flag.ExitOnError)
 	showVersion := fs.Bool("version", false, boot.T("flag.version"))
 	out := fs.String("out", "", boot.T("flag.backup_out"))
+	in := fs.String("in", "", boot.T("flag.restore_in"))
 	emailAddr := fs.String("email", "", boot.T("flag.email"))
 	_ = fs.Parse(args)
 	if *showVersion {
@@ -86,12 +90,16 @@ func main() {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	st, err := store.Open(ctx, cfg.DatabasePath())
+	st, err := openStore(ctx, cfg, l, logger)
 	if err != nil {
-		logger.Error(l.T("log.store.failed"), slog.String("path", cfg.DatabasePath()), slog.String("error", err.Error()))
+		logger.Error(l.T("log.store.failed"), slog.String("database", cfg.DatabaseDisplay()), slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 	defer st.Close()
+	if !importSQLite(ctx, cfg, st, l, logger) {
+		st.Close()
+		os.Exit(1)
+	}
 
 	switch cmd {
 	case "serve":
@@ -106,6 +114,19 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Println(l.T("cli.backup.done", "path", *out))
+	case "restore":
+		if *in == "" {
+			fmt.Fprintln(os.Stderr, l.T("cli.restore.in_required"))
+			os.Exit(2)
+		}
+		res, err := st.Restore(ctx, *in)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, l.T("cli.restore.failed", "error", err.Error()))
+			os.Exit(1)
+		}
+		_ = st.Audit(ctx, store.AuditEntry{Action: "system.restore", Target: filepath.Base(*in),
+			Details: fmt.Sprintf("cli tables=%d rows=%d", res.Tables, res.Rows)})
+		fmt.Println(l.T("cli.restore.done", "path", *in, "tables", res.Tables, "rows", res.Rows))
 	case "reset-password":
 		u, err := st.UserByEmail(ctx, *emailAddr)
 		if err != nil {
@@ -158,7 +179,7 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 		slog.String("locale", cfg.Locale),
 		slog.String("timezone", sys.Timezone),
 		slog.String("base_url", sys.BaseURLString()),
-		slog.String("database", cfg.DatabasePath()),
+		slog.String("database", cfg.DatabaseDisplay()),
 	)
 	formatter := timeutil.NewFormatter(sys.Location, l)
 
@@ -305,6 +326,78 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 	}
 	logger.Info(l.T("log.server.stopped"))
 	return 0
+}
+
+// openStore opens the database. PostgreSQL may still be starting (or be
+// restarting), so connection attempts are repeated for two minutes.
+func openStore(ctx context.Context, cfg config.Config, l i18n.Localizer, logger *slog.Logger) (*store.Store, error) {
+	deadline := time.Now().Add(2 * time.Minute)
+	for {
+		st, err := store.Open(ctx, cfg.Database())
+		if err == nil || !cfg.Postgres() || time.Now().After(deadline) {
+			return st, err
+		}
+		logger.Warn(l.T("log.store.waiting"), slog.String("database", cfg.DatabaseDisplay()), slog.String("error", err.Error()))
+		select {
+		case <-ctx.Done():
+			return nil, err
+		case <-time.After(3 * time.Second):
+		}
+	}
+}
+
+// importSQLite moves the SQLite database of an earlier installation into a
+// new, empty PostgreSQL database on the first start with PostgreSQL. The
+// copy runs in one transaction and is verified table by table; on failure
+// nothing is changed and the server does not start (so nobody sets up a
+// fresh, empty installation by mistake). Afterwards the SQLite file is
+// renamed, not deleted. It returns false when the server must not start.
+func importSQLite(ctx context.Context, cfg config.Config, st *store.Store, l i18n.Localizer, logger *slog.Logger) bool {
+	path := cfg.DatabasePath()
+	if !st.Postgres() {
+		return true
+	}
+	if _, err := os.Stat(path); err != nil {
+		return true
+	}
+	empty, err := st.Empty(ctx)
+	if err != nil {
+		logger.Error(l.T("log.store.import_failed"), slog.String("file", path), slog.String("error", err.Error()))
+		return false
+	}
+	if !empty {
+		logger.Warn(l.T("log.store.import_skipped"), slog.String("file", path), slog.String("database", cfg.DatabaseDisplay()))
+		return true
+	}
+	logger.Info(l.T("log.store.import_started"), slog.String("file", path), slog.String("database", cfg.DatabaseDisplay()))
+	res, err := st.ImportSQLite(ctx, path)
+	if errors.Is(err, store.ErrNotEmpty) {
+		// Another process (a CLI command next to the server) was faster.
+		logger.Warn(l.T("log.store.import_skipped"), slog.String("file", path), slog.String("database", cfg.DatabaseDisplay()))
+		return true
+	}
+	if err != nil {
+		logger.Error(l.T("log.store.import_failed"), slog.String("file", path), slog.String("error", err.Error()))
+		return false
+	}
+	kept := path + ".imported-" + time.Now().UTC().Format("20060102-150405")
+	if err := os.Rename(path, kept); err != nil {
+		logger.Warn(l.T("log.store.import_rename_failed"), slog.String("file", path), slog.String("error", err.Error()))
+		kept = path
+	} else {
+		for _, suffix := range []string{"-wal", "-shm"} {
+			if _, err := os.Stat(path + suffix); err == nil {
+				_ = os.Rename(path+suffix, kept+suffix)
+			}
+		}
+	}
+	logger.Info(l.T("log.store.import_done"), slog.Int("tables", res.Tables), slog.Int64("rows", res.Rows),
+		slog.Int64("sanitized", res.Sanitized), slog.Int64("orphans", res.Orphans), slog.Duration("duration", res.Duration.Round(time.Millisecond)), slog.String("kept", kept))
+	_ = st.Audit(ctx, store.AuditEntry{Action: "system.database_import", Target: filepath.Base(path),
+		Details: fmt.Sprintf("tables=%d rows=%d sanitized=%d orphans=%d kept=%s", res.Tables, res.Rows, res.Sanitized, res.Orphans, filepath.Base(kept))})
+	_ = st.AddNotification(ctx, store.LevelInfo, "database_imported", map[string]string{
+		"tables": strconv.Itoa(res.Tables), "rows": strconv.FormatInt(res.Rows, 10), "file": filepath.Base(kept)}, "")
+	return true
 }
 
 // healthcheck probes the local /healthz endpoint (used by the container

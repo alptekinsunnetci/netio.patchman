@@ -62,7 +62,7 @@ func (s *Store) OSVQueries(ctx context.Context, keys []OSVQueryKey) (map[OSVQuer
 
 // SaveOSVQueries upserts query results.
 func (s *Store) SaveOSVQueries(ctx context.Context, results map[OSVQueryKey][]OSVRef) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		stmt, err := tx.PrepareContext(ctx, `INSERT INTO osv_queries (ecosystem, name, version, record_ids, checked_at) VALUES (?, ?, ?, ?, ?)
 			ON CONFLICT (ecosystem, name, version) DO UPDATE SET record_ids = excluded.record_ids, checked_at = excluded.checked_at`)
 		if err != nil {
@@ -245,13 +245,13 @@ func (s *Store) UpsertVulnerability(ctx context.Context, v vuln.Vulnerability) e
 
 // UpsertAdvisory stores an advisory and links it to CVEs.
 func (s *Store) UpsertAdvisory(ctx context.Context, a vuln.Advisory, source string, cves []string) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO advisories (id, title, url, source) VALUES (?, ?, ?, ?)
 			ON CONFLICT (id) DO UPDATE SET title = excluded.title, url = excluded.url, source = excluded.source`, a.ID, a.Title, a.URL, source); err != nil {
 			return err
 		}
 		for _, c := range cves {
-			if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO vulnerability_advisories (cve_id, advisory_id) VALUES (?, ?)`, c, a.ID); err != nil {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO vulnerability_advisories (cve_id, advisory_id) VALUES (?, ?) ON CONFLICT DO NOTHING`, c, a.ID); err != nil {
 				return err
 			}
 		}
@@ -266,11 +266,12 @@ type KEVEntry struct {
 
 // ReplaceKEV replaces the KEV catalog.
 func (s *Store) ReplaceKEV(ctx context.Context, entries []KEVEntry) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `DELETE FROM kev`); err != nil {
 			return err
 		}
-		stmt, err := tx.PrepareContext(ctx, `INSERT OR REPLACE INTO kev (cve_id, date_added, due_date, ransomware) VALUES (?, ?, ?, ?)`)
+		stmt, err := tx.PrepareContext(ctx, `INSERT INTO kev (cve_id, date_added, due_date, ransomware) VALUES (?, ?, ?, ?)
+			ON CONFLICT (cve_id) DO UPDATE SET date_added = excluded.date_added, due_date = excluded.due_date, ransomware = excluded.ransomware`)
 		if err != nil {
 			return err
 		}
@@ -322,7 +323,16 @@ type DetectedFinding struct {
 // reopened. It returns the number of new or reopened findings.
 func (s *Store) ApplyFindings(ctx context.Context, hostID int64, detected []DetectedFinding) (int, error) {
 	created := 0
-	err := s.tx(ctx, func(tx *sql.Tx) error {
+	err := s.tx(ctx, func(tx *Tx) error {
+		created = 0
+		// One scan of a host at a time (the host row is locked until commit).
+		var locked int64
+		if err := tx.QueryRowContext(ctx, `SELECT id FROM hosts WHERE id = ? FOR UPDATE`, hostID).Scan(&locked); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return ErrNotFound
+			}
+			return err
+		}
 		type existing struct {
 			id     int64
 			status string
@@ -387,7 +397,7 @@ func (s *Store) ApplyFindings(ctx context.Context, hostID int64, detected []Dete
 
 // SetFindingStatus changes the status of findings (by ID) on behalf of a user.
 func (s *Store) SetFindingStatus(ctx context.Context, ids []int64, status, note string, userID int64) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		for _, id := range ids {
 			where, args := andScope(ctx, ` WHERE id = ? AND status <> 'resolved'`, []any{id}, "host_id")
 			if _, err := tx.ExecContext(ctx, `UPDATE findings SET status = ?, status_note = ?, status_changed_by = ?, status_expires_at = 0`+where,
@@ -524,7 +534,7 @@ func (s *Store) ListFindings(ctx context.Context, f FindingFilter, p Page) ([]Fi
 	rows, err := s.db.QueryContext(ctx, `SELECT f.id, f.host_id, h.hostname, f.cve_id, COALESCE(v.title, ''), COALESCE(v.severity, 'unknown'), v.cvss_score,
 		CASE WHEN k.cve_id IS NULL THEN 0 ELSE 1 END, f.package_name, f.installed_version, f.fixed_version, f.status, f.status_note,
 		f.first_detected_at, f.last_checked_at, f.resolved_at, f.status_expires_at, COALESCE(cu.name, ''), e.score, `+f.SLA.dueSQL("f", "v")+findingFrom+` LEFT JOIN users cu ON cu.id = f.status_changed_by`+where+
-		` ORDER BY `+severityOrder+`, v.cvss_score DESC, f.cve_id DESC, h.hostname LIMIT ? OFFSET ?`, append(args, p.limit(), p.Offset())...)
+		` ORDER BY `+severityOrder+`, v.cvss_score DESC NULLS LAST, f.cve_id DESC, h.hostname LIMIT ? OFFSET ?`, append(args, p.limit(), p.Offset())...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -590,22 +600,23 @@ type VulnFilter struct {
 // ListVulnSummaries returns CVEs with active findings, most severe first.
 func (s *Store) ListVulnSummaries(ctx context.Context, f VulnFilter, p Page) ([]VulnSummary, int, error) {
 	where, args := findingWhere(ctx, FindingFilter{Severity: f.Severity, Search: f.Search, KEVOnly: f.KEVOnly, Status: f.Status, SLA: f.SLA, OverdueOnly: f.OverdueOnly})
-	order := `MIN(` + severityOrder + `), MAX(k.cve_id IS NOT NULL) DESC, MAX(v.cvss_score) DESC`
+	const kevFirst = `MAX(CASE WHEN k.cve_id IS NULL THEN 0 ELSE 1 END) DESC`
+	order := `MIN(` + severityOrder + `), ` + kevFirst + `, MAX(v.cvss_score) DESC NULLS LAST`
 	if f.Sort == "epss" {
-		order = `MAX(k.cve_id IS NOT NULL) DESC, COALESCE(MAX(e.score), -1) DESC, MIN(` + severityOrder + `)`
+		order = kevFirst + `, COALESCE(MAX(e.score), -1) DESC, MIN(` + severityOrder + `)`
 	}
 	due := f.SLA.dueSQL("f", "v")
 	having := ""
 	if f.FixOnly {
-		having = ` HAVING MAX(f.fixed_version <> '') = 1`
+		having = ` HAVING MAX(CASE WHEN f.fixed_version <> '' THEN 1 ELSE 0 END) = 1`
 	}
 	var total int
-	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM (SELECT f.cve_id`+findingFrom+where+` GROUP BY f.cve_id`+having+`)`, args...).Scan(&total); err != nil {
+	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM (SELECT f.cve_id`+findingFrom+where+` GROUP BY f.cve_id`+having+`) AS t`, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	rows, err := s.db.QueryContext(ctx, `SELECT f.cve_id, COALESCE(MAX(v.title), ''), COALESCE(MAX(v.severity), 'unknown'), MAX(v.cvss_score),
 		MAX(CASE WHEN k.cve_id IS NULL THEN 0 ELSE 1 END), COUNT(DISTINCT f.host_id), GROUP_CONCAT(DISTINCT f.package_name),
-		MAX(f.fixed_version <> ''), MIN(f.first_detected_at), MAX(f.last_checked_at), MAX(e.score),
+		MAX(CASE WHEN f.fixed_version <> '' THEN 1 ELSE 0 END), MIN(f.first_detected_at), MAX(f.last_checked_at), MAX(e.score),
 		MIN(CASE WHEN f.status IN `+activeStatuses+` AND `+due+` > 0 THEN `+due+` END)`+findingFrom+where+
 		` GROUP BY f.cve_id`+having+` ORDER BY `+order+`, COUNT(DISTINCT f.host_id) DESC, f.cve_id DESC LIMIT ? OFFSET ?`,
 		append(args, p.limit(), p.Offset())...)
@@ -716,7 +727,7 @@ func (s *Store) PendingAlerts(ctx context.Context) ([]PendingAlert, error) {
 
 // MarkNotified marks all findings of the CVEs as notified.
 func (s *Store) MarkNotified(ctx context.Context, cves []string) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		for _, c := range cves {
 			if _, err := tx.ExecContext(ctx, `UPDATE findings SET notified = 1 WHERE cve_id = ? AND notified = 0`, c); err != nil {
 				return err

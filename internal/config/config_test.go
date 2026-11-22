@@ -1,6 +1,8 @@
 package config
 
 import (
+	"net/url"
+	"os"
 	"strings"
 	"testing"
 
@@ -53,5 +55,50 @@ func TestSenderConfigurable(t *testing.T) {
 	}
 	if got := cfg.SMTP.From.String(); got != `"netio.patchman" <patchman@example.test>` {
 		t.Errorf("From = %s", got)
+	}
+}
+
+func TestDatabaseURL(t *testing.T) {
+	b := i18n.MustLoad()
+	cfg, err := Load(b, envMap(map[string]string{"PATCHMAN_DATA_DIR": "/data"}))
+	if err != nil || cfg.Postgres() || cfg.Database() != cfg.DatabasePath() {
+		t.Fatalf("default must be SQLite: %+v %v", cfg, err)
+	}
+	cfg, _ = Load(b, envMap(map[string]string{"PATCHMAN_DATABASE_URL": "sqlite"}))
+	if cfg.Postgres() {
+		t.Error("sqlite value must select SQLite")
+	}
+
+	pw := t.TempDir() + "/password"
+	if err := os.WriteFile(pw, []byte("s3cr:et/\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err = Load(b, envMap(map[string]string{
+		"PATCHMAN_DATABASE_URL":           "postgres://patchman@postgres:5432/patchman?sslmode=disable",
+		"PATCHMAN_DATABASE_PASSWORD_FILE": pw,
+	}))
+	if err != nil || !cfg.Postgres() {
+		t.Fatalf("%+v %v", cfg, err)
+	}
+	u, _ := url.Parse(cfg.Database())
+	if p, _ := u.User.Password(); p != "s3cr:et/" || u.User.Username() != "patchman" {
+		t.Errorf("password not taken from the file: %q", cfg.Database())
+	}
+	if d := cfg.DatabaseDisplay(); strings.Contains(d, "s3cr") || d != "postgres://patchman@postgres:5432/patchman?sslmode=disable" {
+		t.Errorf("display: %q", d)
+	}
+
+	_, err = Load(b, envMap(map[string]string{"PATCHMAN_DATABASE_URL": "mysql://root:geheim@db/x"}))
+	if err == nil || !strings.Contains(err.Error(), "PATCHMAN_DATABASE_URL") || strings.Contains(err.Error(), "geheim") {
+		t.Errorf("invalid URL error: %v", err)
+	}
+	_, err = Load(b, envMap(map[string]string{"PATCHMAN_DATABASE_URL": "postgres://u@db/x", "PATCHMAN_DATABASE_PASSWORD_FILE": pw + ".missing"}))
+	if err == nil || !strings.Contains(err.Error(), "PATCHMAN_DATABASE_PASSWORD_FILE") {
+		t.Errorf("missing password file: %v", err)
+	}
+	// A password in the URL wins; the file is then not needed.
+	cfg, err = Load(b, envMap(map[string]string{"PATCHMAN_DATABASE_URL": "postgres://u:pw@db/x", "PATCHMAN_DATABASE_PASSWORD_FILE": pw + ".missing"}))
+	if err != nil || cfg.Database() != "postgres://u:pw@db/x" {
+		t.Errorf("URL password: %q %v", cfg.Database(), err)
 	}
 }

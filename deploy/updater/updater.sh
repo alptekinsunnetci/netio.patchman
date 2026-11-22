@@ -84,7 +84,8 @@ run_update() {
 	write_status running "$step" "$start" 0 "$from" "$to"
 	log "sağlık denetimi"
 	i=0
-	while [ $i -lt 60 ]; do
+	# İlk açılışta veritabanı aktarımı (0.8.0, SQLite -> PostgreSQL) sürebilir: en fazla 10 dakika.
+	while [ $i -lt 120 ]; do
 		id=$($COMPOSE ps -q server 2>/dev/null)
 		health=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$id" 2>/dev/null)
 		if [ "$health" = "healthy" ]; then
@@ -95,7 +96,7 @@ run_update() {
 		i=$((i + 1))
 		sleep 5
 	done
-	log "sunucu 5 dakika içinde sağlıklı duruma geçmedi: $health"
+	log "sunucu 10 dakika içinde sağlıklı duruma geçmedi: $health"
 	fail
 }
 

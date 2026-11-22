@@ -76,7 +76,7 @@ func scanChannel(row interface{ Scan(...any) error }) (Channel, error) {
 
 // ListChannels returns all channels ordered by name.
 func (s *Store) ListChannels(ctx context.Context) ([]Channel, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT `+channelCols+` FROM notify_channels ORDER BY name COLLATE NOCASE, id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT `+channelCols+` FROM notify_channels ORDER BY lower(name), name, id`)
 	if err != nil {
 		return nil, err
 	}
@@ -99,12 +99,8 @@ func (s *Store) ChannelByID(ctx context.Context, id int64) (Channel, error) {
 
 // CreateChannel stores a channel.
 func (s *Store) CreateChannel(ctx context.Context, c Channel) (int64, error) {
-	res, err := s.db.ExecContext(ctx, `INSERT INTO notify_channels (name, type, url, secret, chat_id, min_level, enabled, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+	return insertID(ctx, s.db, `INSERT INTO notify_channels (name, type, url, secret, chat_id, min_level, enabled, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		strings.TrimSpace(c.Name), c.Type, c.URL, c.Secret, c.ChatID, c.MinLevel, boolInt(c.Enabled), now())
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
 }
 
 // SetChannelEnabled switches a channel on or off.

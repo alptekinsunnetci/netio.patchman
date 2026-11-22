@@ -12,7 +12,7 @@ Bu belge, netio.patchman sunucusunun üretim ortamına kurulmasını, ajanların
 | 100–500 | 2 çekirdek | 2 GB | 20 GB |
 | 500 üzeri | 4 çekirdek | 4 GB | 40 GB |
 
-- Docker Engine 24+ ve Docker Compose v2.24+ ya da doğrudan çalıştırma için herhangi bir Linux dağıtımı.
+- Docker Engine 24+ ve Docker Compose v2.24+ ya da doğrudan çalıştırma için herhangi bir Linux dağıtımı. Tablodaki değerler PostgreSQL konteynerini de kapsar.
 - Ajanların erişebileceği bir alan adı ve TLS sertifikası (önerilir).
 - Güvenlik açığı verileri için `api.osv.dev` ve `www.cisa.gov` adreslerine, Windows sunucuları varsa `api.msrc.microsoft.com` adresine HTTPS (443) erişimi. Erişim yoksa bkz. [Bölüm 8](#8-internet-erişimi-olmayan-ortamlar).
 
@@ -45,9 +45,48 @@ docker compose ps                  # durum "healthy" olmalı
 docker compose logs -f server
 ```
 
-Compose proje adı `netio-patchman`, imaj adı `netio-patchman-server`, veri birimi `netio-patchman-data`'dır. Veritabanı birimde `/data/netio-patchman.db` dosyasında tutulur.
+Compose proje adı `netio-patchman`, imaj adı `netio-patchman-server`'dır. İki konteyner çalışır: `server` (uygulama) ve `postgres` (PostgreSQL 17). Veriler `netio-patchman-db` biriminde (PostgreSQL), yedekler ve geçici dosyalar `netio-patchman-data` biriminde (`/data`) tutulur. Bkz. [Bölüm 2.2](#22-veritabanı).
 
 İlk açılışta `PATCHMAN_BASE_URL/setup` adresinde ilk yönetici hesabı oluşturulur. Bu sayfa yalnızca hiç kullanıcı yokken açılır.
+
+### 2.2 Veritabanı
+
+Varsayılan kurulumda veritabanı, aynı Compose projesindeki PostgreSQL 17 konteyneridir:
+
+- Kullanıcı ve veritabanı adı `patchman`. Parola ilk açılışta rastgele üretilir ve `netio-patchman-db` biriminde `patchman-password` dosyasına yazılır. Sunucu bu dosyayı salt okunur bağlar (`PATCHMAN_DATABASE_PASSWORD_FILE`).
+- PostgreSQL dışarıya port açmaz; yalnızca Compose ağındaki sunucu bağlanır. Elle sorgu için: `docker compose exec postgres psql -U patchman patchman`.
+- Veritabanı `--locale=C` ile oluşturulur: metinler bayt sırasına göre sıralanır, büyük/küçük harf duyarsız karşılaştırmalar (e-posta, grup adı, arama) yalnızca ASCII harflerde yapılır. Bu, önceki SQLite davranışıyla aynıdır.
+
+**Dış bir PostgreSQL** (13 veya üzeri) kullanmak için `.env` dosyasına adresini yazın:
+
+```sh
+PATCHMAN_DATABASE_URL=postgres://patchman:parola@db.your-domain:5432/patchman?sslmode=verify-full
+```
+
+Kullanıcının veritabanında tablo oluşturma yetkisi olmalıdır (şema açılışta oluşturulur ve güncellenir). Parolayı adrese yazmak yerine bir dosyadan da okutabilirsiniz: `PATCHMAN_DATABASE_PASSWORD_FILE=/run/secrets/db-password`. Bu durumda Compose'daki `postgres` konteyneri çalışmaya devam eder ama kullanılmaz.
+
+**SQLite** ile çalışmak için (küçük kurulumlar, Docker dışı çalıştırma) `PATCHMAN_DATABASE_URL=sqlite` yazın ya da değişkeni hiç tanımlamayın (Docker dışında varsayılan budur). Veritabanı `PATCHMAN_DATA_DIR/netio-patchman.db` dosyasıdır.
+
+**Önceki sürümlerden geçiş (0.8.0).** PostgreSQL ile ilk açılışta veritabanı boşsa ve `/data/netio-patchman.db` dosyası varsa sunucu SQLite verisini kendiliğinden aktarır:
+
+1. SQLite dosyası bütünlük denetiminden geçirilir (`PRAGMA quick_check`), tutarlı bir çalışma kopyası alınır (yarım kalmış yazma günlüğü de dahil). Asıl dosyaya dokunulmaz.
+2. Bütün tablolar tek bir PostgreSQL işleminde kopyalanır. Her tablonun satır sayısı kaynakla karşılaştırılır, kimlik sayaçları kaldığı yerden devam edecek şekilde ayarlanır, yabancı anahtarlar en sonda topluca doğrulanır.
+3. PostgreSQL metinde geçersiz UTF-8 baytı ve NUL karakteri kabul etmez. Böyle değerler varsa düzeltilerek aktarılır; sayısı günlükte `sanitized` alanında görünür. Silinmiş kayıtlara bağlı kalmış satırlar, yabancı anahtarın kuralına göre silinir ya da bağlantısı kaldırılır (`orphans`).
+4. İşlem onaylanınca eski dosyanın adı `netio-patchman.db.imported-<UTC zaman>` olarak değiştirilir, bildirim merkezine bilgi notu düşer ve denetim kaydı yazılır.
+
+Bir adım başarısız olursa işlem geri alınır, PostgreSQL boş kalır ve sunucu başlamaz. Bu bilerek böyledir: boş bir veritabanıyla açılıp yeni bir **İlk Kurulum** yapılmasının önüne geçer. Sorunu giderdikten sonra `docker compose up -d` aktarımı baştan yapar. PostgreSQL'de zaten veri varsa aktarım yapılmaz ve günlüğe bir uyarı yazılır.
+
+Geçişten sonra SQLite'a dönmek için önce güncel bir yedek alın, sonra SQLite modunda geri yükleyin:
+
+```sh
+docker compose exec server netio-patchman-server backup -out /data/backups/donus.db
+echo "PATCHMAN_DATABASE_URL=sqlite" >> .env
+docker compose stop server
+docker compose run --rm --no-deps server restore -in /data/backups/donus.db
+docker compose up -d
+```
+
+Geçişten önceki hale dönmek için `-in` ile aktarılan eski dosyayı (`/data/netio-patchman.db.imported-…`) verin.
 
 ### 2.1 Panelden yapılandırma
 
@@ -280,7 +319,7 @@ Ardından panelde sunucunun **Sistem Bilgisi** sekmesinden sunucuyu kaldırın.
 
 Sunucu, veritabanını her gün belirlenen saatte (varsayılan 02:30, `PATCHMAN_TIMEZONE` saatine göre) tutarlı bir kopya olarak yedekler ve en yeni N yedeği saklar (varsayılan 7). Ayarlar **Sistem Ayarları → Otomatik yedekleme** bölümündedir. Sunucu yedekleme saatinde kapalıysa yedek, açıldıktan sonraki ilk dakikada alınır.
 
-- Dosya adı: `netio-patchman-YYYYAAGG-SSDDss.db`. Her dosya doğrudan açılabilen bir SQLite veritabanıdır.
+- Dosya adı: `netio-patchman-YYYYAAGG-SSDDss.db`. Her dosya doğrudan açılabilen bir SQLite veritabanıdır; PostgreSQL kullanılırken de yedekler bu biçimde, tek bir tutarlı anlık görüntüden yazılır. Böylece bir yedek iki veritabanına da geri yüklenebilir.
 - Varsayılan dizin `/data/backups` (Docker biriminin içi). Birim ya da disk kaybına karşı yedekleri ayrı bir diske yazdırın:
 
   ```yaml
@@ -308,15 +347,17 @@ docker compose cp server:/data/yedek-$(date +%Y%m%d).db ./
 
 ### 5.3 Geri yükleme
 
-Otomatik ya da elle alınmış bir yedekten:
+`restore` komutu veritabanındaki bütün verileri yedektekilerle değiştirir. Komut tek bir işlemde çalışır; yedek okunamazsa ya da başka bir sürümün şemasına aitse veritabanı değişmez. Sunucuyu önce durdurun:
 
 ```sh
 docker compose stop server
-docker compose cp ./yedek-20261119.db server:/data/netio-patchman.db
+docker compose run --rm --no-deps server restore -in /data/backups/netio-patchman-20261119-023000.db
 docker compose start server
 ```
 
-Otomatik yedek konteynerin içindeyse önce dışarı alın: `docker compose cp server:/data/backups/netio-patchman-20261119-023000.db ./yedek-20261119.db`. Yedekleri sunucu dışında da saklayın.
+Sunucu dışındaki bir yedeği önce birime kopyalayın: `docker compose cp ./yedek-20261119.db server:/data/yedek-20261119.db`, ardından `-in /data/yedek-20261119.db`. Otomatik yedekleri dışarı almak için: `docker compose cp server:/data/backups/netio-patchman-20261119-023000.db ./`. Yedekleri sunucu dışında da saklayın.
+
+Eski sürümlerin (SQLite) yedekleri de geri yüklenebilir; şema önce bu sürüme yükseltilir. Daha yeni bir sürümün yedeği geri yüklenmez.
 
 ## 6. Sürüm yükseltme
 
@@ -325,7 +366,7 @@ git pull
 docker compose up -d --build
 ```
 
-Veritabanı şeması açılışta otomatik olarak güncellenir. Yükseltmeden önce yedek alın.
+Veritabanı şeması açılışta otomatik olarak güncellenir. Yükseltmeden önce yedek alın. 0.7.x'ten 0.8.0'a geçişte SQLite verisi PostgreSQL'e aktarılır, bkz. [Bölüm 2.2](#22-veritabanı).
 
 Sunucunun ve ajanların sürümü depodaki `VERSION` dosyasından alınır. Kendi derlemenize ayrı bir sürüm vermek için `.env` içinde `PATCHMAN_VERSION` tanımlayın. Ajanlar yalnızca sürüm değiştiğinde güncellenir.
 
@@ -355,7 +396,7 @@ docker compose up -d --build
 Nasıl çalışır:
 
 1. Panel, veri birimine `update-request.json` dosyasını yazar (Docker'a dokunmaz).
-2. Güncelleyici (her 5 saniyede bir yoklar) dosyayı alır ve sırasıyla çalıştırır: `git pull --ff-only` (depo sahibinin kimliğiyle, dosyalar root'a geçmez), `netio-patchman-server backup` ile yedek (`/data/before-update-<sürüm>-<zaman>.db`), `docker compose build server`, `docker compose up -d server`, sağlık denetimi (en fazla 5 dakika).
+2. Güncelleyici (her 5 saniyede bir yoklar) dosyayı alır ve sırasıyla çalıştırır: `git pull --ff-only` (depo sahibinin kimliğiyle, dosyalar root'a geçmez), `netio-patchman-server backup` ile yedek (`/data/before-update-<sürüm>-<zaman>.db`), `docker compose build server`, `docker compose up -d server`, sağlık denetimi (en fazla 10 dakika).
 3. Durum `/data/update/status.json`, çıktı `/data/update/update.log` dosyasına yazılır; panel bunları gösterir ve bitince bildirim oluşturur.
 
 Güncelleyici depodaki betiği (`deploy/updater/updater.sh`) çalıştırır; böylece `git pull` ile kendisi de güncellenir. Güncelleyici imajının kendisi değişirse (`deploy/updater/Dockerfile`) bir kez `docker compose up -d --build` çalıştırın.
@@ -419,6 +460,7 @@ Komut, kullanıcının doğrulayıcısını ve yedek kodlarını kaldırır, otu
 - **Ajanlar:** Panelin **Ajan Yönetimi** sayfasındaki indirme adreslerinden ajan dosyasını, `netio-patchman-agent.service` dosyasını ve `install-agent.sh` betiğini alın, sunucuya kopyalayıp `--binary` seçeneğiyle kurun. Windows'ta `install-agent.ps1` ve `netio-patchman-agent-windows-amd64.exe` ile `-Binary` kullanılır.
 - **Güvenlik açığı verisi:** **Sunucu yapılandırması** sayfasında OSV API adresini iç ağdaki bir yansıya yönlendirin. KEV kataloğunun adresini iç ağdaki bir kopyaya çevirin veya kataloğu kapatın. Windows sunucuları için Microsoft Security Update Guide adresini bir vekil sunucuya yönlendirin ya da kapatın; kapalıyken yalnızca Windows Update'in kendisinin bildirdiği CVE'ler kullanılır. (Ortam değişkenleri: `PATCHMAN_OSV_URL`, `PATCHMAN_KEV_URL`, `PATCHMAN_MSRC_URL`.)
 - **Yeni sürüm denetimi:** **Sunucu yapılandırması → Sürüm denetimi** bölümünden kapatın veya iç ağdaki bir `VERSION` dosyasına yönlendirin (`PATCHMAN_UPDATE_CHECK_URL=off`).
+- **Docker imajları:** Sunucu imajının derlenmesi için `golang:1.26-alpine` ve `gcr.io/distroless/static-debian12`, veritabanı için `postgres:17-alpine` gerekir. İnternete erişen bir makinede `docker pull` ve `docker save` ile alıp hedefte `docker load` ile yükleyin.
 - Panel dış kaynak (CDN, yazı tipi) kullanmaz.
 
 ## 9. REST API ve izleme
@@ -430,6 +472,9 @@ REST API ve Prometheus metrikleri için bkz. [api.md](api.md). Anahtarlar **Prof
 | Belirti | Kontrol |
 |---|---|
 | Sunucu başlamıyor | `docker compose logs server`: yapılandırma hataları Türkçe olarak listelenir. |
+| Günlükte "Veritabanına bağlanılamadı, yeniden denenecek" | `docker compose ps postgres` "healthy" mi? `docker compose logs postgres`. Dış PostgreSQL'de adresi, parolayı ve `sslmode` değerini kontrol edin. Sunucu iki dakika boyunca yeniden dener. |
+| Günlükte "SQLite veritabanı PostgreSQL'e aktarılamadı" | Hata ayrıntısı aynı kayıttadır. SQLite dosyası değişmemiş, PostgreSQL boş bırakılmıştır. Disk alanını ve `postgres` konteynerini kontrol edip `docker compose up -d` ile yeniden deneyin. |
+| Günlükte "PostgreSQL veritabanında zaten veri olduğu için SQLite dosyası aktarılmadı" | Aktarım daha önce yapılmış ama eski dosyanın adı değiştirilememiş. Verilerin panelde göründüğünü doğrulayıp `/data/netio-patchman.db` dosyasını kenara alın. |
 | Ajan görünmüyor | Sunucuda `journalctl -u netio-patchman-agent.service -n 50`. Kayıt anahtarının süresi dolmuş veya kullanım sınırına ulaşmış olabilir. |
 | Windows ajanı görünmüyor veya güncelleme listelemiyor | `Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50`. `wuauserv` hizmeti devre dışı mı? WSUS kullanılıyorsa güncellemeler onaylanmış mı? |
 | Windows sunucusunda CVE yok | Merkezi sunucunun `api.msrc.microsoft.com` erişimini ve **Sunucu yapılandırması** sayfasındaki Microsoft Security Update Guide ayarını kontrol edin. |

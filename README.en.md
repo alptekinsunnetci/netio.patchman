@@ -6,7 +6,7 @@
 
 netio.patchman is a self-hosted platform for monitoring and managing the vulnerabilities and package updates of hundreds of Linux and Windows servers from a single dashboard.
 
-- The central server is a single Docker container with an embedded SQLite database. No separate database, queue or cache service is needed.
+- The central server runs with Docker Compose: the application container and a PostgreSQL database. The SQLite database of earlier versions is moved into PostgreSQL automatically on the first start. No queue or cache service is needed.
 - A small agent is installed on each managed server. The agent opens no ports; it connects to the central server itself.
 - The web interface is available in Turkish, English, German and Russian, and each user picks their own language. CVE data is shown exactly as published by its source, never translated.
 
@@ -130,7 +130,7 @@ The screenshots show the Turkish interface; the other languages have the same la
  Managed servers                         Central server (Docker)                 External sources
 ┌──────────────────────┐   HTTPS   ┌──────────────────────────────┐   HTTPS   ┌──────────────┐
 │ netio-patchman-agent │ ────────▶ │ netio.patchman               │ ────────▶ │ api.osv.dev  │
-│  inventory, jobs     │ (outbound)│  dashboard + API + SQLite    │           │ CISA KEV     │
+│  inventory, jobs     │ (outbound)│  dashboard + API + PostgreSQL│           │ CISA KEV     │
 │  (Linux, Windows)    │           │                              │           │ MSRC         │
 └──────────────────────┘           └──────────────────────────────┘           └──────────────┘
                                                  ▲
@@ -283,6 +283,20 @@ docker compose up -d --build
 - The version is read from the `VERSION` file in the repository.
 - If **Settings → Agents → Update agents automatically** is on (the default), agents switch to the new version by themselves.
 
+### 0.8.0: moving to PostgreSQL
+
+Version 0.8.0 moves the database from SQLite to PostgreSQL. The Compose file now runs a PostgreSQL 17 container next to the application (`postgres`, volume `netio-patchman-db`). Nothing extra is needed for the move; the usual `git pull && docker compose up -d --build` (or **Update now** in the dashboard) is enough:
+
+1. The PostgreSQL container starts for the first time. Its password is generated randomly and kept in the database volume; no port is published.
+2. If PostgreSQL is empty and `/data/netio-patchman.db` exists, the server copies all tables into PostgreSQL in one transaction and compares the row count of every table with the source. The dashboard opens only after the copy. A database with 1.3 million rows is moved in about 15 seconds.
+3. Afterwards the old file is renamed to `netio-patchman.db.imported-<time>` (not deleted), an information notice appears in the notification center and the move is written to the audit log.
+
+If any step fails, PostgreSQL is left empty, the SQLite file is not changed and the server does not start. The error is shown by `docker compose logs server`. After fixing the cause, `docker compose up -d` starts the move again.
+
+- **Staying on SQLite:** add `PATCHMAN_DATABASE_URL=sqlite` to `.env`. The PostgreSQL container still runs but is not used.
+- **External PostgreSQL:** add `PATCHMAN_DATABASE_URL=postgres://user:password@host:5432/database?sslmode=require` to `.env`. If that database is empty, the SQLite data is moved there.
+- **Going back:** start with `PATCHMAN_DATABASE_URL=sqlite` and restore a current backup with the `restore` command; the steps are in [docs/kurulum.md](docs/kurulum.md#22-veritabanı) (Turkish).
+
 ### Updating from the dashboard (optional)
 
 The upgrade can also be started with **Settings → Server configuration → Product version → Update now**. Turn on the `updater` container from the Compose file once:
@@ -309,15 +323,17 @@ docker compose exec server netio-patchman-server backup -out /data/backup.db
 docker compose cp server:/data/backup.db ./backup-$(date +%Y%m%d).db
 ```
 
-Restoring from a backup:
+Restoring from a backup (backups are SQLite files whichever database is in use):
 
 ```sh
 docker compose stop server
-docker compose cp ./backup-20261120.db server:/data/netio-patchman.db
+docker compose run --rm --no-deps server restore -in /data/backups/netio-patchman-20261120-023000.db
 docker compose start server
 ```
 
-The database is kept in the Docker volume `netio-patchman-data` (`/data/netio-patchman.db`). Backups also contain the SMTP password; protect them accordingly.
+Copy a backup from outside into the volume first: `docker compose cp ./backup-20261120.db server:/data/backup.db`, then restore it with `-in /data/backup.db`. The restore runs in one transaction: if it fails, the database is not changed.
+
+The data is kept in the PostgreSQL volume `netio-patchman-db`, backups in the volume `netio-patchman-data` (`/data/backups`). Backups also contain the SMTP password; protect them accordingly.
 
 ### Resetting an administrator password
 
@@ -361,6 +377,8 @@ The `PATCHMAN_`-prefixed variables in `.env` only provide the initial values; a 
 | `PATCHMAN_TLS_CERT_FILE`, `PATCHMAN_TLS_KEY_FILE` | — | Certificate and key for letting the server terminate TLS itself | — |
 | `PATCHMAN_TIMEZONE` | `Europe/Istanbul` | Time zone in which dates and times are shown | yes |
 | `PATCHMAN_LOCALE` | `tr-TR` | Default language (`tr-TR`, `en-US`, `de-DE` or `ru-RU`): interface of new users, emails and logs. Each user can choose their own interface language | — |
+| `PATCHMAN_DATABASE_URL` | PostgreSQL from Compose | PostgreSQL address (`postgres://user@host:5432/database`); `sqlite` uses the SQLite file `/data/netio-patchman.db` | — |
+| `PATCHMAN_DATABASE_PASSWORD_FILE` | password file from Compose | File the password is read from when the address has none | — |
 | `PATCHMAN_BACKUP_DIR` | `/data/backups` | Directory for automatic backups | — |
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API address (an internal mirror can be used) | yes |
 | `PATCHMAN_KEV_URL` | CISA KEV address | KEV catalog address; `off` turns it off | yes |
@@ -398,6 +416,7 @@ scrape_configs:
 
 | Symptom | Check |
 |---|---|
+| After an update the server does not start and the log says the SQLite database could not be copied to PostgreSQL | The details are in the same log entry; the SQLite file is unchanged. Check with `docker compose ps` that `postgres` is "healthy" and that there is free disk space, then run `docker compose up -d`. To go back to SQLite for now, add `PATCHMAN_DATABASE_URL=sqlite` to `.env`. |
 | The dashboard does not open | `docker compose ps` should show `0.0.0.0:<port>->8080/tcp` in the PORTS column. See errors with `docker compose logs server`. Is the `PATCHMAN_PUBLISH_PORT` port open in the firewall? |
 | The install command shows `localhost` | Change the server address on the **Server configuration** page to an address the agents can reach. |
 | The agent does not enroll | Does `curl -I https://patchman.your-domain/healthz` work from the agent's server? `journalctl -u netio-patchman-agent -n 50` |
@@ -431,7 +450,9 @@ More information (in Turkish): [docs/kurulum.md](docs/kurulum.md) (installation 
 Requirement: Go 1.26 or later.
 
 ```sh
-go test ./...                                   # unit and end-to-end tests
+go test ./...                                   # unit and end-to-end tests (SQLite)
+# The same tests on PostgreSQL (each test uses its own schema):
+PATCHMAN_TEST_DATABASE_URL=postgres://patchman:password@127.0.0.1:5432/patchman go test ./...
 go vet ./...
 PATCHMAN_DATA_DIR=./data go run ./cmd/netio-patchman-server
 

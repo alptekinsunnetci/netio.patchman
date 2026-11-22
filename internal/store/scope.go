@@ -34,7 +34,7 @@ func hostScope(ctx context.Context, col string) (string, []any) {
 		return "", nil
 	}
 	if len(ids) == 0 {
-		return "0", nil
+		return "1 = 0", nil
 	}
 	args := make([]any, len(ids))
 	for i, id := range ids {
@@ -62,7 +62,7 @@ func groupScope(ctx context.Context, col string) (string, []any) {
 		return "", nil
 	}
 	if len(ids) == 0 {
-		return "0", nil
+		return "1 = 0", nil
 	}
 	args := make([]any, len(ids))
 	for i, id := range ids {

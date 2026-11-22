@@ -83,7 +83,7 @@ func (s *Server) renderSystem(w http.ResponseWriter, r *http.Request, status int
 		"Stored": stored, "AnyStored": anyStored,
 		"Timezones": commonTimezones, "LogLevels": settings.LogLevels,
 		"Env": map[string]any{
-			"HTTPAddr": env.HTTPAddr, "Database": env.DatabasePath(), "AgentDistDir": env.AgentDistDir,
+			"HTTPAddr": env.HTTPAddr, "Database": env.DatabaseDisplay(), "AgentDistDir": env.AgentDistDir,
 			"TLS": env.TLSCertFile != "", "TLSCertFile": env.TLSCertFile, "LogFormat": env.LogFormat, "Locale": env.Locale,
 		},
 	}

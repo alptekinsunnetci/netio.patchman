@@ -21,8 +21,21 @@ services:
       # Konteyner içinde her zaman 8080 dinlenir. Dışarıya açılan port .env
       # içindeki PATCHMAN_PUBLISH_PORT ile değiştirilir.
       PATCHMAN_HTTP_ADDR: ":8080"
+      # Veritabanı: bu projedeki PostgreSQL konteyneri. Parolası ilk açılışta
+      # rastgele üretilir ve veritabanı biriminde saklanır. Önceki sürümlerin
+      # SQLite veritabanı ilk açılışta buraya kendiliğinden aktarılır.
+      # Dış bir PostgreSQL için .env içinde PATCHMAN_DATABASE_URL tanımlayın;
+      # SQLite'ta kalmak için PATCHMAN_DATABASE_URL=sqlite yazın.
+      PATCHMAN_DATABASE_URL: ${PATCHMAN_DATABASE_URL:-postgres://patchman@postgres:5432/patchman?sslmode=disable}
+      PATCHMAN_DATABASE_PASSWORD_FILE: ${PATCHMAN_DATABASE_PASSWORD_FILE:-/run/patchman-db/patchman-password}
     volumes:
       - patchman-data:/data
+      # Yalnızca parola dosyası okunur (veritabanı dosyaları postgres
+      # kullanıcısına aittir ve sunucu tarafından okunamaz).
+      - patchman-db:/run/patchman-db:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "${PATCHMAN_PUBLISH_PORT:-8080}:8080"
     logging:
@@ -31,6 +44,44 @@ services:
         max-size: "20m"
         max-file: "5"
         tag: "netio.patchman/{{.Name}}"
+
+  # PostgreSQL 17. Dışarıya port açılmaz; yalnızca sunucu bağlanır. Veriler
+  # netio-patchman-db biriminde tutulur. Parola ilk açılışta rastgele üretilip
+  # aynı birimdeki patchman-password dosyasına yazılır.
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: patchman
+      POSTGRES_DB: patchman
+      POSTGRES_PASSWORD_FILE: /var/lib/postgresql/data/patchman-password
+      # Bayt sırasına göre sıralama (SQLite ile aynı davranış).
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        f=/var/lib/postgresql/data/patchman-password
+        if [ ! -s "$$f" ]; then
+          tr -dc A-Za-z0-9 < /dev/urandom | head -c 40 > "$$f.tmp" && mv "$$f.tmp" "$$f"
+        fi
+        chmod 0644 "$$f"
+        exec docker-entrypoint.sh postgres
+    shm_size: 256m
+    volumes:
+      - patchman-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U patchman -d patchman -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Panelden güncelleme (isteğe bağlı). Etkinleştirmek için .env dosyasına
   # COMPOSE_PROFILES=updater ekleyip "docker compose up -d --build" çalıştırın.
@@ -55,3 +106,5 @@ services:
 volumes:
   patchman-data:
     name: netio-patchman-data
+  patchman-db:
+    name: netio-patchman-db

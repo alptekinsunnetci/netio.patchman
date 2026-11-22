@@ -40,12 +40,8 @@ func (s *Store) CreateAPIToken(ctx context.Context, userID int64, name, hash, pr
 	if n >= MaxAPITokensPerUser {
 		return 0, ErrLimit
 	}
-	res, err := s.db.ExecContext(ctx, `INSERT INTO api_tokens (user_id, name, token_hash, prefix, read_only, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+	return insertID(ctx, s.db, `INSERT INTO api_tokens (user_id, name, token_hash, prefix, read_only, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		userID, truncate(strings.TrimSpace(name), 100), hash, prefix, boolInt(readOnly), now(), ts(expires))
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
 }
 
 // ErrLimit is returned when a per-user limit is reached.
@@ -74,7 +70,7 @@ func (s *Store) ListAPITokens(ctx context.Context, userID int64) ([]APIToken, er
 		q += ` WHERE t.user_id = ?`
 		args = append(args, userID)
 	}
-	rows, err := s.db.QueryContext(ctx, q+` ORDER BY t.revoked_at <> 0, t.id DESC`, args...)
+	rows, err := s.db.QueryContext(ctx, q+` ORDER BY CASE WHEN t.revoked_at <> 0 THEN 1 ELSE 0 END, t.id DESC`, args...)
 	if err != nil {
 		return nil, err
 	}

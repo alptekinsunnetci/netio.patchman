@@ -33,7 +33,7 @@ const MaxGroupName = 60
 func (s *Store) ListGroups(ctx context.Context) ([]HostGroup, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT g.id, g.name, g.description, g.created_at,
 		(SELECT COUNT(*) FROM host_group_members m WHERE m.group_id = g.id), g.exclude_packages
-		FROM host_groups g`+groupWhere(ctx)+` ORDER BY g.name COLLATE NOCASE`, groupArgs(ctx)...)
+		FROM host_groups g`+groupWhere(ctx)+` ORDER BY lower(g.name), g.name`, groupArgs(ctx)...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,15 +78,8 @@ func groupArgs(ctx context.Context) []any {
 	return args
 }
 
-func uniqueErr(err error) error {
-	if err != nil && strings.Contains(err.Error(), "UNIQUE") {
-		return ErrDuplicate
-	}
-	return err
-}
-
-// nameTaken reports whether another group has the name. SQLite's NOCASE
-// folds ASCII only, so "Üretim" and "üretim" are compared here.
+// nameTaken reports whether another group has the name. The unique index
+// (SQLite NOCASE, PostgreSQL lower()) may fold ASCII only, so "Üretim" and "üretim" are compared here.
 func (s *Store) nameTaken(ctx context.Context, name string, exceptID int64) (bool, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT id, name FROM host_groups`)
 	if err != nil {
@@ -114,12 +107,9 @@ func (s *Store) CreateGroup(ctx context.Context, name, description string) (int6
 		}
 		return 0, err
 	}
-	res, err := s.db.ExecContext(ctx, `INSERT INTO host_groups (name, description, created_at) VALUES (?, ?, ?)`,
+	id, err := insertID(ctx, s.db, `INSERT INTO host_groups (name, description, created_at) VALUES (?, ?, ?)`,
 		strings.TrimSpace(name), truncate(strings.TrimSpace(description), 500), now())
-	if err != nil {
-		return 0, uniqueErr(err)
-	}
-	return res.LastInsertId()
+	return id, uniqueErr(err)
 }
 
 // UpdateGroup renames a group or changes its description.
@@ -144,7 +134,7 @@ func (s *Store) UpdateGroup(ctx context.Context, id int64, name, description str
 // DeleteGroup removes a group. Schedules that targeted it are disabled and
 // switched to an empty host selection, so they never fall back to every host.
 func (s *Store) DeleteGroup(ctx context.Context, id int64) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `UPDATE schedules SET enabled = 0, next_run_at = 0, target = 'hosts', group_id = NULL, updated_at = ? WHERE group_id = ?`, now(), id); err != nil {
 			return err
 		}
@@ -162,10 +152,11 @@ func (s *Store) DeleteGroup(ctx context.Context, id int64) error {
 // AddHostsToGroup adds hosts to a group and returns how many were added.
 func (s *Store) AddHostsToGroup(ctx context.Context, groupID int64, hostIDs []int64) (int, error) {
 	added := 0
-	err := s.tx(ctx, func(tx *sql.Tx) error {
+	err := s.tx(ctx, func(tx *Tx) error {
+		added = 0
 		for _, h := range hostIDs {
-			res, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO host_group_members (group_id, host_id)
-				SELECT ?, id FROM hosts WHERE id = ? AND EXISTS (SELECT 1 FROM host_groups WHERE id = ?)`, groupID, h, groupID)
+			res, err := tx.ExecContext(ctx, `INSERT INTO host_group_members (group_id, host_id)
+				SELECT CAST(? AS BIGINT), id FROM hosts WHERE id = ? AND EXISTS (SELECT 1 FROM host_groups WHERE id = ?) ON CONFLICT DO NOTHING`, groupID, h, groupID)
 			if err != nil {
 				return err
 			}
@@ -180,7 +171,8 @@ func (s *Store) AddHostsToGroup(ctx context.Context, groupID int64, hostIDs []in
 // RemoveHostsFromGroup removes hosts from a group and returns how many were removed.
 func (s *Store) RemoveHostsFromGroup(ctx context.Context, groupID int64, hostIDs []int64) (int, error) {
 	removed := 0
-	err := s.tx(ctx, func(tx *sql.Tx) error {
+	err := s.tx(ctx, func(tx *Tx) error {
+		removed = 0
 		for _, h := range hostIDs {
 			res, err := tx.ExecContext(ctx, `DELETE FROM host_group_members WHERE group_id = ? AND host_id = ?`, groupID, h)
 			if err != nil {
@@ -196,13 +188,13 @@ func (s *Store) RemoveHostsFromGroup(ctx context.Context, groupID int64, hostIDs
 
 // SetHostGroups replaces the groups of one host.
 func (s *Store) SetHostGroups(ctx context.Context, hostID int64, groupIDs []int64) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `DELETE FROM host_group_members WHERE host_id = ?`, hostID); err != nil {
 			return err
 		}
 		for _, g := range groupIDs {
-			if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO host_group_members (group_id, host_id)
-				SELECT id, ? FROM host_groups WHERE id = ?`, hostID, g); err != nil {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO host_group_members (group_id, host_id)
+				SELECT id, CAST(? AS BIGINT) FROM host_groups WHERE id = ? ON CONFLICT DO NOTHING`, hostID, g); err != nil {
 				return err
 			}
 		}
@@ -224,7 +216,7 @@ func (s *Store) fillGroups(ctx context.Context, hosts []Host) error {
 		marks = append(marks, "?")
 	}
 	rows, err := s.db.QueryContext(ctx, `SELECT m.host_id, g.id, g.name FROM host_group_members m JOIN host_groups g ON g.id = m.group_id
-		WHERE m.host_id IN (`+strings.Join(marks, ",")+`) ORDER BY g.name COLLATE NOCASE`, args...)
+		WHERE m.host_id IN (`+strings.Join(marks, ",")+`) ORDER BY lower(g.name), g.name`, args...)
 	if err != nil {
 		return err
 	}

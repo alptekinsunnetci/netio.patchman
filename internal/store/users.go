@@ -85,7 +85,7 @@ func scanUser(row interface{ Scan(...any) error }) (User, error) {
 // replaces the recovery codes (SHA-256 hashes). The verified step counts as
 // used. Other sessions of the user are ended.
 func (s *Store) EnableTOTP(ctx context.Context, id int64, secret string, usedStep int64, recoveryHashes []string, keepSessionHash string) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `UPDATE users SET totp_secret = ?, totp_enabled_at = ?, totp_last_step = ? WHERE id = ?`, secret, now(), usedStep, id); err != nil {
 			return err
 		}
@@ -99,15 +99,15 @@ func (s *Store) EnableTOTP(ctx context.Context, id int64, secret string, usedSte
 
 // ReplaceRecoveryCodes stores a new set of recovery code hashes.
 func (s *Store) ReplaceRecoveryCodes(ctx context.Context, id int64, hashes []string) error {
-	return s.tx(ctx, func(tx *sql.Tx) error { return replaceRecoveryCodes(ctx, tx, id, hashes) })
+	return s.tx(ctx, func(tx *Tx) error { return replaceRecoveryCodes(ctx, tx, id, hashes) })
 }
 
-func replaceRecoveryCodes(ctx context.Context, tx *sql.Tx, id int64, hashes []string) error {
+func replaceRecoveryCodes(ctx context.Context, tx *Tx, id int64, hashes []string) error {
 	if _, err := tx.ExecContext(ctx, `DELETE FROM user_recovery_codes WHERE user_id = ?`, id); err != nil {
 		return err
 	}
 	for _, h := range hashes {
-		if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO user_recovery_codes (user_id, code_hash) VALUES (?, ?)`, id, h); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO user_recovery_codes (user_id, code_hash) VALUES (?, ?) ON CONFLICT DO NOTHING`, id, h); err != nil {
 			return err
 		}
 	}
@@ -117,7 +117,7 @@ func replaceRecoveryCodes(ctx context.Context, tx *sql.Tx, id int64, hashes []st
 // DisableTOTP turns off two-factor authentication, removes recovery codes and
 // ends the user's sessions except keepSessionHash ("" ends all).
 func (s *Store) DisableTOTP(ctx context.Context, id int64, keepSessionHash string) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `UPDATE users SET totp_secret = '', totp_enabled_at = 0, totp_last_step = 0 WHERE id = ?`, id); err != nil {
 			return err
 		}
@@ -174,16 +174,10 @@ func (s *Store) CountActiveAdmins(ctx context.Context) (int, error) {
 // CreateUser inserts a user and returns its ID.
 func (s *Store) CreateUser(ctx context.Context, u User) (int64, error) {
 	n := now()
-	res, err := s.db.ExecContext(ctx,
+	id, err := insertID(ctx, s.db,
 		`INSERT INTO users (email, name, password_hash, role, disabled, created_at, password_changed_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		strings.TrimSpace(u.Email), strings.TrimSpace(u.Name), u.PasswordHash, u.Role, boolInt(u.Disabled), n, n)
-	if err != nil {
-		if strings.Contains(err.Error(), "UNIQUE") {
-			return 0, ErrDuplicate
-		}
-		return 0, err
-	}
-	return res.LastInsertId()
+	return id, uniqueErr(err)
 }
 
 // ErrDuplicate is returned on unique constraint violations.
@@ -219,7 +213,7 @@ func (s *Store) userGroupIDs(ctx context.Context, userID int64) ([]int64, error)
 // SetUserGroups limits a user to the hosts of groupIDs (scoped) or lifts the
 // limit. Groups that no longer exist are ignored.
 func (s *Store) SetUserGroups(ctx context.Context, userID int64, scoped bool, groupIDs []int64) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `UPDATE users SET group_scoped = ? WHERE id = ?`, boolInt(scoped), userID); err != nil {
 			return err
 		}
@@ -230,7 +224,7 @@ func (s *Store) SetUserGroups(ctx context.Context, userID int64, scoped bool, gr
 			return nil
 		}
 		for _, g := range groupIDs {
-			if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO user_groups (user_id, group_id) SELECT ?, id FROM host_groups WHERE id = ?`, userID, g); err != nil {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO user_groups (user_id, group_id) SELECT CAST(? AS BIGINT), id FROM host_groups WHERE id = ? ON CONFLICT DO NOTHING`, userID, g); err != nil {
 				return err
 			}
 		}
@@ -240,7 +234,7 @@ func (s *Store) SetUserGroups(ctx context.Context, userID int64, scoped bool, gr
 
 // UserByEmail returns a user by email (case-insensitive).
 func (s *Store) UserByEmail(ctx context.Context, email string) (User, error) {
-	u, err := scanUser(s.db.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE email = ?`, strings.TrimSpace(email)))
+	u, err := scanUser(s.db.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE lower(email) = lower(?)`, strings.TrimSpace(email)))
 	if err != nil {
 		return u, err
 	}
@@ -250,7 +244,7 @@ func (s *Store) UserByEmail(ctx context.Context, email string) (User, error) {
 
 // ListUsers returns all users ordered by name.
 func (s *Store) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT `+userCols+` FROM users ORDER BY name COLLATE NOCASE, email`)
+	rows, err := s.db.QueryContext(ctx, `SELECT `+userCols+` FROM users ORDER BY lower(name), name, email`)
 	if err != nil {
 		return nil, err
 	}
@@ -296,7 +290,7 @@ func (s *Store) ActiveAdminEmails(ctx context.Context) ([]string, error) {
 // UpdateUser changes name, role and disabled state. Disabling a user also
 // ends their sessions.
 func (s *Store) UpdateUser(ctx context.Context, id int64, name, role string, disabled bool) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `UPDATE users SET name = ?, role = ?, disabled = ? WHERE id = ?`, strings.TrimSpace(name), role, boolInt(disabled), id); err != nil {
 			return err
 		}
@@ -311,7 +305,7 @@ func (s *Store) UpdateUser(ctx context.Context, id int64, name, role string, dis
 // SetPassword replaces a user's password hash and ends all their sessions
 // except keepSession (pass "" to end all).
 func (s *Store) SetPassword(ctx context.Context, id int64, hash, keepSessionHash string) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `UPDATE users SET password_hash = ?, password_changed_at = ? WHERE id = ?`, hash, now(), id); err != nil {
 			return err
 		}

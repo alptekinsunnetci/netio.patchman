@@ -6,7 +6,7 @@
 
 netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstellen und Paketupdates von Hunderten Linux- und Windows-Servern über ein einziges Dashboard überwachen und verwalten.
 
-- Der zentrale Server ist ein einzelner Docker-Container mit eingebetteter SQLite-Datenbank. Es ist kein separater Datenbank-, Warteschlangen- oder Cache-Dienst nötig.
+- Der zentrale Server läuft mit Docker Compose: Anwendungscontainer und PostgreSQL-Datenbank. Die SQLite-Datenbank früherer Versionen wird beim ersten Start automatisch nach PostgreSQL übertragen. Kein Warteschlangen- oder Cache-Dienst nötig.
 - Auf jedem verwalteten Server wird ein kleiner Agent installiert. Der Agent öffnet keine Ports; er verbindet sich selbst mit dem zentralen Server.
 - Die Weboberfläche gibt es auf Türkisch, Englisch, Deutsch und Russisch; jeder Benutzer wählt seine Sprache. CVE-Daten werden genau so angezeigt, wie die Quelle sie veröffentlicht, und nie übersetzt.
 
@@ -130,7 +130,7 @@ Die Screenshots zeigen die türkische Oberfläche; die anderen Sprachen haben da
  Verwaltete Server                       Zentraler Server (Docker)               Externe Quellen
 ┌──────────────────────┐   HTTPS   ┌──────────────────────────────┐   HTTPS   ┌──────────────┐
 │ netio-patchman-agent │ ────────▶ │ netio.patchman               │ ────────▶ │ api.osv.dev  │
-│  Inventar, Aufträge  │ (ausgeh.) │  Dashboard + API + SQLite    │           │ CISA KEV     │
+│  Inventar, Aufträge  │ (ausgeh.) │  Dashboard + API + PostgreSQL│           │ CISA KEV     │
 │  (Linux, Windows)    │           │                              │           │ MSRC         │
 └──────────────────────┘           └──────────────────────────────┘           └──────────────┘
                                                  ▲
@@ -283,6 +283,20 @@ docker compose up -d --build
 - Die Version wird aus der Datei `VERSION` im Repository gelesen.
 - Ist **Einstellungen → Agenten → Agenten automatisch aktualisieren** eingeschaltet (Standard), wechseln die Agenten selbst auf die neue Version.
 
+### 0.8.0: Umstieg auf PostgreSQL
+
+Mit Version 0.8.0 zieht die Datenbank von SQLite nach PostgreSQL um. Die Compose-Datei startet jetzt neben der Anwendung einen PostgreSQL-17-Container (`postgres`, Volume `netio-patchman-db`). Für den Umstieg ist nichts weiter nötig; das übliche `git pull && docker compose up -d --build` (oder **Jetzt aktualisieren** im Dashboard) genügt:
+
+1. Der PostgreSQL-Container startet zum ersten Mal. Sein Passwort wird zufällig erzeugt und im Datenbank-Volume abgelegt; es wird kein Port veröffentlicht.
+2. Ist PostgreSQL leer und gibt es `/data/netio-patchman.db`, kopiert der Server alle Tabellen in einer Transaktion nach PostgreSQL und vergleicht die Zeilenzahl jeder Tabelle mit der Quelle. Das Dashboard öffnet sich erst danach. Eine Datenbank mit 1,3 Millionen Zeilen wird in etwa 15 Sekunden übertragen.
+3. Danach wird die alte Datei in `netio-patchman.db.imported-<Zeit>` umbenannt (nicht gelöscht), in der Benachrichtigungszentrale erscheint ein Hinweis und der Umzug wird im Audit-Log vermerkt.
+
+Schlägt ein Schritt fehl, bleibt PostgreSQL leer, die SQLite-Datei unverändert und der Server startet nicht. Der Fehler steht in `docker compose logs server`. Nach Behebung der Ursache startet `docker compose up -d` die Übertragung erneut.
+
+- **Bei SQLite bleiben:** `PATCHMAN_DATABASE_URL=sqlite` in `.env` eintragen. Der PostgreSQL-Container läuft weiter, wird aber nicht verwendet.
+- **Externes PostgreSQL:** `PATCHMAN_DATABASE_URL=postgres://benutzer:passwort@host:5432/datenbank?sslmode=require` in `.env` eintragen. Ist diese Datenbank leer, werden die SQLite-Daten dorthin übertragen.
+- **Zurück:** mit `PATCHMAN_DATABASE_URL=sqlite` starten und eine aktuelle Sicherung mit dem Befehl `restore` wiederherstellen; die Schritte stehen in [docs/kurulum.md](docs/kurulum.md#22-veritabanı) (Türkisch).
+
 ### Aktualisierung aus dem Dashboard (optional)
 
 Die Aktualisierung lässt sich auch über **Einstellungen → Serverkonfiguration → Produktversion → Jetzt aktualisieren** starten. Schalten Sie dazu einmalig den `updater`-Container aus der Compose-Datei ein:
@@ -309,15 +323,17 @@ docker compose exec server netio-patchman-server backup -out /data/sicherung.db
 docker compose cp server:/data/sicherung.db ./sicherung-$(date +%Y%m%d).db
 ```
 
-Wiederherstellung aus einer Sicherung:
+Wiederherstellung aus einer Sicherung (Sicherungen sind unabhängig von der verwendeten Datenbank SQLite-Dateien):
 
 ```sh
 docker compose stop server
-docker compose cp ./sicherung-20261120.db server:/data/netio-patchman.db
+docker compose run --rm --no-deps server restore -in /data/backups/netio-patchman-20261120-023000.db
 docker compose start server
 ```
 
-Die Datenbank liegt im Docker-Volume `netio-patchman-data` (`/data/netio-patchman.db`). Sicherungen enthalten auch das SMTP-Passwort; schützen Sie sie entsprechend.
+Eine Sicherung von außerhalb zuerst ins Volume kopieren: `docker compose cp ./sicherung-20261120.db server:/data/sicherung.db`, dann mit `-in /data/sicherung.db` wiederherstellen. Die Wiederherstellung läuft in einer Transaktion: schlägt sie fehl, bleibt die Datenbank unverändert.
+
+Die Daten liegen im PostgreSQL-Volume `netio-patchman-db`, die Sicherungen im Volume `netio-patchman-data` (`/data/backups`). Sicherungen enthalten auch das SMTP-Passwort; schützen Sie sie entsprechend.
 
 ### Administratorpasswort zurücksetzen
 
@@ -361,6 +377,8 @@ Die Variablen mit dem Präfix `PATCHMAN_` in `.env` liefern nur die Anfangswerte
 | `PATCHMAN_TLS_CERT_FILE`, `PATCHMAN_TLS_KEY_FILE` | — | Zertifikat und Schlüssel, wenn der Server TLS selbst beendet | — |
 | `PATCHMAN_TIMEZONE` | `Europe/Istanbul` | Zeitzone für die Anzeige von Datum und Uhrzeit | ja |
 | `PATCHMAN_LOCALE` | `tr-TR` | Standardsprache (`tr-TR`, `en-US`, `de-DE` oder `ru-RU`): Oberfläche neuer Benutzer, E-Mails und Protokolle. Jeder Benutzer kann seine eigene Sprache wählen | — |
+| `PATCHMAN_DATABASE_URL` | PostgreSQL aus Compose | PostgreSQL-Adresse (`postgres://benutzer@host:5432/datenbank`); `sqlite` verwendet die SQLite-Datei `/data/netio-patchman.db` | — |
+| `PATCHMAN_DATABASE_PASSWORD_FILE` | Passwortdatei aus Compose | Datei, aus der das Passwort gelesen wird, wenn die Adresse keines enthält | — |
 | `PATCHMAN_BACKUP_DIR` | `/data/backups` | Verzeichnis für automatische Sicherungen | — |
 | `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV-API-Adresse (ein interner Spiegel ist möglich) | ja |
 | `PATCHMAN_KEV_URL` | CISA-KEV-Adresse | Adresse des KEV-Katalogs; `off` schaltet ihn ab | ja |
@@ -398,6 +416,7 @@ scrape_configs:
 
 | Symptom | Prüfung |
 |---|---|
+| Nach einer Aktualisierung startet der Server nicht, im Log steht, dass die SQLite-Datenbank nicht nach PostgreSQL übertragen werden konnte | Details stehen im selben Log-Eintrag; die SQLite-Datei ist unverändert. Mit `docker compose ps` prüfen, ob `postgres` "healthy" ist und genug Speicherplatz frei ist, dann `docker compose up -d`. Vorübergehend zurück zu SQLite: `PATCHMAN_DATABASE_URL=sqlite` in `.env`. |
 | Das Dashboard öffnet sich nicht | `docker compose ps` sollte in der Spalte PORTS `0.0.0.0:<port>->8080/tcp` zeigen. Fehler mit `docker compose logs server` ansehen. Ist der Port `PATCHMAN_PUBLISH_PORT` in der Firewall offen? |
 | Der Installationsbefehl zeigt `localhost` | Ändern Sie auf der Seite **Serverkonfiguration** die Serveradresse auf eine für die Agenten erreichbare Adresse. |
 | Der Agent registriert sich nicht | Funktioniert `curl -I https://patchman.your-domain/healthz` vom Server des Agenten aus? `journalctl -u netio-patchman-agent -n 50` |
@@ -431,7 +450,9 @@ Weitere Informationen (Türkisch): [docs/kurulum.md](docs/kurulum.md) (Installat
 Voraussetzung: Go 1.26 oder neuer.
 
 ```sh
-go test ./...                                   # Unit- und End-to-End-Tests
+go test ./...                                   # Unit- und End-to-End-Tests (SQLite)
+# Dieselben Tests mit PostgreSQL (jeder Test in einem eigenen Schema):
+PATCHMAN_TEST_DATABASE_URL=postgres://patchman:passwort@127.0.0.1:5432/patchman go test ./...
 go vet ./...
 PATCHMAN_DATA_DIR=./data go run ./cmd/netio-patchman-server
 

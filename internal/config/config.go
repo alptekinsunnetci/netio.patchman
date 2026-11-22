@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/mail"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -42,7 +43,12 @@ type Config struct {
 	LogFormat    string
 	SMTP         SMTP
 
-	DataDir      string
+	DataDir string
+	// DatabaseURL is the PostgreSQL connection URL including the password
+	// (PATCHMAN_DATABASE_URL, password optionally from
+	// PATCHMAN_DATABASE_PASSWORD_FILE); empty selects the SQLite file
+	// DatabasePath. Never log it; use DatabaseDisplay.
+	DatabaseURL  string
 	BackupDir    string // automatic backups (default <DataDir>/backups)
 	AgentDistDir string
 	TLSCertFile  string
@@ -55,8 +61,40 @@ type Config struct {
 	UpdateURL    string // empty disables the new-version check
 }
 
-// DatabasePath is the SQLite database file.
+// DatabasePath is the SQLite database file. With PostgreSQL it is the file
+// imported on the first start (see store.ImportSQLite).
 func (c Config) DatabasePath() string { return filepath.Join(c.DataDir, "netio-patchman.db") }
+
+// Postgres reports whether the server uses PostgreSQL.
+func (c Config) Postgres() bool { return c.DatabaseURL != "" }
+
+// Database is the value for store.Open: the PostgreSQL URL or the SQLite path.
+func (c Config) Database() string {
+	if c.DatabaseURL != "" {
+		return c.DatabaseURL
+	}
+	return c.DatabasePath()
+}
+
+// DatabaseDisplay is the database for logs and the dashboard, without the password.
+func (c Config) DatabaseDisplay() string {
+	if c.DatabaseURL == "" {
+		return c.DatabasePath()
+	}
+	u, err := url.Parse(c.DatabaseURL)
+	if err != nil {
+		return "postgres://?"
+	}
+	if u.User != nil {
+		u.User = url.User(u.User.Username())
+	}
+	q := u.Query()
+	if q.Has("password") {
+		q.Del("password")
+		u.RawQuery = q.Encode()
+	}
+	return u.String()
+}
 
 // SecureCookies reports whether cookies must carry the Secure flag.
 func (c Config) SecureCookies() bool { return c.BaseURL != nil && c.BaseURL.Scheme == "https" }
@@ -147,6 +185,34 @@ func Load(b *i18n.Bundle, getenv func(string) string) (Config, error) {
 	}
 
 	cfg.DataDir = env("DATA_DIR", "/var/lib/netio-patchman")
+	// PostgreSQL, or the SQLite file in the data directory ("" or "sqlite").
+	if raw := env("DATABASE_URL", ""); raw != "" && !strings.EqualFold(raw, "sqlite") {
+		u, err := url.Parse(raw)
+		if err != nil || (u.Scheme != "postgres" && u.Scheme != "postgresql") || u.Host == "" {
+			// The value may hold a password: show only the scheme.
+			shown := "…"
+			if err == nil && u.Scheme != "" {
+				shown = u.Scheme + "://…"
+			}
+			fail("config.error.invalid_database_url", "value", shown)
+		} else {
+			// A password in the URL wins over the file.
+			if _, has := u.User.Password(); !has && env("DATABASE_PASSWORD_FILE", "") != "" {
+				pf := env("DATABASE_PASSWORD_FILE", "")
+				b, err := os.ReadFile(pf)
+				if err != nil {
+					fail("config.error.database_password_file", "path", pf, "error", err.Error())
+				} else {
+					name := "netio-patchman"
+					if u.User != nil {
+						name = u.User.Username()
+					}
+					u.User = url.UserPassword(name, strings.TrimRight(string(b), "\r\n"))
+				}
+			}
+			cfg.DatabaseURL = u.String()
+		}
+	}
 	cfg.BackupDir = env("BACKUP_DIR", filepath.Join(cfg.DataDir, "backups"))
 	cfg.AgentDistDir = env("AGENT_DIST_DIR", "/usr/share/netio-patchman/agent")
 	cfg.TLSCertFile = env("TLS_CERT_FILE", "")

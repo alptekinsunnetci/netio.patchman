@@ -162,7 +162,7 @@ func TestSystemConfiguration(t *testing.T) {
 
 	status, body, _ := e.do(admin, "GET", "/settings/system", nil)
 	expect(t, "system page", status, 200, body, "Sunucu yapılandırması · netio.patchman", "Sunucu adresi", e.srv.URL,
-		"E-posta sunucusu (SMTP)", "E-posta gönderimi kapalı", "OSV API adresi", "Başlangıç yapılandırması", "PATCHMAN_DATA_DIR")
+		"E-posta sunucusu (SMTP)", "E-posta gönderimi kapalı", "OSV API adresi", "Başlangıç yapılandırması", "PATCHMAN_DATABASE_URL")
 	if strings.Contains(body, "Ortam değişkenlerine dön") {
 		t.Error("reset offered before anything was saved")
 	}

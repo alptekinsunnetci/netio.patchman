@@ -46,6 +46,9 @@ func TestOSVRecordCompressedAndLegacy(t *testing.T) {
 
 func TestNewDatabaseUsesIncrementalVacuum(t *testing.T) {
 	s := openTest(t)
+	if s.Postgres() {
+		t.Skip("SQLite only")
+	}
 	var mode int
 	if err := s.db.QueryRow("PRAGMA auto_vacuum").Scan(&mode); err != nil {
 		t.Fatal(err)

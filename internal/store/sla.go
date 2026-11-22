@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 )
 
@@ -38,21 +37,23 @@ type EPSSEntry struct {
 
 // ReplaceEPSS replaces the stored EPSS scores.
 func (s *Store) ReplaceEPSS(ctx context.Context, entries []EPSSEntry) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	// A CVE listed twice keeps its last entry.
+	rows := make([][]any, 0, len(entries))
+	idx := make(map[string]int, len(entries))
+	for _, e := range entries {
+		row := []any{e.CVEID, e.Score, e.Percentile}
+		if i, ok := idx[e.CVEID]; ok {
+			rows[i] = row
+			continue
+		}
+		idx[e.CVEID] = len(rows)
+		rows = append(rows, row)
+	}
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `DELETE FROM epss`); err != nil {
 			return err
 		}
-		stmt, err := tx.PrepareContext(ctx, `INSERT OR REPLACE INTO epss (cve_id, score, percentile) VALUES (?, ?, ?)`)
-		if err != nil {
-			return err
-		}
-		defer stmt.Close()
-		for _, e := range entries {
-			if _, err := stmt.ExecContext(ctx, e.CVEID, e.Score, e.Percentile); err != nil {
-				return err
-			}
-		}
-		return nil
+		return insertRows(ctx, tx, `INSERT INTO epss (cve_id, score, percentile)`, "", 3, rows)
 	})
 }
 
@@ -91,11 +92,12 @@ func (s *Store) ClaimOverdue(ctx context.Context, sla SLA) ([]OverdueHost, error
 	}
 	due := sla.dueSQL("f", "v")
 	var out []OverdueHost
-	err := s.tx(ctx, func(tx *sql.Tx) error {
+	err := s.tx(ctx, func(tx *Tx) error {
+		out = nil
 		n := now()
 		rows, err := tx.QueryContext(ctx, `SELECT f.host_id, h.hostname, COUNT(*) FROM findings f JOIN vulnerabilities v ON v.cve_id = f.cve_id
 			JOIN hosts h ON h.id = f.host_id WHERE f.sla_notified_at = 0 AND f.status IN `+activeStatuses+` AND `+due+` > 0 AND `+due+` < ?
-			GROUP BY f.host_id ORDER BY h.hostname`, n)
+			GROUP BY f.host_id, h.hostname ORDER BY h.hostname`, n)
 		if err != nil {
 			return err
 		}

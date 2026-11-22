@@ -151,7 +151,7 @@ func (s *Store) ListHosts(ctx context.Context, f HostFilter, p Page) ([]Host, in
 	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM hosts h`+where, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.db.QueryContext(ctx, hostSelect+where+` ORDER BY h.hostname COLLATE NOCASE LIMIT ? OFFSET ?`, append(args, p.limit(), p.Offset())...)
+	rows, err := s.db.QueryContext(ctx, hostSelect+where+` ORDER BY lower(h.hostname), h.hostname, h.id LIMIT ? OFFSET ?`, append(args, p.limit(), p.Offset())...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -321,13 +321,9 @@ func (t EnrollmentToken) Usable() bool {
 
 // CreateEnrollmentToken stores a token hash.
 func (s *Store) CreateEnrollmentToken(ctx context.Context, name, hash, prefix string, createdBy int64, expires time.Time, maxUses int) (int64, error) {
-	res, err := s.db.ExecContext(ctx,
+	return insertID(ctx, s.db,
 		`INSERT INTO enrollment_tokens (name, token_hash, token_prefix, created_by, created_at, expires_at, max_uses) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		strings.TrimSpace(name), hash, prefix, nullID(createdBy), now(), ts(expires), maxUses)
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
 }
 
 // ListEnrollmentTokens returns all tokens, newest first.
@@ -365,11 +361,13 @@ var ErrTokenInvalid = errors.New("store: enrollment token invalid")
 func (s *Store) RegisterHost(ctx context.Context, tokenHash string, info protocol.HostInfo, ecosystem, secretHash string) (int64, bool, error) {
 	var hostID int64
 	var reenrolled bool
-	err := s.tx(ctx, func(tx *sql.Tx) error {
+	err := s.tx(ctx, func(tx *Tx) error {
+		hostID, reenrolled = 0, false
 		var tokenID int64
 		var expires, revoked int64
 		var maxUses, uses int
-		err := tx.QueryRowContext(ctx, `SELECT id, expires_at, revoked_at, max_uses, uses FROM enrollment_tokens WHERE token_hash = ?`, tokenHash).
+		// The row lock keeps concurrent enrollments within max_uses.
+		err := tx.QueryRowContext(ctx, `SELECT id, expires_at, revoked_at, max_uses, uses FROM enrollment_tokens WHERE token_hash = ? FOR UPDATE`, tokenHash).
 			Scan(&tokenID, &expires, &revoked, &maxUses, &uses)
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrTokenInvalid
@@ -400,16 +398,12 @@ func (s *Store) RegisterHost(ctx context.Context, tokenHash string, info protoco
 				return err
 			}
 		}
-		res, err := tx.ExecContext(ctx, `INSERT INTO hosts (machine_id, hostname, fqdn, os_id, os_version_id, os_name, os_version, kernel, arch,
+		hostID, err = insertID(ctx, tx, `INSERT INTO hosts (machine_id, hostname, fqdn, os_id, os_version_id, os_name, os_version, kernel, arch,
 			ip_addresses, package_manager, ecosystem, agent_version, remote_updates, self_update, uptime_seconds, agent_secret_hash, enrolled_at, enrollment_token, last_seen_at, virtualization, upstream)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			info.MachineID, info.Hostname, info.FQDN, info.OSID, info.OSVersionID, info.OSName, info.OSVersion, info.Kernel, info.Arch,
 			string(ips), info.PackageManager, ecosystem, info.AgentVersion, boolInt(info.RemoteUpdates), boolInt(info.SelfUpdate), info.UptimeSeconds, secretHash, n, tokenID, n,
 			protocol.CleanVirtualization(info.Virtualization), protocol.CleanUpstream(info.Upstream))
-		if err != nil {
-			return err
-		}
-		hostID, err = res.LastInsertId()
 		return err
 	})
 	return hostID, reenrolled, err
@@ -422,7 +416,7 @@ func nonNil(s []string) []string {
 	return s
 }
 
-func updateHostInfo(ctx context.Context, tx *sql.Tx, id int64, info protocol.HostInfo, ecosystem string) error {
+func updateHostInfo(ctx context.Context, tx *Tx, id int64, info protocol.HostInfo, ecosystem string) error {
 	ips, _ := json.Marshal(nonNil(info.IPAddresses))
 	virt := protocol.CleanVirtualization(info.Virtualization)
 	// Agents before 0.3.0 do not report the platform; keep what is known.
@@ -438,7 +432,7 @@ func updateHostInfo(ctx context.Context, tx *sql.Tx, id int64, info protocol.Hos
 // Checkin records a heartbeat and returns whether the host was offline
 // (already notified) before this check-in, and whether a report is due.
 func (s *Store) Checkin(ctx context.Context, id int64, info protocol.HostInfo, ecosystem string, reportEvery time.Duration) (wasOfflineNotified, reportDue bool, err error) {
-	err = s.tx(ctx, func(tx *sql.Tx) error {
+	err = s.tx(ctx, func(tx *Tx) error {
 		var notified int
 		var lastReport int64
 		if err := tx.QueryRowContext(ctx, `SELECT offline_notified, last_report_at FROM hosts WHERE id = ?`, id).Scan(&notified, &lastReport); err != nil {
@@ -453,7 +447,7 @@ func (s *Store) Checkin(ctx context.Context, id int64, info protocol.HostInfo, e
 
 // SaveReport replaces the host's inventory and flags it for scanning.
 func (s *Store) SaveReport(ctx context.Context, id int64, r protocol.Report, ecosystem string) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if err := updateHostInfo(ctx, tx, id, r.Host, ecosystem); err != nil {
 			return err
 		}
@@ -480,27 +474,29 @@ func (s *Store) SaveReport(ctx context.Context, id int64, r protocol.Report, eco
 		if _, err := tx.ExecContext(ctx, `DELETE FROM host_packages WHERE host_id = ?`, id); err != nil {
 			return err
 		}
-		ins, err := tx.PrepareContext(ctx, `INSERT OR REPLACE INTO host_packages (host_id, name, arch, version, source_name, source_version) VALUES (?, ?, ?, ?, ?, ?)`)
-		if err != nil {
-			return err
-		}
-		defer ins.Close()
+		// A package listed twice keeps its last entry.
+		pkgRows := make([][]any, 0, len(r.Packages))
+		pkgIdx := make(map[[2]string]int, len(r.Packages))
 		for _, p := range r.Packages {
 			if p.Name == "" || p.Version == "" {
 				continue
 			}
-			if _, err := ins.ExecContext(ctx, id, p.Name, p.Arch, p.Version, p.SourceName, p.SourceVersion); err != nil {
-				return err
+			row := []any{id, p.Name, p.Arch, p.Version, p.SourceName, p.SourceVersion}
+			if i, ok := pkgIdx[[2]string{p.Name, p.Arch}]; ok {
+				pkgRows[i] = row
+				continue
 			}
+			pkgIdx[[2]string{p.Name, p.Arch}] = len(pkgRows)
+			pkgRows = append(pkgRows, row)
+		}
+		if err := insertRows(ctx, tx, `INSERT INTO host_packages (host_id, name, arch, version, source_name, source_version)`, "", 6, pkgRows); err != nil {
+			return err
 		}
 		if _, err := tx.ExecContext(ctx, `DELETE FROM host_updates WHERE host_id = ?`, id); err != nil {
 			return err
 		}
-		upd, err := tx.PrepareContext(ctx, `INSERT OR REPLACE INTO host_updates (host_id, name, current_version, available_version, repository, security, title, severity, cves) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-		if err != nil {
-			return err
-		}
-		defer upd.Close()
+		updRows := make([][]any, 0, len(r.Updates))
+		updIdx := make(map[string]int, len(r.Updates))
 		for _, u := range r.Updates {
 			if u.Name == "" {
 				continue
@@ -512,12 +508,16 @@ func (s *Store) SaveReport(ctx context.Context, id int64, r protocol.Report, eco
 				}
 			}
 			cj, _ := json.Marshal(nonNil(cves))
-			if _, err := upd.ExecContext(ctx, id, u.Name, u.CurrentVersion, u.AvailableVersion, u.Repository, boolInt(u.Security),
-				truncate(u.Title, 500), truncate(u.Severity, 40), string(cj)); err != nil {
-				return err
+			row := []any{id, u.Name, u.CurrentVersion, u.AvailableVersion, u.Repository, boolInt(u.Security),
+				truncate(u.Title, 500), truncate(u.Severity, 40), string(cj)}
+			if i, ok := updIdx[u.Name]; ok {
+				updRows[i] = row
+				continue
 			}
+			updIdx[u.Name] = len(updRows)
+			updRows = append(updRows, row)
 		}
-		return nil
+		return insertRows(ctx, tx, `INSERT INTO host_updates (host_id, name, current_version, available_version, repository, security, title, severity, cves)`, "", 9, updRows)
 	})
 }
 

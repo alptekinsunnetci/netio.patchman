@@ -83,7 +83,7 @@ type ScheduleRow struct {
 
 // ListSchedules returns all schedules ordered by name.
 func (s *Store) ListSchedules(ctx context.Context) ([]ScheduleRow, error) {
-	rows, err := s.db.QueryContext(ctx, scheduleSelect+` ORDER BY sc.name COLLATE NOCASE, sc.id`)
+	rows, err := s.db.QueryContext(ctx, scheduleSelect+` ORDER BY lower(sc.name), sc.name, sc.id`)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func dbTarget(sc Schedule) (string, any) {
 	return sc.Target, nil
 }
 
-func setScheduleHosts(ctx context.Context, tx *sql.Tx, id int64, sc Schedule) error {
+func setScheduleHosts(ctx context.Context, tx *Tx, id int64, sc Schedule) error {
 	if _, err := tx.ExecContext(ctx, `DELETE FROM schedule_hosts WHERE schedule_id = ?`, id); err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func setScheduleHosts(ctx context.Context, tx *sql.Tx, id int64, sc Schedule) er
 	}
 	for _, h := range sc.HostIDs {
 		// Hosts deleted meanwhile are ignored.
-		if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO schedule_hosts (schedule_id, host_id) SELECT ?, id FROM hosts WHERE id = ?`, id, h); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO schedule_hosts (schedule_id, host_id) SELECT CAST(? AS BIGINT), id FROM hosts WHERE id = ? ON CONFLICT DO NOTHING`, id, h); err != nil {
 			return err
 		}
 	}
@@ -148,16 +148,14 @@ func setScheduleHosts(ctx context.Context, tx *sql.Tx, id int64, sc Schedule) er
 // CreateSchedule stores a new schedule.
 func (s *Store) CreateSchedule(ctx context.Context, sc Schedule, userID int64) (int64, error) {
 	var id int64
-	err := s.tx(ctx, func(tx *sql.Tx) error {
+	err := s.tx(ctx, func(tx *Tx) error {
 		n := now()
 		target, group := dbTarget(sc)
-		res, err := tx.ExecContext(ctx, `INSERT INTO schedules (name, enabled, job_type, days, minute, window_minutes, target, os_id, next_run_at, created_by, created_at, updated_at, group_id, reboot)
+		var err error
+		id, err = insertID(ctx, tx, `INSERT INTO schedules (name, enabled, job_type, days, minute, window_minutes, target, os_id, next_run_at, created_by, created_at, updated_at, group_id, reboot)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			sc.Name, boolInt(sc.Enabled), sc.JobType, sc.Days, sc.Minute, sc.WindowMinutes, target, sc.OSID, toTS(sc.NextRunAt), nullID(userID), n, n, group, boolInt(sc.Reboot))
 		if err != nil {
-			return err
-		}
-		if id, err = res.LastInsertId(); err != nil {
 			return err
 		}
 		return setScheduleHosts(ctx, tx, id, sc)
@@ -167,7 +165,7 @@ func (s *Store) CreateSchedule(ctx context.Context, sc Schedule, userID int64) (
 
 // UpdateSchedule replaces a schedule's definition and next run time.
 func (s *Store) UpdateSchedule(ctx context.Context, sc Schedule) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		target, group := dbTarget(sc)
 		res, err := tx.ExecContext(ctx, `UPDATE schedules SET name = ?, enabled = ?, job_type = ?, days = ?, minute = ?, window_minutes = ?, target = ?, os_id = ?,
 			next_run_at = ?, updated_at = ?, group_id = ?, reboot = ? WHERE id = ?`,
@@ -185,7 +183,7 @@ func (s *Store) UpdateSchedule(ctx context.Context, sc Schedule) error {
 // DeleteSchedule removes a schedule. Its queued jobs are cancelled; finished
 // jobs keep their history (schedule_id becomes NULL).
 func (s *Store) DeleteSchedule(ctx context.Context, id int64) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		if _, err := tx.ExecContext(ctx, `UPDATE jobs SET status = 'cancelled', finished_at = ? WHERE schedule_id = ? AND status = 'queued'`, now(), id); err != nil {
 			return err
 		}
@@ -269,7 +267,7 @@ func (s *Store) ScheduleTargets(ctx context.Context, sc Schedule) ([]Host, error
 	default:
 		return nil, nil
 	}
-	rows, err := s.db.QueryContext(ctx, q+` ORDER BY h.hostname COLLATE NOCASE`, args...)
+	rows, err := s.db.QueryContext(ctx, q+` ORDER BY lower(h.hostname), h.hostname, h.id`, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -288,12 +286,8 @@ func (s *Store) ScheduleTargets(ctx context.Context, sc Schedule) ([]Host, error
 // CreateScheduledJob queues a job on behalf of a schedule. The agent must
 // pick it up before expiresAt, otherwise it is marked expired.
 func (s *Store) CreateScheduledJob(ctx context.Context, hostID int64, typ string, scheduleID int64, expiresAt time.Time) (int64, error) {
-	res, err := s.db.ExecContext(ctx, `INSERT INTO jobs (host_id, type, packages, params, status, created_by, created_at, schedule_id, expires_at)
+	return insertID(ctx, s.db, `INSERT INTO jobs (host_id, type, packages, params, status, created_by, created_at, schedule_id, expires_at)
 		VALUES (?, ?, '[]', '{}', 'queued', NULL, ?, ?, ?)`, hostID, typ, now(), scheduleID, toTS(expiresAt))
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
 }
 
 // ExpiredJobGroup summarizes jobs of one schedule that expired together.
@@ -307,10 +301,11 @@ type ExpiredJobGroup struct {
 // them by schedule.
 func (s *Store) ExpireJobs(ctx context.Context, at time.Time) ([]ExpiredJobGroup, error) {
 	var groups []ExpiredJobGroup
-	err := s.tx(ctx, func(tx *sql.Tx) error {
+	err := s.tx(ctx, func(tx *Tx) error {
+		groups = nil
 		rows, err := tx.QueryContext(ctx, `SELECT COALESCE(j.schedule_id, 0), COALESCE(sc.name, ''), h.hostname FROM jobs j
 			JOIN hosts h ON h.id = j.host_id LEFT JOIN schedules sc ON sc.id = j.schedule_id
-			WHERE j.status = 'queued' AND j.expires_at > 0 AND j.expires_at <= ? ORDER BY j.schedule_id, h.hostname`, at.Unix())
+			WHERE j.status = 'queued' AND j.expires_at > 0 AND j.expires_at <= ? ORDER BY COALESCE(j.schedule_id, 0), h.hostname`, at.Unix())
 		if err != nil {
 			return err
 		}
@@ -392,7 +387,16 @@ func toTS(t time.Time) int64 {
 // job leads to at most one reboot.
 func (s *Store) QueueScheduledReboot(ctx context.Context, hostID int64) (int64, error) {
 	var rebootID int64
-	err := s.tx(ctx, func(tx *sql.Tx) error {
+	err := s.tx(ctx, func(tx *Tx) error {
+		rebootID = 0
+		// One decision per host at a time (two reports must not queue two reboots).
+		var locked int64
+		if err := tx.QueryRowContext(ctx, `SELECT id FROM hosts WHERE id = ? FOR UPDATE`, hostID).Scan(&locked); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil
+			}
+			return err
+		}
 		var jobID, scheduleID, expires int64
 		err := tx.QueryRowContext(ctx, `SELECT j.id, j.schedule_id, j.expires_at FROM jobs j JOIN schedules sc ON sc.id = j.schedule_id
 			WHERE j.host_id = ? AND sc.reboot = 1 AND j.reboot_job_id = 0 AND j.type IN ('upgrade_security', 'upgrade_all')
@@ -410,12 +414,8 @@ func (s *Store) QueueScheduledReboot(ctx context.Context, hostID int64) (int64, 
 			return err
 		}
 		if pending == 0 {
-			res, err := tx.ExecContext(ctx, `INSERT INTO jobs (host_id, type, packages, params, status, created_by, created_at, schedule_id, expires_at)
-				VALUES (?, 'reboot', '[]', '{}', 'queued', NULL, ?, ?, ?)`, hostID, now(), scheduleID, expires)
-			if err != nil {
-				return err
-			}
-			if rebootID, err = res.LastInsertId(); err != nil {
+			if rebootID, err = insertID(ctx, tx, `INSERT INTO jobs (host_id, type, packages, params, status, created_by, created_at, schedule_id, expires_at)
+				VALUES (?, 'reboot', '[]', '{}', 'queued', NULL, ?, ?, ?)`, hostID, now(), scheduleID, expires); err != nil {
 				return err
 			}
 		}

@@ -1,6 +1,7 @@
 // Package backup takes automatic daily copies of the database.
 //
-// A backup is a consistent SQLite copy (VACUUM INTO) written as
+// A backup is a consistent SQLite copy (VACUUM INTO, or an export of the
+// PostgreSQL database from one snapshot, see store.Backup) written as
 // netio-patchman-YYYYMMDD-HHMMSS.db (display time zone) into the backup
 // directory; the newest N files are kept. The schedule and retention are
 // runtime settings (settings.Values.Backup*); the directory is bootstrap

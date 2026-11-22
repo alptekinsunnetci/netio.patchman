@@ -51,12 +51,8 @@ func (s *Store) CreateJob(ctx context.Context, hostID int64, typ string, package
 		params = map[string]string{}
 	}
 	p, _ := json.Marshal(params)
-	res, err := s.db.ExecContext(ctx, `INSERT INTO jobs (host_id, type, packages, params, status, created_by, created_at) VALUES (?, ?, ?, ?, 'queued', ?, ?)`,
+	return insertID(ctx, s.db, `INSERT INTO jobs (host_id, type, packages, params, status, created_by, created_at) VALUES (?, ?, ?, ?, 'queued', ?, ?)`,
 		hostID, typ, string(b), string(p), nullID(userID), now())
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
 }
 
 // HasActiveJob reports whether the host has a queued or dispatched job of the type.
@@ -89,10 +85,12 @@ func (s *Store) LastFinishedJob(ctx context.Context, hostID int64, typ string) (
 // DispatchJobs returns queued jobs for a host and marks them dispatched.
 func (s *Store) DispatchJobs(ctx context.Context, hostID int64) ([]protocol.Job, error) {
 	var out []protocol.Job
-	err := s.tx(ctx, func(tx *sql.Tx) error {
+	err := s.tx(ctx, func(tx *Tx) error {
+		out = nil
 		// Scheduled jobs past their maintenance window are never dispatched.
+		// The row locks keep two check-ins from dispatching a job twice.
 		rows, err := tx.QueryContext(ctx, `SELECT id, type, packages, params FROM jobs WHERE host_id = ? AND status = 'queued'
-			AND (expires_at = 0 OR expires_at > ?) ORDER BY id`, hostID, now())
+			AND (expires_at = 0 OR expires_at > ?) ORDER BY id FOR UPDATE`, hostID, now())
 		if err != nil {
 			return err
 		}
@@ -306,14 +304,13 @@ func (s *Store) AddNotification(ctx context.Context, level, kind string, params 
 	b, _ := json.Marshal(params)
 	at := now()
 	hostID, jobID := linkTarget(link)
-	res, err := s.db.ExecContext(ctx, `INSERT INTO notifications (created_at, level, kind, params, link, host_id)
-		VALUES (?, ?, ?, ?, ?, CASE WHEN ? > 0 THEN ? ELSE COALESCE((SELECT host_id FROM jobs WHERE id = ?), 0) END)`,
+	id, err := insertID(ctx, s.db, `INSERT INTO notifications (created_at, level, kind, params, link, host_id)
+		VALUES (?, ?, ?, ?, ?, CASE WHEN CAST(? AS BIGINT) > 0 THEN CAST(? AS BIGINT) ELSE COALESCE((SELECT host_id FROM jobs WHERE id = ?), 0) END)`,
 		at, level, kind, string(b), link, hostID, hostID, jobID)
 	if err != nil {
 		return err
 	}
 	if fn := s.notifyHook.Load(); fn != nil {
-		id, _ := res.LastInsertId()
 		(*fn)(Notification{ID: id, CreatedAt: fromTS(at), Level: level, Kind: kind, Params: params, Link: link})
 	}
 	return nil
@@ -433,7 +430,7 @@ func (s *Store) Settings(ctx context.Context) (map[string]string, error) {
 
 // SaveSettings upserts settings.
 func (s *Store) SaveSettings(ctx context.Context, kv map[string]string) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		for k, v := range kv {
 			if _, err := tx.ExecContext(ctx, `INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value`, k, v); err != nil {
 				return err
@@ -445,7 +442,7 @@ func (s *Store) SaveSettings(ctx context.Context, kv map[string]string) error {
 
 // DeleteSettings removes keys, so their defaults apply again.
 func (s *Store) DeleteSettings(ctx context.Context, keys ...string) error {
-	return s.tx(ctx, func(tx *sql.Tx) error {
+	return s.tx(ctx, func(tx *Tx) error {
 		for _, k := range keys {
 			if _, err := tx.ExecContext(ctx, `DELETE FROM settings WHERE key = ?`, k); err != nil {
 				return err
@@ -571,7 +568,7 @@ func (s *Store) SearchInstalled(ctx context.Context, search string, p Page) ([]I
 	}
 	where, args := andScope(ctx, ` WHERE name LIKE ? ESCAPE '\'`, []any{likeEscape(q)}, "host_id")
 	var total int
-	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM (SELECT 1 FROM host_packages`+where+` GROUP BY name, version)`, args...).Scan(&total); err != nil {
+	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM (SELECT 1 FROM host_packages`+where+` GROUP BY name, version) AS t`, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	rows, err := s.db.QueryContext(ctx, `SELECT name, version, COUNT(DISTINCT host_id) FROM host_packages`+where+` GROUP BY name, version ORDER BY name, version LIMIT ? OFFSET ?`,
@@ -612,8 +609,8 @@ func (s *Store) FleetStats(ctx context.Context, offlineAfter time.Duration) (Fle
 	var oldest int64
 	cutoff := now() - int64(offlineAfter.Seconds())
 	hw, ha := andScope(ctx, "", nil, "id")
-	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*), COALESCE(SUM(last_seen_at >= ?), 0), COALESCE(SUM(last_seen_at > 0 AND last_seen_at < ?), 0),
-		COALESCE(SUM(last_seen_at = 0), 0), COALESCE(SUM(reboot_required), 0),
+	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*), COUNT(CASE WHEN last_seen_at >= ? THEN 1 END), COUNT(CASE WHEN last_seen_at > 0 AND last_seen_at < ? THEN 1 END),
+		COUNT(CASE WHEN last_seen_at = 0 THEN 1 END), COUNT(CASE WHEN reboot_required = 1 THEN 1 END),
 		COALESCE(MIN(CASE WHEN reboot_required = 1 AND reboot_required_since > 0 THEN reboot_required_since END), 0) FROM hosts`+hw, append([]any{cutoff, cutoff}, ha...)...).
 		Scan(&st.Hosts, &st.Online, &st.Offline, &st.NeverSeen, &st.RebootRequired, &oldest)
 	if err != nil {
@@ -621,7 +618,7 @@ func (s *Store) FleetStats(ctx context.Context, offlineAfter time.Duration) (Fle
 	}
 	st.RebootOldest = fromTS(oldest)
 	uw, ua := andScope(ctx, "", nil, "host_id")
-	err = s.db.QueryRowContext(ctx, `SELECT COUNT(DISTINCT host_id), COUNT(*), COALESCE(SUM(security), 0),
+	err = s.db.QueryRowContext(ctx, `SELECT COUNT(DISTINCT host_id), COUNT(*), COUNT(CASE WHEN security = 1 THEN 1 END),
 		COUNT(DISTINCT CASE WHEN security = 1 THEN host_id END) FROM host_updates`+uw, ua...).
 		Scan(&st.HostsWithUpdates, &st.PendingUpdates, &st.SecurityUpdates, &st.HostsWithSecUpdates)
 	return st, err
