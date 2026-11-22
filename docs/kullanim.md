@@ -34,15 +34,18 @@ Altyapının genel durumunu gösterir:
 
 Kartlara tıklayarak ilgili filtrelenmiş listeye geçebilirsiniz.
 
+**Takip ettiğim paketler** bölümü, nginx veya mariadb gibi özellikle izlemek istediğiniz paketlerin tüm sunuculardaki durumunu gösterir: kaç sunucuda kurulu olduğu, kaç farklı sürümün çalıştığı, kaç sunucuda güncelleme beklediği ve açık güvenlik açıklarının sayısı ile en yüksek önem derecesi. Bir paketi takibe almak için sunucunun **Kurulu Paketler** sekmesinde, **Paket Yönetimi** sayfasında ya da paket sayfasında adın yanındaki yıldıza tıklayın. Yıldıza yeniden tıklamak paketi listeden çıkarır. Liste kişiseldir: her kullanıcının listesi ayrıdır ve izleyici rolündeki kullanıcılar da kendi listelerini tutabilir. Bir kullanıcı en fazla 100 paket takip edebilir. Gruplarla sınırlandırılmış kullanıcılar yalnızca kendi sunucularındaki durumu görür.
+
 **Günlük eğilim** bölümü son 30 günü dört küçük grafikte gösterir: kritik ve yüksek açık sayısı (CVE), aktif olarak istismar edilen açıklar (KEV), açık bulgular ve bekleyen güvenlik güncellemeleri. Fareyle grafiğin üzerine gelindiğinde (ya da grafik seçiliyken ok tuşlarıyla) o günün değeri gösterilir. **Günlük değerleri tablo olarak göster** aynı verileri tablo halinde açar. Sunucu filonun durumunu her 15 dakikada bir o günün kaydına yazar; merkezi sunucunun kapalı olduğu günlerde grafikte boşluk kalır. Grafik ikinci günden itibaren görünür.
 
 ## Sunucu Envanteri
 
 Her sunucu için işletim sistemi, son bağlantı zamanı, açık güvenlik açıkları (önem derecesine göre) ve bekleyen güncellemeler listelenir. Sunucu adına tıklayarak ayrıntı sayfasını açın:
 
-- **Güvenlik Açıkları:** Bu sunucudaki bulgular.
-- **Bekleyen Güncellemeler:** Güncellenebilir paketler. Paketleri seçip **Seçili paketleri güncelle** ile yalnızca bunları kurabilirsiniz.
-- **Kurulu Paketler:** Tüm paketler ve sürümleri.
+- **Güvenlik Açıkları:** Bu sunucudaki bulgular. Arama kutusu CVE numarası, başlık veya paket adıyla süzer. Debian/Ubuntu'da bulgular kaynak paket adıyla kaydedilir, ancak ikili paket adıyla da arayabilirsiniz: `mariadb-server` araması `mariadb` kaynak paketinin bulgularını getirir.
+- **Bekleyen Güncellemeler:** Güncellenebilir paketler. Arama kutusu paket adına, Windows'ta KB numarasına, başlığa veya CVE'ye göre süzer. Paketleri seçip **Seçili paketleri güncelle** ile yalnızca bunları kurabilirsiniz.
+- **Kurulu Paketler:** Tüm paketler ve sürümleri. Paket adının yanındaki yıldız paketi takip listenize ekler.
+- **Takip Edilenler:** Takip ettiğiniz paketlerden bu sunucuda kurulu olanlar. Her paket için kurulu sürüm, varsa yeni sürüm ve açık güvenlik açıkları görünür. Paket eklemek için adını yazıp **Takip et**'e basın. Güncellemesi olan paketleri seçip burada da güncelleyebilirsiniz.
 - **İşlem Geçmişi:** Bu sunucuda çalıştırılan işler.
 - **Sistem Bilgisi:** Donanım, ajan bilgileri ve notlar.
 

@@ -84,6 +84,29 @@
   {{end}}
 </section>
 
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "watch.dashboard_title"}}{{with $d.Watched}} <span class="muted">({{len .}})</span>{{end}}</h2>
+  </div>
+  {{if $d.Watched}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "package.field.name"}}</th><th class="num">{{t "watch.field.hosts"}}</th><th>{{t "watch.field.updates"}}</th><th>{{t "watch.field.vulns"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Watched}}
+    <tr>
+      <td class="mono">{{template "star" (star $ .Name true)}} <a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td>
+      <td class="num">{{if .HostCount}}{{.HostCount}}{{if gt .VersionCount 1}}<div class="cell-sub">{{t "watch.versions" "n" .VersionCount}}</div>{{end}}{{else}}<span class="muted">{{t "watch.not_installed"}}</span>{{end}}</td>
+      <td>{{if .UpdateHosts}}<a href="/packages/{{pathesc .Name}}">{{t "watch.update_hosts" "n" .UpdateHosts}}</a>{{if .SecurityHosts}} <span class="pill pill--danger">{{t "package.security"}}</span>{{end}}{{else if .HostCount}}<span class="muted">{{t "watch.up_to_date"}}</span>{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td>{{if .CVECount}}<a href="/vulnerabilities?q={{.FindingPackage}}">{{template "sev" .Severity}} {{t "watch.cve_hosts" "n" .CVECount "hosts" .VulnHosts}}</a>{{if .KnownExploited}} {{template "kev"}}{{end}}{{else if .HostCount}}<span class="muted">{{t "watch.no_vulns"}}</span>{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "watch.dashboard_empty")}}{{end}}
+</section>
+
 <div class="grid-2">
   <section class="panel panel--flush">
     <div class="panel__head">

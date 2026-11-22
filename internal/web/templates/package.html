@@ -4,7 +4,7 @@
 {{$d := .Data}}{{$root := .}}{{$op := .User.CanOperate}}
 <nav class="breadcrumb"><a href="/packages">{{t "nav.packages"}}</a> / <span class="mono">{{$d.Name}}</span></nav>
 <header class="pagehead">
-  <div><h1 class="pagehead__title mono">{{$d.Name}}</h1></div>
+  <div><h1 class="pagehead__title mono">{{template "star" (star $root $d.Name $d.Watching)}} {{$d.Name}}</h1></div>
   {{if and $op $d.WithUpdate}}
   <div class="pagehead__actions">
     <form method="post" action="/packages/{{$d.Name}}/upgrade" data-confirm="{{t "packages.upgrade_confirm" "package" $d.Name "n" (len $d.WithUpdate)}}">

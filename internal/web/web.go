@@ -301,6 +301,10 @@ func (s *Server) funcs() template.FuncMap {
 		"channelTarget": s.channelTarget,
 		"levelLabel":    func(level string) string { return l.T("level." + level) },
 		"has":           func(m map[int64]bool, id int64) bool { return m[id] },
+		"watching":      func(m map[string]bool, name string) bool { return m[name] },
+		"star": func(d pageData, name string, on bool) starArgs {
+			return starArgs{Name: name, On: on, CSRF: d.CSRF, Back: d.Path}
+		},
 		"riskTerm": func(days int) string {
 			if days == 0 {
 				return l.T("vuln.risk_days.none")
@@ -426,6 +430,7 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("GET /packages/{name}", view(s.packageDetail))
 	mux.Handle("POST /packages/{name}/upgrade", operate(s.packageUpgrade))
 	mux.Handle("POST /packages/security-all", operate(s.packagesSecurityAll))
+	mux.Handle("POST /watched", view(s.watchToggle))
 
 	mux.Handle("GET /jobs", view(s.jobs))
 	mux.Handle("GET /jobs/{id}", view(s.job))

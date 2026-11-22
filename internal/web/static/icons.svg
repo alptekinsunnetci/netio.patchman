@@ -96,4 +96,7 @@
     <path d="M10 4H6.5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2H10"/>
     <path d="m15 7.5 4.5 4.5-4.5 4.5M19.5 12H9"/>
   </symbol>
+  <symbol id="i-star" viewBox="0 0 24 24">
+    <path stroke-linejoin="round" d="m12 3.75 2.55 5.17 5.7.83-4.13 4.02.98 5.68L12 16.77l-5.1 2.68.98-5.68-4.13-4.02 5.7-.83z"/>
+  </symbol>
 </svg>

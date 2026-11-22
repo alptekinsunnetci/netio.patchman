@@ -94,6 +94,7 @@ func populate(t *testing.T, s *Store) {
 	must(s.Audit(ctx, AuditEntry{Action: "system", Details: "cli"}))
 	_, err = s.CreateAPIToken(ctx, admin, "grafana", "apihash", "npat_ab", true, time.Time{})
 	must(err)
+	must(s.WatchPackage(ctx, op, "openssl"))
 	_, err = s.CreateChannel(ctx, Channel{Name: "Slack", Type: ChannelSlack, URL: "https://hooks.example.test/x", MinLevel: LevelWarning, Enabled: true})
 	must(err)
 	must(s.TakeSnapshot(ctx, time.Now()))

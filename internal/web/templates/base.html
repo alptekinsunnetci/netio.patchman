@@ -29,6 +29,8 @@
 
 {{define "sev"}}<span class="badge badge--{{sevClass .}}">{{sevLabel .}}</span>{{end}}
 
+{{define "star"}}<form class="star-form" method="post" action="/watched"><input type="hidden" name="_csrf" value="{{.CSRF}}"><input type="hidden" name="name" value="{{.Name}}"><input type="hidden" name="back" value="{{.Back}}"><input type="hidden" name="watch" value="{{if .On}}0{{else}}1{{end}}"><button class="star{{if .On}} is-on{{end}}" type="submit" aria-pressed="{{if .On}}true{{else}}false{{end}}" title="{{if .On}}{{t "watch.remove"}}{{else}}{{t "watch.add"}}{{end}}" aria-label="{{if .On}}{{t "watch.remove"}}{{else}}{{t "watch.add"}}{{end}}: {{.Name}}">{{template "icon" "star"}}</button></form>{{end}}
+
 {{define "kev"}}<span class="badge badge--kev" title="{{t "vuln.kev_tooltip"}}">KEV</span>{{end}}
 
 {{define "jobstatus"}}<span class="pill pill--{{.}}">{{jobStatus .}}</span>{{end}}

@@ -36,7 +36,7 @@
     <tbody>
     {{range $d.Updates}}
     <tr>
-      <td class="mono"><a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td>
+      <td class="mono">{{template "star" (star $root .Name (watching $d.Watched .Name))}} <a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td>
       <td>{{if .Security}}<span class="pill pill--danger">{{t "package.security"}}</span>{{else}}<span class="pill pill--muted">{{t "package.regular"}}</span>{{end}}</td>
       <td class="num">{{.HostCount}}</td>
       <td class="mono cell-sub">{{join .CurrentVersions ", "}}</td>
@@ -68,7 +68,7 @@
   <table class="table">
     <thead><tr><th>{{t "package.field.name"}}</th><th>{{t "package.field.version"}}</th><th class="num">{{t "packages.host_count"}}</th></tr></thead>
     <tbody>
-    {{range $d.Installed}}<tr><td class="mono"><a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td><td class="mono">{{.Version}}</td><td class="num">{{.HostCount}}</td></tr>{{end}}
+    {{range $d.Installed}}<tr><td class="mono">{{template "star" (star $root .Name (watching $d.Watched .Name))}} <a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td><td class="mono">{{.Version}}</td><td class="num">{{.HostCount}}</td></tr>{{end}}
     </tbody>
   </table>
   {{else if $d.Q}}{{template "empty" (t "packages.installed_none")}}

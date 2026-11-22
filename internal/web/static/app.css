@@ -308,6 +308,15 @@ fieldset.field > legend { padding: 0; margin-bottom: 6px; }
 .button.is-copied { border-color: var(--ok); color: var(--ok); }
 .button:focus-visible, .field__input:focus-visible, .navlink:focus-visible, .tab:focus-visible, .chip:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .button-row, .inline-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+/* Watch (star) toggle next to a package name */
+.star-form { display: inline; margin: 0; }
+.star { display: inline-flex; align-items: center; gap: 6px; padding: 2px; border: 0; background: transparent; color: var(--text-subtle); font: inherit; cursor: pointer; vertical-align: middle; border-radius: var(--radius-sm); }
+.star:hover { color: var(--accent); }
+.star.is-on { color: var(--accent); }
+.star.is-on .icon { fill: currentColor; }
+.star .icon { width: 16px; height: 16px; }
+.button .star-label { font-weight: 600; }
+.watch-add { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .bulkbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 10px 12px; margin-bottom: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
 .bulkbar__label { font-weight: 600; font-size: 13px; }
 

@@ -62,12 +62,14 @@
   <a class="tab{{if eq $d.Tab "vulns"}} is-active{{end}}" href="/servers/{{$h.ID}}">{{t "server.tab.vulns"}}</a>
   <a class="tab{{if eq $d.Tab "updates"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=updates">{{t "server.tab.updates"}} <span class="tab__count">{{$h.UpdateCount}}</span></a>
   <a class="tab{{if eq $d.Tab "packages"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=packages">{{t "server.tab.packages"}} <span class="tab__count">{{$h.PackageCount}}</span></a>
+  <a class="tab{{if eq $d.Tab "watched"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=watched">{{t "server.tab.watched"}} <span class="tab__count">{{$d.WatchedCount}}</span></a>
   <a class="tab{{if eq $d.Tab "jobs"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=jobs">{{t "server.tab.jobs"}}</a>
   <a class="tab{{if eq $d.Tab "info"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=info">{{t "server.tab.info"}}</a>
 </nav>
 
 {{if eq $d.Tab "vulns"}}
 <form class="filters" method="get" action="/servers/{{$h.ID}}">
+  <input class="field__input" type="search" name="q" value="{{$d.Q}}" placeholder="{{t "vulns.search_placeholder"}}" aria-label="{{t "common.search"}}">
   <select class="field__input" name="status" aria-label="{{t "vuln.field.status"}}">
     <option value="">{{t "vulns.filter.active"}}</option>
     <option value="accepted_risk"{{if eq $d.Status "accepted_risk"}} selected{{end}}>{{t "status.accepted_risk"}}</option>
@@ -109,6 +111,12 @@
 {{template "pager" $d.Pager}}
 
 {{else if eq $d.Tab "updates"}}
+<form class="filters" method="get" action="/servers/{{$h.ID}}">
+  <input type="hidden" name="tab" value="updates">
+  <input class="field__input" type="search" name="q" value="{{$d.Q}}" placeholder="{{if eq $h.OSID "windows"}}{{t "server.updates_search_windows"}}{{else}}{{t "package.search_placeholder"}}{{end}}" aria-label="{{t "common.search"}}">
+  <button class="button" type="submit">{{t "common.search"}}</button>
+  {{if $d.Q}}<span class="muted">{{t "server.updates_matching" "n" (len $d.Updates) "total" $d.UpdateTotal}}</span> <a class="button button--sm button--ghost" href="/servers/{{$h.ID}}?tab=updates">{{t "common.clear"}}</a>{{end}}
+</form>
 <section class="panel panel--flush">
   {{with $d.ExcludePatterns}}<p class="panel__note muted">{{t "exclude.active"}} <span class="mono">{{join . ", "}}</span></p>{{end}}
   {{if $d.Updates}}
@@ -152,7 +160,7 @@
     </div>
     {{if and $root.User.CanOperate $h.RemoteUpdates}}<div class="panel__foot"><button class="button button--primary" type="submit">{{t "server.action.upgrade_selected"}}</button></div>{{end}}
   </form>
-  {{else}}{{template "empty" (t "server.no_updates")}}{{end}}
+  {{else if $d.Q}}{{template "empty" (t "server.no_updates_match")}}{{else}}{{template "empty" (t "server.no_updates")}}{{end}}
 </section>
 
 {{else if eq $d.Tab "packages"}}
@@ -168,7 +176,7 @@
     <thead><tr><th>{{t "package.field.name"}}</th><th>{{t "package.field.version"}}</th><th>{{t "package.field.arch"}}</th><th>{{t "package.field.source"}}</th></tr></thead>
     <tbody>
     {{range $d.Packages}}
-    <tr><td class="mono"><a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td><td class="mono">{{.Version}}</td><td class="mono">{{.Arch}}</td><td class="mono cell-sub">{{.SourceName}}{{if and .SourceVersion (ne .SourceVersion .Version)}} {{.SourceVersion}}{{end}}</td></tr>
+    <tr><td class="mono">{{template "star" (star $root .Name (watching $d.Watched .Name))}} <a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td><td class="mono">{{.Version}}</td><td class="mono">{{.Arch}}</td><td class="mono cell-sub">{{.SourceName}}{{if and .SourceVersion (ne .SourceVersion .Version)}} {{.SourceVersion}}{{end}}</td></tr>
     {{end}}
     </tbody>
   </table>
@@ -176,6 +184,44 @@
   {{else}}{{template "empty" (t "server.no_packages")}}{{end}}
 </section>
 {{template "pager" $d.Pager}}
+<p class="footnote">{{t "watch.packages_hint"}}</p>
+
+{{else if eq $d.Tab "watched"}}
+<form class="filters" method="post" action="/watched">
+  {{template "csrf" $root}}<input type="hidden" name="watch" value="1"><input type="hidden" name="back" value="/servers/{{$h.ID}}?tab=watched">
+  <input class="field__input mono" type="text" name="name" maxlength="200" required placeholder="{{t "watch.add_placeholder"}}" aria-label="{{t "package.field.name"}}">
+  <button class="button" type="submit">{{template "icon" "star"}}{{t "watch.add"}}</button>
+</form>
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "watch.host_title"}}</h2>
+    <a class="panel__link" href="/dashboard">{{t "watch.all_servers"}}</a>
+  </div>
+  {{if $d.WatchedRows}}
+  <form method="post" action="/servers/{{$h.ID}}/jobs" data-confirm="{{t "server.action.selected_confirm"}}" id="watched-upgrade">
+    {{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_packages"><input type="hidden" name="back_tab" value="watched">
+  </form>
+  <div class="table-wrap">
+  <table class="table">
+    {{$op := and $root.User.CanOperate $h.RemoteUpdates}}
+    <thead><tr>{{if $op}}<th class="check"><input type="checkbox" data-check-all="packages" form="watched-upgrade" aria-label="{{t "common.select_all"}}"></th>{{end}}<th>{{t "package.field.name"}}</th><th>{{t "package.field.current"}}</th><th>{{t "package.field.available"}}</th><th>{{t "host.field.vulns"}}</th></tr></thead>
+    <tbody>
+    {{range $d.WatchedRows}}
+    <tr>
+      {{if $op}}<td class="check">{{if .AvailableVersion}}<input type="checkbox" name="packages" value="{{.Name}}" form="watched-upgrade" aria-label="{{.Name}}">{{end}}</td>{{end}}
+      <td class="mono">{{template "star" (star $root .Name true)}} <a href="/packages/{{pathesc .Name}}">{{.Name}}</a></td>
+      <td class="mono">{{join .Versions ", "}}</td>
+      <td>{{if .AvailableVersion}}<span class="mono">{{.AvailableVersion}}</span> {{if .Security}}<span class="pill pill--danger">{{t "package.security"}}</span>{{else}}<span class="pill pill--muted">{{t "package.regular"}}</span>{{end}}{{else}}<span class="muted">{{t "watch.up_to_date"}}</span>{{end}}</td>
+      <td>{{if .CVECount}}<a href="/servers/{{$h.ID}}?q={{.Name}}">{{template "sev" .Severity}} {{t "watch.cve_count" "n" .CVECount}}</a>{{if .KnownExploited}} {{template "kev"}}{{end}}{{else}}<span class="muted">{{t "watch.no_vulns"}}</span>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{if $op}}<div class="panel__foot"><button class="button button--primary" type="submit" form="watched-upgrade">{{t "server.action.upgrade_selected"}}</button></div>{{end}}
+  {{else}}{{template "empty" (t "watch.host_empty")}}{{end}}
+</section>
+{{if $d.WatchedMissing}}<p class="footnote">{{t "watch.host_missing" "n" $d.WatchedMissing}}</p>{{end}}
 
 {{else if eq $d.Tab "jobs"}}
 <section class="panel panel--flush">

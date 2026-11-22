@@ -502,8 +502,16 @@ func findingWhere(ctx context.Context, f FindingFilter) (string, []any) {
 	}
 	if q := strings.TrimSpace(f.Search); q != "" {
 		l := likeEscape(q)
-		conds = append(conds, `(f.cve_id LIKE ? ESCAPE '\' OR f.package_name LIKE ? ESCAPE '\' OR v.title LIKE ? ESCAPE '\')`)
-		args = append(args, l, l, l)
+		if f.HostID != 0 {
+			// On one host a binary package name also finds the findings of its
+			// source package (Debian/Ubuntu/Alpine record those).
+			conds = append(conds, `(f.cve_id LIKE ? ESCAPE '\' OR f.package_name LIKE ? ESCAPE '\' OR v.title LIKE ? ESCAPE '\'
+				OR f.package_name IN (SELECT source_name FROM host_packages WHERE host_id = ? AND source_name <> '' AND name LIKE ? ESCAPE '\'))`)
+			args = append(args, l, l, l, f.HostID, l)
+		} else {
+			conds = append(conds, `(f.cve_id LIKE ? ESCAPE '\' OR f.package_name LIKE ? ESCAPE '\' OR v.title LIKE ? ESCAPE '\')`)
+			args = append(args, l, l, l)
+		}
 	}
 	if f.OverdueOnly && f.SLA.Enabled() {
 		due := f.SLA.dueSQL("f", "v")

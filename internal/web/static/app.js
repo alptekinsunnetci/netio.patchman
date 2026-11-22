@@ -36,8 +36,11 @@
     if (!name) return;
     var form = e.target.form;
     if (!form) return;
-    var boxes = form.querySelectorAll('input[type="checkbox"][name="' + name + '"]');
-    for (var i = 0; i < boxes.length; i++) boxes[i].checked = e.target.checked;
+    // form.elements also holds inputs tied to the form with a form attribute.
+    var els = form.elements;
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].type === "checkbox" && els[i].name === name) els[i].checked = e.target.checked;
+    }
   });
 
   // Sections shown only for some radio choices: data-show-when="name=a|b".

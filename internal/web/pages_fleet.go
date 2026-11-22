@@ -51,9 +51,14 @@ func (s *Server) dashboard(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	watched, err := s.st.WatchedSummary(ctx, sessionFrom(r).user.ID)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
 	d := s.page(r, s.l.T("dashboard.title"), "dashboard")
 	d.Data = map[string]any{
-		"Stats": stats, "Sev": sev, "KEV": kev, "TopVulns": topVulns, "TopHosts": topHosts, "Jobs": jobs,
+		"Stats": stats, "Sev": sev, "KEV": kev, "TopVulns": topVulns, "TopHosts": topHosts, "Jobs": jobs, "Watched": watched,
 		"SLAEnabled": sla.Enabled(), "Overdue": overdue, "OverdueCVEs": overdueCVEs,
 		"Scan": s.o.Scanner.Status(), "Trend": s.buildTrends(snaps, from, to),
 	}
@@ -118,7 +123,10 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tab := r.URL.Query().Get("tab")
-	data := map[string]any{"Host": h, "Tab": tab, "Online": h.Online(s.offlineAfter()),
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	userID := sessionFrom(r).user.ID
+	watchedCount, _ := s.st.CountHostWatched(ctx, userID, id)
+	data := map[string]any{"Host": h, "Tab": tab, "Online": h.Online(s.offlineAfter()), "Q": q, "WatchedCount": watchedCount,
 		"ScanSupported": scanner.TargetFor(h.HostInfo()).Supported()}
 	pg := pageNumber(r)
 	switch tab {
@@ -128,6 +136,10 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 			s.serverError(w, r, err)
 			return
 		}
+		data["UpdateTotal"] = len(ups)
+		if q != "" {
+			ups = filterUpdates(ups, q)
+		}
 		data["Updates"] = ups
 		patterns := s.effectiveExcludes(ctx, id)
 		excluded := map[string]bool{}
@@ -136,13 +148,19 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 		}
 		data["ExcludePatterns"], data["Excluded"] = patterns, excluded
 	case "packages":
-		q := r.URL.Query().Get("q")
 		pkgs, total, err := s.st.SearchHostPackages(ctx, id, q, store.Page{Number: pg, Size: pageSize})
 		if err != nil {
 			s.serverError(w, r, err)
 			return
 		}
-		data["Packages"], data["Pager"], data["Q"] = pkgs, newPager(r, pg, total), q
+		data["Packages"], data["Pager"], data["Watched"] = pkgs, newPager(r, pg, total), s.watchedSet(ctx, r)
+	case "watched":
+		rows, missing, err := s.st.HostWatched(ctx, userID, id)
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		data["WatchedRows"], data["WatchedMissing"] = rows, missing
 	case "jobs":
 		jobs, total, err := s.st.ListJobs(ctx, store.JobFilter{HostID: id}, store.Page{Number: pg, Size: pageSize})
 		if err != nil {
@@ -170,7 +188,7 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 		data["Tab"] = "vulns"
 		status := r.URL.Query().Get("status")
 		overdue := r.URL.Query().Get("overdue") == "1"
-		rows, total, err := s.st.ListFindings(ctx, store.FindingFilter{HostID: id, Status: status, SLA: s.sla(ctx), OverdueOnly: overdue}, store.Page{Number: pg, Size: pageSize})
+		rows, total, err := s.st.ListFindings(ctx, store.FindingFilter{HostID: id, Status: status, Search: q, SLA: s.sla(ctx), OverdueOnly: overdue}, store.Page{Number: pg, Size: pageSize})
 		if err != nil {
 			s.serverError(w, r, err)
 			return
@@ -661,7 +679,7 @@ func (s *Server) packages(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	tab := q.Get("tab")
 	pg := pageNumber(r)
-	data := map[string]any{"Tab": tab, "Q": q.Get("q"), "Security": q.Get("security") == "1"}
+	data := map[string]any{"Tab": tab, "Q": q.Get("q"), "Security": q.Get("security") == "1", "Watched": s.watchedSet(r.Context(), r)}
 	if tab == "installed" {
 		rows, total, err := s.st.SearchInstalled(r.Context(), q.Get("q"), store.Page{Number: pg, Size: pageSize})
 		if err != nil {
@@ -701,7 +719,7 @@ func (s *Server) packageDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	d := s.page(r, name, "packages")
-	d.Data = map[string]any{"Name": name, "WithUpdate": withUpdate, "Installed": installed}
+	d.Data = map[string]any{"Name": name, "WithUpdate": withUpdate, "Installed": installed, "Watching": s.watchedSet(r.Context(), r)[name]}
 	s.render(w, r, http.StatusOK, "package", d)
 }
 
@@ -987,6 +1005,20 @@ func (s *Server) vulnerabilitiesCSV(w http.ResponseWriter, r *http.Request) {
 // validPackageView accepts package names for viewing: besides package
 // manager names, Windows program names ("7-Zip 26.01 (x64)"). Jobs still
 // require protocol.ValidPackageName.
+// filterUpdates keeps the updates whose name, title (Windows) or CVE list
+// contains q, ignoring case.
+func filterUpdates(ups []protocol.Update, q string) []protocol.Update {
+	q = strings.ToLower(q)
+	var out []protocol.Update
+	for _, u := range ups {
+		if strings.Contains(strings.ToLower(u.Name), q) || strings.Contains(strings.ToLower(u.Title), q) ||
+			strings.Contains(strings.ToLower(strings.Join(u.CVEs, " ")), q) {
+			out = append(out, u)
+		}
+	}
+	return out
+}
+
 func validPackageView(name string) bool {
 	if name == "" || len(name) > 200 || !utf8.ValidString(name) {
 		return false
