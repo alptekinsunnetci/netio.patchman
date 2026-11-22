@@ -18,7 +18,7 @@
 </section>
 {{else}}
 
-<section class="stats">
+<section class="stats{{if $d.SLAEnabled}} stats--7{{end}}">
   <a class="stat" href="/servers">
     <p class="stat__label">{{t "dashboard.stat.servers"}}</p>
     <p class="stat__value">{{$d.Stats.Hosts}}</p>
