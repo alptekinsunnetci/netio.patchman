@@ -1964,5 +1964,18 @@
   "software.category.webapp": "Web application",
   "software.category.business": "Business application",
   "software.category.system": "System tool",
-  "software.no_service": "This software has no service (a command-line tool or library)."
+  "software.no_service": "This software has no service (a command-line tool or library).",
+  "settings.tab.general": "General",
+  "settings.jump": "Go to section",
+  "settings.section.email": "Email",
+  "settings.section.agents": "Agents",
+  "settings.section.scan": "Scanning",
+  "settings.section.security": "Security",
+  "settings.section.updates": "Updates",
+  "settings.section.monitoring": "Resource monitoring",
+  "settings.section.sla": "Remediation times",
+  "settings.section.inventory": "Inventory and EOL",
+  "settings.section.backup": "Backup",
+  "software.system_tools": "System tools ({n})",
+  "host.security_updates_short": "{n} security"
 }

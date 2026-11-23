@@ -100,7 +100,7 @@ CloudLinux 8 ve 9 AlmaLinux kaynaklarından derlendiği için AlmaLinux güvenli
 
 ## Ekran görüntüleri
 
-Görüntüler, Ubuntu, Debian, Rocky Linux, AlmaLinux ve Alpine çalıştıran altı test sunucusundan alınmıştır. Güvenlik açıkları OSV.dev'den gelen gerçek verilerdir.
+Görüntüler altı Ubuntu 24.04 demo sunucusundan alınmıştır. Paket sürümleri gerçek Ubuntu sürümleridir (bir kısmı güncellenmemiş haliyle); güvenlik açıkları OSV.dev'den gelen gerçek verilerdir.
 
 **Sunucu envanteri:** Tüm sunucular, açık sayıları önem derecesine göre, bekleyen güncellemeler ve ajan durumu. Seçili sunucularda toplu güncelleme başlatılabilir.
 
@@ -109,6 +109,14 @@ Görüntüler, Ubuntu, Debian, Rocky Linux, AlmaLinux ve Alpine çalıştıran a
 **Sunucu ayrıntısı:** Sunucudaki açıklar CVSS puanı, etkilenen paket, kurulu ve düzeltilmiş sürümle listelenir. Güvenlik güncellemeleri, tüm güncellemeler ve yeniden başlatma tek tıkla başlatılır.
 
 ![Sunucu ayrıntısı](docs/images/server.png)
+
+**Kaynak kullanımı:** Ajanın bildirdiği işlemci, bellek, takas alanı ve disk kullanımı; son 24 saat, 7 gün ve 30 gün grafikleri ile otomatik uyarı sınırları.
+
+![Kaynak kullanımı](docs/images/health.png)
+
+**Yazılım envanteri:** Paketlerden tanınan sunucu yazılımları, kaç sunucuda ve hangi sürüm serileriyle kurulu oldukları, çalışan servisler ve açıklar.
+
+![Yazılım envanteri](docs/images/software.png)
 
 **Güvenlik açıkları:** Filoda tespit edilen tüm açıklar; önem derecesine, istismar durumuna ve düzeltme olup olmadığına göre süzülebilir.
 

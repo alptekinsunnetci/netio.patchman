@@ -350,25 +350,26 @@
     <h2 class="panel__title">{{t "software.host_title"}}</h2>
     <a class="panel__link" href="/software?tab=compare&a={{$h.ID}}">{{t "software.compare_with"}}</a>
   </div>
-  {{if $d.Software}}
+  {{if or $d.Software $d.SystemSoftware}}
   <div class="table-wrap">
   <table class="table">
     <thead><tr><th>{{t "software.field.name"}}</th><th>{{t "software.field.version"}}</th><th>{{t "software.field.package"}}</th><th>{{t "software.field.state"}}</th><th>{{t "host.field.vulns"}}</th><th>{{t "eol.field.support"}}</th><th>{{t "software.field.first_seen"}}</th></tr></thead>
     <tbody>
-    {{range $d.Software}}
-    <tr>
-      <td><a href="/software/{{.Software}}?cycle={{.Cycle}}">{{swName .Software}}</a> <span class="muted">{{.Cycle}}</span><div class="cell-sub">{{t (printf "software.category.%s" (swCategory .Software))}}</div></td>
-      <td class="mono">{{.Version}}</td>
-      <td class="mono cell-sub">{{if .Package}}{{.Package}} {{.PackageVersion}}{{else}}<span class="muted" title="{{t "software.probed_hint"}}">{{t "software.probed"}}</span>{{end}}</td>
-      <td>{{template "running" .Running}}{{if .Service}} <span class="muted mono">{{.Service}}</span>{{end}}</td>
-      <td>{{if .CVECount}}<a href="/servers/{{$h.ID}}?q={{.Package}}">{{template "sev" .Severity}} {{t "watch.cve_count" "n" .CVECount}}</a>{{if .KnownExploited}} {{template "kev"}}{{end}}{{else}}<span class="muted">{{t "watch.no_vulns"}}</span>{{end}}</td>
-      <td>{{with eolItem $d.SoftwareEOL .Software .Cycle}}{{template "eolpill" .}}{{if .Found}}{{if not .Release.EOL.IsZero}}<div class="cell-sub">{{date .Release.EOL}}</div>{{end}}{{end}}{{if .DistroSupported}}<div class="cell-sub" title="{{t "eol.distro_hint"}}">{{t "eol.distro_supported"}}</div>{{end}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
-      <td><time datetime="{{iso .FirstSeenAt}}">{{date .FirstSeenAt}}</time></td>
-    </tr>
-    {{end}}
+    {{range $d.Software}}{{template "swrow" (swRow . $h.ID $d.SoftwareEOL)}}{{end}}
     </tbody>
   </table>
   </div>
+  {{with $d.SystemSoftware}}
+  <details class="details details--table">
+    <summary>{{t "software.system_tools" "n" (len .)}}</summary>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>{{t "software.field.name"}}</th><th>{{t "software.field.version"}}</th><th>{{t "software.field.package"}}</th><th>{{t "software.field.state"}}</th><th>{{t "host.field.vulns"}}</th><th>{{t "eol.field.support"}}</th><th>{{t "software.field.first_seen"}}</th></tr></thead>
+      <tbody>{{range .}}{{template "swrow" (swRow . $h.ID $d.SoftwareEOL)}}{{end}}</tbody>
+    </table>
+    </div>
+  </details>
+  {{end}}
   {{else}}{{template "empty" (t "software.host_empty")}}{{end}}
 </section>
 
@@ -525,4 +526,16 @@
 </section>
 {{end}}
 {{end}}
+{{end}}
+
+{{define "swrow"}}
+    <tr>
+      <td><a href="/software/{{.R.Software}}?cycle={{.R.Cycle}}">{{swName .R.Software}}</a> <span class="muted">{{.R.Cycle}}</span><div class="cell-sub">{{t (printf "software.category.%s" (swCategory .R.Software))}}</div></td>
+      <td class="mono">{{.R.Version}}</td>
+      <td class="mono cell-sub">{{if .R.Package}}{{.R.Package}} {{.R.PackageVersion}}{{else}}<span class="muted" title="{{t "software.probed_hint"}}">{{t "software.probed"}}</span>{{end}}</td>
+      <td>{{template "running" .R.Running}}{{if .R.Service}} <span class="muted mono">{{.R.Service}}</span>{{end}}</td>
+      <td>{{if .R.CVECount}}<a href="/servers/{{$.HostID}}?q={{.R.Package}}">{{template "sev" .R.Severity}} {{t "watch.cve_count" "n" .R.CVECount}}</a>{{if .R.KnownExploited}} {{template "kev"}}{{end}}{{else}}<span class="muted">{{t "watch.no_vulns"}}</span>{{end}}</td>
+      <td>{{with eolItem $.EOL $.R.Software $.R.Cycle}}{{template "eolpill" .}}{{if .Found}}{{if not .Release.EOL.IsZero}}<div class="cell-sub">{{date .Release.EOL}}</div>{{end}}{{end}}{{if .DistroSupported}}<div class="cell-sub" title="{{t "eol.distro_hint"}}">{{t "eol.distro_supported"}}</div>{{end}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td><time datetime="{{iso .R.FirstSeenAt}}">{{date .R.FirstSeenAt}}</time></td>
+    </tr>
 {{end}}

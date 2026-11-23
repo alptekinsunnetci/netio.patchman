@@ -10,8 +10,10 @@
 </header>
 {{with $d.Notice}}<p class="alert alert--success" role="status">{{.}}</p>{{end}}
 
+<div class="grid-2 profile-grid">
+<div class="stack">
 {{if gt (len .Languages) 1}}
-<section class="panel panel--narrow" id="language">
+<section class="panel" id="language">
   <h2 class="panel__title">{{t "language.label"}}</h2>
   <form class="form form--row" method="post" action="/profile/language">
     {{template "csrf" $root}}
@@ -23,7 +25,19 @@
 </section>
 {{end}}
 
-<section class="panel panel--narrow" id="mfa">
+<section class="panel">
+  <h2 class="panel__title">{{t "profile.change_password"}}</h2>
+  <form class="form" method="post" action="/profile/password">
+    {{template "csrf" $root}}
+    <label class="field"><span class="field__label">{{t "profile.current_password"}}</span><input class="field__input" type="password" name="current_password" required autocomplete="current-password"></label>
+    <label class="field"><span class="field__label">{{t "user.field.password"}}</span><input class="field__input" type="password" name="password" required minlength="10" autocomplete="new-password"><span class="field__hint">{{t "user.password_hint"}}</span></label>
+    <label class="field"><span class="field__label">{{t "user.field.password_confirm"}}</span><input class="field__input" type="password" name="password_confirm" required minlength="10" autocomplete="new-password"></label>
+    <div><button class="button button--primary" type="submit">{{t "profile.change_password"}}</button></div>
+  </form>
+</section>
+</div>
+<div class="stack">
+<section class="panel" id="mfa">
   <h2 class="panel__title">{{t "mfa.title"}}</h2>
   {{if $d.MissingMFA}}<p class="alert alert--warning">{{t "mfa.required_notice"}}</p>{{end}}
   {{with $d.RecoveryCodes}}
@@ -65,6 +79,8 @@
   <form method="post" action="/profile/mfa/setup">{{template "csrf" $root}}<button class="button button--primary" type="submit">{{template "icon" "key"}}{{t "mfa.start"}}</button></form>
   {{end}}
 </section>
+</div>
+</div>
 
 <section class="panel" id="api">
   <h2 class="panel__title">{{t "apitoken.title"}}</h2>
@@ -101,17 +117,6 @@
     <label class="field"><span class="field__label">{{t "apitoken.field.valid_days"}}</span><input class="field__input" type="number" name="valid_days" min="0" max="3650" value="90" required></label>
     {{if $root.User.CanOperate}}<label class="check-label"><input type="checkbox" name="write" value="1"> {{t "apitoken.allow_write"}}</label>{{end}}
     <div><button class="button" type="submit">{{t "apitoken.create"}}</button></div>
-  </form>
-</section>
-
-<section class="panel panel--narrow">
-  <h2 class="panel__title">{{t "profile.change_password"}}</h2>
-  <form class="form" method="post" action="/profile/password">
-    {{template "csrf" $root}}
-    <label class="field"><span class="field__label">{{t "profile.current_password"}}</span><input class="field__input" type="password" name="current_password" required autocomplete="current-password"></label>
-    <label class="field"><span class="field__label">{{t "user.field.password"}}</span><input class="field__input" type="password" name="password" required minlength="10" autocomplete="new-password"><span class="field__hint">{{t "user.password_hint"}}</span></label>
-    <label class="field"><span class="field__label">{{t "user.field.password_confirm"}}</span><input class="field__input" type="password" name="password_confirm" required minlength="10" autocomplete="new-password"></label>
-    <div><button class="button button--primary" type="submit">{{t "profile.change_password"}}</button></div>
   </form>
 </section>
 {{end}}

@@ -145,14 +145,15 @@ func TestReferencedKeysExist(t *testing.T) {
 
 	// Keys built at runtime from identifiers.
 	families := map[string][]string{
-		"severity.":   {"critical", "high", "medium", "low", "none", "unknown"},
-		"status.":     {"open", "in_progress", "resolved", "accepted_risk", "false_positive"},
-		"job.type.":   {"refresh", "upgrade_security", "upgrade_all", "upgrade_packages", "agent_update", "restart_services", "reboot", "health_check", "preview", "rollback"},
-		"job.status.": {"queued", "dispatched", "succeeded", "partial", "failed", "timed_out", "cancelled", "expired"},
-		"role.":       {"admin", "operator", "viewer"},
-		"level.":      {"critical", "warning", "info"},
-		"nav.":        {"dashboard", "servers", "groups", "vulnerabilities", "packages", "software", "reports", "jobs", "rollouts", "standards", "schedules", "agents", "notifications", "users", "settings"},
-		"nav.group.":  {"overview", "inventory", "security", "updates", "admin"},
+		"severity.":         {"critical", "high", "medium", "low", "none", "unknown"},
+		"status.":           {"open", "in_progress", "resolved", "accepted_risk", "false_positive"},
+		"job.type.":         {"refresh", "upgrade_security", "upgrade_all", "upgrade_packages", "agent_update", "restart_services", "reboot", "health_check", "preview", "rollback"},
+		"job.status.":       {"queued", "dispatched", "succeeded", "partial", "failed", "timed_out", "cancelled", "expired"},
+		"role.":             {"admin", "operator", "viewer"},
+		"level.":            {"critical", "warning", "info"},
+		"nav.":              {"dashboard", "servers", "groups", "vulnerabilities", "packages", "software", "reports", "jobs", "rollouts", "standards", "schedules", "agents", "notifications", "users", "settings"},
+		"nav.group.":        {"overview", "inventory", "security", "updates", "admin"},
+		"settings.section.": {"email", "agents", "scan", "security", "updates", "monitoring", "sla", "inventory", "backup"},
 		// Keep in step with the software catalog (TestCategoriesHaveLabels checks it there).
 		"software.category.": {"web", "database", "cache", "runtime", "mail", "container", "remote", "search", "queue", "dns", "file", "vpn",
 			"directory", "monitoring", "devops", "infra", "security", "panel", "library", "appserver", "network", "virtualization", "storage", "backup",

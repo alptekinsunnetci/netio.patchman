@@ -24,25 +24,29 @@
     <h2 class="panel__title">{{t "rollout.section.hosts"}}</h2>
     <fieldset class="fieldset">
       <legend>{{t "rollout.field.strategy"}}</legend>
-      <label class="check-label"><input type="radio" name="strategy" value="batches"{{if ne $f.Strategy "groups"}} checked{{end}}> {{t "rollout.strategy.batches"}}</label>
-      <div class="form-grid">
-        <label class="field"><span class="field__label">{{t "rollout.field.target"}}</span>
-          <select class="field__input" name="target">
-            <option value="all"{{if eq $f.Target "all"}} selected{{end}}>{{t "rollout.target.all"}}</option>
-            <option value="group"{{if eq $f.Target "group"}} selected{{end}}>{{t "rollout.target.group"}}</option>
-            <option value="hosts"{{if eq $f.Target "hosts"}} selected{{end}}>{{t "rollout.target.hosts"}}</option>
-          </select></label>
-        <label class="field"><span class="field__label">{{t "host.field.groups"}}</span>
-          <select class="field__input" name="group_id"><option value="0">{{t "common.empty"}}</option>{{range $d.Groups}}<option value="{{.ID}}"{{if eq .ID $f.GroupID}} selected{{end}}>{{.Name}}</option>{{end}}</select></label>
-        <label class="field"><span class="field__label">{{t "rollout.field.batch"}}</span>
-          <input class="field__input" type="number" name="batch" min="0" max="1000" value="{{$f.Batch}}">
-          <span class="field__hint">{{t "rollout.batch_hint"}}</span></label>
+      <div class="daypicker">
+        <label class="check-label"><input type="radio" name="strategy" value="batches"{{if ne $f.Strategy "groups"}} checked{{end}}> {{t "rollout.strategy.batches"}}</label>
+        <label class="check-label"><input type="radio" name="strategy" value="groups"{{if eq $f.Strategy "groups"}} checked{{end}}> {{t "rollout.strategy.groups"}}</label>
       </div>
-      {{if $d.Hosts}}<details class="details"><summary>{{t "rollout.pick_hosts"}}</summary>
-        <div class="checklist">{{range $d.Hosts}}<label class="check-label"><input type="checkbox" name="host_ids" value="{{.ID}}"{{if index $f.HostIDs .ID}} checked{{end}}> {{.Hostname}}</label>{{end}}</div>
-      </details>{{end}}
-      <label class="check-label"><input type="radio" name="strategy" value="groups"{{if eq $f.Strategy "groups"}} checked{{end}}> {{t "rollout.strategy.groups"}}</label>
-      <div class="form-grid">
+      <div data-show-when="strategy=batches">
+        <div class="form-grid">
+          <label class="field"><span class="field__label">{{t "rollout.field.target"}}</span>
+            <select class="field__input" name="target">
+              <option value="all"{{if eq $f.Target "all"}} selected{{end}}>{{t "rollout.target.all"}}</option>
+              <option value="group"{{if eq $f.Target "group"}} selected{{end}}>{{t "rollout.target.group"}}</option>
+              <option value="hosts"{{if eq $f.Target "hosts"}} selected{{end}}>{{t "rollout.target.hosts"}}</option>
+            </select></label>
+          <label class="field"><span class="field__label">{{t "host.field.groups"}}</span>
+            <select class="field__input" name="group_id"><option value="0">{{t "common.empty"}}</option>{{range $d.Groups}}<option value="{{.ID}}"{{if eq .ID $f.GroupID}} selected{{end}}>{{.Name}}</option>{{end}}</select></label>
+          <label class="field"><span class="field__label">{{t "rollout.field.batch"}}</span>
+            <input class="field__input" type="number" name="batch" min="0" max="1000" value="{{$f.Batch}}">
+            <span class="field__hint">{{t "rollout.batch_hint"}}</span></label>
+        </div>
+        {{if $d.Hosts}}<details class="details"><summary>{{t "rollout.pick_hosts"}}</summary>
+          <div class="checklist">{{range $d.Hosts}}<label class="check-label"><input type="checkbox" name="host_ids" value="{{.ID}}"{{if index $f.HostIDs .ID}} checked{{end}}> {{.Hostname}}</label>{{end}}</div>
+        </details>{{end}}
+      </div>
+      <div data-show-when="strategy=groups" class="form-grid">
         {{range $i, $sel := $f.StageGroups}}
         <label class="field"><span class="field__label">{{t "rollout.stage_n" "n" (add $i 1)}}</span>
           <select class="field__input" name="stage_group_{{$i}}"><option value="0">{{t "common.empty"}}</option>{{range $d.Groups}}<option value="{{.ID}}"{{if eq .ID $sel}} selected{{end}}>{{.Name}}</option>{{end}}</select></label>

@@ -108,7 +108,6 @@
         <th>{{t "host.field.resources"}}</th>
         <th class="num">{{t "score.short"}}</th>
         <th>{{t "host.field.vulns"}}</th>
-        <th class="num">{{t "host.field.security_updates"}}</th>
         <th class="num">{{t "host.field.updates"}}</th>
         <th>{{t "host.field.last_seen"}}</th>
         <th>{{t "host.field.agent_version"}}</th>
@@ -124,13 +123,12 @@
         <div class="cell-sub mono">{{join .IPAddresses ", "}}</div>
         {{if .Groups}}<div class="tags">{{range .Groups}}<a class="tag" href="/servers?group={{.ID}}">{{.Name}}</a>{{end}}</div>{{end}}
       </td>
-      <td>{{.OSName}}<div class="cell-sub"><span class="mono">{{.Kernel}}</span> · {{virt .Virtualization}}</div></td>
+      <td title="{{.Kernel}}">{{.OSName}}<div class="cell-sub">{{virt .Virtualization}}</div></td>
       <td>{{template "hoststatus" .}}</td>
       <td>{{$id := .ID}}{{with index $d.Resources .ID}}<a class="resmini" href="/servers/{{$id}}?tab=health">{{template "resval" (resval "cpu" .CPUOrLoad $d.MonitorCfg.HealthCPUWarn)}}{{template "resval" (resval "memory" .MemoryPercent $d.MonitorCfg.HealthMemoryWarn)}}{{template "resval" (resval "disk" .DiskMax $d.MonitorCfg.HealthDiskWarn)}}</a>{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
       <td class="num"><a href="/servers/{{.ID}}/score">{{template "score" .SecurityScore}}</a></td>
       <td>{{template "sevcounts" .Vulns}}</td>
-      <td class="num">{{if .SecurityUpdateCount}}<strong class="text-danger">{{.SecurityUpdateCount}}</strong>{{else}}0{{end}}</td>
-      <td class="num">{{.UpdateCount}}</td>
+      <td class="num">{{.UpdateCount}}{{if .SecurityUpdateCount}}<div class="cell-sub text-danger">{{t "host.security_updates_short" "n" .SecurityUpdateCount}}</div>{{end}}</td>
       <td><time datetime="{{iso .LastSeenAt}}" title="{{datetime .LastSeenAt}}">{{ago .LastSeenAt}}</time></td>
       <td class="mono">{{.AgentVersion}}{{if agentOutdated .}} <span class="pill pill--warning" title="{{t "agents.update.outdated_hint" "version" agentRelease}}">{{t "agents.update.outdated"}}</span>{{end}}</td>
     </tr>

@@ -13,6 +13,7 @@
       <button class="button" type="submit">{{template "icon" "refresh"}}{{t "system.reset"}}</button></form>
   </div>{{end}}
 </header>
+{{template "settingsnav" "system"}}
 
 <form class="form" method="post" action="/settings/system" autocomplete="off">
   {{template "csrf" $root}}

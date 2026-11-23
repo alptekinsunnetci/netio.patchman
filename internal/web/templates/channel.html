@@ -12,6 +12,7 @@
     <form method="post" action="/settings/channels/{{$c.ID}}/test">{{template "csrf" $root}}<button class="button" type="submit">{{t "channel.test"}}</button></form>
   </div>
 </header>
+{{template "settingsnav" "channels"}}
 
 <section class="panel">
   <h2 class="panel__title">{{t "channel.filter_title"}}</h2>

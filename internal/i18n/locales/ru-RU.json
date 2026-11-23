@@ -1964,5 +1964,18 @@
   "software.category.webapp": "Веб-приложение",
   "software.category.business": "Корпоративное приложение",
   "software.category.system": "Системный инструмент",
-  "software.no_service": "У этого ПО нет службы (утилита командной строки или библиотека)."
+  "software.no_service": "У этого ПО нет службы (утилита командной строки или библиотека).",
+  "settings.tab.general": "Общие",
+  "settings.jump": "Перейти к разделу",
+  "settings.section.email": "Почта",
+  "settings.section.agents": "Агенты",
+  "settings.section.scan": "Сканирование",
+  "settings.section.security": "Безопасность",
+  "settings.section.updates": "Обновления",
+  "settings.section.monitoring": "Мониторинг ресурсов",
+  "settings.section.sla": "Сроки устранения",
+  "settings.section.inventory": "Инвентаризация и EOL",
+  "settings.section.backup": "Резервное копирование",
+  "software.system_tools": "Системные инструменты: {n}",
+  "host.security_updates_short": "безопасности: {n}"
 }

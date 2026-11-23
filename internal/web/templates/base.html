@@ -82,6 +82,15 @@
 
 {{define "langlinks"}}{{if gt (len .Languages) 1}}<p class="auth__langs" aria-label="{{t "language.label"}}">{{range $i, $l := .Languages}}{{if $i}} · {{end}}{{if $l.Current}}<strong>{{$l.Name}}</strong>{{else}}<a href="/lang?to={{$l.Locale}}&amp;next={{$.Path}}" hreflang="{{$l.Locale}}">{{$l.Name}}</a>{{end}}{{end}}</p>{{end}}{{end}}
 
+{{define "settingsnav"}}<nav class="tabs settings-tabs" aria-label="{{t "nav.settings"}}">
+  <a class="tab{{if eq . "general"}} is-active{{end}}" href="/settings">{{t "settings.tab.general"}}</a>
+  <a class="tab{{if eq . "system"}} is-active{{end}}" href="/settings/system">{{t "settings.system_link"}}</a>
+  <a class="tab{{if eq . "channels"}} is-active{{end}}" href="/settings/channels">{{t "channels.title"}}</a>
+  <a class="tab{{if eq . "health"}} is-active{{end}}" href="/settings/health">{{t "health.title"}}</a>
+  <a class="tab{{if eq . "score"}} is-active{{end}}" href="/settings/score">{{t "score.settings_title"}}</a>
+  <a class="tab{{if eq . "audit"}} is-active{{end}}" href="/settings/audit">{{t "audit.title"}}</a>
+</nav>{{end}}
+
 {{define "trendfigs"}}
   <div class="trends{{if eq (len .) 1}} trends--single{{end}}">
     {{range .}}

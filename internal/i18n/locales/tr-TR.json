@@ -2021,5 +2021,18 @@
   "software.category.webapp": "Web uygulaması",
   "software.category.business": "Kurumsal uygulama",
   "software.category.system": "Sistem aracı",
-  "software.no_service": "Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane)."
+  "software.no_service": "Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).",
+  "settings.tab.general": "Genel",
+  "settings.jump": "Bölümlere git",
+  "settings.section.email": "E-posta",
+  "settings.section.agents": "Ajanlar",
+  "settings.section.scan": "Tarama",
+  "settings.section.security": "Güvenlik",
+  "settings.section.updates": "Güncellemeler",
+  "settings.section.monitoring": "Kaynak izleme",
+  "settings.section.sla": "Düzeltme süreleri",
+  "settings.section.inventory": "Envanter ve EOL",
+  "settings.section.backup": "Yedekleme",
+  "software.system_tools": "Sistem araçları ({n})",
+  "host.security_updates_short": "{n} güvenlik"
 }

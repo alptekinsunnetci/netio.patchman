@@ -9,6 +9,7 @@
     <p class="pagehead__sub">{{t "score.settings_subtitle"}}</p>
   </div>
 </header>
+{{template "settingsnav" "score"}}
 
 <form class="form" method="post" action="/settings/score">
   {{template "csrf" $root}}

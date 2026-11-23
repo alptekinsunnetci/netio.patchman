@@ -7,14 +7,11 @@
     <h1 class="pagehead__title">{{t "nav.settings"}}</h1>
     <p class="pagehead__sub">{{t "settings.subtitle"}}</p>
   </div>
-  <div class="pagehead__actions">
-    <a class="button" href="/settings/system">{{template "icon" "settings"}}{{t "settings.system_link"}}</a>
-    <a class="button" href="/settings/channels">{{template "icon" "bell"}}{{t "channels.title"}}</a>
-    <a class="button" href="/settings/score">{{template "icon" "shield"}}{{t "score.settings_title"}}</a>
-    <a class="button" href="/settings/health">{{template "icon" "refresh"}}{{t "health.title"}}</a>
-    <a class="button" href="/settings/audit">{{template "icon" "list"}}{{t "audit.title"}}</a>
-  </div>
 </header>
+{{template "settingsnav" "general"}}
+<nav class="chips settings-jump" aria-label="{{t "settings.jump"}}">
+  {{range list "email" "agents" "scan" "security" "updates" "monitoring" "sla" "inventory" "backup"}}<a class="chip" href="#{{.}}">{{t (printf "settings.section.%s" .)}}</a>{{end}}
+</nav>
 
 <form class="form" method="post" action="/settings">
   {{template "csrf" $root}}
@@ -40,7 +37,7 @@
     <label class="check-label"><input type="checkbox" name="email_server_update" value="1"{{if $c.EmailServerUpdate}} checked{{end}}> {{t "settings.email.server_update"}}</label>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="agents">
     <h2 class="panel__title">{{t "settings.agent.title"}}</h2>
     <label class="check-label"><input type="checkbox" name="agent_auto_update" value="1"{{if $c.AgentAutoUpdate}} checked{{end}}> {{t "settings.agent.auto_update"}}</label>
     <p class="field__hint">{{t "settings.agent.auto_update_hint"}}</p>
@@ -54,7 +51,7 @@
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="scan">
     <h2 class="panel__title">{{t "settings.scan.title"}}</h2>
     <label class="check-label"><input type="checkbox" name="scan_enabled" value="1"{{if $c.ScanEnabled}} checked{{end}}> {{t "settings.scan.enabled"}}</label>
     <p class="field__hint">{{t "settings.scan.sources"}}</p>

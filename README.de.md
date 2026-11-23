@@ -98,7 +98,7 @@ CloudLinux 8 und 9 werden aus AlmaLinux-Quellen gebaut und mit den AlmaLinux-Sic
 
 ## Screenshots
 
-Die Screenshots zeigen die türkische Oberfläche; die anderen Sprachen haben dasselbe Layout. Sie stammen von sechs Testservern mit Ubuntu, Debian, Rocky Linux, AlmaLinux und Alpine. Die Schwachstellen sind echte Daten von OSV.dev.
+Die Screenshots zeigen die türkische Oberfläche; die anderen Sprachen haben dasselbe Layout. Sie stammen von sechs Ubuntu-24.04-Demoservern. Die Paketversionen sind echte Ubuntu-Versionen (teils nicht aktualisiert); die Schwachstellen sind echte Daten von OSV.dev.
 
 **Serverinventar:** Alle Server mit Schwachstellen nach Schweregrad, ausstehenden Updates und Agentenstatus. Auf ausgewählten Servern können Sammel-Updates gestartet werden.
 
@@ -107,6 +107,14 @@ Die Screenshots zeigen die türkische Oberfläche; die anderen Sprachen haben da
 **Serverdetails:** Die Schwachstellen des Servers mit CVSS-Wert, betroffenem Paket, installierter und korrigierter Version. Sicherheitsupdates, alle Updates und Neustarts starten mit einem Klick.
 
 ![Serverdetails](docs/images/server.png)
+
+**Ressourcennutzung:** Vom Agenten gemeldete CPU-, Speicher-, Auslagerungs- und Plattennutzung mit Diagrammen über 24 Stunden, 7 und 30 Tage sowie den eingebauten Warngrenzen.
+
+![Ressourcennutzung](docs/images/health.png)
+
+**Software-Inventar:** Aus Paketen erkannte Serversoftware, auf wie vielen Servern und in welchen Versionsreihen sie installiert ist, laufende Dienste und Schwachstellen.
+
+![Software-Inventar](docs/images/software.png)
 
 **Schwachstellen:** Alle in der Flotte gefundenen Schwachstellen, filterbar nach Schweregrad, Ausnutzung und verfügbarer Korrektur.
 

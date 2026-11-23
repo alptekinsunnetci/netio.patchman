@@ -98,7 +98,7 @@ CloudLinux 8 and 9 are built from AlmaLinux sources and are scanned with AlmaLin
 
 ## Screenshots
 
-The screenshots show the Turkish interface; the other languages have the same layout. They were taken with six test servers running Ubuntu, Debian, Rocky Linux, AlmaLinux and Alpine. The vulnerabilities are real data from OSV.dev.
+The screenshots show the Turkish interface; the other languages have the same layout. They were taken with six Ubuntu 24.04 demo servers. The package versions are real Ubuntu versions (some left unpatched); the vulnerabilities are real data from OSV.dev.
 
 **Server inventory:** All servers with their vulnerabilities by severity, pending updates and agent status. Bulk updates can be started on selected servers.
 
@@ -107,6 +107,14 @@ The screenshots show the Turkish interface; the other languages have the same la
 **Server details:** The server's vulnerabilities with CVSS score, affected package, installed and fixed version. Security updates, all updates and reboots are started with one click.
 
 ![Server details](docs/images/server.png)
+
+**Resource usage:** CPU, memory, swap and disk usage reported by the agent, with 24-hour, 7-day and 30-day charts and the built-in warning limits.
+
+![Resource usage](docs/images/health.png)
+
+**Software inventory:** Server software recognized from packages, on how many servers and in which release series it is installed, running services and vulnerabilities.
+
+![Software inventory](docs/images/software.png)
 
 **Vulnerabilities:** All vulnerabilities found across the fleet, filterable by severity, exploitation and fix availability.
 

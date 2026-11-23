@@ -17,6 +17,7 @@ import (
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/scanner"
 	"netio.patchman/internal/settings"
+	"netio.patchman/internal/software"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
 	"netio.patchman/internal/vuln"
@@ -270,7 +271,17 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 			s.serverError(w, r, err)
 			return
 		}
-		data["Software"], data["Services"], data["ServicesKnown"], data["SoftwareEvents"] = sw, svcs, known, events
+		// Basic system tools (sudo, coreutils, systemd) are on every host;
+		// they are listed apart so the server software stands out.
+		var main, system []store.HostSoftwareRow
+		for _, row := range sw {
+			if d, ok := software.ByID(row.Software); ok && d.Category == software.CategorySystem {
+				system = append(system, row)
+			} else {
+				main = append(main, row)
+			}
+		}
+		data["Software"], data["SystemSoftware"], data["Services"], data["ServicesKnown"], data["SoftwareEvents"] = main, system, svcs, known, events
 		data["SoftwareEOL"] = softwareEOL(s.hostEOL(ctx, h, sw))
 		driftRows, _, err := s.st.ListDrift(ctx, store.DriftFilter{HostID: id}, store.Page{Number: 1, Size: 200})
 		if err != nil {

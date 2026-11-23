@@ -328,8 +328,8 @@ fieldset.field > legend { padding: 0; margin-bottom: 6px; }
 .progress__seg--bad { background: var(--danger); }
 .progress__seg--run { background: var(--info); }
 /* Grouped form fields */
-.fieldset { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin: 0; display: grid; gap: 12px; }
-.fieldset legend { padding: 0 6px; color: var(--text-muted); font-size: 13px; }
+/* A group of related fields: the legend reads like a field label. */
+.fieldset legend { padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--text); }
 /* Watch (star) toggle next to a package name */
 .star-form { display: inline; margin: 0; }
 .star { display: inline-flex; align-items: center; gap: 6px; padding: 2px; border: 0; background: transparent; color: var(--text-subtle); font: inherit; cursor: pointer; vertical-align: middle; border-radius: var(--radius-sm); }
@@ -536,3 +536,15 @@ select.field__input { padding-right: 28px; }
 /* Sidebar sections. */
 .navgroup { margin: 14px 10px 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-subtle); }
 .sidebar__nav .navgroup:first-child { margin-top: 0; }
+
+/* Settings: tabs shared by the settings pages and a jump list of sections. */
+.settings-tabs { margin-bottom: 16px; }
+.settings-jump { margin: -4px 0 16px; }
+.settings-jump .chip { font-size: 12px; padding: 3px 10px; }
+section[id] { scroll-margin-top: 16px; }
+.stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.stack > .panel { margin: 0; }
+.profile-grid { margin-bottom: 16px; align-items: start; }
+@media (max-width: 1000px) { .profile-grid { grid-template-columns: minmax(0, 1fr); } }
+.details--table { border-top: 1px solid var(--border); }
+.details--table > summary { padding: 12px 16px; color: var(--text-muted); font-size: 13px; }

@@ -1964,5 +1964,18 @@
   "software.category.webapp": "Webanwendung",
   "software.category.business": "Unternehmensanwendung",
   "software.category.system": "Systemwerkzeug",
-  "software.no_service": "Diese Software hat keinen Dienst (Kommandozeilenwerkzeug oder Bibliothek)."
+  "software.no_service": "Diese Software hat keinen Dienst (Kommandozeilenwerkzeug oder Bibliothek).",
+  "settings.tab.general": "Allgemein",
+  "settings.jump": "Zum Abschnitt",
+  "settings.section.email": "E-Mail",
+  "settings.section.agents": "Agenten",
+  "settings.section.scan": "Scan",
+  "settings.section.security": "Sicherheit",
+  "settings.section.updates": "Updates",
+  "settings.section.monitoring": "Ressourcenüberwachung",
+  "settings.section.sla": "Behebungsfristen",
+  "settings.section.inventory": "Inventar und EOL",
+  "settings.section.backup": "Sicherung",
+  "software.system_tools": "Systemwerkzeuge ({n})",
+  "host.security_updates_short": "{n} Sicherheit"
 }

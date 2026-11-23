@@ -362,6 +362,10 @@ func (s *Server) funcs() template.FuncMap {
 			return id
 		},
 		"swCatalogSize": func() int { return len(software.Catalog) },
+		// swRow passes a host software row to the "swrow" template.
+		"swRow": func(r store.HostSoftwareRow, hostID int64, eol map[string]eol.Item) map[string]any {
+			return map[string]any{"R": r, "HostID": hostID, "EOL": eol}
+		},
 		"swCategory": func(id string) string {
 			if d, ok := software.ByID(id); ok {
 				return d.Category
