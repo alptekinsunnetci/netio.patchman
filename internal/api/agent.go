@@ -256,6 +256,7 @@ func (s *Server) checkin(w http.ResponseWriter, r *http.Request, hostID int64) {
 	if wasOffline {
 		s.o.Notifier.AgentOnline(r.Context(), hostID, req.Host.Hostname)
 	}
+	s.closeUnreported(r.Context(), hostID, req.Host)
 	s.maybeQueueAgentUpdate(r.Context(), hostID, req.Host, cfg)
 	jobs, err := s.o.Store.DispatchJobs(r.Context(), hostID)
 	if err != nil {
@@ -293,6 +294,28 @@ func (s *Server) checkin(w http.ResponseWriter, r *http.Request, hostID int64) {
 		ReportIntervalSeconds:  cfg.AgentReportMinutes * 60,
 		Health:                 s.monitorSchedule(r.Context(), hostID, req.Host, cfg),
 	})
+}
+
+// closeUnreported finishes jobs dispatched at an earlier check-in whose result
+// never arrived (see Store.CloseUnreportedJobs), so they do not stay
+// "running" until the timeout. It runs before the agent-update check, so a
+// finished update does not block the next one.
+func (s *Server) closeUnreported(ctx context.Context, hostID int64, info protocol.HostInfo) {
+	jobs, err := s.o.Store.CloseUnreportedJobs(ctx, hostID, info.AgentVersion, func(_ string, params map[string]string, succeeded bool) string {
+		if succeeded {
+			return "[netio.patchman] " + s.o.L.T("job.unreported.agent_updated", "version", params[protocol.ParamVersion])
+		}
+		return "[netio.patchman] " + s.o.L.T("job.unreported.failed")
+	})
+	if err != nil {
+		s.o.Logger.Warn(s.o.L.T("log.api.failed"), slog.String("error", err.Error()))
+		return
+	}
+	for _, j := range jobs {
+		s.o.Logger.Warn(s.o.L.T("log.api.job_unreported"), slog.Int64("job_id", j.ID), slog.String("hostname", info.Hostname),
+			slog.String("type", j.Type), slog.String("status", j.Status))
+		go s.o.Notifier.JobFinished(context.WithoutCancel(ctx), j)
+	}
 }
 
 func (s *Server) report(w http.ResponseWriter, r *http.Request, hostID int64) {

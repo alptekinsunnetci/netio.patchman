@@ -119,10 +119,15 @@ func (u SelfUpdater) Update(ctx context.Context, job protocol.Job) (string, bool
 		return "", false, err
 	}
 
-	// The new binary must start and report the expected version.
-	vctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	// The new binary must start and report the expected version. Antivirus
+	// software may hold the first start of a new executable for a cloud
+	// lookup, hence the generous limit; WaitDelay keeps a killed process from
+	// blocking on its output pipe.
+	vctx, cancel := context.WithTimeout(ctx, 90*time.Second)
 	defer cancel()
-	out, err := exec.CommandContext(vctx, tmp, "-version").CombinedOutput()
+	cmd := exec.CommandContext(vctx, tmp, "-version")
+	cmd.WaitDelay = 5 * time.Second
+	out, err := cmd.CombinedOutput()
 	if err != nil || !bytes.Contains(out, []byte(" "+target+" ")) {
 		return "", false, errors.New(u.L.T("agent.update.verify_failed", "output", strings.TrimSpace(string(out))))
 	}

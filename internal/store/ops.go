@@ -149,6 +149,69 @@ func (s *Store) CompleteJob(ctx context.Context, hostID, jobID int64, r protocol
 	return s.JobByID(ctx, jobID)
 }
 
+// CloseUnreportedJobs finishes the host's dispatched jobs whose result never
+// arrived. The agent runs the jobs of a check-in and posts their results
+// before it checks in again, so a job still dispatched at a later check-in
+// was interrupted (agent stopped or restarted) or its result was lost. An
+// agent update counts as succeeded when the agent now runs the target
+// version. output returns the text stored for each job.
+func (s *Store) CloseUnreportedJobs(ctx context.Context, hostID int64, agentVersion string, output func(typ string, params map[string]string, succeeded bool) string) ([]Job, error) {
+	var ids []int64
+	err := s.tx(ctx, func(tx *Tx) error {
+		ids = nil
+		type pending struct {
+			id     int64
+			typ    string
+			params map[string]string
+		}
+		var list []pending
+		rows, err := tx.QueryContext(ctx, `SELECT id, type, params FROM jobs WHERE host_id = ? AND status = 'dispatched' ORDER BY id FOR UPDATE`, hostID)
+		if err != nil {
+			return err
+		}
+		for rows.Next() {
+			var p pending
+			var params string
+			if err := rows.Scan(&p.id, &p.typ, &params); err != nil {
+				rows.Close()
+				return err
+			}
+			_ = json.Unmarshal([]byte(params), &p.params)
+			list = append(list, p)
+		}
+		if err := rows.Err(); err != nil {
+			rows.Close()
+			return err
+		}
+		rows.Close()
+		for _, p := range list {
+			succeeded := p.typ == protocol.JobAgentUpdate && agentVersion != "" && p.params[protocol.ParamVersion] == agentVersion
+			status, code := protocol.JobFailed, -1
+			if succeeded {
+				status, code = protocol.JobSucceeded, 0
+			}
+			if _, err := tx.ExecContext(ctx, `UPDATE jobs SET status = ?, finished_at = ?, exit_code = ?, output = ? WHERE id = ? AND status = 'dispatched'`,
+				status, now(), code, truncate(output(p.typ, p.params, succeeded), protocol.MaxOutputBytes), p.id); err != nil {
+				return err
+			}
+			ids = append(ids, p.id)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Job, 0, len(ids))
+	for _, id := range ids {
+		j, err := s.JobByID(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, j)
+	}
+	return out, nil
+}
+
 // JobFromParam returns the newest job whose parameter key equals value
 // (for example the job approved from a preview), 0 when there is none.
 func (s *Store) JobFromParam(ctx context.Context, key, value string) (int64, error) {
