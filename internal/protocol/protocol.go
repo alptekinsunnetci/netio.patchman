@@ -184,7 +184,10 @@ type HealthStatus struct {
 // Resources is a snapshot of the host's resource usage. Sizes are bytes;
 // Load is the 1, 5 and 15 minute load average (none on Windows).
 type Resources struct {
-	CPUs            int         `json:"cpus"`
+	CPUs int `json:"cpus"`
+	// CPUPercent is the average CPU use since the previous round (nil when
+	// unknown, from agents before 1.0.2).
+	CPUPercent      *float64    `json:"cpu_percent,omitempty"`
 	Load            []float64   `json:"load,omitempty"`
 	MemoryTotal     int64       `json:"memory_total"`
 	MemoryAvailable int64       `json:"memory_available"`
@@ -226,6 +229,34 @@ func (r Resources) SwapPercent() float64 {
 	return float64(r.SwapTotal-r.SwapFree) / float64(r.SwapTotal) * 100
 }
 
+// CPU is the CPU use in percent; -1 unknown.
+func (r Resources) CPU() float64 {
+	if r.CPUPercent == nil {
+		return -1
+	}
+	return *r.CPUPercent
+}
+
+// CPUOrLoad is the CPU use, or the load per core from agents that do not
+// report it; -1 unknown.
+func (r Resources) CPUOrLoad() float64 {
+	if v := r.CPU(); v >= 0 {
+		return v
+	}
+	return r.LoadPercent()
+}
+
+// DiskMax is the use of the fullest file system; -1 without file systems.
+func (r Resources) DiskMax() float64 {
+	m := -1.0
+	for _, d := range r.Disks {
+		if d.Total > 0 {
+			m = max(m, d.Percent())
+		}
+	}
+	return m
+}
+
 // LoadPercent is the 1-minute load average per CPU core; -1 unknown.
 func (r Resources) LoadPercent() float64 {
 	if len(r.Load) == 0 || r.CPUs <= 0 {
@@ -251,6 +282,9 @@ func (r *Resources) Clean() {
 	r.MemoryAvailable, r.SwapFree = min(r.MemoryAvailable, r.MemoryTotal), min(r.SwapFree, r.SwapTotal)
 	if r.CPUs < 0 || r.CPUs > 100000 {
 		r.CPUs = 0
+	}
+	if r.CPUPercent != nil && (*r.CPUPercent < 0 || *r.CPUPercent > 100) {
+		r.CPUPercent = nil
 	}
 	if len(r.Load) > 3 {
 		r.Load = r.Load[:3]

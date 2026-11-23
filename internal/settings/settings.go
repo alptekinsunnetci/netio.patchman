@@ -145,7 +145,7 @@ type Values struct {
 	HealthDelay    int
 	// HealthMonitor is how often agents run the checks on their own and
 	// report resource usage (minutes, 0 = off). The built-in limits warn
-	// when disk, memory or CPU load (per core, Linux) use reaches the
+	// when disk, memory or CPU use (the load per core from older agents) reaches the
 	// percentage (0 = off).
 	HealthMonitor    int
 	HealthDiskWarn   int
@@ -200,6 +200,7 @@ func Defaults() Values {
 		HealthMonitor:        5,
 		HealthDiskWarn:       90,
 		HealthMemoryWarn:     95,
+		HealthCPUWarn:        90,
 		RequirePreview:       true,
 	}
 }

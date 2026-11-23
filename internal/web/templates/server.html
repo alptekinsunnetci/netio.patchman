@@ -236,15 +236,20 @@
 <section class="panel" id="live">
   <div class="panel__head">
     <h2 class="panel__title">{{t "health.live_title"}}</h2>
-    {{if $d.Resources}}<span class="cell-sub">{{t "health.live_at" "time" (ago $d.ResourcesAt)}}</span>{{end}}
+    {{if $d.Resources}}<span class="cell-sub">{{t "health.live_at" "time" (ago $d.ResourcesAt)}} · {{t "health.every" "n" $d.MonitorCfg.HealthMonitor}}</span>{{end}}
   </div>
   {{if not ($h.Supports "health_monitor")}}<p class="panel__note">{{t "health.monitor_unsupported"}}</p>
   {{else if eq $d.MonitorCfg.HealthMonitor 0}}<p class="panel__note">{{t "health.monitor_off"}}</p>
   {{else if not $d.Resources}}<p class="panel__note">{{t "health.monitor_waiting" "n" $d.MonitorCfg.HealthMonitor}}</p>{{end}}
   {{with $d.Resources}}
   <div class="usage-grid">
-    {{if .Load}}<div class="usage-item">
+    {{if .CPUPercent}}<div class="usage-item">
       <span class="usage-item__label">{{t "health.resource.cpu"}}</span>
+      {{template "usagebar" (usage .CPU $d.MonitorCfg.HealthCPUWarn)}}
+      <span class="usage-item__value mono">{{round .CPU}}%</span>
+      <span class="cell-sub">{{if .Load}}{{t "health.load_detail" "load" (printf "%s · %s · %s" (dec (index .Load 0)) (dec (index .Load 1)) (dec (index .Load 2))) "cpus" .CPUs}}{{else}}{{t "health.cpus" "cpus" .CPUs}}{{end}}</span>
+    </div>{{else if .Load}}<div class="usage-item">
+      <span class="usage-item__label">{{t "health.resource.load"}}</span>
       {{template "usagebar" (usage .LoadPercent $d.MonitorCfg.HealthCPUWarn)}}
       <span class="usage-item__value mono">{{round .LoadPercent}}%</span>
       <span class="cell-sub">{{t "health.load_detail" "load" (printf "%s · %s · %s" (dec (index .Load 0)) (dec (index .Load 1)) (dec (index .Load 2))) "cpus" .CPUs}}</span>
@@ -269,6 +274,13 @@
     </div>{{end}}
   </div>
   {{end}}
+  {{if $d.Resources}}
+  <div class="panel__head panel__head--sub">
+    <h3 class="panel__title">{{t "health.history_title"}}</h3>
+    <nav class="chips" aria-label="{{t "health.history_title"}}">{{range $d.ResourceRanges}}<a class="chip{{if eq .Key $d.ResourceRange}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=health&amp;range={{.Key}}">{{t (printf "health.range.%s" .Key)}}</a>{{end}}</nav>
+  </div>
+  {{with $d.ResourceCharts}}{{template "trendfigs" .}}{{else}}<p class="panel__note">{{t "health.history_waiting"}}</p>{{end}}
+  {{end}}
   {{if $d.HealthBuiltin}}
   <div class="table-wrap">
   <table class="table">
@@ -278,12 +290,16 @@
     </tbody>
   </table>
   </div>
+  <p class="panel__note">{{t "health.limits_note" "disk" $d.MonitorCfg.HealthDiskWarn "memory" $d.MonitorCfg.HealthMemoryWarn "cpu" $d.MonitorCfg.HealthCPUWarn}}{{if $root.User.IsAdmin}} <a href="/settings#monitoring">{{t "health.monitor_settings"}}</a>{{end}}</p>
   {{end}}
 </section>
 
 <section class="panel panel--flush">
   <div class="panel__head">
-    <h2 class="panel__title">{{t "health.host_title"}}</h2>
+    <div>
+      <h2 class="panel__title">{{t "health.extra_title"}}</h2>
+      <p class="cell-sub">{{t "health.extra_hint"}}</p>
+    </div>
     <div class="button-row">
       {{if $root.User.IsAdmin}}<a class="button button--sm button--ghost" href="/settings/health">{{t "health.manage"}}</a>{{end}}
       {{if and $root.User.CanOperate $d.HealthChecks}}{{if $h.Supports "health"}}
@@ -292,8 +308,8 @@
       {{end}}{{end}}
     </div>
   </div>
-  {{if not ($h.Supports "health")}}<p class="panel__note">{{t "health.agent_unsupported"}}</p>{{end}}
   {{if $d.HealthChecks}}
+  {{if not ($h.Supports "health")}}<p class="panel__note">{{t "health.agent_unsupported"}}</p>{{end}}
   <div class="table-wrap">
   <table class="table">
     <thead><tr><th>{{t "health.field.name"}}</th><th>{{t "health.field.type"}}</th><th>{{t "health.field.target"}}</th><th>{{t "health.field.result"}}</th><th>{{t "health.field.value"}}</th><th>{{t "health.field.when"}}</th></tr></thead>
@@ -312,12 +328,12 @@
     </tbody>
   </table>
   </div>
-  {{else}}{{template "empty" (t "health.no_checks")}}{{end}}
+  {{else}}<p class="panel__note">{{t "health.no_checks"}}</p>{{end}}
 </section>
 
+{{if $d.HealthHistory}}
 <section class="panel panel--flush">
   <div class="panel__head"><h2 class="panel__title">{{t "health.history"}}</h2></div>
-  {{if $d.HealthHistory}}
   <div class="table-wrap">
   <table class="table">
     <thead><tr><th>{{t "health.field.when"}}</th><th>{{t "health.field.name"}}</th><th>{{t "health.field.phase"}}</th><th>{{t "health.field.result"}}</th><th>{{t "health.field.value"}}</th></tr></thead>
@@ -326,11 +342,9 @@
     </tbody>
   </table>
   </div>
-  {{else}}{{template "empty" (t "health.no_history")}}{{end}}
 </section>
 {{template "pager" $d.Pager}}
-
-{{else if eq $d.Tab "software"}}
+{{end}}{{else if eq $d.Tab "software"}}
 <section class="panel panel--flush">
   <div class="panel__head">
     <h2 class="panel__title">{{t "software.host_title"}}</h2>

@@ -97,7 +97,7 @@ func TestHealthChecksEndToEnd(t *testing.T) {
 		t.Fatal(err)
 	}
 	status, body, _ = e.do(admin, "GET", hostURL+"?tab=health", nil)
-	expect(t, "host health tab", status, 200, body, "Bu sunucunun sağlık kontrolleri", "Şimdi kontrol et", "/ 40%", "Sonuç geçmişi", "HTTP 502")
+	expect(t, "host health tab", status, 200, body, "Ek kontroller (isteğe bağlı)", "Şimdi kontrol et", "/ 40%", "Sonuç geçmişi", "HTTP 502")
 	hist, total, _ := e.st.HostHealth(ctx, id, store.Page{Number: 1, Size: 50})
 	if total != 4 || len(hist) != 4 {
 		t.Errorf("history: %d", total)

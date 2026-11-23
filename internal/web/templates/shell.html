@@ -4,8 +4,10 @@
   <aside class="sidebar">
     <a class="sidebar__brand" href="/dashboard" aria-label="{{.Product}}">{{template "wordmark"}}</a>
     <nav class="sidebar__nav" aria-label="{{t "nav.main"}}">
+      {{$group := ""}}
       {{range .Nav}}
       {{if or (and (ne .Key "users") (ne .Key "settings")) $.User.IsAdmin}}
+      {{if ne .Group $group}}{{$group = .Group}}<p class="navgroup">{{t (printf "nav.group.%s" .Group)}}</p>{{end}}
       <a class="navlink{{if eq .Key $.Active}} is-active{{end}}" href="{{.Href}}"{{if eq .Key $.Active}} aria-current="page"{{end}}>
         {{template "icon" .Icon}}<span>{{t (printf "nav.%s" .Key)}}</span>
         {{if and (eq .Key "notifications") $.Unread}}<span class="navlink__count">{{$.Unread}}</span>{{end}}

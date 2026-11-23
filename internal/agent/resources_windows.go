@@ -48,3 +48,20 @@ func ReadResources() protocol.Resources {
 	}
 	return r
 }
+
+var procGetSystemTimes = windows.NewLazySystemDLL("kernel32.dll").NewProc("GetSystemTimes")
+
+// cpuTimes reads the busy and total CPU time with GetSystemTimes (kernel
+// time includes idle time).
+func cpuTimes() (busy, total uint64, ok bool) {
+	var idle, kernel, user windows.Filetime
+	if r, _, _ := procGetSystemTimes.Call(uintptr(unsafe.Pointer(&idle)), uintptr(unsafe.Pointer(&kernel)), uintptr(unsafe.Pointer(&user))); r == 0 {
+		return 0, 0, false
+	}
+	ft := func(f windows.Filetime) uint64 { return uint64(f.HighDateTime)<<32 | uint64(f.LowDateTime) }
+	total = ft(kernel) + ft(user)
+	if total < ft(idle) {
+		return 0, 0, false
+	}
+	return total - ft(idle), total, total > 0
+}

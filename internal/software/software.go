@@ -143,7 +143,7 @@ var Catalog = []Def{
 		Services: res(`cassandra`), EOL: "apache-cassandra"},
 	{ID: "couchdb", Name: "Apache CouchDB", Category: CategoryDatabase, Packages: res(`couchdb`),
 		Services: res(`couchdb`), EOL: "apache-couchdb"},
-	{ID: "apache", Name: "Apache HTTP Server", Category: CategoryWeb, Packages: res(`apache2-bin`, `apache2`, `httpd`, `httpd24-httpd`),
+	{ID: "apache", Name: "Apache HTTP Server", Category: CategoryWeb, Packages: res(`apache2-bin`, `apache2`, `httpd`, `httpd24-httpd`, `ea-apache24`),
 		Services: res(`apache2`, `httpd`, `apache2@.+`), EOL: "apache-http-server"},
 	{ID: "kafka", Name: "Apache Kafka", Category: CategoryQueue, Packages: res(`kafka`),
 		Services: res(`kafka`), EOL: "apache-kafka"},
@@ -242,7 +242,7 @@ var Catalog = []Def{
 		Services: res(`nagios-nrpe-server`, `nrpe`)},
 	{ID: "netdata", Name: "Netdata", Category: CategoryMonitoring, Packages: res(`netdata`),
 		Services: res(`netdata`)},
-	{ID: "nginx", Name: "Nginx", Category: CategoryWeb, Packages: res(`nginx`, `nginx-core`, `nginx-full`, `nginx-light`, `nginx-extras`, `nginx-mainline`, `nginx-plus`),
+	{ID: "nginx", Name: "Nginx", Category: CategoryWeb, Packages: res(`nginx`, `nginx-core`, `nginx-full`, `nginx-light`, `nginx-extras`, `nginx-mainline`, `nginx-plus`, `ea-nginx`),
 		Services: res(`nginx`), EOL: "nginx"},
 	{ID: "nodejs", Name: "Node.js", Category: CategoryRuntime, Packages: res(`nodejs`, `nodejs\d+`, `node\.js`),
 		EOL: "nodejs", Cycle: pkgver.Major},
@@ -261,9 +261,9 @@ var Catalog = []Def{
 		Services: res(`openvpn`, `openvpn@.+`, `openvpn-server@.+`, `openvpn-client@.+`, `openvpnservice`), EOL: "openvpn"},
 	{ID: "perl", Name: "Perl", Category: CategoryRuntime, Packages: res(`perl`, `strawberry perl .*`),
 		EOL: "perl"},
-	{ID: "php", Name: "PHP", Category: CategoryRuntime, Packages: res(`php(\d+(\.\d+)?)?-common`, `php(\d+(\.\d+)?)?-cli`, `php\d+(\.\d+)?`, `php`),
+	{ID: "php", Name: "PHP", Category: CategoryRuntime, Packages: res(`php(\d+(\.\d+)?)?-common`, `php(\d+(\.\d+)?)?-cli`, `php\d+(\.\d+)?`, `php`, `ea-php\d+`, `alt-php\d+`),
 		EOL: "php"},
-	{ID: "php-fpm", Name: "PHP-FPM", Category: CategoryRuntime, Packages: res(`php(\d+(\.\d+)?)?-fpm`),
+	{ID: "php-fpm", Name: "PHP-FPM", Category: CategoryRuntime, Packages: res(`php(\d+(\.\d+)?)?-fpm`, `ea-php\d+-php-fpm`, `alt-php\d+-fpm`),
 		Services: res(`php.*-fpm`, `php-fpm.*`), EOL: "php"},
 	{ID: "plesk", Name: "Plesk", Category: CategoryPanel, Packages: res(`plesk-core`, `psa`),
 		Services: res(`psa`, `sw-engine`, `sw-cp-server`), EOL: "plesk", Cycle: components(3)},
@@ -327,9 +327,10 @@ var Catalog = []Def{
 }
 
 // Probed lists the products the agent detects outside the package manager.
-var Probed = []string{"cpanel", "directadmin", "litespeed", "openlitespeed", "plesk", "iis", "mssql"}
+var Probed = []string{"cpanel", "directadmin", "litespeed", "openlitespeed", "plesk", "iis", "mssql", "csf", "maldet", "ispconfig"}
 
 func init() {
+	Catalog = append(Catalog, extended...)
 	sort.SliceStable(Catalog, func(i, j int) bool { return strings.ToLower(Catalog[i].Name) < strings.ToLower(Catalog[j].Name) })
 }
 

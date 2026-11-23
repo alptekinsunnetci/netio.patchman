@@ -36,7 +36,7 @@
       <td><a href="/software/{{.Def.ID}}">{{.Def.Name}}</a></td>
       <td class="cell-sub">{{t (printf "software.category.%s" .Def.Category)}}</td>
       <td class="num">{{.Hosts}}</td>
-      <td class="num">{{.Running}}</td>
+      <td class="num">{{if .Def.Services}}{{.Running}}{{else}}<span class="muted" title="{{t "software.no_service"}}">{{t "common.empty"}}</span>{{end}}</td>
       <td><div class="chips">{{$id := .Def.ID}}{{range .Cycles}}<a class="chip" href="/software/{{$id}}?cycle={{.Cycle}}">{{if .Cycle}}{{.Cycle}}{{else}}?{{end}} <span>{{.Hosts}}</span></a>{{end}}</div></td>
       <td>{{if .CVECount}}{{template "sev" .Severity}} {{t "watch.cve_count" "n" .CVECount}}{{if .KnownExploited}} {{template "kev"}}{{end}}{{else}}<span class="muted">{{t "watch.no_vulns"}}</span>{{end}}</td>
     </tr>
@@ -46,7 +46,7 @@
   </div>
   {{else}}{{template "empty" (t "software.empty")}}{{end}}
 </section>
-<p class="footnote">{{t "software.catalog_hint"}}</p>
+<p class="footnote">{{t "software.catalog_hint" "n" swCatalogSize}}</p>
 
 {{else if eq $d.Tab "eol"}}
 {{$s := $d.EOLSummary}}{{$f := $d.EOLFilter}}

@@ -105,6 +105,7 @@
         <th>{{t "host.field.hostname"}}</th>
         <th>{{t "host.field.os"}}</th>
         <th>{{t "host.field.status"}}</th>
+        <th>{{t "host.field.resources"}}</th>
         <th class="num">{{t "score.short"}}</th>
         <th>{{t "host.field.vulns"}}</th>
         <th class="num">{{t "host.field.security_updates"}}</th>
@@ -125,6 +126,7 @@
       </td>
       <td>{{.OSName}}<div class="cell-sub"><span class="mono">{{.Kernel}}</span> · {{virt .Virtualization}}</div></td>
       <td>{{template "hoststatus" .}}</td>
+      <td>{{$id := .ID}}{{with index $d.Resources .ID}}<a class="resmini" href="/servers/{{$id}}?tab=health">{{template "resval" (resval "cpu" .CPUOrLoad $d.MonitorCfg.HealthCPUWarn)}}{{template "resval" (resval "memory" .MemoryPercent $d.MonitorCfg.HealthMemoryWarn)}}{{template "resval" (resval "disk" .DiskMax $d.MonitorCfg.HealthDiskWarn)}}</a>{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
       <td class="num"><a href="/servers/{{.ID}}/score">{{template "score" .SecurityScore}}</a></td>
       <td>{{template "sevcounts" .Vulns}}</td>
       <td class="num">{{if .SecurityUpdateCount}}<strong class="text-danger">{{.SecurityUpdateCount}}</strong>{{else}}0{{end}}</td>

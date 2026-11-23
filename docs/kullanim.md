@@ -229,35 +229,37 @@ Her sunucu için 0-100 arası bir güvenlik puanı hesaplanır (yüksek = iyi). 
 
 ## Yazılım Envanteri
 
-**Yazılım Envanteri** sayfası paket listesinden tanınan sunucu yazılımlarını gösterir. Paket adları ürün adına eşlenir (örneğin `nginx-core` → Nginx, `php8.2-fpm` → PHP-FPM 8.2, `openjdk-17-jre-headless` → Java 17). Debian/Ubuntu, Red Hat ailesi, SUSE ve Alpine paket adları ile Windows'ta kurulu programların adları tanınır. Tanınan 88 ürün:
+**Yazılım Envanteri** sayfası sunuculardaki tanınan yazılımları gösterir; şu an 399 ürün tanınır. Paket adları ürün adına eşlenir (örneğin `nginx-core` → Nginx, `php8.2-fpm` → PHP-FPM 8.2, `ea-php82` → PHP 8.2, `openjdk-17-jre-headless` → Java 17). Debian/Ubuntu, Red Hat ailesi, SUSE ve Alpine paket adları ile Windows'ta kurulu programların adları tanınır. cPanel EasyApache (`ea-php*`, `ea-apache24`, `ea-nginx`) ve CloudLinux PHP Selector (`alt-php*`) paketleri de ilgili ürüne bağlanır.
 
-| Kategori | Ürünler |
+| Kategori | Örnek ürünler |
 |---|---|
-| Web sunucusu / proxy | Apache HTTP Server, Nginx, LiteSpeed, OpenLiteSpeed, lighttpd, Caddy, Traefik, HAProxy, Varnish, Squid, Apache Tomcat, IIS |
-| Veritabanı | MySQL, MariaDB, PostgreSQL, MongoDB, Microsoft SQL Server, ClickHouse, Cassandra, CouchDB, InfluxDB |
-| Önbellek | Redis, Valkey, Memcached |
-| Çalışma ortamı | PHP, PHP-FPM, Node.js, Python, Java (OpenJDK, Temurin, Corretto, Zulu, Oracle Java), .NET, Go, Ruby, Perl |
-| E-posta | Postfix, Exim, Dovecot, Sendmail, Microsoft Exchange Server |
-| Konteyner | Docker Engine, containerd, Podman, Kubernetes |
-| Mesaj kuyruğu | RabbitMQ, Apache Kafka, Apache ActiveMQ, Mosquitto |
-| Arama ve günlük analizi | Elasticsearch, OpenSearch, Kibana, Logstash |
-| DNS | BIND 9, Unbound, PowerDNS (Authoritative, Recursor) |
-| Dosya paylaşımı ve FTP | Samba, vsftpd, ProFTPD, Pure-FTPd, FileZilla Server |
-| VPN | OpenVPN, WireGuard, strongSwan |
-| Dizin ve kimlik | OpenLDAP, FreeIPA |
-| İzleme | Zabbix Server, Proxy ve Agent, Prometheus, Grafana, Nagios Core, Nagios NRPE, Netdata |
-| Geliştirme ve CI/CD | Jenkins, GitLab, GitLab Runner |
-| Altyapı servisleri | Consul, Vault, etcd, Keepalived |
-| Güvenlik | Fail2ban, ClamAV |
-| Barındırma ve yönetim paneli | cPanel & WHM, Plesk, DirectAdmin, Webmin, Cockpit |
-| Kütüphane | OpenSSL |
-| Uzaktan erişim | OpenSSH |
+| Çalışma ortamı | Python, PyPy, Java (OpenJDK, Temurin, Corretto, Zulu, Oracle), GraalVM, Node.js, Deno, Bun, PHP, PHP-FPM, Ruby, JRuby, Go, .NET, .NET SDK, Mono, Perl, Rust, Erlang, Elixir, Lua, R, Swift |
+| Web sunucusu / proxy | Apache, Nginx, NGINX Unit, OpenResty, Caddy, Traefik, HAProxy, Envoy, Varnish, Squid, lighttpd, LiteSpeed, OpenLiteSpeed, Cherokee, H2O, Apache Traffic Server, Tengine, IIS, Tinyproxy, 3proxy, Privoxy |
+| Uygulama sunucusu | Tomcat, TomEE, WildFly, JBoss EAP, Jetty, GlassFish, Gunicorn, uWSGI, Uvicorn, Daphne, Puma, Unicorn, Passenger, FrankenPHP |
+| Veritabanı ve önbellek | MySQL, MariaDB, Percona Server, PostgreSQL, TimescaleDB, SQLite, SQL Server, Oracle Database, Firebird, CockroachDB, MongoDB, CouchDB, Couchbase, RethinkDB, RavenDB, ArangoDB, FerretDB, ScyllaDB, Cassandra, HBase, ClickHouse, InfluxDB, VictoriaMetrics, OpenTSDB, FoundationDB, Aerospike, Tarantool, Redis, Valkey, KeyDB, Dragonfly, Memcached, Hazelcast |
+| Mesaj kuyruğu | RabbitMQ, Kafka, ActiveMQ, NATS, EMQX, VerneMQ, Mosquitto, Redpanda, Celery, Gearman, Beanstalkd, NSQ |
+| Arama, günlük ve izleme | Elasticsearch, OpenSearch, Solr, Sphinx, Meilisearch, Typesense, Graylog, Loki, Fluentd, Fluent Bit, Logstash, Vector, Filebeat, Metricbeat, OpenTelemetry Collector, Jaeger, Kibana, Zabbix, Prometheus ve exporter'ları, Alertmanager, Grafana, Alloy, Tempo, Mimir, Icinga 2, Checkmk Agent, Centreon, Nagios, Netdata, Sensu, Telegraf, collectd, Munin, Monit, Thanos |
+| E-posta | Postfix, Exim, Sendmail, OpenSMTPD, Dovecot, Courier, Cyrus IMAP, Rspamd, SpamAssassin, Amavis, ClamAV, OpenDKIM, OpenDMARC, Mailman, Roundcube, SOGo, MailScanner, Exchange |
+| DNS ve ağ | BIND, Unbound, PowerDNS, Knot DNS, Knot Resolver, NSD, CoreDNS, dnsmasq, Kea, ISC DHCP, FRR, BIRD, OpenBGPD, Quagga, Open vSwitch, Keepalived, Corosync, Pacemaker, IPVS |
+| VPN ve uzaktan erişim | OpenVPN, WireGuard, strongSwan, Tailscale, Headscale, ZeroTier, Nebula, SoftEther, OpenSSH, Dropbear |
+| Kimlik | OpenLDAP, 389 Directory Server, FreeIPA, MIT ve Heimdal Kerberos, Keycloak, Authelia, Kanidm, SSSD, FreeRADIUS |
+| Güvenlik | Fail2ban, CrowdSec, ClamAV, maldet, OSSEC, Wazuh, AIDE, Tripwire, Lynis, RKHunter, chkrootkit, Suricata, Snort, Zeek, ModSecurity, OWASP CRS, SELinux, AppArmor, nftables, iptables, firewalld, UFW, Shorewall, CSF, Imunify360, ImunifyAV, OpenSCAP, auditd, YARA, Falco, KernelCare, Certbot, OpenSSL, GnuPG |
+| Konteyner ve sanallaştırma | Docker, Docker Compose, containerd, CRI-O, Podman, Buildah, Skopeo, runc, crun, LXC, LXD, Incus, Kubernetes, minikube, Helm, QEMU/KVM, libvirt, Proxmox VE, OpenNebula, oVirt, Xen, VirtualBox, Nomad |
+| Depolama ve yedekleme | Ceph, GlusterFS, MooseFS, MinIO, DRBD, OpenZFS, Btrfs, LVM2, mdadm, multipath, Samba, NFS, iSCSI, Bacula, Bareos, BorgBackup, Restic, Duplicity, Duplicati, UrBackup, Amanda, Kopia, rsnapshot, rsync, Rclone, Veeam, Proxmox Backup Server, ReaR, pgBackRest, XtraBackup, Mariabackup, Barman, JetBackup |
+| CI/CD ve otomasyon | Jenkins, GitLab, GitLab Runner, Gitea, Forgejo, Woodpecker, Buildbot, Ansible, Puppet, Chef, Salt, CFEngine, Terraform, OpenTofu, Packer, Vagrant, Rundeck, Semaphore, Artifactory |
+| Barındırma paneli | cPanel & WHM, Plesk, DirectAdmin, Webmin, Virtualmin, ISPConfig, HestiaCP, CloudPanel, Froxlor, VestaCP, Cockpit, CageFS, LVE Manager, MySQL Governor |
+| Web ve kurumsal uygulama (paketle kurulanlar) | WordPress, MediaWiki, phpMyAdmin, Adminer, phpBB, Redmine, Matomo, Odoo, Zammad, GLPI, Mattermost, Matrix Synapse, ONLYOFFICE, Collabora Online, OpenProject |
+| Sistem aracı | systemd, D-Bus, Polkit, chrony, NTPsec, rsyslog, syslog-ng, logrotate, TuneD, smartmontools, sysstat, iproute2, tcpdump, TShark, nmap, sudo, coreutils ve benzerleri |
+
+Sistem araçları kategorisi her sunucuda kurulu temel paketleri de gösterdiği için listeyi kalabalıklaştırabilir; kategori süzgeciyle ayrılabilir.
 
 Paket yöneticisi dışında kurulan ürünleri ajan kendisi tespit eder ve tabloda **Ajan tespiti** olarak gösterir:
-- **Linux:** cPanel (`/usr/local/cpanel/version`), Plesk (`/usr/local/psa/version`), LiteSpeed/OpenLiteSpeed (`/usr/local/lsws/VERSION`) ve DirectAdmin (kendi programının sürüm çıktısı).
+- **Linux:** cPanel (`/usr/local/cpanel/version`), Plesk (`/usr/local/psa/version`), LiteSpeed/OpenLiteSpeed (`/usr/local/lsws/VERSION`), DirectAdmin (kendi programının sürüm çıktısı), CSF (`/etc/csf/version.txt`), maldet ve ISPConfig.
 - **Windows:** IIS ve SQL Server örneklerinin yama seviyesi kayıt defterinden okunur.
 
-Bu tespit için ajan 1.0.1 veya sonrası gerekir.
+Bu tespit için ajan 1.0.2 veya sonrası gerekir.
+
+Tarball, konteyner veya dil paket yöneticisiyle kurulan yazılımlar paket envanterinde görünmez. Örneğin sitelere ayrı ayrı kurulan WordPress, Joomla, Drupal, Magento, Nextcloud, Laravel veya Django uygulamaları ile Kubernetes içindeki Argo CD, Longhorn gibi bileşenler tanınmaz. Bunlar için web dizinlerini tarayan bir uygulama seviyesi tespit ileride eklenebilir.
 
 - **Yazılımlar:** Her ürünün hangi sunucularda, hangi sürüm serisiyle kurulu olduğu. Ürün sayfasında sunucu başına paket, sürüm ve servis durumu yer alır.
 - **Kurulu ve çalışan:** Ajan servis listesini de gönderir (systemd, OpenRC, Windows servisleri). Kurulu olup servisi çalışmayan yazılımlar ayrıca işaretlenir. Servis bilgisi yalnızca 1.0.0 ve üstü ajanlardan gelir.
@@ -336,7 +338,7 @@ Sunucu sayfasından başlatılan bir güncelleme önce **ön izleme** olarak ça
 
 ### Sağlık kontrolleri
 
-**Sistem Ayarları → Sağlık kontrolleri** sayfasında (yalnızca yöneticiler) güncellemeden önce ve sonra, ayrıca sürekli izlemede çalışacak kontroller tanımlanır. Her kontrol tüm sunuculara, bir gruba veya tek bir sunucuya uygulanabilir.
+**Sistem Ayarları → Sağlık kontrolleri** sayfasında (yalnızca yöneticiler) güncellemeden önce ve sonra, ayrıca kaynak izleme aralığıyla çalışacak ek kontroller tanımlanır. Her kontrol tüm sunuculara, bir gruba veya tek bir sunucuya uygulanabilir.
 
 | Tür | Kontrol |
 |---|---|
@@ -351,20 +353,22 @@ Sunucu sayfasından başlatılan bir güncelleme önce **ön izleme** olarak ça
 - Güncellemeden sonra kontroller ayarlanan bekleme süresi geçince (varsayılan 15 saniye) yeniden çalışır. Önce başarılı olup sonra başarısız olan bir kontrol **bozulma** olarak işaretlenir. İş başarısız sayılır ve bildirim gönderilir.
 - Sonuçlar iş sayfasında ve sunucu sayfasının **Sağlık** sekmesinde görünür. Sunucu sayfasındaki **Sağlık kontrollerini çalıştır** düğmesi kontrolleri güncelleme yapmadan çalıştırır.
 
-#### Sürekli izleme
+#### Kaynak izleme
 
-Ajanlar sağlık kontrollerini güncelleme beklemeden, belirli aralıkla kendiliğinden çalıştırır (varsayılan 5 dakika). Her turda CPU yükünü, bellek, takas alanı ve tüm yerel disklerin kullanımını da bildirirler. Bunun için hiçbir kontrol tanımlamak gerekmez.
+Ajanlar belirli aralıkla (varsayılan 5 dakika) işlemci, bellek, takas alanı ve tüm yerel disklerin kullanımını kendiliğinden bildirir. Bunun için hiçbir kontrol tanımlamak gerekmez. İşlemci kullanımı iki ölçüm arasındaki ortalamadır; Linux'ta yük ortalaması da gösterilir.
 
-- **Otomatik sınırlar:** Disk doluluğu %90'a, bellek kullanımı %95'e ulaşan sunucular kendiliğinden uyarı üretir. CPU yükü sınırı (çekirdek başına, yalnızca Linux) varsayılan olarak kapalıdır. Sınırlar ve izleme aralığı **Sistem Ayarları → Sürekli izleme** bölümünden değiştirilir; 0 ilgili sınırı veya izlemeyi kapatır.
-- **Bildirim:** Bir kontrol veya sınır art arda iki turda başarısız olursa bir kez bildirilir; tek turluk dalgalanmalar bildirim üretmez. Düzeldiğinde de bildirilir. Bildirim kanallarında bu bildirimler **Sağlık kontrolü ve kaynak uyarıları** olayına düşer.
-- **Hangi kontroller:** Her kontrolün **Ajanların sürekli izleme turlarında da çalıştır** seçeneği vardır (varsayılan açık). Ağır veya yalnızca güncellemede anlamlı kontroller için kapatılabilir.
-- **Görünüm:**
-  - Sunucu sayfasının **Sağlık** sekmesindeki **Anlık durum** bölümü yükü, belleği, takas alanını ve her diski çubuklarla gösterir; otomatik sınırların durumu ve son ölçüm zamanı da buradadır.
-  - Kontroller tablosunda her kontrolün en son sonucu ve ne zamandan beri o durumda olduğu yer alır.
-  - Sunucu listesinde sorunlu sunucular **Sağlık sorunu** etiketiyle işaretlenir; **Sağlık sorunu olanlar** süzgeciyle listelenebilir.
-- **Geçmiş:** Her tur saklanmaz; yalnızca bir kontrolün başarılıdan başarısıza (veya tersine) geçtiği anlar geçmişe **Sürekli izleme** aşamasıyla yazılır.
+- **Sunucu sayfası:** **Sağlık** sekmesinin üstündeki **Kaynak kullanımı** bölümü şunları gösterir:
+  - İşlemci, bellek, takas alanı ve her disk için güncel değerler, çubuklarla.
+  - **Son 24 saat / Son 7 gün / Son 30 gün** grafikleri: işlemci, bellek ve en dolu disk.
+  - Otomatik sınırların durumu.
+- **Sunucu listesi:** **Kaynaklar** sütununda her sunucunun güncel işlemci, RAM ve en dolu disk değeri yer alır. Sınıra yaklaşan değerler turuncu, aşanlar kırmızı gösterilir. 15 dakikadan (veya üç ölçüm aralığından) eski ölçümler gösterilmez.
+- **Otomatik sınırlar:** Disk doluluğu %90'a, bellek kullanımı %95'e, işlemci kullanımı %90'a ulaşan sunucular kendiliğinden uyarı üretir. Sınırlar ve ölçüm aralığı **Sistem Ayarları → Kaynak izleme** bölümünden değiştirilir; 0 ilgili sınırı veya izlemeyi kapatır.
+- **Bildirim:** Bir sınır veya kontrol art arda iki ölçümde aşılırsa bir kez bildirilir; tek ölçümlük dalgalanmalar bildirim üretmez. Düzeldiğinde de bildirilir. Bildirim kanallarında bu bildirimler **Sağlık kontrolü ve kaynak uyarıları** olayına düşer.
+- **Ek kontroller:** Web sitesi, port, servis veya betik kontrolleri isteğe bağlıdır. Tanımlanırsa aynı aralıkla çalışır ve sonuçları **Ek kontroller** bölümünde görünür. Her kontrolün **Ajanların sürekli izleme turlarında da çalıştır** seçeneği vardır (varsayılan açık).
+- **Geçmiş:** Ölçümler 30 gün saklanır. Kontrol geçmişine yalnızca bir kontrolün başarılıdan başarısıza (veya tersine) geçtiği anlar yazılır.
 - Ağ dosya sistemleri (NFS, CIFS) ölçülmez, çünkü erişilemeyen bir paylaşım ölçümü süresiz bekletebilir. Bunlar için bir yerel komut kontrolü kullanın.
-- Sürekli izleme ajan 1.0.1 veya sonrasını gerektirir. Eski ajanlarda kontroller yalnızca güncellemelerde ve elle başlatıldığında çalışır.
+- **Ajan sürümü:** Kaynak izleme ajan 1.0.2 veya sonrasını gerektirir. 1.0.1 ajanları ölçüm göndermiyordu; otomatik ajan güncellemesi açıksa ajanlar kendiliğinden yükselir.
+
 
 ### Geri dönüş (rollback)
 

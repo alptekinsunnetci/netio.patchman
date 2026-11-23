@@ -662,7 +662,7 @@ func (s *Server) metrics(w http.ResponseWriter, r *http.Request) {
 	// Resource usage from monitoring rounds; stale snapshots (an agent that
 	// stopped reporting) are left out.
 	cfg, _ := settings.Load(ctx, s.st)
-	fresh := max(3*time.Duration(cfg.HealthMonitor)*time.Minute, 15*time.Minute)
+	fresh := resourcesFresh(cfg)
 	if res, err := s.st.FleetResources(ctx, timeutil.Now().Add(-fresh)); err == nil && len(res) > 0 {
 		gauge("netio_patchman_host_memory_used_percent", "Memory in use on a host (total minus available).")
 		for _, h := range hosts {
@@ -674,6 +674,12 @@ func (s *Server) metrics(w http.ResponseWriter, r *http.Request) {
 		for _, h := range hosts {
 			if r, ok := res[h.h.ID]; ok && r.LoadPercent() >= 0 {
 				val("netio_patchman_host_load_per_cpu_percent", hostLabels(h.h), promFloat(r.LoadPercent()))
+			}
+		}
+		gauge("netio_patchman_host_cpu_used_percent", "CPU use on a host, averaged over the monitoring interval.")
+		for _, h := range hosts {
+			if r, ok := res[h.h.ID]; ok && r.CPU() >= 0 {
+				val("netio_patchman_host_cpu_used_percent", hostLabels(h.h), promFloat(r.CPU()))
 			}
 		}
 		gauge("netio_patchman_host_disk_used_percent", "File system use on a host (as df shows it).")

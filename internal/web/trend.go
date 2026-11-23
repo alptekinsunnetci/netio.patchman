@@ -120,63 +120,70 @@ func (s *Server) layoutTrends(snaps []store.Snapshot, from, to time.Time, metric
 	}
 	set := trendSet{Rows: snaps, From: labels[0], To: labels[days-1], Available: len(snaps) >= 2}
 	for _, m := range metrics {
-		c := trendChart{Key: m.key, Labels: strings.Join(labels, "|")}
-		vals := make([]string, days)
-		peak := 0
+		vals := make([]int, days)
+		has := make([]bool, days)
 		for i := 0; i < days; i++ {
 			if sn, ok := byDay[i]; ok {
-				if v, ok := m.val(sn); ok {
-					peak = max(peak, v)
-				}
+				vals[i], has[i] = m.val(sn)
 			}
 		}
-		c.Max = niceCeil(peak)
-		if m.fixedMax > 0 {
-			c.Max = m.fixedMax
-		}
-		// Days without a value (server down, nothing computed) break the line
-		// instead of being bridged; each run of days is its own segment.
-		var line, area strings.Builder
-		prev, segX := -2, 0.0
-		lastX := 0.0
-		seen := false
-		closeArea := func() { area.WriteString(" L" + coord(lastX) + " " + coord(trendH) + " Z") }
-		for i := 0; i < days; i++ {
-			sn, ok := byDay[i]
-			if !ok {
-				continue
-			}
-			v, ok := m.val(sn)
-			if !ok {
-				continue
-			}
-			vals[i] = strconv.Itoa(v)
-			x := float64(i) / float64(days-1) * trendW
-			y := trendH - float64(v)/float64(c.Max)*trendH
-			if !seen {
-				c.First = v
-			}
-			if prev != i-1 {
-				if seen {
-					closeArea()
-					line.WriteString(" ")
-					area.WriteString(" ")
-				}
-				segX = x
-				line.WriteString("M" + coord(x) + " " + coord(y))
-				area.WriteString("M" + coord(segX) + " " + coord(trendH) + " L" + coord(x) + " " + coord(y))
-			} else {
-				line.WriteString(" L" + coord(x) + " " + coord(y))
-				area.WriteString(" L" + coord(x) + " " + coord(y))
-			}
-			seen, prev = true, i
-			c.Last, lastX = v, x
-		}
-		if seen {
-			closeArea()
-		}
-		c.Line, c.Area, c.Values = line.String(), area.String(), strings.Join(vals, ",")
-		set.Charts = append(set.Charts, c)
+		set.Charts = append(set.Charts, buildChart(m.key, labels, vals, has, m.fixedMax))
 	}
 	return set
+}
+
+// buildChart draws one metric over slots (days, hours): vals[i] counts when
+// has[i]. Slots without a value break the line instead of being bridged;
+// each run of slots is its own segment. fixedMax > 0 fixes the top tick.
+func buildChart(key string, labels []string, vals []int, has []bool, fixedMax int) trendChart {
+	n := len(labels)
+	c := trendChart{Key: key, Labels: strings.Join(labels, "|")}
+	text := make([]string, n)
+	peak := 0
+	for i := 0; i < n; i++ {
+		if has[i] {
+			peak = max(peak, vals[i])
+		}
+	}
+	c.Max = niceCeil(peak)
+	if fixedMax > 0 {
+		c.Max = fixedMax
+	}
+	var line, area strings.Builder
+	prev, segX := -2, 0.0
+	lastX := 0.0
+	seen := false
+	closeArea := func() { area.WriteString(" L" + coord(lastX) + " " + coord(trendH) + " Z") }
+	for i := 0; i < n; i++ {
+		if !has[i] {
+			continue
+		}
+		v := vals[i]
+		text[i] = strconv.Itoa(v)
+		x := float64(i) / float64(max(n-1, 1)) * trendW
+		y := trendH - float64(v)/float64(c.Max)*trendH
+		if !seen {
+			c.First = v
+		}
+		if prev != i-1 {
+			if seen {
+				closeArea()
+				line.WriteString(" ")
+				area.WriteString(" ")
+			}
+			segX = x
+			line.WriteString("M" + coord(x) + " " + coord(y))
+			area.WriteString("M" + coord(segX) + " " + coord(trendH) + " L" + coord(x) + " " + coord(y))
+		} else {
+			line.WriteString(" L" + coord(x) + " " + coord(y))
+			area.WriteString(" L" + coord(x) + " " + coord(y))
+		}
+		seen, prev = true, i
+		c.Last, lastX = v, x
+	}
+	if seen {
+		closeArea()
+	}
+	c.Line, c.Area, c.Values = line.String(), area.String(), strings.Join(text, ",")
+	return c
 }

@@ -27,6 +27,9 @@ func TestProbeProducts(t *testing.T) {
 	write("usr/local/psa/version", "18.0.65 Ubuntu 22.04 1800241113.14\n", 0o644)
 	write("usr/local/lsws/VERSION", "6.3.1\n", 0o644)
 	write("usr/local/directadmin/directadmin", "#!/bin/sh\n[ \"$1\" = version ] && echo 'v1.672 3d4bc2f'\n", 0o755)
+	write("etc/csf/version.txt", "14.21\n", 0o644)
+	write("usr/local/maldetect/maldet", "#!/usr/bin/env bash\n#\ninspath=/usr/local/maldetect\nver=1.6.5\n", 0o755)
+	write("usr/local/ispconfig/server/lib/config.inc.php", "<?php\ndefine('ISPC_APP_VERSION', '3.2.11p2');\n", 0o644)
 	old := productRoot
 	productRoot = root
 	defer func() { productRoot = old }()
@@ -35,7 +38,7 @@ func TestProbeProducts(t *testing.T) {
 	for _, p := range ProbeProducts(context.Background()) {
 		got[p.Software] = p.Version
 	}
-	want := map[string]string{"cpanel": "11.124.0.15", "plesk": "18.0.65", "litespeed": "6.3.1", "directadmin": "1.672"}
+	want := map[string]string{"cpanel": "11.124.0.15", "plesk": "18.0.65", "litespeed": "6.3.1", "directadmin": "1.672", "csf": "14.21", "maldet": "1.6.5", "ispconfig": "3.2.11"}
 	for k, v := range want {
 		if got[k] != v {
 			t.Errorf("%s: %q, want %q (all: %v)", k, got[k], v, got)

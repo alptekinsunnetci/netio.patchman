@@ -99,6 +99,62 @@ func parseMeminfoBytes(r io.Reader) map[string]int64 {
 	return out
 }
 
+// parseProcStat returns the busy and total CPU time of the "cpu" line of
+// /proc/stat (iowait counts as idle; guest time is already in user).
+func parseProcStat(s string) (busy, total uint64, ok bool) {
+	for _, line := range strings.Split(s, "\n") {
+		f := strings.Fields(line)
+		if len(f) < 5 || f[0] != "cpu" {
+			continue
+		}
+		var v [8]uint64
+		for i := 0; i < 8 && i+1 < len(f); i++ {
+			n, err := strconv.ParseUint(f[i+1], 10, 64)
+			if err != nil {
+				return 0, 0, false
+			}
+			v[i] = n
+		}
+		for _, n := range v {
+			total += n
+		}
+		idle := v[3] + v[4]
+		return total - idle, total, total > 0
+	}
+	return 0, 0, false
+}
+
+// cpuSample is a reading of the CPU time counters.
+type cpuSample struct {
+	busy, total uint64
+	ok          bool
+}
+
+// cpuPercent is the CPU use since the previous round; the first round
+// measures one second. -1 when the counters cannot be read.
+func (r *Runner) cpuPercent(ctx context.Context) float64 {
+	busy, total, ok := cpuTimes()
+	if !ok {
+		return -1
+	}
+	prev := r.cpuPrev
+	if !prev.ok || total <= prev.total {
+		if !sleep(ctx, time.Second) {
+			return -1
+		}
+		prev = cpuSample{busy, total, true}
+		if busy, total, ok = cpuTimes(); !ok {
+			return -1
+		}
+	}
+	r.cpuPrev = cpuSample{busy, total, true}
+	dt, db := total-prev.total, busy-prev.busy
+	if dt == 0 || busy < prev.busy {
+		return -1
+	}
+	return min(float64(db)/float64(dt)*100, 100)
+}
+
 // monitor runs one monitoring round in the background: the scheduled
 // checks and a resource snapshot, posted to the server. Rounds never
 // overlap; the next one is due IntervalSeconds after this one started.
@@ -116,6 +172,9 @@ func (r *Runner) monitor(ctx context.Context, h *protocol.HealthSchedule) {
 		ctx, cancel := context.WithTimeout(ctx, time.Duration(h.IntervalSeconds)*time.Second)
 		defer cancel()
 		res := ReadResources()
+		if v := r.cpuPercent(ctx); v >= 0 {
+			res.CPUPercent = &v
+		}
 		st := protocol.HealthStatus{Results: r.jobs.Health.Run(ctx, checks), Resources: &res, CheckedAt: timeutil.Now()}
 		if err := r.client.Health(ctx, st); err != nil && ctx.Err() == nil {
 			r.logger.Warn(r.l.T("log.agent.health_failed"), slog.String("error", err.Error()))

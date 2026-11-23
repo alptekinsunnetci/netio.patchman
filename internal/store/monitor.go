@@ -35,8 +35,13 @@ type MonitorResult struct {
 // Builtin reports whether the result comes from a built-in limit.
 func (r MonitorResult) Builtin() bool { return r.CheckID == 0 }
 
-// Target is the file system of a built-in disk limit.
-func (r MonitorResult) Target() string { return strings.TrimPrefix(r.Key, MonitorDiskPrefix) }
+// Target is the file system of a built-in disk limit ("" for the others).
+func (r MonitorResult) Target() string {
+	if !strings.HasPrefix(r.Key, MonitorDiskPrefix) {
+		return ""
+	}
+	return strings.TrimPrefix(r.Key, MonitorDiskPrefix)
+}
 
 // HealthState is the stored state of a monitored check.
 type HealthState struct {
@@ -134,6 +139,11 @@ func (s *Store) SaveMonitoring(ctx context.Context, hostID int64, res *protocol.
 		if res != nil {
 			b, _ := json.Marshal(res)
 			if _, err := tx.ExecContext(ctx, `UPDATE hosts SET resources = ?, resources_at = ? WHERE id = ?`, string(b), n, hostID); err != nil {
+				return err
+			}
+			m := SampleOf(*res)
+			m.At = fromTS(n)
+			if err := insertSample(ctx, tx, hostID, m); err != nil {
 				return err
 			}
 		}
@@ -235,4 +245,65 @@ func (s *Store) FailingHealth(ctx context.Context) (map[int64]int, error) {
 		out[id] = n
 	}
 	return out, rows.Err()
+}
+
+// MetricSample is one row of a host's resource history; percentages in
+// tenths, -1 unknown. Disk is the fullest file system.
+type MetricSample struct {
+	At                            time.Time
+	CPU, Load, Memory, Swap, Disk int
+}
+
+// SampleOf converts a snapshot to a history row.
+func SampleOf(r protocol.Resources) MetricSample {
+	tenths := func(v float64) int {
+		if v < 0 {
+			return -1
+		}
+		return int(v*10 + 0.5)
+	}
+	return MetricSample{CPU: tenths(r.CPU()), Load: tenths(r.LoadPercent()), Memory: tenths(r.MemoryPercent()), Swap: tenths(r.SwapPercent()), Disk: tenths(r.DiskMax())}
+}
+
+// RecordMetricSample stores one history row (imports, tests); a second
+// row for the same second is ignored.
+func (s *Store) RecordMetricSample(ctx context.Context, hostID int64, m MetricSample) error {
+	return insertSample(ctx, s.db, hostID, m)
+}
+
+type execer interface {
+	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+}
+
+func insertSample(ctx context.Context, x execer, hostID int64, m MetricSample) error {
+	_, err := x.ExecContext(ctx, `INSERT INTO host_metrics (host_id, at, cpu, load, memory, swap, disk) VALUES (?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT (host_id, at) DO NOTHING`, hostID, m.At.Unix(), m.CPU, m.Load, m.Memory, m.Swap, m.Disk)
+	return err
+}
+
+// HostMetrics returns a host's resource history since from, oldest first.
+func (s *Store) HostMetrics(ctx context.Context, hostID int64, from time.Time) ([]MetricSample, error) {
+	where, args := andScope(ctx, ` WHERE host_id = ? AND at >= ?`, []any{hostID, from.Unix()}, "host_id")
+	rows, err := s.db.QueryContext(ctx, `SELECT at, cpu, load, memory, swap, disk FROM host_metrics`+where+` ORDER BY at`, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []MetricSample
+	for rows.Next() {
+		var m MetricSample
+		var at int64
+		if err := rows.Scan(&at, &m.CPU, &m.Load, &m.Memory, &m.Swap, &m.Disk); err != nil {
+			return nil, err
+		}
+		m.At = fromTS(at)
+		out = append(out, m)
+	}
+	return out, rows.Err()
+}
+
+// PruneHostMetrics deletes resource history older than d.
+func (s *Store) PruneHostMetrics(ctx context.Context, d time.Duration) error {
+	_, err := s.db.ExecContext(ctx, `DELETE FROM host_metrics WHERE at < ?`, now()-int64(d.Seconds()))
+	return err
 }

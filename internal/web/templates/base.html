@@ -41,6 +41,8 @@
 
 {{define "score"}}{{if lt . 0}}<span class="muted" title="{{t "score.pending"}}">{{t "common.empty"}}</span>{{else}}<span class="score score--{{scoreBand .}}">{{.}}</span>{{end}}{{end}}
 
+{{define "resval"}}{{if .Known}}<span class="resmini__item resmini__item--{{.Level}}"><span class="resmini__label">{{t (printf "health.short.%s" .Key)}}</span> {{.Used}}%</span>{{end}}{{end}}
+
 {{define "usagebar"}}<span class="usage usage--{{.Level}}" role="img" aria-label="{{.Used}}%"><span class="usage__used" data-grow="{{.Used}}"></span><span class="usage__free" data-grow="{{.Free}}"></span></span>{{end}}
 
 {{define "healthpill"}}{{if .}}<span class="pill pill--online">{{t "health.ok"}}</span>{{else}}<span class="pill pill--danger">{{t "health.fail"}}</span>{{end}}{{end}}
@@ -80,15 +82,9 @@
 
 {{define "langlinks"}}{{if gt (len .Languages) 1}}<p class="auth__langs" aria-label="{{t "language.label"}}">{{range $i, $l := .Languages}}{{if $i}} · {{end}}{{if $l.Current}}<strong>{{$l.Name}}</strong>{{else}}<a href="/lang?to={{$l.Locale}}&amp;next={{$.Path}}" hreflang="{{$l.Locale}}">{{$l.Name}}</a>{{end}}{{end}}</p>{{end}}{{end}}
 
-{{define "trends"}}
-<section class="panel" aria-labelledby="trend-title">
-  <div class="panel__head">
-    <h2 class="panel__title" id="trend-title">{{t "trend.title"}}</h2>
-    <span class="panel__link muted">{{.From}} – {{.To}}</span>
-  </div>
-  {{if .Available}}
-  <div class="trends{{if eq (len .Charts) 1}} trends--single{{end}}">
-    {{range .Charts}}
+{{define "trendfigs"}}
+  <div class="trends{{if eq (len .) 1}} trends--single{{end}}">
+    {{range .}}
     <figure class="trend" data-trend>
       <figcaption class="trend__head"><span class="trend__title">{{t (printf "trend.metric.%s" .Key)}}</span><span class="trend__last">{{.Last}}</span></figcaption>
       <div class="trend__plot" data-values="{{.Values}}" data-labels="{{.Labels}}" data-name="{{t (printf "trend.metric.%s" .Key)}}" role="img" aria-label="{{t "trend.aria" "metric" (t (printf "trend.metric.%s" .Key)) "first" .First "last" .Last}}">
@@ -107,6 +103,16 @@
     </figure>
     {{end}}
   </div>
+{{end}}
+
+{{define "trends"}}
+<section class="panel" aria-labelledby="trend-title">
+  <div class="panel__head">
+    <h2 class="panel__title" id="trend-title">{{t "trend.title"}}</h2>
+    <span class="panel__link muted">{{.From}} – {{.To}}</span>
+  </div>
+  {{if .Available}}
+  {{template "trendfigs" .Charts}}
   <details class="details">
     <summary>{{t "trend.table"}}</summary>
     <div class="table-wrap">

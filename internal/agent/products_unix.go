@@ -3,9 +3,12 @@
 package agent
 
 import (
+	"bufio"
 	"context"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"netio.patchman/internal/protocol"
@@ -37,7 +40,33 @@ func ProbeProducts(ctx context.Context) []protocol.Product {
 		out = append(out, product(id, findVersion(v))...)
 	}
 	out = append(out, product("directadmin", directAdminVersion(ctx))...)
+	// ConfigServer Security & Firewall: "14.21".
+	if v, ok := firstLine(productPath("etc/csf/version.txt")); ok {
+		out = append(out, product("csf", findVersion(v))...)
+	}
+	// Linux Malware Detect: the script sets ver=1.6.5.
+	out = append(out, product("maldet", assignment(productPath("usr/local/maldetect/maldet"), "ver="))...)
+	// ISPConfig: define('ISPC_APP_VERSION', '3.2.11p2');
+	out = append(out, product("ispconfig", assignment(productPath("usr/local/ispconfig/server/lib/config.inc.php"), "ISPC_APP_VERSION"))...)
 	return out
+}
+
+// assignment returns the version on the first line of a small file that
+// contains marker ("ver=1.6.5", "define('ISPC_APP_VERSION', '3.2.11')").
+func assignment(path, marker string) string {
+	f, err := os.Open(path)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+	sc := bufio.NewScanner(io.LimitReader(f, 1<<20))
+	for sc.Scan() {
+		line := sc.Text()
+		if i := strings.Index(line, marker); i >= 0 {
+			return findVersion(line[i+len(marker):])
+		}
+	}
+	return ""
 }
 
 // directAdminVersion asks the DirectAdmin binary ("directadmin version" on

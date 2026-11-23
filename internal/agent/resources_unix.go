@@ -45,3 +45,12 @@ func ReadResources() protocol.Resources {
 	}
 	return r
 }
+
+// cpuTimes reads the busy and total CPU time from /proc/stat.
+func cpuTimes() (busy, total uint64, ok bool) {
+	b, err := os.ReadFile("/proc/stat")
+	if err != nil {
+		return 0, 0, false
+	}
+	return parseProcStat(string(b))
+}

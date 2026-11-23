@@ -525,3 +525,14 @@ select.field__input { padding-right: 28px; }
 .usage--ok .usage__used { background: var(--ok); }
 .usage--warn .usage__used { background: var(--warn); }
 .usage--bad .usage__used { background: var(--danger); }
+
+.panel__head--sub { margin: 18px 0 10px; }
+.resmini { display: inline-flex; flex-direction: column; gap: 1px; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--text); white-space: nowrap; }
+.resmini:hover { text-decoration: none; }
+.resmini__label { color: var(--text-muted); display: inline-block; min-width: 34px; }
+.resmini__item--warn { color: var(--warn); font-weight: 600; }
+.resmini__item--bad { color: var(--danger); font-weight: 600; }
+
+/* Sidebar sections. */
+.navgroup { margin: 14px 10px 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-subtle); }
+.sidebar__nav .navgroup:first-child { margin-top: 0; }

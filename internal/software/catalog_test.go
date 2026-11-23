@@ -214,3 +214,43 @@ func TestCatalogConsistent(t *testing.T) {
 }
 
 func lower(s string) string { return strings.ToLower(s) }
+
+func TestDetectHostingAndExtended(t *testing.T) {
+	rpm := []protocol.Package{
+		{Name: "ea-php82", Version: "8.2.27-1.cp108~el8"},
+		{Name: "ea-php82-php-fpm", Version: "8.2.27-1.cp108~el8"},
+		{Name: "alt-php74", Version: "7.4.33-21.el8"},
+		{Name: "ea-apache24", Version: "2.4.62-1.cp108~el8"},
+		{Name: "cagefs", Version: "7.6.22-1.el8.cloudlinux"},
+		{Name: "imunify360-firewall", Version: "8.1.4-2.el8"},
+		{Name: "jetbackup5-cpanel", Version: "5.3.21-1.el8"},
+		{Name: "MailScanner", Version: "5.5.1-4"},
+		{Name: "sudo", Version: "1.9.5p2-1.el8_9"},
+		{Name: "systemd", Version: "239-82.el8"},
+		{Name: "chrony", Version: "4.5-1.el8"},
+		{Name: "pve-manager", Version: "8.2.7"},
+	}
+	svcs := []protocol.Service{{Name: "ea-php82-php-fpm", State: "running"}, {Name: "chronyd", State: "running"}, {Name: "pveproxy", State: "running"}}
+	got := detected(protocol.PMDnf, rpm, []protocol.Product{{Software: "csf", Version: "14.21"}}, svcs)
+	expectCycles(t, got, "php 8.2", "php 7.4", "php-fpm 8.2", "apache 2.4", "cagefs 7.6", "imunify360 8.1", "jetbackup 5.3", "mailscanner 5.5",
+		"sudo 1.9", "systemd 239", "chrony 4.5", "proxmox-ve 8", "csf 14.21")
+	if got["chrony 4.5"].Running != Running || got["php-fpm 8.2"].Package != "ea-php82-php-fpm" {
+		t.Errorf("services: %+v %+v", got["chrony 4.5"], got["php-fpm 8.2"])
+	}
+
+	deb := []protocol.Package{
+		{Name: "prometheus-node-exporter", Version: "1.5.0-1+b6"},
+		{Name: "borgbackup", Version: "1.2.4-1"},
+		{Name: "erlang-base", Version: "1:25.2.3+dfsg-1"},
+		{Name: "rabbitmq-server", Version: "3.10.8-1.1"},
+		{Name: "qemu-system-x86", Version: "1:7.2+dfsg-7+deb12u7"},
+		{Name: "libvirt-daemon-system", Version: "9.0.0-4+deb12u1"},
+		{Name: "zfsutils-linux", Version: "2.1.11-1"},
+		{Name: "isc-dhcp-server", Version: "4.4.3-P1-2"},
+		{Name: "python3-sphinx", Version: "5.3.0-4"},
+		{Name: "unit", Version: "1.32.1-1~bookworm"},
+		{Name: "dex", Version: "0.9.0-1"},
+	}
+	expectCycles(t, detected(protocol.PMApt, deb, nil, nil), "node-exporter 1.5", "borgbackup 1.2", "erlang 25", "rabbitmq 3.10", "qemu 7.2",
+		"libvirt 9.0", "zfs 2.1", "isc-dhcp 4.4", "nginx-unit 1.32")
+}

@@ -30,6 +30,9 @@ type Runner struct {
 	// whether a round is still running.
 	healthNext time.Time
 	healthBusy atomic.Bool
+	// cpuPrev is the CPU counter reading of the previous round (used only
+	// by the round in progress).
+	cpuPrev cpuSample
 }
 
 // RestartRequested reports whether the agent replaced its binary and must be
@@ -192,41 +195,53 @@ func (r *Runner) Run(ctx context.Context) {
 		if resp.CheckinIntervalSeconds >= 15 {
 			interval = time.Duration(resp.CheckinIntervalSeconds) * time.Second
 		}
-		needReport := resp.ReportRequested
-		// A reboot and an agent update end the process, so they run after all
-		// other jobs; the agent update last because it exits at once.
-		sort.SliceStable(resp.Jobs, func(i, j int) bool { return jobOrder(resp.Jobs[i].Type) < jobOrder(resp.Jobs[j].Type) })
-		for _, job := range resp.Jobs {
-			r.logger.Info(r.l.T("log.agent.job_started"), slog.Int64("job_id", job.ID), slog.String("type", job.Type), slog.Any("packages", job.Packages))
-			res := r.runJob(ctx, job)
-			r.logger.Info(r.l.T("log.agent.job_finished"), slog.Int64("job_id", job.ID), slog.Bool("succeeded", res.Succeeded), slog.Int("exit_code", res.ExitCode))
-			for attempt := 0; attempt < 5; attempt++ {
-				err := r.client.JobResult(ctx, job.ID, res)
-				var apiErr *APIError
-				if err == nil || (errors.As(err, &apiErr) && apiErr.Status == http.StatusNotFound) {
-					break
-				}
-				r.logger.Warn(r.l.T("log.agent.job_result_failed"), slog.String("error", err.Error()))
-				if !sleep(ctx, 30*time.Second) {
-					return
-				}
-			}
-			needReport = true
-			if r.restart {
-				break
-			}
-		}
-		if r.restart {
-			// The new binary sends a fresh report when it starts; main logs the restart.
+		if !r.afterCheckin(ctx, resp) {
 			return
-		}
-		if needReport {
-			r.sendReport(ctx)
 		}
 		if !sleep(ctx, jitter(interval)) {
 			return
 		}
 	}
+}
+
+// afterCheckin acts on a check-in response: runs the jobs, sends a report
+// when one is due and starts a monitoring round when one is due. It returns
+// false when the agent must stop (cancelled, or restarting after an update).
+func (r *Runner) afterCheckin(ctx context.Context, resp protocol.CheckinResponse) bool {
+	// Monitoring runs in the background, so it starts before long jobs.
+	r.monitor(ctx, resp.Health)
+	needReport := resp.ReportRequested
+	// A reboot and an agent update end the process, so they run after all
+	// other jobs; the agent update last because it exits at once.
+	sort.SliceStable(resp.Jobs, func(i, j int) bool { return jobOrder(resp.Jobs[i].Type) < jobOrder(resp.Jobs[j].Type) })
+	for _, job := range resp.Jobs {
+		r.logger.Info(r.l.T("log.agent.job_started"), slog.Int64("job_id", job.ID), slog.String("type", job.Type), slog.Any("packages", job.Packages))
+		res := r.runJob(ctx, job)
+		r.logger.Info(r.l.T("log.agent.job_finished"), slog.Int64("job_id", job.ID), slog.Bool("succeeded", res.Succeeded), slog.Int("exit_code", res.ExitCode))
+		for attempt := 0; attempt < 5; attempt++ {
+			err := r.client.JobResult(ctx, job.ID, res)
+			var apiErr *APIError
+			if err == nil || (errors.As(err, &apiErr) && apiErr.Status == http.StatusNotFound) {
+				break
+			}
+			r.logger.Warn(r.l.T("log.agent.job_result_failed"), slog.String("error", err.Error()))
+			if !sleep(ctx, 30*time.Second) {
+				return false
+			}
+		}
+		needReport = true
+		if r.restart {
+			break
+		}
+	}
+	if r.restart {
+		// The new binary sends a fresh report when it starts; main logs the restart.
+		return false
+	}
+	if needReport {
+		r.sendReport(ctx)
+	}
+	return ctx.Err() == nil
 }
 
 func jobOrder(typ string) int {

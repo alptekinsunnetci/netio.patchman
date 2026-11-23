@@ -11,9 +11,9 @@ Use this name consistently throughout the application.
 
 Product description:
 
-"Merkezi Linux Güvenlik Açığı ve Güncelleme Yönetimi"
+"Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi"
 
-The product is an independent, self-hosted Linux security and vulnerability management platform.
+The product is an independent, self-hosted security, update and monitoring platform for Linux and Windows servers.
 
 Do not use PatchMon branding in the final product.
 

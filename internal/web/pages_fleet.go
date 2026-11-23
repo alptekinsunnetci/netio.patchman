@@ -123,7 +123,18 @@ func (s *Server) servers(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	cfg, _ := settings.Load(r.Context(), s.st)
+	res, err := s.st.FleetResources(r.Context(), timeutil.Now().Add(-resourcesFresh(cfg)))
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	resources := make(map[int64]*protocol.Resources, len(res))
+	for id, x := range res {
+		resources[id] = &x
+	}
 	d.Data = map[string]any{"Hosts": hosts, "Filter": f, "OSOptions": osOpts, "Groups": groups, "Platforms": platforms, "HealthFailing": failing,
+		"Resources": resources, "MonitorCfg": cfg,
 		"Pager": newPager(r, pg, total), "Query": r.URL.RawQuery}
 	s.render(w, r, http.StatusOK, "servers", d)
 }
@@ -221,6 +232,17 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 		}
 		cfg, _ := settings.Load(ctx, s.st)
 		data["HealthState"], data["HealthBuiltin"], data["Resources"], data["ResourcesAt"], data["MonitorCfg"] = byCheck, builtin, res, resAt, cfg
+		rg := resourceRangeOf(r.URL.Query().Get("range"))
+		now := timeutil.Now()
+		samples, err := s.st.HostMetrics(ctx, id, now.Add(-rg.Span))
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		data["ResourceRange"], data["ResourceRanges"], data["ResourceSamples"] = rg.Key, resourceRanges, len(samples)
+		if len(samples) >= 2 {
+			data["ResourceCharts"] = s.resourceCharts(samples, rg, now)
+		}
 	case "software":
 		sw, err := s.st.HostSoftware(ctx, id)
 		if err != nil {

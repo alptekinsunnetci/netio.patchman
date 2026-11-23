@@ -46,3 +46,13 @@ func TestFindVersion(t *testing.T) {
 		}
 	}
 }
+
+func TestParseProcStat(t *testing.T) {
+	busy, total, ok := parseProcStat("cpu  100 0 50 800 50 0 0 0 0 0\ncpu0 50 0 25 400 25 0 0 0 0 0\n")
+	if !ok || total != 1000 || busy != 150 {
+		t.Errorf("proc stat: %d %d %v", busy, total, ok)
+	}
+	if _, _, ok := parseProcStat("intr 1 2 3\n"); ok {
+		t.Error("no cpu line accepted")
+	}
+}

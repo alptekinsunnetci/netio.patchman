@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify"
@@ -83,11 +84,12 @@ func TestContinuousMonitoring(t *testing.T) {
 	}
 
 	const gib = int64(1) << 30
+	cpuPct := 37.5
 	round := func(ok bool, rootUsed int64, extra ...protocol.HealthResult) {
 		t.Helper()
 		st := protocol.HealthStatus{CheckedAt: timeutil.Now(),
 			Results: append([]protocol.HealthResult{{ID: web, Name: "Web sitesi", Type: "http", OK: ok, Value: "HTTP 200", Message: map[bool]string{true: "", false: "HTTP 502"}[ok]}}, extra...),
-			Resources: &protocol.Resources{CPUs: 4, Load: []float64{0.52, 0.4, 0.3}, MemoryTotal: 8 * gib, MemoryAvailable: 6 * gib, SwapTotal: 2 * gib, SwapFree: 2 * gib,
+			Resources: &protocol.Resources{CPUs: 4, CPUPercent: &cpuPct, Load: []float64{0.52, 0.4, 0.3}, MemoryTotal: 8 * gib, MemoryAvailable: 6 * gib, SwapTotal: 2 * gib, SwapFree: 2 * gib,
 				Disks: []protocol.DiskUsage{{Path: "/", Total: 100 * gib, Used: rootUsed, Available: 100*gib - rootUsed}, {Path: "/var/lib/mysql", Total: 50 * gib, Used: 10 * gib, Available: 40 * gib}}}}
 		if err := client.Health(ctx, st); err != nil {
 			t.Fatal(err)
@@ -105,7 +107,7 @@ func TestContinuousMonitoring(t *testing.T) {
 			failing++
 		}
 	}
-	if failing != 2 || len(states) != 4 { // check, disk /, disk /var/lib/mysql, memory
+	if failing != 2 || len(states) != 5 { // check, disk /, disk /var/lib/mysql, memory, cpu
 		t.Fatalf("states after round 1: %+v", states)
 	}
 	if countKind(t, e, "health_down")+countKind(t, e, "resource_high") != 0 {
@@ -128,7 +130,26 @@ func TestContinuousMonitoring(t *testing.T) {
 
 	// Pages while failing.
 	status, body, _ := e.do(admin, "GET", hostURL+"?tab=health", nil)
-	expect(t, "health tab", status, 200, body, "Anlık durum", "/var/lib/mysql", "95%", "Disk (/)", "HTTP 502", "Otomatik sınır", "usage--bad", "0,52 · 0,40 · 0,30")
+	expect(t, "health tab", status, 200, body, "Kaynak kullanımı", "İşlemci", "38%", "/var/lib/mysql", "95%", "Disk (/)", "HTTP 502", "Otomatik sınır", "usage--bad",
+		"0,52 · 0,40 · 0,30", "Ek kontroller (isteğe bağlı)", "Kaynak geçmişi", "Grafikler için en az iki ölçüm")
+	// History: earlier samples make the charts (averaged per slot).
+	for i, cpu := range []int{100, 300, 500} {
+		if err := e.st.RecordMetricSample(ctx, id, store.MetricSample{At: timeutil.Now().Add(-time.Duration(30*(i+1)) * time.Minute), CPU: cpu, Load: 130, Memory: 250, Swap: 0, Disk: 950}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, body, _ = e.do(admin, "GET", hostURL+"?tab=health&range=24h", nil)
+	expect(t, "charts", 200, 200, body, "İşlemci kullanımı (%)", "Bellek kullanımı (%)", "En dolu disk (%)", `class="chip is-active"`, "Son 7 gün")
+	if !strings.Contains(body, "data-values=\"") || strings.Contains(body, "Grafikler için en az iki ölçüm") {
+		t.Error("charts not drawn")
+	}
+	_, body, _ = e.do(admin, "GET", hostURL+"?tab=health&range=30d", nil)
+	expect(t, "30 days", 200, 200, body, "Son 30 gün")
+	if samples, _ := e.st.HostMetrics(ctx, id, timeutil.Now().Add(-time.Hour)); len(samples) != 3 || samples[len(samples)-1].CPU != 375 || samples[len(samples)-1].Disk != 950 {
+		t.Errorf("samples: %+v", samples)
+	}
+	_, body, _ = e.do(admin, "GET", "/servers", nil)
+	expect(t, "server list resources", 200, 200, body, "Kaynaklar", "resmini__item--bad", ">RAM</span> 25%", ">CPU</span> 38%")
 	status, body, _ = e.do(admin, "GET", "/servers?status=health", nil)
 	expect(t, "health filter", status, 200, body, "web-21", "Sağlık sorunu: 2")
 	if strings.Contains(body, "db-01") {
@@ -141,13 +162,13 @@ func TestContinuousMonitoring(t *testing.T) {
 		Checks    []struct{ Key string }
 		Resources *protocol.Resources
 	}
-	if err := json.Unmarshal([]byte(body), &api); status != 200 || err != nil || api.Failing != 2 || len(api.Checks) != 4 || api.Resources == nil || len(api.Resources.Disks) != 2 {
+	if err := json.Unmarshal([]byte(body), &api); status != 200 || err != nil || api.Failing != 2 || len(api.Checks) != 5 || api.Resources == nil || len(api.Resources.Disks) != 2 {
 		t.Errorf("api: %d %v %s", status, err, body)
 	}
 	status, body = e.apiDo(key, "GET", "/metrics", "")
 	expect(t, "metrics", status, 200, body, `netio_patchman_host_health_failing{host="web-21",os="debian"} 2`,
 		`netio_patchman_host_disk_used_percent{host="web-21",os="debian",path="/"} 95.0`, `netio_patchman_host_memory_used_percent{host="web-21",os="debian"} 25.0`,
-		`netio_patchman_host_load_per_cpu_percent{host="web-21",os="debian"} 13.0`)
+		`netio_patchman_host_load_per_cpu_percent{host="web-21",os="debian"} 13.0`, `netio_patchman_host_cpu_used_percent{host="web-21",os="debian"} 37.5`)
 
 	// Recovery is notified; the history keeps the changes only.
 	round(true, 40*gib)

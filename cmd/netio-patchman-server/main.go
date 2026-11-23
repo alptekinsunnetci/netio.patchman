@@ -218,6 +218,7 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 		_ = st.PruneSnapshots(ctx, 2*365*24*time.Hour)
 		_ = st.PruneSoftwareEvents(ctx, 2*365*24*time.Hour)
 		_ = st.PruneHostScores(ctx, 2*365*24*time.Hour)
+		_ = st.PruneHostMetrics(ctx, 30*24*time.Hour)
 		_ = st.PruneOSVQueries(ctx, 30*24*time.Hour)
 		_ = st.PruneOSVRecords(ctx, 90*24*time.Hour)
 		_ = st.PruneMSRCKB(ctx, 30*24*time.Hour)

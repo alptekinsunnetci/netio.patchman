@@ -115,27 +115,30 @@ type shared struct {
 func (s *Server) mfaRequired() bool { return s.requireMFA.Load() }
 
 type navItem struct {
-	Key  string
-	Href string
-	Icon string
+	Key   string
+	Href  string
+	Icon  string
+	Group string // catalog key suffix of the section heading (nav.group.<Group>)
 }
 
+// navigation is the sidebar in sections; the template prints a section
+// heading before the first visible item of each.
 var navigation = []navItem{
-	{"dashboard", "/dashboard", "dashboard"},
-	{"servers", "/servers", "server"},
-	{"groups", "/groups", "tag"},
-	{"vulnerabilities", "/vulnerabilities", "shield"},
-	{"packages", "/packages", "package"},
-	{"software", "/software", "layers"},
-	{"reports", "/reports", "report"},
-	{"jobs", "/jobs", "jobs"},
-	{"rollouts", "/rollouts", "rollout"},
-	{"standards", "/standards", "check"},
-	{"schedules", "/schedules", "calendar"},
-	{"agents", "/agents", "agent"},
-	{"notifications", "/notifications", "bell"},
-	{"users", "/users", "users"},
-	{"settings", "/settings", "settings"},
+	{"dashboard", "/dashboard", "dashboard", "overview"},
+	{"notifications", "/notifications", "bell", "overview"},
+	{"reports", "/reports", "report", "overview"},
+	{"servers", "/servers", "server", "inventory"},
+	{"groups", "/groups", "tag", "inventory"},
+	{"software", "/software", "layers", "inventory"},
+	{"packages", "/packages", "package", "inventory"},
+	{"vulnerabilities", "/vulnerabilities", "shield", "security"},
+	{"standards", "/standards", "check", "security"},
+	{"jobs", "/jobs", "jobs", "updates"},
+	{"rollouts", "/rollouts", "rollout", "updates"},
+	{"schedules", "/schedules", "calendar", "updates"},
+	{"agents", "/agents", "agent", "admin"},
+	{"users", "/users", "users", "admin"},
+	{"settings", "/settings", "settings", "admin"},
 }
 
 var pageNames = []string{
@@ -311,7 +314,11 @@ func (s *Server) funcs() template.FuncMap {
 		"online": func(h store.Host) bool { return h.Online(s.offlineAfter()) },
 		"usage":  usageBar,
 		"sub64":  func(a, b int64) int64 { return a - b },
-		"round":  func(v float64) int { return int(math.Round(v)) },
+		"resval": func(key string, pct float64, limit int) resVal {
+			u := usageBar(pct, limit)
+			return resVal{Key: key, Used: u.Used, Level: u.Level, Known: pct >= 0}
+		},
+		"round": func(v float64) int { return int(math.Round(v)) },
 		"dec": func(v float64) string {
 			return strings.Replace(strconv.FormatFloat(v, 'f', 2, 64), ".", l.T("number.decimal"), 1)
 		},
@@ -354,6 +361,7 @@ func (s *Server) funcs() template.FuncMap {
 			}
 			return id
 		},
+		"swCatalogSize": func() int { return len(software.Catalog) },
 		"swCategory": func(id string) string {
 			if d, ok := software.ByID(id); ok {
 				return d.Category
@@ -837,4 +845,11 @@ func usageBar(pct float64, limit int) usage {
 		level = "warn"
 	}
 	return usage{Used: u, Free: 100 - u, Level: level}
+}
+
+// resVal is one compact resource value of the server list.
+type resVal struct {
+	Key, Level string
+	Used       int
+	Known      bool
 }

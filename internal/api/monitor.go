@@ -77,7 +77,7 @@ func (s *Server) health(w http.ResponseWriter, r *http.Request, hostID int64) {
 }
 
 // BuiltinLimits evaluates the snapshot against the built-in limits: every
-// file system, memory and the load per core (Linux). A limit of 0 is off.
+// file system, memory and CPU use. A limit of 0 is off.
 func BuiltinLimits(res protocol.Resources, cfg settings.Values) []store.MonitorResult {
 	var out []store.MonitorResult
 	pct := func(v float64) string { return fmt.Sprintf("%.0f%%", v) }
@@ -93,7 +93,12 @@ func BuiltinLimits(res protocol.Resources, cfg settings.Values) []store.MonitorR
 	if v := res.MemoryPercent(); cfg.HealthMemoryWarn > 0 && v >= 0 {
 		out = append(out, store.MonitorResult{Key: store.MonitorMemory, Type: "memory", OK: v < float64(cfg.HealthMemoryWarn), Value: pct(v)})
 	}
-	if v := res.LoadPercent(); cfg.HealthCPUWarn > 0 && v >= 0 {
+	// CPU use (agents from 1.0.2), the load per core otherwise.
+	cpu := res.CPU()
+	if cpu < 0 {
+		cpu = res.LoadPercent()
+	}
+	if v := cpu; cfg.HealthCPUWarn > 0 && v >= 0 {
 		out = append(out, store.MonitorResult{Key: store.MonitorCPU, Type: "cpu", OK: v < float64(cfg.HealthCPUWarn), Value: pct(v)})
 	}
 	return out
