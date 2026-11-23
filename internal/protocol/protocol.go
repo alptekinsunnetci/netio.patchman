@@ -88,6 +88,37 @@ const (
 	CapHealthMonitor = "health_monitor"
 )
 
+// PreviewSupported reports whether the agent can simulate a package job
+// with this package manager (Windows Update has no dry run).
+func PreviewSupported(pm string) bool {
+	switch pm {
+	case PMApt, PMDnf, PMYum, PMZypper, PMApk:
+		return true
+	}
+	return false
+}
+
+// RollbackSupported reports whether the agent can install earlier package
+// versions with this package manager (not apk, not Windows Update).
+func RollbackSupported(pm string) bool {
+	switch pm {
+	case PMApt, PMDnf, PMYum, PMZypper:
+		return true
+	}
+	return false
+}
+
+// CanPreview: the agent declared previews and its package manager has a dry
+// run. Agents up to 1.0.3 declared CapPreview on Windows too.
+func (h HostInfo) CanPreview() bool {
+	return h.Supports(CapPreview) && PreviewSupported(h.PackageManager)
+}
+
+// CanRollback: the agent declared rollbacks for a package manager that has them.
+func (h HostInfo) CanRollback() bool {
+	return h.Supports(CapRollback) && RollbackSupported(h.PackageManager)
+}
+
 // Supports reports whether the agent declared capability c.
 func (h HostInfo) Supports(c string) bool {
 	for _, x := range h.Capabilities {

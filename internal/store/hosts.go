@@ -140,6 +140,12 @@ func (h Host) IsVirtual() bool { return h.Virtualization != "" && h.Virtualizati
 // Supports reports whether the host's agent declared capability c (protocol.Cap*).
 func (h Host) Supports(c string) bool { return h.HostInfo().Supports(c) }
 
+// CanPreview: update previews work on the host (see protocol.HostInfo.CanPreview).
+func (h Host) CanPreview() bool { return h.HostInfo().CanPreview() }
+
+// CanRollback: rollbacks work on the host.
+func (h Host) CanRollback() bool { return h.HostInfo().CanRollback() }
+
 // HostFilter narrows the host list.
 type HostFilter struct {
 	Search  string

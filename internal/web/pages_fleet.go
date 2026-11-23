@@ -549,7 +549,7 @@ func (s *Server) serverCreateJob(w http.ResponseWriter, r *http.Request) {
 	typ := r.PostFormValue("type")
 	// With previews required, an update started here first shows its plan;
 	// the update runs after the plan is approved on the job page.
-	if cfg, _ := settings.Load(r.Context(), s.st); cfg.RequirePreview && isPackageJobType(typ) && h.Supports(protocol.CapPreview) && h.RemoteUpdates {
+	if cfg, _ := settings.Load(r.Context(), s.st); cfg.RequirePreview && isPackageJobType(typ) && h.CanPreview() && h.RemoteUpdates {
 		id, msg := s.queuePreview(r, h, typ, r.PostForm["packages"])
 		if msg != "" {
 			s.redirect(w, r, back, "error", msg)
@@ -1070,6 +1070,21 @@ func (s *Server) jobRetry(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.serverError(w, r, err)
 		return
+	}
+	// A failed preview is retried as a preview where the host can simulate;
+	// elsewhere (Windows Update) the update itself runs.
+	if j.Type == protocol.JobPreview {
+		previewed := j.Params[protocol.ParamPreviewType]
+		if h.CanPreview() {
+			newID, msg := s.queuePreview(r, h, previewed, pkgs)
+			if msg != "" {
+				s.redirect(w, r, back, "error", msg)
+				return
+			}
+			s.redirect(w, r, "/jobs/"+strconv.FormatInt(newID, 10), "success", s.l.T("job.retried", "id", j.ID))
+			return
+		}
+		typ = previewed
 	}
 	newID, msg := s.queueJob(r, h, typ, pkgs)
 	if msg != "" {

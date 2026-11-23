@@ -49,7 +49,7 @@ func revertible(c protocol.PackageChange) bool {
 // rollbackBlocked returns why a rollback cannot be started on a host, "" when it can.
 func (s *Server) rollbackBlocked(h store.Host) string {
 	switch {
-	case !h.Supports(protocol.CapRollback):
+	case !h.CanRollback():
 		return s.l.T("job.error.agent_capability", "hostname", h.Hostname)
 	case !h.RemoteUpdates:
 		return s.l.T("job.error.remote_disabled", "hostname", h.Hostname)

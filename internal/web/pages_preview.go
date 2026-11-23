@@ -26,7 +26,7 @@ func (s *Server) queuePreview(r *http.Request, h store.Host, typ string, pkgs []
 	if !isPackageJobType(typ) {
 		return 0, s.l.T("job.error.invalid_type")
 	}
-	if !h.Supports(protocol.CapPreview) {
+	if !h.CanPreview() {
 		return 0, s.l.T("job.error.agent_capability", "hostname", h.Hostname)
 	}
 	if typ != protocol.JobUpgradePackages {

@@ -114,7 +114,7 @@
 {{template "pager" $d.Pager}}
 
 {{else if eq $d.Tab "updates"}}
-{{if and $root.User.CanOperate ($h.Supports "preview") $d.Updates}}
+{{if and $root.User.CanOperate $h.CanPreview $d.Updates}}
 <div class="inline-actions">
   <form method="post" action="/servers/{{$h.ID}}/preview">{{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_security"><button class="button button--sm" type="submit"{{if not $h.SecurityUpdateCount}} disabled{{end}}>{{template "icon" "list"}}{{t "preview.run_security"}}</button></form>
   <form method="post" action="/servers/{{$h.ID}}/preview">{{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_all"><button class="button button--sm" type="submit">{{template "icon" "list"}}{{t "preview.run_all"}}</button></form>
@@ -167,7 +167,7 @@
     </table>
     {{end}}
     </div>
-    {{if and $root.User.CanOperate $h.RemoteUpdates}}<div class="panel__foot button-row"><button class="button button--primary" type="submit">{{t "server.action.upgrade_selected"}}</button>{{if $h.Supports "preview"}}<button class="button" type="submit" formaction="/servers/{{$h.ID}}/preview" data-confirm="">{{template "icon" "list"}}{{t "preview.run_selected"}}</button>{{end}}</div>{{end}}
+    {{if and $root.User.CanOperate $h.RemoteUpdates}}<div class="panel__foot button-row"><button class="button button--primary" type="submit">{{t "server.action.upgrade_selected"}}</button>{{if $h.CanPreview}}<button class="button" type="submit" formaction="/servers/{{$h.ID}}/preview" data-confirm="">{{template "icon" "list"}}{{t "preview.run_selected"}}</button>{{end}}</div>{{end}}
   </form>
   {{else if $d.Q}}{{template "empty" (t "server.no_updates_match")}}{{else}}{{template "empty" (t "server.no_updates")}}{{end}}
 </section>

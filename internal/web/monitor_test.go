@@ -131,7 +131,12 @@ func TestContinuousMonitoring(t *testing.T) {
 	// Pages while failing.
 	status, body, _ := e.do(admin, "GET", hostURL+"?tab=health", nil)
 	expect(t, "health tab", status, 200, body, "Kaynak kullanımı", "İşlemci", "38%", "/var/lib/mysql", "95%", "Disk (/)", "HTTP 502", "Otomatik sınır", "usage--bad",
-		"0,52 · 0,40 · 0,30", "Ek kontroller (isteğe bağlı)", "Kaynak geçmişi", "Grafikler için en az iki ölçüm")
+		"0,52 · 0,40 · 0,30", "Ek kontroller (isteğe bağlı)", "Kaynak geçmişi")
+	// Rounds in the same second share one history row; rounds that straddle
+	// a second already give the two rows the charts need.
+	if early, _ := e.st.HostMetrics(ctx, id, timeutil.Now().Add(-time.Hour)); len(early) < 2 && !strings.Contains(body, "Grafikler için en az iki ölçüm") {
+		t.Error("waiting note missing before the second measurement")
+	}
 	// History: earlier samples make the charts (averaged per slot).
 	for i, cpu := range []int{100, 300, 500} {
 		if err := e.st.RecordMetricSample(ctx, id, store.MetricSample{At: timeutil.Now().Add(-time.Duration(30*(i+1)) * time.Minute), CPU: cpu, Load: 130, Memory: 250, Swap: 0, Disk: 950}); err != nil {
@@ -145,7 +150,7 @@ func TestContinuousMonitoring(t *testing.T) {
 	}
 	_, body, _ = e.do(admin, "GET", hostURL+"?tab=health&range=30d", nil)
 	expect(t, "30 days", 200, 200, body, "Son 30 gün")
-	if samples, _ := e.st.HostMetrics(ctx, id, timeutil.Now().Add(-time.Hour)); len(samples) != 3 || samples[len(samples)-1].CPU != 375 || samples[len(samples)-1].Disk != 950 {
+	if samples, _ := e.st.HostMetrics(ctx, id, timeutil.Now().Add(-time.Hour)); len(samples) < 3 || samples[len(samples)-1].CPU != 375 || samples[len(samples)-1].Disk != 950 {
 		t.Errorf("samples: %+v", samples)
 	}
 	_, body, _ = e.do(admin, "GET", "/servers", nil)

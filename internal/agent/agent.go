@@ -195,8 +195,15 @@ func pickPackageManager(rel map[string]string, has func(string) bool) string {
 
 // Capabilities are the optional features this agent implements; the server
 // only sends the jobs and parameters behind them to agents that declare them.
-func Capabilities() []string {
-	return []string{protocol.CapServices, protocol.CapHealth, protocol.CapPreview, protocol.CapRollback, protocol.CapHealthMonitor}
+func Capabilities(pm string) []string {
+	caps := []string{protocol.CapServices, protocol.CapHealth, protocol.CapHealthMonitor}
+	if protocol.PreviewSupported(pm) {
+		caps = append(caps, protocol.CapPreview)
+	}
+	if protocol.RollbackSupported(pm) {
+		caps = append(caps, protocol.CapRollback)
+	}
+	return caps
 }
 
 // ReadHostInfo collects host identification. Values are verbatim.
@@ -206,7 +213,6 @@ func ReadHostInfo(remoteUpdates, selfUpdate bool) (protocol.HostInfo, error) {
 		AgentVersion:  version.Version,
 		RemoteUpdates: remoteUpdates,
 		SelfUpdate:    selfUpdate,
-		Capabilities:  Capabilities(),
 	}
 	var err error
 	if h.Hostname, err = os.Hostname(); err != nil {
@@ -214,6 +220,7 @@ func ReadHostInfo(remoteUpdates, selfUpdate bool) (protocol.HostInfo, error) {
 	}
 	h.IPAddresses = ipAddresses()
 	h.PackageManager = DetectPackageManager()
+	h.Capabilities = Capabilities(h.PackageManager)
 	h.Virtualization = Virtualization()
 	// Machine ID, kernel or build, uptime, FQDN and OS identification.
 	return h, readPlatform(&h)

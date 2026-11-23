@@ -333,7 +333,7 @@ Sunucu sayfasından başlatılan bir güncelleme önce **ön izleme** olarak ça
 
 - Ön izleme zorunluluğu **Sistem Ayarları → Güncelleme ayarları → Sunucu sayfasından başlatılan güncellemeler önce ön izlemeden geçsin** ile kapatılabilir (varsayılan açık).
 - Zamanlanmış güncellemeler, kademeli güncellemeler ve API ile başlatılan işler ön izleme beklemez.
-- Ön izleme yalnızca bu özelliği bildiren ajanlarda (1.0.0 ve üstü) ve APT, DNF, YUM ve Zypper'da yapılır. Eski ajanlarda güncelleme eskisi gibi doğrudan başlar.
+- Ön izleme yalnızca bu özelliği bildiren ajanlarda (1.0.0 ve üstü) ve APT, DNF, YUM, Zypper ve apk'da yapılır. Windows Update'in simülasyon kipi olmadığı için Windows sunucularında ve eski ajanlarda güncelleme doğrudan başlar.
 - Onaylanmadan bekleyen ön izleme hiçbir şey değiştirmez. Ön izlemeden sonra paket listesi değişse bile ajan güncelleme sırasında hedefleri yeniden belirler ve sonucu doğrular.
 
 ### Sağlık kontrolleri
