@@ -9,12 +9,13 @@
     <p class="pagehead__sub">{{t "health.subtitle"}}</p>
   </div>
 </header>
+<p class="alert alert--info">{{t "health.monitor_note"}} <a href="/settings#monitoring">{{t "health.monitor_settings"}}</a></p>
 
 <section class="panel panel--flush">
   {{if $d.Checks}}
   <div class="table-wrap">
   <table class="table">
-    <thead><tr><th>{{t "health.field.name"}}</th><th>{{t "health.field.type"}}</th><th>{{t "health.field.target"}}</th><th>{{t "health.field.scope"}}</th><th>{{t "health.field.with_updates"}}</th><th>{{t "health.field.enabled"}}</th><th></th></tr></thead>
+    <thead><tr><th>{{t "health.field.name"}}</th><th>{{t "health.field.type"}}</th><th>{{t "health.field.target"}}</th><th>{{t "health.field.scope"}}</th><th>{{t "health.field.with_updates"}}</th><th>{{t "health.field.monitor"}}</th><th>{{t "health.field.enabled"}}</th><th></th></tr></thead>
     <tbody>
     {{range $d.Checks}}
     <tr>
@@ -23,6 +24,7 @@
       <td class="mono cell-sub">{{if eq .Type "resources"}}{{if .CPU}}CPU ≤ {{.CPU}}% {{end}}{{if .Memory}}RAM ≤ {{.Memory}}% {{end}}{{if .Disk}}{{t "health.disk_short"}} ≤ {{.Disk}}%{{end}}{{else}}{{.Target}}{{end}}</td>
       <td>{{if eq .Scope "group"}}<a href="/groups/{{.GroupID}}">{{.GroupName}}</a>{{else if eq .Scope "host"}}<a href="/servers/{{.HostID}}?tab=health">{{.Hostname}}</a>{{else}}{{t "health.scope.all"}}{{end}}</td>
       <td>{{if .WithUpdates}}{{t "common.yes"}}{{else}}<span class="muted">{{t "common.no"}}</span>{{end}}</td>
+      <td>{{if .Monitor}}{{t "common.yes"}}{{else}}<span class="muted">{{t "common.no"}}</span>{{end}}</td>
       <td>{{if .Enabled}}{{t "common.enabled"}}{{else}}<span class="muted">{{t "common.disabled"}}</span>{{end}}</td>
       <td class="actions"><form method="post" action="/settings/health/{{.ID}}/delete" data-confirm="{{t "health.delete_confirm" "name" .Name}}">{{template "csrf" $root}}<button class="button button--sm button--ghost" type="submit">{{t "common.delete"}}</button></form></td>
     </tr>
@@ -82,6 +84,7 @@
         <select class="field__input" name="host_id"><option value="0">{{t "common.empty"}}</option>{{range $d.Hosts}}<option value="{{.ID}}"{{if eq .ID $f.HostID}} selected{{end}}>{{.Hostname}}</option>{{end}}</select></label>
     </div>
     <label class="check-label"><input type="checkbox" name="with_updates" value="1"{{if $f.WithUpdates}} checked{{end}}> {{t "health.field.with_updates_long"}}</label>
+    <label class="check-label"><input type="checkbox" name="monitor" value="1"{{if $f.Monitor}} checked{{end}}> {{t "health.field.monitor_long"}}</label>
     <label class="check-label"><input type="checkbox" name="enabled" value="1"{{if $f.Enabled}} checked{{end}}> {{t "health.field.enabled"}}</label>
     <div class="button-row">
       <button class="button button--primary" type="submit">{{t "common.save"}}</button>

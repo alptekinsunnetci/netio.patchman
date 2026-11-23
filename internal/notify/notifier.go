@@ -626,6 +626,38 @@ func (n *Notifier) HealthResult(ctx context.Context, j store.Job) {
 	}, "/jobs/"+strconv.FormatInt(j.ID, 10))
 }
 
+// HealthMonitor notifies monitored checks that started failing or
+// recovered: health_down/health_up for defined checks, resource_high/
+// resource_ok for the built-in disk, memory and CPU limits.
+func (n *Notifier) HealthMonitor(ctx context.Context, hostID int64, hostname string, changes []store.HealthChange, limits map[string]int) {
+	link := "/servers/" + strconv.FormatInt(hostID, 10) + "?tab=health"
+	for _, c := range changes {
+		level, params := store.LevelInfo, map[string]string{"hostname": hostname, "value": c.Value}
+		var kind string
+		switch {
+		case c.Builtin() && c.Down:
+			kind, level = "resource_high", store.LevelWarning
+			params["resource"], params["target"], params["limit"] = c.Type, c.Target(), strconv.Itoa(limits[c.Type])
+		case c.Builtin():
+			kind = "resource_ok"
+			params["resource"], params["target"] = c.Type, c.Target()
+		case c.Down:
+			kind, level = "health_down", store.LevelWarning
+			params["check"], params["detail"] = c.Name, c.Message
+			if c.Message == "" {
+				params["detail"] = c.Value
+			}
+		default:
+			kind = "health_up"
+			params["check"] = c.Name
+		}
+		if c.Type != "disk" {
+			params["target"] = ""
+		}
+		_ = n.st.AddNotification(ctx, level, kind, params, link)
+	}
+}
+
 // RolloutEvent records that a rolling update paused, stopped or completed.
 func (n *Notifier) RolloutEvent(ctx context.Context, kind, level string, r store.Rollout) {
 	reason := ""

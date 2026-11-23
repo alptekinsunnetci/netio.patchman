@@ -27,6 +27,8 @@ func TestEventOf(t *testing.T) {
 		{"rollback_done", nil, "rollback"},
 		{"reboot_required", nil, "reboot_required"},
 		{"health_regressed", nil, "health_failed"},
+		{"health_down", nil, "health_failed"},
+		{"resource_ok", nil, "health_failed"},
 		{"eol_approaching", nil, "eol"},
 		{"agent_offline", nil, "host_offline"},
 		{"drift_detected", nil, "drift"},

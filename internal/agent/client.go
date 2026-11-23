@@ -155,6 +155,11 @@ func (c *Client) JobResult(ctx context.Context, id int64, r protocol.JobResult) 
 	return c.post(ctx, path, r, true, nil)
 }
 
+// Health posts a monitoring round.
+func (c *Client) Health(ctx context.Context, st protocol.HealthStatus) error {
+	return c.post(ctx, protocol.PathHealth, st, true, nil)
+}
+
 // Credentials are the agent's enrolled identity.
 type Credentials struct {
 	ServerURL   string `json:"server_url"`

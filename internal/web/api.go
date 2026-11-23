@@ -14,6 +14,7 @@ import (
 	"netio.patchman/internal/auth"
 	"netio.patchman/internal/eol"
 	"netio.patchman/internal/protocol"
+	"netio.patchman/internal/settings"
 	"netio.patchman/internal/software"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
@@ -652,9 +653,41 @@ func (s *Server) metrics(w http.ResponseWriter, r *http.Request) {
 	for _, h := range hosts {
 		val("netio_patchman_host_reboot_required", hostLabels(h.h), boolNum(h.h.RebootRequired))
 	}
+	if failing, err := s.st.FailingHealth(ctx); err == nil {
+		gauge("netio_patchman_host_health_failing", "Failing monitored health checks and built-in limits on a host.")
+		for _, h := range hosts {
+			val("netio_patchman_host_health_failing", hostLabels(h.h), failing[h.h.ID])
+		}
+	}
+	// Resource usage from monitoring rounds; stale snapshots (an agent that
+	// stopped reporting) are left out.
+	cfg, _ := settings.Load(ctx, s.st)
+	fresh := max(3*time.Duration(cfg.HealthMonitor)*time.Minute, 15*time.Minute)
+	if res, err := s.st.FleetResources(ctx, timeutil.Now().Add(-fresh)); err == nil && len(res) > 0 {
+		gauge("netio_patchman_host_memory_used_percent", "Memory in use on a host (total minus available).")
+		for _, h := range hosts {
+			if r, ok := res[h.h.ID]; ok && r.MemoryPercent() >= 0 {
+				val("netio_patchman_host_memory_used_percent", hostLabels(h.h), promFloat(r.MemoryPercent()))
+			}
+		}
+		gauge("netio_patchman_host_load_per_cpu_percent", "1-minute load average per CPU core (Linux).")
+		for _, h := range hosts {
+			if r, ok := res[h.h.ID]; ok && r.LoadPercent() >= 0 {
+				val("netio_patchman_host_load_per_cpu_percent", hostLabels(h.h), promFloat(r.LoadPercent()))
+			}
+		}
+		gauge("netio_patchman_host_disk_used_percent", "File system use on a host (as df shows it).")
+		for _, h := range hosts {
+			for _, d := range res[h.h.ID].Disks {
+				val("netio_patchman_host_disk_used_percent", hostLabels(h.h)+`,path="`+promLabel(d.Path)+`"`, promFloat(d.Percent()))
+			}
+		}
+	}
 	w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
 	_, _ = w.Write([]byte(b.String()))
 }
+
+func promFloat(v float64) string { return strconv.FormatFloat(v, 'f', 1, 64) }
 
 func hostLabels(h store.Host) string {
 	return `host="` + promLabel(h.Hostname) + `",os="` + promLabel(h.OSID) + `"`

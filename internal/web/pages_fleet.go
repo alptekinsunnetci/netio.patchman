@@ -118,7 +118,12 @@ func (s *Server) servers(w http.ResponseWriter, r *http.Request) {
 	groups, _ := s.st.ListGroups(r.Context())
 	platforms, _ := s.st.PlatformOptions(r.Context())
 	d := s.page(r, s.l.T("nav.servers"), "servers")
-	d.Data = map[string]any{"Hosts": hosts, "Filter": f, "OSOptions": osOpts, "Groups": groups, "Platforms": platforms,
+	failing, err := s.st.FailingHealth(r.Context())
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	d.Data = map[string]any{"Hosts": hosts, "Filter": f, "OSOptions": osOpts, "Groups": groups, "Platforms": platforms, "HealthFailing": failing,
 		"Pager": newPager(r, pg, total), "Query": r.URL.RawQuery}
 	s.render(w, r, http.StatusOK, "servers", d)
 }
@@ -196,6 +201,26 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		data["HealthLatest"], data["HealthHistory"], data["Pager"], data["HealthChecks"] = latest, hist, newPager(r, pg, total), checks
+		states, err := s.st.HostHealthStates(ctx, id)
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		res, resAt, err := s.st.HostResources(ctx, id)
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		byCheck, builtin := map[int64]store.HealthState{}, []store.HealthState{}
+		for _, st := range states {
+			if st.Builtin() {
+				builtin = append(builtin, st)
+			} else {
+				byCheck[st.CheckID] = st
+			}
+		}
+		cfg, _ := settings.Load(ctx, s.st)
+		data["HealthState"], data["HealthBuiltin"], data["Resources"], data["ResourcesAt"], data["MonitorCfg"] = byCheck, builtin, res, resAt, cfg
 	case "software":
 		sw, err := s.st.HostSoftware(ctx, id)
 		if err != nil {

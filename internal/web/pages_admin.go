@@ -527,6 +527,23 @@ func (s *Server) settingsSave(w http.ResponseWriter, r *http.Request) {
 			bad = append(bad, s.l.T("validation.range", "field", s.l.T("settings.health.delay"), "min", 0, "max", 600))
 		}
 	}
+	if _, ok := r.PostForm["monitor_section"]; ok {
+		for _, f := range []struct {
+			field, key, label string
+			max               int
+		}{
+			{"health_monitor", settings.KeyHealthMonitor, "settings.monitor.interval", 1440},
+			{"health_disk_warn", settings.KeyHealthDiskWarn, "settings.monitor.disk", 100},
+			{"health_memory_warn", settings.KeyHealthMemoryWarn, "settings.monitor.memory", 100},
+			{"health_cpu_warn", settings.KeyHealthCPUWarn, "settings.monitor.cpu", 1000},
+		} {
+			if v, ok := intIn(f.field, 0, f.max); ok {
+				kv[f.key] = v
+			} else {
+				bad = append(bad, s.l.T("validation.range", "field", s.l.T(f.label), "min", 0, "max", f.max))
+			}
+		}
+	}
 	if raw, ok := r.PostForm["update_exclude"]; ok {
 		patterns, invalid := protocol.ParseExcludePatterns(raw[0])
 		if len(invalid) > 0 {

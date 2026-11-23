@@ -233,6 +233,54 @@
 {{if $d.WatchedMissing}}<p class="footnote">{{t "watch.host_missing" "n" $d.WatchedMissing}}</p>{{end}}
 
 {{else if eq $d.Tab "health"}}
+<section class="panel" id="live">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "health.live_title"}}</h2>
+    {{if $d.Resources}}<span class="cell-sub">{{t "health.live_at" "time" (ago $d.ResourcesAt)}}</span>{{end}}
+  </div>
+  {{if not ($h.Supports "health_monitor")}}<p class="panel__note">{{t "health.monitor_unsupported"}}</p>
+  {{else if eq $d.MonitorCfg.HealthMonitor 0}}<p class="panel__note">{{t "health.monitor_off"}}</p>
+  {{else if not $d.Resources}}<p class="panel__note">{{t "health.monitor_waiting" "n" $d.MonitorCfg.HealthMonitor}}</p>{{end}}
+  {{with $d.Resources}}
+  <div class="usage-grid">
+    {{if .Load}}<div class="usage-item">
+      <span class="usage-item__label">{{t "health.resource.cpu"}}</span>
+      {{template "usagebar" (usage .LoadPercent $d.MonitorCfg.HealthCPUWarn)}}
+      <span class="usage-item__value mono">{{round .LoadPercent}}%</span>
+      <span class="cell-sub">{{t "health.load_detail" "load" (printf "%s · %s · %s" (dec (index .Load 0)) (dec (index .Load 1)) (dec (index .Load 2))) "cpus" .CPUs}}</span>
+    </div>{{end}}
+    {{if gt .MemoryTotal 0}}<div class="usage-item">
+      <span class="usage-item__label">{{t "health.resource.memory"}}</span>
+      {{template "usagebar" (usage .MemoryPercent $d.MonitorCfg.HealthMemoryWarn)}}
+      <span class="usage-item__value mono">{{round .MemoryPercent}}%</span>
+      <span class="cell-sub">{{t "health.used_of" "used" (size (sub64 .MemoryTotal .MemoryAvailable)) "total" (size .MemoryTotal)}}</span>
+    </div>{{end}}
+    {{if gt .SwapTotal 0}}<div class="usage-item">
+      <span class="usage-item__label">{{t "health.resource.swap"}}</span>
+      {{template "usagebar" (usage .SwapPercent 0)}}
+      <span class="usage-item__value mono">{{round .SwapPercent}}%</span>
+      <span class="cell-sub">{{t "health.used_of" "used" (size (sub64 .SwapTotal .SwapFree)) "total" (size .SwapTotal)}}</span>
+    </div>{{end}}
+    {{range .Disks}}<div class="usage-item">
+      <span class="usage-item__label">{{t "health.resource.disk"}} <span class="mono">{{.Path}}</span></span>
+      {{template "usagebar" (usage .Percent $d.MonitorCfg.HealthDiskWarn)}}
+      <span class="usage-item__value mono">{{round .Percent}}%</span>
+      <span class="cell-sub">{{t "health.used_of" "used" (size .Used) "total" (size .Total)}}</span>
+    </div>{{end}}
+  </div>
+  {{end}}
+  {{if $d.HealthBuiltin}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "health.builtin_title"}}</th><th>{{t "health.field.result"}}</th><th>{{t "health.field.value"}}</th><th>{{t "health.field.since"}}</th></tr></thead>
+    <tbody>
+    {{range $d.HealthBuiltin}}<tr><td>{{healthLabel .Target .Type .CheckID}}</td><td>{{template "healthpill" .OK}}</td><td class="mono">{{.Value}}</td><td>{{datetime .Since}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  </div>
+  {{end}}
+</section>
+
 <section class="panel panel--flush">
   <div class="panel__head">
     <h2 class="panel__title">{{t "health.host_title"}}</h2>
@@ -255,7 +303,9 @@
       <td>{{$c.Name}}</td>
       <td class="cell-sub">{{t (printf "health.type.%s" $c.Type)}}</td>
       <td class="mono cell-sub">{{$c.Target}}</td>
-      {{$found := false}}{{range $d.HealthLatest}}{{if and (not $found) (eq .ID $c.ID)}}{{$found = true}}<td>{{template "healthpill" .OK}}</td><td class="mono cell-sub">{{.Value}}{{with .Message}}<div>{{.}}</div>{{end}}</td><td>{{datetime .CreatedAt}}{{if .JobID}} · <a href="/jobs/{{.JobID}}">#{{.JobID}}</a>{{end}}</td>{{end}}{{end}}
+      {{$found := false}}{{$st := index $d.HealthState $c.ID}}
+      {{range $d.HealthLatest}}{{if and (not $found) (eq .ID $c.ID) (or $st.CheckedAt.IsZero (.CreatedAt.After $st.CheckedAt))}}{{$found = true}}<td>{{template "healthpill" .OK}}</td><td class="mono cell-sub">{{.Value}}{{with .Message}}<div>{{.}}</div>{{end}}</td><td>{{datetime .CreatedAt}}{{if .JobID}} · <a href="/jobs/{{.JobID}}">#{{.JobID}}</a>{{end}}</td>{{end}}{{end}}
+      {{if and (not $found) (not $st.CheckedAt.IsZero)}}{{$found = true}}<td>{{template "healthpill" $st.OK}}</td><td class="mono cell-sub">{{$st.Value}}{{with $st.Message}}<div>{{.}}</div>{{end}}</td><td>{{datetime $st.CheckedAt}}<div class="cell-sub">{{t "health.monitor_since" "time" (datetime $st.Since)}}</div></td>{{end}}
       {{if not $found}}<td colspan="3" class="muted">{{t "health.never_run"}}</td>{{end}}
     </tr>
     {{end}}
@@ -272,7 +322,7 @@
   <table class="table">
     <thead><tr><th>{{t "health.field.when"}}</th><th>{{t "health.field.name"}}</th><th>{{t "health.field.phase"}}</th><th>{{t "health.field.result"}}</th><th>{{t "health.field.value"}}</th></tr></thead>
     <tbody>
-    {{range $d.HealthHistory}}<tr><td>{{datetime .CreatedAt}}{{if .JobID}}<div class="cell-sub"><a href="/jobs/{{.JobID}}">#{{.JobID}}</a></div>{{end}}</td><td>{{.Name}}</td><td class="cell-sub">{{t (printf "health.phase.%s" .Phase)}}</td><td>{{template "healthpill" .OK}}</td><td class="mono cell-sub">{{.Value}}{{with .Message}}<div>{{.}}</div>{{end}}</td></tr>{{end}}
+    {{range $d.HealthHistory}}<tr><td>{{datetime .CreatedAt}}{{if .JobID}}<div class="cell-sub"><a href="/jobs/{{.JobID}}">#{{.JobID}}</a></div>{{end}}</td><td>{{healthLabel .Name .Type .ID}}</td><td class="cell-sub">{{t (printf "health.phase.%s" .Phase)}}</td><td>{{template "healthpill" .OK}}</td><td class="mono cell-sub">{{.Value}}{{with .Message}}<div>{{.}}</div>{{end}}</td></tr>{{end}}
     </tbody>
   </table>
   </div>
@@ -295,7 +345,7 @@
     <tr>
       <td><a href="/software/{{.Software}}?cycle={{.Cycle}}">{{swName .Software}}</a> <span class="muted">{{.Cycle}}</span><div class="cell-sub">{{t (printf "software.category.%s" (swCategory .Software))}}</div></td>
       <td class="mono">{{.Version}}</td>
-      <td class="mono cell-sub">{{.Package}} {{.PackageVersion}}</td>
+      <td class="mono cell-sub">{{if .Package}}{{.Package}} {{.PackageVersion}}{{else}}<span class="muted" title="{{t "software.probed_hint"}}">{{t "software.probed"}}</span>{{end}}</td>
       <td>{{template "running" .Running}}{{if .Service}} <span class="muted mono">{{.Service}}</span>{{end}}</td>
       <td>{{if .CVECount}}<a href="/servers/{{$h.ID}}?q={{.Package}}">{{template "sev" .Severity}} {{t "watch.cve_count" "n" .CVECount}}</a>{{if .KnownExploited}} {{template "kev"}}{{end}}{{else}}<span class="muted">{{t "watch.no_vulns"}}</span>{{end}}</td>
       <td>{{with eolItem $d.SoftwareEOL .Software .Cycle}}{{template "eolpill" .}}{{if .Found}}{{if not .Release.EOL.IsZero}}<div class="cell-sub">{{date .Release.EOL}}</div>{{end}}{{end}}{{if .DistroSupported}}<div class="cell-sub" title="{{t "eol.distro_hint"}}">{{t "eol.distro_supported"}}</div>{{end}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>

@@ -33,7 +33,7 @@ func TestDetectDebian(t *testing.T) {
 		{Name: "ssh", State: "running"},
 	}
 	got := map[string]Installed{}
-	for _, in := range Detect(protocol.PMApt, pkgs, services, true) {
+	for _, in := range Detect(protocol.PMApt, pkgs, nil, services, true) {
 		got[in.Software+" "+in.Cycle] = in
 	}
 	want := map[string]Installed{
@@ -66,7 +66,7 @@ func TestDetectRPMAndUnknownServices(t *testing.T) {
 		{Name: "nodejs", Version: "1:20.16.0-1.module+el9.4.0+2154+2d3a3b26"},
 	}
 	got := map[string]Installed{}
-	for _, in := range Detect(protocol.PMDnf, pkgs, nil, false) {
+	for _, in := range Detect(protocol.PMDnf, pkgs, nil, nil, false) {
 		got[in.Software+" "+in.Cycle] = in
 	}
 	for _, k := range []string{"apache 2.4", "postgresql 16", "postgresql 13", "mariadb 10.6", "nodejs 20"} {

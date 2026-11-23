@@ -14,7 +14,7 @@ import (
 
 func (s *Server) healthChecks(w http.ResponseWriter, r *http.Request) {
 	s.renderHealthChecks(w, r, http.StatusOK, "", store.HealthCheckDef{
-		HealthCheck: protocol.HealthCheck{Type: protocol.HealthHTTP, TimeoutSeconds: 10}, Scope: store.HealthScopeAll, WithUpdates: true, Enabled: true})
+		HealthCheck: protocol.HealthCheck{Type: protocol.HealthHTTP, TimeoutSeconds: 10}, Scope: store.HealthScopeAll, WithUpdates: true, Monitor: true, Enabled: true})
 }
 
 func (s *Server) renderHealthChecks(w http.ResponseWriter, r *http.Request, status int, errMsg string, form store.HealthCheckDef) {
@@ -54,7 +54,7 @@ func (s *Server) healthForm(r *http.Request) (store.HealthCheckDef, string) {
 		return n, err == nil && n >= lo && n <= hi
 	}
 	c := store.HealthCheckDef{HealthCheck: protocol.HealthCheck{Name: in("name"), Type: in("type"), Target: in("target"), Contains: r.PostFormValue("contains"),
-		Insecure: r.PostFormValue("insecure") == "1"}, Scope: in("scope"), WithUpdates: r.PostFormValue("with_updates") == "1", Enabled: r.PostFormValue("enabled") == "1"}
+		Insecure: r.PostFormValue("insecure") == "1"}, Scope: in("scope"), WithUpdates: r.PostFormValue("with_updates") == "1", Monitor: r.PostFormValue("monitor") == "1", Enabled: r.PostFormValue("enabled") == "1"}
 	c.GroupID, _ = strconv.ParseInt(in("group_id"), 10, 64)
 	c.HostID, _ = strconv.ParseInt(in("host_id"), 10, 64)
 	var ok [5]bool

@@ -95,6 +95,25 @@
     </div>
   </section>
 
+  <section class="panel" id="monitoring">
+    <h2 class="panel__title">{{t "settings.monitor.title"}}</h2>
+    <p class="field__hint">{{t "settings.monitor.hint"}}</p>
+    <input type="hidden" name="monitor_section" value="1">
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "settings.monitor.interval"}}</span>
+        <input class="field__input" type="number" name="health_monitor" min="0" max="1440" value="{{$c.HealthMonitor}}">
+        <span class="field__hint">{{t "settings.monitor.interval_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "settings.monitor.disk"}}</span>
+        <input class="field__input" type="number" name="health_disk_warn" min="0" max="100" value="{{$c.HealthDiskWarn}}"></label>
+      <label class="field"><span class="field__label">{{t "settings.monitor.memory"}}</span>
+        <input class="field__input" type="number" name="health_memory_warn" min="0" max="100" value="{{$c.HealthMemoryWarn}}"></label>
+      <label class="field"><span class="field__label">{{t "settings.monitor.cpu"}}</span>
+        <input class="field__input" type="number" name="health_cpu_warn" min="0" max="1000" value="{{$c.HealthCPUWarn}}">
+        <span class="field__hint">{{t "settings.monitor.cpu_hint"}}</span></label>
+    </div>
+    <p class="field__hint">{{t "settings.monitor.limits_hint"}}</p>
+  </section>
+
   <section class="panel" id="sla">
     <h2 class="panel__title">{{t "settings.sla.title"}}</h2>
     <p class="field__hint">{{t "settings.sla.hint"}}</p>

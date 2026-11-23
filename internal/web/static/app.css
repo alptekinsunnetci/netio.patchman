@@ -216,7 +216,8 @@ code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
 /* Stats */
 .stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
 .stats--compact { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.stats--7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+/* The dashboard's seven or eight cards: two rows of four. */
+.stats--7 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; color: inherit; min-width: 0; }
 a.stat:hover { border-color: var(--border-strong); text-decoration: none; }
 .stat__label { color: var(--text-muted); font-size: 13px; }
@@ -318,7 +319,7 @@ fieldset.field > legend { padding: 0; margin-bottom: 6px; }
 .score-head { display: flex; gap: 16px; align-items: center; }
 .score-head p { margin: 0; }
 .score-items li { padding: 2px 0; }
-.stats--8 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+.stats--8 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .stats--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 /* Rollout progress: succeeded, failed, running, not started (2px gaps) */
 .progress { display: inline-flex; gap: 2px; width: 140px; height: 8px; vertical-align: middle; }
@@ -481,8 +482,7 @@ select.field__input { padding-right: 28px; }
 @media (max-width: 1200px) {
   .trends { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .stats--7 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .stats--8 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .stats--7, .stats--8 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .stats--5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 1000px) {
@@ -511,3 +511,17 @@ select.field__input { padding-right: 28px; }
   .notif { flex-wrap: wrap; }
   .notif__actions { width: 100%; padding-left: 20px; }
 }
+
+/* Resource usage (server health tab). */
+.usage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px 24px; margin-bottom: 12px; }
+.usage-item { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; }
+.usage-item__label { font-weight: 600; font-size: 13px; }
+.usage-item .usage { grid-column: 1 / 2; }
+.usage-item__value { font-size: 13px; text-align: right; }
+.usage-item .cell-sub { grid-column: 1 / -1; }
+.usage { display: flex; gap: 2px; height: 8px; width: 100%; }
+.usage__used, .usage__free { min-width: 0; border-radius: 2px; flex-basis: 0; }
+.usage__free { background: var(--border); }
+.usage--ok .usage__used { background: var(--ok); }
+.usage--warn .usage__used { background: var(--warn); }
+.usage--bad .usage__used { background: var(--danger); }

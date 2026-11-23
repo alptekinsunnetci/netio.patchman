@@ -27,22 +27,23 @@ type HealthCheckDef struct {
 	HostID      int64
 	Hostname    string
 	WithUpdates bool
+	Monitor     bool // also runs in the agents' monitoring rounds
 	Enabled     bool
 	CreatedAt   time.Time
 }
 
 const healthCheckCols = `c.id, c.name, c.type, c.target, c.expect, c.contains, c.insecure, c.cpu, c.memory, c.disk, c.paths, c.timeout_seconds,
-	c.scope, COALESCE(c.group_id, 0), COALESCE(g.name, ''), COALESCE(c.host_id, 0), COALESCE(h.hostname, ''), c.with_updates, c.enabled, c.created_at`
+	c.scope, COALESCE(c.group_id, 0), COALESCE(g.name, ''), COALESCE(c.host_id, 0), COALESCE(h.hostname, ''), c.with_updates, c.monitor, c.enabled, c.created_at`
 
 const healthCheckFrom = ` FROM health_checks c LEFT JOIN host_groups g ON g.id = c.group_id LEFT JOIN hosts h ON h.id = c.host_id`
 
 func scanHealthCheck(row interface{ Scan(...any) error }) (HealthCheckDef, error) {
 	var c HealthCheckDef
-	var insecure, with, enabled int
+	var insecure, with, monitor, enabled int
 	var paths string
 	var created int64
 	err := row.Scan(&c.ID, &c.Name, &c.Type, &c.Target, &c.Expect, &c.Contains, &insecure, &c.CPU, &c.Memory, &c.Disk, &paths, &c.TimeoutSeconds,
-		&c.Scope, &c.GroupID, &c.GroupName, &c.HostID, &c.Hostname, &with, &enabled, &created)
+		&c.Scope, &c.GroupID, &c.GroupName, &c.HostID, &c.Hostname, &with, &monitor, &enabled, &created)
 	if errors.Is(err, sql.ErrNoRows) {
 		return c, ErrNotFound
 	}
@@ -50,7 +51,7 @@ func scanHealthCheck(row interface{ Scan(...any) error }) (HealthCheckDef, error
 		return c, err
 	}
 	_ = json.Unmarshal([]byte(paths), &c.Paths)
-	c.Insecure, c.WithUpdates, c.Enabled, c.CreatedAt = insecure == 1, with == 1, enabled == 1, fromTS(created)
+	c.Insecure, c.WithUpdates, c.Monitor, c.Enabled, c.CreatedAt = insecure == 1, with == 1, monitor == 1, enabled == 1, fromTS(created)
 	return c, nil
 }
 
@@ -64,19 +65,19 @@ func healthArgs(c HealthCheckDef) []any {
 		host = c.HostID
 	}
 	return []any{strings.TrimSpace(c.Name), c.Type, c.Target, c.Expect, c.Contains, boolInt(c.Insecure), c.CPU, c.Memory, c.Disk, string(paths), c.TimeoutSeconds,
-		c.Scope, group, host, boolInt(c.WithUpdates), boolInt(c.Enabled)}
+		c.Scope, group, host, boolInt(c.WithUpdates), boolInt(c.Monitor), boolInt(c.Enabled)}
 }
 
 // CreateHealthCheck stores a definition.
 func (s *Store) CreateHealthCheck(ctx context.Context, c HealthCheckDef) (int64, error) {
 	return insertID(ctx, s.db, `INSERT INTO health_checks (name, type, target, expect, contains, insecure, cpu, memory, disk, paths, timeout_seconds,
-		scope, group_id, host_id, with_updates, enabled, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, append(healthArgs(c), now())...)
+		scope, group_id, host_id, with_updates, monitor, enabled, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, append(healthArgs(c), now())...)
 }
 
 // UpdateHealthCheck replaces a definition.
 func (s *Store) UpdateHealthCheck(ctx context.Context, c HealthCheckDef) error {
 	res, err := s.db.ExecContext(ctx, `UPDATE health_checks SET name = ?, type = ?, target = ?, expect = ?, contains = ?, insecure = ?, cpu = ?, memory = ?, disk = ?,
-		paths = ?, timeout_seconds = ?, scope = ?, group_id = ?, host_id = ?, with_updates = ?, enabled = ? WHERE id = ?`, append(healthArgs(c), c.ID)...)
+		paths = ?, timeout_seconds = ?, scope = ?, group_id = ?, host_id = ?, with_updates = ?, monitor = ?, enabled = ? WHERE id = ?`, append(healthArgs(c), c.ID)...)
 	if err != nil {
 		return err
 	}
@@ -123,11 +124,22 @@ func (s *Store) healthChecks(ctx context.Context, tail string, args ...any) ([]H
 // one of its groups, or the host itself); withUpdates keeps only those that
 // run with update jobs.
 func (s *Store) ChecksForHost(ctx context.Context, hostID int64, withUpdates bool) ([]protocol.HealthCheck, error) {
-	cond := ` WHERE c.enabled = 1 AND (c.scope = 'all' OR (c.scope = 'host' AND c.host_id = ?)
-		OR (c.scope = 'group' AND c.group_id IN (SELECT group_id FROM host_group_members WHERE host_id = ?)))`
+	extra := ""
 	if withUpdates {
-		cond += ` AND c.with_updates = 1`
+		extra = ` AND c.with_updates = 1`
 	}
+	return s.checksForHost(ctx, hostID, extra)
+}
+
+// MonitorChecksForHost returns the enabled checks of a host that run in
+// the monitoring rounds.
+func (s *Store) MonitorChecksForHost(ctx context.Context, hostID int64) ([]protocol.HealthCheck, error) {
+	return s.checksForHost(ctx, hostID, ` AND c.monitor = 1`)
+}
+
+func (s *Store) checksForHost(ctx context.Context, hostID int64, extra string) ([]protocol.HealthCheck, error) {
+	cond := ` WHERE c.enabled = 1 AND (c.scope = 'all' OR (c.scope = 'host' AND c.host_id = ?)
+		OR (c.scope = 'group' AND c.group_id IN (SELECT group_id FROM host_group_members WHERE host_id = ?)))` + extra
 	defs, err := s.healthChecks(ctx, cond+` ORDER BY lower(c.name), c.id LIMIT ?`, hostID, hostID, protocol.MaxHealthChecks)
 	if err != nil {
 		return nil, err
@@ -144,7 +156,7 @@ type HealthResultRow struct {
 	protocol.HealthResult
 	HostID    int64
 	JobID     int64
-	Phase     string // "before", "after", "check"
+	Phase     string // "before", "after", "check", "monitor"
 	CreatedAt time.Time
 }
 
@@ -153,6 +165,8 @@ const (
 	HealthBefore = "before"
 	HealthAfter  = "after"
 	HealthCheck  = "check"
+	// HealthMonitor: a monitoring round changed the check between ok and failing.
+	HealthMonitor = "monitor"
 )
 
 // RecordHealth stores the results of a job's health report.

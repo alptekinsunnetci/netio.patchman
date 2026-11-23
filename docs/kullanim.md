@@ -229,7 +229,35 @@ Her sunucu için 0-100 arası bir güvenlik puanı hesaplanır (yüksek = iyi). 
 
 ## Yazılım Envanteri
 
-**Yazılım Envanteri** sayfası paket listesinden tanınan sunucu yazılımlarını gösterir: web ve uygulama sunucuları, veritabanları, dil çalışma zamanları, kontrol panelleri ve benzerleri. Paket adları ürün adına eşlenir (örneğin `nginx-core` → nginx, `php8.2-fpm` → PHP 8.2).
+**Yazılım Envanteri** sayfası paket listesinden tanınan sunucu yazılımlarını gösterir. Paket adları ürün adına eşlenir (örneğin `nginx-core` → Nginx, `php8.2-fpm` → PHP-FPM 8.2, `openjdk-17-jre-headless` → Java 17). Debian/Ubuntu, Red Hat ailesi, SUSE ve Alpine paket adları ile Windows'ta kurulu programların adları tanınır. Tanınan 88 ürün:
+
+| Kategori | Ürünler |
+|---|---|
+| Web sunucusu / proxy | Apache HTTP Server, Nginx, LiteSpeed, OpenLiteSpeed, lighttpd, Caddy, Traefik, HAProxy, Varnish, Squid, Apache Tomcat, IIS |
+| Veritabanı | MySQL, MariaDB, PostgreSQL, MongoDB, Microsoft SQL Server, ClickHouse, Cassandra, CouchDB, InfluxDB |
+| Önbellek | Redis, Valkey, Memcached |
+| Çalışma ortamı | PHP, PHP-FPM, Node.js, Python, Java (OpenJDK, Temurin, Corretto, Zulu, Oracle Java), .NET, Go, Ruby, Perl |
+| E-posta | Postfix, Exim, Dovecot, Sendmail, Microsoft Exchange Server |
+| Konteyner | Docker Engine, containerd, Podman, Kubernetes |
+| Mesaj kuyruğu | RabbitMQ, Apache Kafka, Apache ActiveMQ, Mosquitto |
+| Arama ve günlük analizi | Elasticsearch, OpenSearch, Kibana, Logstash |
+| DNS | BIND 9, Unbound, PowerDNS (Authoritative, Recursor) |
+| Dosya paylaşımı ve FTP | Samba, vsftpd, ProFTPD, Pure-FTPd, FileZilla Server |
+| VPN | OpenVPN, WireGuard, strongSwan |
+| Dizin ve kimlik | OpenLDAP, FreeIPA |
+| İzleme | Zabbix Server, Proxy ve Agent, Prometheus, Grafana, Nagios Core, Nagios NRPE, Netdata |
+| Geliştirme ve CI/CD | Jenkins, GitLab, GitLab Runner |
+| Altyapı servisleri | Consul, Vault, etcd, Keepalived |
+| Güvenlik | Fail2ban, ClamAV |
+| Barındırma ve yönetim paneli | cPanel & WHM, Plesk, DirectAdmin, Webmin, Cockpit |
+| Kütüphane | OpenSSL |
+| Uzaktan erişim | OpenSSH |
+
+Paket yöneticisi dışında kurulan ürünleri ajan kendisi tespit eder ve tabloda **Ajan tespiti** olarak gösterir:
+- **Linux:** cPanel (`/usr/local/cpanel/version`), Plesk (`/usr/local/psa/version`), LiteSpeed/OpenLiteSpeed (`/usr/local/lsws/VERSION`) ve DirectAdmin (kendi programının sürüm çıktısı).
+- **Windows:** IIS ve SQL Server örneklerinin yama seviyesi kayıt defterinden okunur.
+
+Bu tespit için ajan 1.0.1 veya sonrası gerekir.
 
 - **Yazılımlar:** Her ürünün hangi sunucularda, hangi sürüm serisiyle kurulu olduğu. Ürün sayfasında sunucu başına paket, sürüm ve servis durumu yer alır.
 - **Kurulu ve çalışan:** Ajan servis listesini de gönderir (systemd, OpenRC, Windows servisleri). Kurulu olup servisi çalışmayan yazılımlar ayrıca işaretlenir. Servis bilgisi yalnızca 1.0.0 ve üstü ajanlardan gelir.
@@ -308,7 +336,7 @@ Sunucu sayfasından başlatılan bir güncelleme önce **ön izleme** olarak ça
 
 ### Sağlık kontrolleri
 
-**Sistem Ayarları → Sağlık kontrolleri** sayfasında (yalnızca yöneticiler) güncellemeden önce ve sonra çalışacak kontroller tanımlanır. Her kontrol tüm sunuculara, bir gruba veya tek bir sunucuya uygulanabilir.
+**Sistem Ayarları → Sağlık kontrolleri** sayfasında (yalnızca yöneticiler) güncellemeden önce ve sonra, ayrıca sürekli izlemede çalışacak kontroller tanımlanır. Her kontrol tüm sunuculara, bir gruba veya tek bir sunucuya uygulanabilir.
 
 | Tür | Kontrol |
 |---|---|
@@ -322,6 +350,21 @@ Sunucu sayfasından başlatılan bir güncelleme önce **ön izleme** olarak ça
 - Güncelleme işinde kontroller önce çalışır. Bir kontrol başarısızsa varsayılan olarak güncelleme yapılmaz ve iş başarısız sayılır. **Önceden başarısız kontrol olsa da güncellemeye devam et** seçilirse güncelleme yine yapılır.
 - Güncellemeden sonra kontroller ayarlanan bekleme süresi geçince (varsayılan 15 saniye) yeniden çalışır. Önce başarılı olup sonra başarısız olan bir kontrol **bozulma** olarak işaretlenir. İş başarısız sayılır ve bildirim gönderilir.
 - Sonuçlar iş sayfasında ve sunucu sayfasının **Sağlık** sekmesinde görünür. Sunucu sayfasındaki **Sağlık kontrollerini çalıştır** düğmesi kontrolleri güncelleme yapmadan çalıştırır.
+
+#### Sürekli izleme
+
+Ajanlar sağlık kontrollerini güncelleme beklemeden, belirli aralıkla kendiliğinden çalıştırır (varsayılan 5 dakika). Her turda CPU yükünü, bellek, takas alanı ve tüm yerel disklerin kullanımını da bildirirler. Bunun için hiçbir kontrol tanımlamak gerekmez.
+
+- **Otomatik sınırlar:** Disk doluluğu %90'a, bellek kullanımı %95'e ulaşan sunucular kendiliğinden uyarı üretir. CPU yükü sınırı (çekirdek başına, yalnızca Linux) varsayılan olarak kapalıdır. Sınırlar ve izleme aralığı **Sistem Ayarları → Sürekli izleme** bölümünden değiştirilir; 0 ilgili sınırı veya izlemeyi kapatır.
+- **Bildirim:** Bir kontrol veya sınır art arda iki turda başarısız olursa bir kez bildirilir; tek turluk dalgalanmalar bildirim üretmez. Düzeldiğinde de bildirilir. Bildirim kanallarında bu bildirimler **Sağlık kontrolü ve kaynak uyarıları** olayına düşer.
+- **Hangi kontroller:** Her kontrolün **Ajanların sürekli izleme turlarında da çalıştır** seçeneği vardır (varsayılan açık). Ağır veya yalnızca güncellemede anlamlı kontroller için kapatılabilir.
+- **Görünüm:**
+  - Sunucu sayfasının **Sağlık** sekmesindeki **Anlık durum** bölümü yükü, belleği, takas alanını ve her diski çubuklarla gösterir; otomatik sınırların durumu ve son ölçüm zamanı da buradadır.
+  - Kontroller tablosunda her kontrolün en son sonucu ve ne zamandan beri o durumda olduğu yer alır.
+  - Sunucu listesinde sorunlu sunucular **Sağlık sorunu** etiketiyle işaretlenir; **Sağlık sorunu olanlar** süzgeciyle listelenebilir.
+- **Geçmiş:** Her tur saklanmaz; yalnızca bir kontrolün başarılıdan başarısıza (veya tersine) geçtiği anlar geçmişe **Sürekli izleme** aşamasıyla yazılır.
+- Ağ dosya sistemleri (NFS, CIFS) ölçülmez, çünkü erişilemeyen bir paylaşım ölçümü süresiz bekletebilir. Bunlar için bir yerel komut kontrolü kullanın.
+- Sürekli izleme ajan 1.0.1 veya sonrasını gerektirir. Eski ajanlarda kontroller yalnızca güncellemelerde ve elle başlatıldığında çalışır.
 
 ### Geri dönüş (rollback)
 

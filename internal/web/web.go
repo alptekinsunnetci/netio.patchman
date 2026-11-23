@@ -17,6 +17,7 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -308,6 +309,22 @@ func (s *Server) funcs() template.FuncMap {
 			return int(math.Round(float64(part) * 100 / float64(total)))
 		},
 		"online": func(h store.Host) bool { return h.Online(s.offlineAfter()) },
+		"usage":  usageBar,
+		"sub64":  func(a, b int64) int64 { return a - b },
+		"round":  func(v float64) int { return int(math.Round(v)) },
+		"dec": func(v float64) string {
+			return strings.Replace(strconv.FormatFloat(v, 'f', 2, 64), ".", l.T("number.decimal"), 1)
+		},
+		"healthLabel": func(name, typ string, id int64) string {
+			if id != 0 || !slices.Contains([]string{"disk", "memory", "cpu"}, typ) {
+				return name
+			}
+			label := l.T("health.resource." + typ)
+			if name != "" {
+				label += " (" + name + ")"
+			}
+			return label
+		},
 		"agentOutdated": func(h store.Host) bool {
 			return s.o.Release.Outdated(h.AgentVersion, h.OSID, h.Arch)
 		},
@@ -569,6 +586,7 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("GET /api/v1/eol", s.apiAuth(false, s.apiEOL))
 	mux.Handle("GET /api/v1/hosts/{id}/score", s.apiAuth(false, s.apiHostScore))
 	mux.Handle("GET /api/v1/drift", s.apiAuth(false, s.apiDrift))
+	mux.Handle("GET /api/v1/hosts/{id}/health", s.apiAuth(false, s.apiHostHealth))
 	mux.Handle("GET /api/v1/rollouts", s.apiAuth(false, s.apiRollouts))
 	mux.Handle("POST /api/v1/hosts/{id}/jobs", s.apiAuth(true, s.apiCreateJob))
 	mux.Handle("GET /api/v1/vulnerabilities", s.apiAuth(false, s.apiVulnerabilities))
@@ -800,4 +818,23 @@ func newPager(r *http.Request, page, total int) pager {
 func pathID(r *http.Request) (int64, bool) {
 	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 	return id, err == nil && id > 0
+}
+
+// usage is a usage bar: used and free shares (data-grow) and the level
+// against a warning limit (ok, warn within 10 points of it, bad at it).
+type usage struct {
+	Used, Free int
+	Level      string
+}
+
+func usageBar(pct float64, limit int) usage {
+	u := int(math.Round(min(max(pct, 0), 100)))
+	level := "ok"
+	switch {
+	case limit > 0 && pct >= float64(limit):
+		level = "bad"
+	case limit > 0 && pct >= float64(limit-10):
+		level = "warn"
+	}
+	return usage{Used: u, Free: 100 - u, Level: level}
 }

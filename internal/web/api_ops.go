@@ -101,3 +101,48 @@ func nonNilStrings(v []string) []string {
 	}
 	return v
 }
+
+// apiHostHealth returns a host's monitored checks and its latest resource
+// snapshot (null before the first monitoring round).
+func (s *Server) apiHostHealth(w http.ResponseWriter, r *http.Request) {
+	h, ok := s.apiHostOr404(w, r)
+	if !ok {
+		return
+	}
+	states, err := s.st.HostHealthStates(r.Context(), h.ID)
+	if err != nil {
+		s.apiError(w, http.StatusInternalServerError, "internal")
+		return
+	}
+	res, at, err := s.st.HostResources(r.Context(), h.ID)
+	if err != nil {
+		s.apiError(w, http.StatusInternalServerError, "internal")
+		return
+	}
+	type check struct {
+		Key       string    `json:"key"`
+		CheckID   int64     `json:"check_id"`
+		Name      string    `json:"name"`
+		Type      string    `json:"type"`
+		Builtin   bool      `json:"builtin"`
+		OK        bool      `json:"ok"`
+		Value     string    `json:"value"`
+		Message   string    `json:"message"`
+		Since     time.Time `json:"since"`
+		CheckedAt time.Time `json:"checked_at"`
+	}
+	out := make([]check, 0, len(states))
+	failing := 0
+	for _, st := range states {
+		out = append(out, check{Key: st.Key, CheckID: st.CheckID, Name: st.Name, Type: st.Type, Builtin: st.Builtin(), OK: st.OK, Value: st.Value,
+			Message: st.Message, Since: st.Since.UTC(), CheckedAt: st.CheckedAt.UTC()})
+		if !st.OK {
+			failing++
+		}
+	}
+	body := map[string]any{"host_id": h.ID, "hostname": h.Hostname, "failing": failing, "checks": out, "resources": res, "resources_at": nil}
+	if res != nil {
+		body["resources_at"] = at.UTC()
+	}
+	s.apiJSON(w, http.StatusOK, body)
+}

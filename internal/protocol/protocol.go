@@ -6,6 +6,7 @@
 //  2. POST /api/v1/agent/checkin   (every CheckinInterval) -> pending jobs
 //  3. POST /api/v1/agent/report    (inventory, gzip allowed)
 //  4. POST /api/v1/agent/jobs/{id}/result
+//  5. POST /api/v1/agent/health    (monitoring results, CapHealthMonitor)
 //
 // Steps 2-4 authenticate with "Authorization: Bearer <secret>".
 package protocol
@@ -15,6 +16,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 )
 
 // Paths.
@@ -23,6 +26,7 @@ const (
 	PathCheckin   = "/api/v1/agent/checkin"
 	PathReport    = "/api/v1/agent/report"
 	PathJobResult = "/api/v1/agent/jobs/{id}/result"
+	PathHealth    = "/api/v1/agent/health"
 )
 
 // Package managers.
@@ -79,6 +83,9 @@ const (
 	CapPreview = "preview"
 	// CapRollback: rollback jobs and JobResult.Changes on package jobs.
 	CapRollback = "rollback"
+	// CapHealthMonitor: the agent runs CheckinResponse.Health on its interval
+	// and posts a HealthStatus with its resource usage.
+	CapHealthMonitor = "health_monitor"
 )
 
 // Supports reports whether the agent declared capability c.
@@ -156,6 +163,114 @@ type CheckinResponse struct {
 	ReportRequested        bool  `json:"report_requested"`
 	CheckinIntervalSeconds int   `json:"checkin_interval_seconds"`
 	ReportIntervalSeconds  int   `json:"report_interval_seconds"`
+	// Health is the monitoring schedule (CapHealthMonitor agents only).
+	Health *HealthSchedule `json:"health,omitempty"`
+}
+
+// HealthSchedule asks the agent to run Checks every IntervalSeconds and to
+// post a HealthStatus (with resource usage even without checks).
+type HealthSchedule struct {
+	IntervalSeconds int           `json:"interval_seconds"`
+	Checks          []HealthCheck `json:"checks,omitempty"`
+}
+
+// HealthStatus is one monitoring run of an agent.
+type HealthStatus struct {
+	CheckedAt time.Time      `json:"checked_at"`
+	Results   []HealthResult `json:"results,omitempty"`
+	Resources *Resources     `json:"resources,omitempty"`
+}
+
+// Resources is a snapshot of the host's resource usage. Sizes are bytes;
+// Load is the 1, 5 and 15 minute load average (none on Windows).
+type Resources struct {
+	CPUs            int         `json:"cpus"`
+	Load            []float64   `json:"load,omitempty"`
+	MemoryTotal     int64       `json:"memory_total"`
+	MemoryAvailable int64       `json:"memory_available"`
+	SwapTotal       int64       `json:"swap_total"`
+	SwapFree        int64       `json:"swap_free"`
+	Disks           []DiskUsage `json:"disks,omitempty"`
+}
+
+// DiskUsage is one file system. Used and Available as df counts them
+// (Available excludes blocks reserved for root).
+type DiskUsage struct {
+	Path      string `json:"path"`
+	Total     int64  `json:"total"`
+	Used      int64  `json:"used"`
+	Available int64  `json:"available"`
+}
+
+// Percent is the use as df shows it: used over used plus available.
+func (d DiskUsage) Percent() float64 {
+	if d.Used+d.Available <= 0 {
+		return 0
+	}
+	return float64(d.Used) / float64(d.Used+d.Available) * 100
+}
+
+// MemoryPercent is the memory in use (total minus available); -1 unknown.
+func (r Resources) MemoryPercent() float64 {
+	if r.MemoryTotal <= 0 {
+		return -1
+	}
+	return float64(r.MemoryTotal-r.MemoryAvailable) / float64(r.MemoryTotal) * 100
+}
+
+// SwapPercent is the swap in use; -1 without swap.
+func (r Resources) SwapPercent() float64 {
+	if r.SwapTotal <= 0 {
+		return -1
+	}
+	return float64(r.SwapTotal-r.SwapFree) / float64(r.SwapTotal) * 100
+}
+
+// LoadPercent is the 1-minute load average per CPU core; -1 unknown.
+func (r Resources) LoadPercent() float64 {
+	if len(r.Load) == 0 || r.CPUs <= 0 {
+		return -1
+	}
+	return r.Load[0] / float64(r.CPUs) * 100
+}
+
+// MaxDisks bounds the file systems of one snapshot.
+const MaxDisks = 30
+
+// Clean bounds a received snapshot: no negative sizes, at most MaxDisks
+// file systems with printable paths.
+func (r *Resources) Clean() {
+	clamp := func(v *int64) {
+		if *v < 0 {
+			*v = 0
+		}
+	}
+	for _, v := range []*int64{&r.MemoryTotal, &r.MemoryAvailable, &r.SwapTotal, &r.SwapFree} {
+		clamp(v)
+	}
+	r.MemoryAvailable, r.SwapFree = min(r.MemoryAvailable, r.MemoryTotal), min(r.SwapFree, r.SwapTotal)
+	if r.CPUs < 0 || r.CPUs > 100000 {
+		r.CPUs = 0
+	}
+	if len(r.Load) > 3 {
+		r.Load = r.Load[:3]
+	}
+	for i, l := range r.Load {
+		if l < 0 || l > 1e6 {
+			r.Load[i] = 0
+		}
+	}
+	var disks []DiskUsage
+	for _, d := range r.Disks {
+		if len(disks) >= MaxDisks || d.Path == "" || len(d.Path) > 200 || !utf8.ValidString(d.Path) || strings.IndexFunc(d.Path, unicode.IsControl) >= 0 {
+			continue
+		}
+		clamp(&d.Total)
+		clamp(&d.Used)
+		clamp(&d.Available)
+		disks = append(disks, d)
+	}
+	r.Disks = disks
 }
 
 // Package is an installed package. SourceName/SourceVersion are the source
@@ -198,6 +313,33 @@ type Report struct {
 	// Services are the host's services (CapServices); nil when the agent
 	// does not report them or the service manager could not be read.
 	Services []Service `json:"services,omitempty"`
+	// Products are software installs the agent found outside the package
+	// manager (hosting panels, IIS, SQL Server on Windows). Older agents
+	// send none.
+	Products []Product `json:"products,omitempty"`
+}
+
+// Product is a probed software install: a catalog id (software.Probed)
+// and its version as the product reports it.
+type Product struct {
+	Software string `json:"software"`
+	Version  string `json:"version"`
+}
+
+var productVersionRE = regexp.MustCompile(`^[0-9A-Za-z][0-9A-Za-z.+~_-]{0,63}$`)
+
+// CleanProducts drops invalid entries and duplicates (at most 50 kept).
+func CleanProducts(in []Product, known func(string) bool) []Product {
+	var out []Product
+	seen := map[Product]bool{}
+	for _, p := range in {
+		if !known(p.Software) || !productVersionRE.MatchString(p.Version) || seen[p] || len(out) >= 50 {
+			continue
+		}
+		seen[p] = true
+		out = append(out, p)
+	}
+	return out
 }
 
 // Service states.

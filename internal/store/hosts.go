@@ -143,7 +143,7 @@ func (h Host) Supports(c string) bool { return h.HostInfo().Supports(c) }
 // HostFilter narrows the host list.
 type HostFilter struct {
 	Search  string
-	Status  string // "", "online", "offline", "reboot", "vulnerable", "updates"
+	Status  string // "", "online", "offline", "reboot", "vulnerable", "updates", "health" (a monitored check fails)
 	OSID    string
 	GroupID int64
 	// Platform is "virtual", "physical", "unknown" or one virtualization id.
@@ -236,6 +236,8 @@ func hostWhere(f HostFilter) (string, []any) {
 		conds = append(conds, `EXISTS (SELECT 1 FROM findings f WHERE f.host_id = h.id AND f.status IN `+activeStatuses+`)`)
 	case "updates":
 		conds = append(conds, `EXISTS (SELECT 1 FROM host_updates u WHERE u.host_id = h.id)`)
+	case "health":
+		conds = append(conds, `EXISTS (SELECT 1 FROM host_health_state hs WHERE hs.host_id = h.id AND hs.ok = 0)`)
 	}
 	if len(conds) == 0 {
 		return "", nil

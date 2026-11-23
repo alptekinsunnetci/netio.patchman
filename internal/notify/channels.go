@@ -32,6 +32,13 @@ func Text(l i18n.Localizer, n store.Notification) string {
 			v = l.T(vuln.Severity(v).LabelKey())
 		case "job_type":
 			v = l.T("job.type." + v)
+		case "resource":
+			v = l.T("health.resource." + v)
+		case "target":
+			// The file system of a disk limit, shown after the resource name.
+			if v != "" {
+				v = " (" + v + ")"
+			}
 		}
 		args = append(args, k, v)
 	}

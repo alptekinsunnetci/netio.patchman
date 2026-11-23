@@ -124,6 +124,10 @@ func populate(t *testing.T, s *Store) {
 		Events: []string{"kev"}, Config: map[string]string{"project": "OPS"}})
 	must(err)
 	must(s.RecordDelivery(ctx, Delivery{ChannelID: chID, Event: "kev", Kind: "vuln_detected", OK: true, Attempts: 1, DurationMS: 12, Payload: "{}"}))
+	_, err = s.SaveMonitoring(ctx, hosts[0], &protocol.Resources{CPUs: 2, MemoryTotal: 4 << 30, MemoryAvailable: 1 << 30,
+		Disks: []protocol.DiskUsage{{Path: "/", Total: 10 << 30, Used: 9 << 30, Available: 1 << 30}}},
+		[]MonitorResult{{Key: MonitorDiskPrefix + "/", Type: "disk", OK: false, Value: "90%"}})
+	must(err)
 	must(s.TakeSnapshot(ctx, time.Now()))
 }
 

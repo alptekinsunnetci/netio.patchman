@@ -41,6 +41,8 @@
 
 {{define "score"}}{{if lt . 0}}<span class="muted" title="{{t "score.pending"}}">{{t "common.empty"}}</span>{{else}}<span class="score score--{{scoreBand .}}">{{.}}</span>{{end}}{{end}}
 
+{{define "usagebar"}}<span class="usage usage--{{.Level}}" role="img" aria-label="{{.Used}}%"><span class="usage__used" data-grow="{{.Used}}"></span><span class="usage__free" data-grow="{{.Free}}"></span></span>{{end}}
+
 {{define "healthpill"}}{{if .}}<span class="pill pill--online">{{t "health.ok"}}</span>{{else}}<span class="pill pill--danger">{{t "health.fail"}}</span>{{end}}{{end}}
 
 {{define "rolloutstatus"}}<span class="pill {{if eq . "completed"}}pill--online{{else if eq . "failed"}}pill--danger{{else if eq . "running"}}pill--queued{{else if eq . "paused"}}pill--warning{{else}}pill--muted{{end}}">{{t (printf "rollout.status.%s" .)}}</span>{{end}}

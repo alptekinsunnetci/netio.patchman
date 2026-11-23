@@ -55,6 +55,10 @@ const (
 	KeyScoreAlertBelow      = "score.alert_below"
 	KeyHealthPolicy         = "health.policy"
 	KeyHealthDelay          = "health.delay_seconds"
+	KeyHealthMonitor        = "health.monitor_minutes"
+	KeyHealthDiskWarn       = "health.disk_warn"
+	KeyHealthMemoryWarn     = "health.memory_warn"
+	KeyHealthCPUWarn        = "health.cpu_warn"
 	KeyRequirePreview       = "updates.require_preview"
 )
 
@@ -139,6 +143,14 @@ type Values struct {
 	// the update and the checks after it.
 	HealthContinue bool
 	HealthDelay    int
+	// HealthMonitor is how often agents run the checks on their own and
+	// report resource usage (minutes, 0 = off). The built-in limits warn
+	// when disk, memory or CPU load (per core, Linux) use reaches the
+	// percentage (0 = off).
+	HealthMonitor    int
+	HealthDiskWarn   int
+	HealthMemoryWarn int
+	HealthCPUWarn    int
 	// RequirePreview: an update started on a server page first runs a dry
 	// run; the update starts only after the plan is approved.
 	RequirePreview bool
@@ -185,6 +197,9 @@ func Defaults() Values {
 		EOLNotify:            true,
 		ScoreWeights:         score.DefaultWeights(),
 		HealthDelay:          15,
+		HealthMonitor:        5,
+		HealthDiskWarn:       90,
+		HealthMemoryWarn:     95,
 		RequirePreview:       true,
 	}
 }
@@ -272,6 +287,10 @@ func FromMap(raw map[string]string) Values {
 	i(KeyScoreAlertBelow, &v.ScoreAlertBelow, 0, 100)
 	v.HealthContinue = raw[KeyHealthPolicy] == "continue"
 	i(KeyHealthDelay, &v.HealthDelay, 0, 600)
+	i(KeyHealthMonitor, &v.HealthMonitor, 0, 1440)
+	i(KeyHealthDiskWarn, &v.HealthDiskWarn, 0, 100)
+	i(KeyHealthMemoryWarn, &v.HealthMemoryWarn, 0, 100)
+	i(KeyHealthCPUWarn, &v.HealthCPUWarn, 0, 1000)
 	b(KeyRequirePreview, &v.RequirePreview)
 	return v
 }

@@ -44,6 +44,7 @@ netio.patchman'deki sunucu, güvenlik açığı, güncelleme ve iş verilerini b
 | GET | `/api/v1/software` | Filodaki yazılımlar. Süzgeçler: `software` (ürün kimliği, ör. `nginx`, `php`), `cycle` (ör. `8.2`) |
 | GET | `/api/v1/eol` | İşletim sistemi ve yazılım destek durumları (`status`: `supported`, `soon`, `eol`, `unknown`; `distro_supported`: dağıtım sürdürüyor) |
 | GET | `/api/v1/hosts/{id}/score` | Güvenlik puanı (`score`, `band`), toplam kesinti ve ölçüt bazında ayrıntı (`categories`). Puan henüz hesaplanmadıysa `score: null` |
+| GET | `/api/v1/hosts/{id}/health` | Sürekli izleme: kontrollerin ve otomatik sınırların anlık durumu (`checks`: `key`, `name`, `type`, `builtin`, `ok`, `value`, `since`, `checked_at`), başarısız sayısı (`failing`) ve son kaynak ölçümü (`resources`: `cpus`, `load`, `memory_total`, `memory_available`, `swap_total`, `swap_free`, `disks[]` bayt cinsinden; `resources_at`) |
 | GET | `/api/v1/drift` | Standart sapmaları. Süzgeçler: `standard`, `host`, `group`. Her kayıtta kural (`kind`, `subject_type`, `subject`, `expected`), bulunan durum (`found`), `first_seen` ve varsa önerilen güncelleme (`suggested_update`) |
 | GET | `/api/v1/rollouts` | Kademeli güncellemeler, en yeni önce: durum, aşama, sunucu sayıları (`hosts.total`, `succeeded`, `failed`…). Grup bazlı sınırlı anahtarlara kapalıdır (`403`) |
 | GET | `/metrics` | Prometheus metrikleri |
@@ -137,6 +138,10 @@ scrape_configs:
 | `netio_patchman_host_vulnerabilities` | `host`, `os`, `severity` | Sunucudaki açık CVE sayısı |
 | `netio_patchman_host_updates_pending` | `host`, `os`, `kind` | Sunucudaki bekleyen güncellemeler |
 | `netio_patchman_host_reboot_required` | `host`, `os` | Sunucu yeniden başlatma bekliyorsa 1 |
+| `netio_patchman_host_health_failing` | `host`, `os` | Sunucuda başarısız olan izlenen kontrol ve otomatik sınır sayısı |
+| `netio_patchman_host_memory_used_percent` | `host`, `os` | Bellek kullanımı (toplam eksi kullanılabilir) |
+| `netio_patchman_host_load_per_cpu_percent` | `host`, `os` | 1 dakikalık yük ortalamasının çekirdek sayısına oranı (Linux) |
+| `netio_patchman_host_disk_used_percent` | `host`, `os`, `path` | Dosya sistemi doluluğu (df'nin gösterdiği gibi). Kaynak metrikleri yalnızca güncel ölçümler için yazılır (son 3 izleme aralığı, en az 15 dakika); bağlantısı kesilen sunucunun eski değerleri uyarı üretmez. |
 | `netio_patchman_security_score` | `stat` (`avg`, `min`) | Filonun ortalama ve en düşük güvenlik puanı (puanlanmış sunucu yoksa yazılmaz) |
 | `netio_patchman_eol` | `kind` (`os`, `software`), `status` (`eol`, `soon`, `eol_distro_maintained`) | Desteği bitmiş veya yakında bitecek işletim sistemi (sunucu) ve yazılım kurulumu sayısı |
 | `netio_patchman_drift_deviations` | — | Açık standart sapmaları |
@@ -157,6 +162,9 @@ groups:
         for: 30m
       - alert: SLASuresiGecti
         expr: netio_patchman_findings_overdue > 0
+      - alert: DiskDoluyor
+        expr: netio_patchman_host_disk_used_percent > 90
+        for: 15m
       - alert: GuvenlikPuaniDusuk
         expr: netio_patchman_security_score{stat="min"} < 50
         for: 1h

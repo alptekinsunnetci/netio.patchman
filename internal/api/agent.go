@@ -111,6 +111,7 @@ func (s *Server) Register(mux *http.ServeMux) {
 	mux.HandleFunc("POST "+protocol.PathCheckin, s.authed(s.checkin))
 	mux.HandleFunc("POST "+protocol.PathReport, s.authed(s.report))
 	mux.HandleFunc("POST "+protocol.PathJobResult, s.authed(s.jobResult))
+	mux.HandleFunc("POST "+protocol.PathHealth, s.authed(s.health))
 	mux.HandleFunc("GET /downloads/agent/{file}", s.download)
 	mux.HandleFunc("GET /downloads/{file}", s.asset)
 }
@@ -290,6 +291,7 @@ func (s *Server) checkin(w http.ResponseWriter, r *http.Request, hostID int64) {
 		ReportRequested:        reportDue,
 		CheckinIntervalSeconds: cfg.AgentCheckinSeconds,
 		ReportIntervalSeconds:  cfg.AgentReportMinutes * 60,
+		Health:                 s.monitorSchedule(r.Context(), hostID, req.Host, cfg),
 	})
 }
 
@@ -453,7 +455,8 @@ func (s *Server) syncSoftware(ctx context.Context, hostID int64, rep protocol.Re
 		// The agent could not read its services this time: use the last list.
 		services, known, _ = s.o.Store.HostServices(ctx, hostID)
 	}
-	found := software.Detect(rep.Host.PackageManager, rep.Packages, services, known)
+	products := protocol.CleanProducts(rep.Products, func(id string) bool { return slices.Contains(software.Probed, id) })
+	found := software.Detect(rep.Host.PackageManager, rep.Packages, products, services, known)
 	items := make([]store.SoftwareItem, len(found))
 	for i, f := range found {
 		items[i] = store.SoftwareItem{Software: f.Software, Cycle: f.Cycle, Version: f.Version, Package: f.Package,

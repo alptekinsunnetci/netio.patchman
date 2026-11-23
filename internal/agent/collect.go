@@ -69,6 +69,8 @@ type Inventory struct {
 	KernelPatch *protocol.KernelPatch
 	// ServiceList is every service with its state; nil when unreadable.
 	ServiceList []protocol.Service
+	// Products are software installs outside the package manager.
+	Products []protocol.Product
 }
 
 // Collect gathers packages, pending updates, the reboot flag and services
@@ -91,7 +93,8 @@ func (c Collector) Collect(ctx context.Context) Inventory {
 	if err != nil {
 		errs = append(errs, "services: "+err.Error())
 	}
-	return Inventory{Packages: pkgs, Updates: updates, Reboot: reboot || kernelPending, Services: services, Errors: errs, KernelPatch: kp, ServiceList: list}
+	return Inventory{Packages: pkgs, Updates: updates, Reboot: reboot || kernelPending, Services: services, Errors: errs, KernelPatch: kp, ServiceList: list,
+		Products: ProbeProducts(ctx)}
 }
 
 // PendingUpdates lists pending updates without refreshing the package lists.

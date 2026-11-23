@@ -24,6 +24,7 @@
       <option value="vulnerable"{{if eq $d.Filter.Status "vulnerable"}} selected{{end}}>{{t "servers.filter.vulnerable"}}</option>
       <option value="updates"{{if eq $d.Filter.Status "updates"}} selected{{end}}>{{t "servers.filter.updates"}}</option>
       <option value="reboot"{{if eq $d.Filter.Status "reboot"}} selected{{end}}>{{t "servers.filter.reboot"}}</option>
+      <option value="health"{{if eq $d.Filter.Status "health"}} selected{{end}}>{{t "servers.filter.health"}}</option>
     </select>
   </label>
   {{if $d.OSOptions}}
@@ -118,7 +119,7 @@
       {{if $op}}<td class="check"><input type="checkbox" name="host_ids" value="{{.ID}}" aria-label="{{.Hostname}}"></td>{{end}}
       <td>
         <a href="/servers/{{.ID}}"><strong>{{.Hostname}}</strong></a>
-        {{if .RebootRequired}}<span class="pill pill--warning" title="{{t "host.reboot_required_hint"}}{{if not .RebootRequiredSince.IsZero}} {{t "host.reboot_since" "since" (ago .RebootRequiredSince)}}{{end}}">{{t "host.reboot_required"}}</span>{{end}}
+        {{$hid := .ID}}{{with index $d.HealthFailing .ID}}<a class="pill pill--danger" href="/servers/{{$hid}}?tab=health">{{t "host.health_failing" "n" .}}</a>{{end}}{{if .RebootRequired}}<span class="pill pill--warning" title="{{t "host.reboot_required_hint"}}{{if not .RebootRequiredSince.IsZero}} {{t "host.reboot_since" "since" (ago .RebootRequiredSince)}}{{end}}">{{t "host.reboot_required"}}</span>{{end}}
         <div class="cell-sub mono">{{join .IPAddresses ", "}}</div>
         {{if .Groups}}<div class="tags">{{range .Groups}}<a class="tag" href="/servers?group={{.ID}}">{{.Name}}</a>{{end}}</div>{{end}}
       </td>

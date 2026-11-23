@@ -27,7 +27,7 @@
     <tr>
       <td><a href="/servers/{{.HostID}}?tab=software">{{.Hostname}}</a><div class="cell-sub">{{.OSName}}</div></td>
       <td class="mono">{{.Version}} <span class="muted">({{.Cycle}})</span></td>
-      <td class="mono cell-sub">{{.Package}} {{.PackageVersion}}</td>
+      <td class="mono cell-sub">{{if .Package}}{{.Package}} {{.PackageVersion}}{{else}}<span class="muted" title="{{t "software.probed_hint"}}">{{t "software.probed"}}</span>{{end}}</td>
       <td>{{template "running" .Running}}{{if .Service}} <span class="muted mono">{{.Service}}</span>{{end}}</td>
       <td>{{if .CVECount}}<a href="/servers/{{.HostID}}?q={{.Package}}">{{template "sev" .Severity}} {{t "watch.cve_count" "n" .CVECount}}</a>{{if .KnownExploited}} {{template "kev"}}{{end}}{{else}}<span class="muted">{{t "watch.no_vulns"}}</span>{{end}}</td>
     </tr>

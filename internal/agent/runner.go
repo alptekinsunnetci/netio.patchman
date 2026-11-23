@@ -7,6 +7,7 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"sort"
+	"sync/atomic"
 	"time"
 
 	"netio.patchman/internal/i18n"
@@ -25,6 +26,10 @@ type Runner struct {
 	updater   SelfUpdater
 	pm        string
 	restart   bool
+	// Monitoring rounds (CheckinResponse.Health): next due time, and
+	// whether a round is still running.
+	healthNext time.Time
+	healthBusy atomic.Bool
 }
 
 // RestartRequested reports whether the agent replaced its binary and must be
@@ -133,7 +138,7 @@ func (r *Runner) sendReport(ctx context.Context) {
 	inv := r.collector.Collect(ctx)
 	rep := protocol.Report{
 		Host: r.hostInfo(), Packages: inv.Packages, Updates: inv.Updates, RebootRequired: inv.Reboot,
-		RestartServices: inv.Services, CollectedAt: timeutil.Now(), Errors: inv.Errors, KernelPatch: inv.KernelPatch, Services: inv.ServiceList,
+		RestartServices: inv.Services, CollectedAt: timeutil.Now(), Errors: inv.Errors, KernelPatch: inv.KernelPatch, Services: inv.ServiceList, Products: inv.Products,
 	}
 	for _, e := range inv.Errors {
 		r.logger.Warn(r.l.T("log.agent.collect_warning"), slog.String("error", e))

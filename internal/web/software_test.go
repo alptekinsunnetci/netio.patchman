@@ -74,6 +74,21 @@ func TestSoftwareInventoryPages(t *testing.T) {
 		t.Errorf("unknown software: %d", status)
 	}
 
+	// Products the agent probed outside the package manager; unknown ids and
+	// bad versions are dropped.
+	if err := client.Report(ctx, protocol.Report{Host: info, CollectedAt: timeutil.Now(), Packages: []protocol.Package{nginx, php},
+		Services: []protocol.Service{{Name: "nginx", State: "running", Enabled: true}, {Name: "php8.2-fpm", State: "failed"}, {Name: "cron", State: "stopped"},
+			{Name: "cpanel", State: "running"}},
+		Products: []protocol.Product{{Software: "cpanel", Version: "11.124.0.15"}, {Software: "nginx", Version: "9.9.9"}, {Software: "plesk", Version: "$(id)"}}}); err != nil {
+		t.Fatal(err)
+	}
+	status, body, _ = e.do(admin, "GET", "/software/cpanel", nil)
+	expect(t, "probed product", status, 200, body, "cPanel &amp; WHM", "web-07", "11.124.0.15", "Ajan tespiti")
+	if sw, _ := e.st.HostSoftware(ctx, id); len(sw) != 3 {
+		t.Errorf("probed products accepted: %+v", sw)
+	}
+	report([]protocol.Package{nginx, php}, []protocol.Service{{Name: "nginx", State: "running", Enabled: true}, {Name: "php8.2-fpm", State: "failed"}, {Name: "cron", State: "stopped"}})
+
 	// Second report: nginx upgraded, PHP-FPM removed, Redis installed.
 	nginx.Version = "1.22.1-9+deb12u1"
 	report([]protocol.Package{nginx, {Name: "redis-server", Version: "5:7.0.15-1~deb12u1", Arch: "amd64", SourceName: "redis"}},

@@ -49,7 +49,7 @@ func EventOf(n store.Notification) string {
 		return "rollback"
 	case "reboot_required":
 		return "reboot_required"
-	case "health_regressed", "health_aborted", "health_failed":
+	case "health_regressed", "health_aborted", "health_failed", "health_down", "health_up", "resource_high", "resource_ok":
 		return "health_failed"
 	case "sla_overdue":
 		return "sla_overdue"
