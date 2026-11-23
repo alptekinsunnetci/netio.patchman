@@ -45,7 +45,7 @@ func (s *Server) standards(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data["Standards"] = list
-	d := s.page(r, s.l.T("nav.standards"), "standards")
+	d := s.page(r, s.l.T("nav.standards"), "compliance_policies")
 	d.Data = data
 	s.render(w, r, http.StatusOK, "standards", d)
 }
@@ -73,7 +73,7 @@ func (s *Server) renderStandardForm(w http.ResponseWriter, r *http.Request, stat
 	if st.ID != 0 {
 		title = st.Name
 	}
-	d := s.page(r, title, "standards")
+	d := s.page(r, title, "compliance_policies")
 	d.Error = errMsg
 	d.Data = map[string]any{"S": st, "Rows": rows, "Groups": groups, "Kinds": drift.Kinds, "Catalog": software.Catalog}
 	s.render(w, r, status, "standard", d)

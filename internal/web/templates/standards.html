@@ -9,6 +9,7 @@
   </div>
   {{if .User.IsAdmin}}<div class="pagehead__actions"><a class="button button--primary" href="/standards/new">{{template "icon" "plus"}}{{t "standard.new"}}</a></div>{{end}}
 </header>
+{{template "policytabs" "standards"}}
 
 <nav class="tabs">
   <a class="tab{{if eq $d.Tab "standards"}} is-active{{end}}" href="/standards">{{t "standard.tab.standards"}}</a>

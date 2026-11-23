@@ -88,7 +88,14 @@
   <a class="tab{{if eq . "channels"}} is-active{{end}}" href="/settings/channels">{{t "channels.title"}}</a>
   <a class="tab{{if eq . "health"}} is-active{{end}}" href="/settings/health">{{t "health.title"}}</a>
   <a class="tab{{if eq . "score"}} is-active{{end}}" href="/settings/score">{{t "score.settings_title"}}</a>
-  <a class="tab{{if eq . "audit"}} is-active{{end}}" href="/settings/audit">{{t "audit.title"}}</a>
+</nav>{{end}}
+
+{{define "evsubject"}}{{if eq .Kind "audit_event"}}{{t (printf "audit.action.%s" .Subject)}}{{else if or (eq .Kind "update_job") (eq .Kind "change_job")}}{{jobType .Subject}}{{with .Outcome}} <span class="muted">· {{jobStatus .}}</span>{{end}}{{else}}<span class="mono">{{truncate .Subject 70}}</span>{{if and .Outcome (ne .Outcome "recorded")}} <span class="muted">{{.Outcome}}</span>{{end}}{{end}}{{end}}
+
+{{define "policytabs"}}<nav class="tabs" aria-label="{{t "nav.compliance_policies"}}">
+  <a class="tab{{if eq . "general"}} is-active{{end}}" href="/compliance/policies">{{t "compliance.policies.tab.general"}}</a>
+  <a class="tab{{if eq . "controls"}} is-active{{end}}" href="/compliance/policies?tab=controls">{{t "compliance.policies.tab.controls"}}</a>
+  <a class="tab{{if eq . "standards"}} is-active{{end}}" href="/standards">{{t "nav.standards"}}</a>
 </nav>{{end}}
 
 {{define "trendfigs"}}

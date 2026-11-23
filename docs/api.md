@@ -47,6 +47,9 @@ netio.patchman'deki sunucu, güvenlik açığı, güncelleme ve iş verilerini b
 | GET | `/api/v1/hosts/{id}/health` | Kaynak izleme: kontrollerin ve otomatik sınırların anlık durumu (`checks`: `key`, `name`, `type`, `builtin`, `ok`, `value`, `since`, `checked_at`), başarısız sayısı (`failing`) ve son kaynak ölçümü (`resources`: `cpus`, `cpu_percent` (ölçüm aralığındaki ortalama, ajan 1.0.2+), `load`, `memory_total`, `memory_available`, `swap_total`, `swap_free`, `disks[]` bayt cinsinden; `resources_at`) |
 | GET | `/api/v1/drift` | Standart sapmaları. Süzgeçler: `standard`, `host`, `group`. Her kayıtta kural (`kind`, `subject_type`, `subject`, `expected`), bulunan durum (`found`), `first_seen` ve varsa önerilen güncelleme (`suggested_update`) |
 | GET | `/api/v1/rollouts` | Kademeli güncellemeler, en yeni önce: durum, aşama, sunucu sayıları (`hosts.total`, `succeeded`, `failed`…). Grup bazlı sınırlı anahtarlara kapalıdır (`403`) |
+| GET | `/api/v1/compliance/reports` | Uyum raporları: başlık, çerçeveler (`profiles`, ör. `isms@1`), dönem (`period_from`, `period_to` hariç), kapsam (`group_id`, `platforms`), sürüm sayısı, son sürüm ve durumu (`draft`, `final`). Grup bazlı sınırlı anahtarlar yalnızca kendi gruplarının raporlarını görür |
+| GET | `/api/v1/compliance/reports/{id}/versions/{n}` | Bir rapor sürümünün JSON dışa aktarımı (`netio.patchman/compliance-export/v1`): sürüm bilgisi ve hash'ler, saklanan rapor içeriği (`report`), kontrol başına otomatik sonuç ve manuel inceleme (`assessments`), kullanılan tüm kanıtlar hash'leri ve eşlendikleri kontrollerle (`evidence`). `n` = 0 son sürümdür |
+| GET | `/api/v1/compliance/evidence` | Kanıt deposu, en yeni önce. Süzgeçler: `kind` (`update_job`, `change_job`, `vuln_resolved`, `audit_event`, `drift_detected`, `backup_result`, `inventory_snapshot`, `manual`), `platform` (`linux`, `windows_server`, `windows_10`, `windows_11`, `windows_other`), `q`, `from`, `to` (`YYYY-AA-GG`), `version` (rapor sürümü no) ve `control` (`profil:KONTROL`). Her kayıtta `sha256` ve zincirdeki önceki kaydın `prev_sha256` değeri bulunur. Denetim kayıtları (`audit_event`) yalnızca yönetici anahtarlarına gösterilir |
 | GET | `/metrics` | Prometheus metrikleri |
 
 Sunucu kayıtlarında ayrıca `security_score` (henüz hesaplanmadıysa `null`) ve ajanın bildirdiği yetenekler (`capabilities`: `services`, `health`, `preview`, `rollback`) bulunur.
@@ -83,6 +86,9 @@ curl -s -H "Authorization: Bearer $KEY" "$BASE/api/v1/vulnerabilities?overdue=1&
 # Bir sunucuda güvenlik güncellemelerini başlat
 curl -s -X POST -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
   -d '{"type":"upgrade_security"}' "$BASE/api/v1/hosts/12/jobs"
+
+# Bir uyum raporunun son sürümünü JSON olarak indir
+curl -s -H "Authorization: Bearer $KEY" "$BASE/api/v1/compliance/reports/3/versions/0" -o rapor.json
 
 # Belirli paketleri güncelle
 curl -s -X POST -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \

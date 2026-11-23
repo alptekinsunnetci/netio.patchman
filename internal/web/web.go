@@ -126,16 +126,19 @@ type navItem struct {
 var navigation = []navItem{
 	{"dashboard", "/dashboard", "dashboard", "overview"},
 	{"notifications", "/notifications", "bell", "overview"},
-	{"reports", "/reports", "report", "overview"},
 	{"servers", "/servers", "server", "inventory"},
 	{"groups", "/groups", "tag", "inventory"},
 	{"software", "/software", "layers", "inventory"},
 	{"packages", "/packages", "package", "inventory"},
 	{"vulnerabilities", "/vulnerabilities", "shield", "security"},
-	{"standards", "/standards", "check", "security"},
 	{"jobs", "/jobs", "jobs", "updates"},
 	{"rollouts", "/rollouts", "rollout", "updates"},
 	{"schedules", "/schedules", "calendar", "updates"},
+	{"compliance", "/compliance", "audit", "compliance"},
+	{"compliance_reports", "/compliance/reports", "report", "compliance"},
+	{"compliance_evidence", "/compliance/evidence", "evidence", "compliance"},
+	{"compliance_history", "/compliance/history", "history", "compliance"},
+	{"compliance_policies", "/compliance/policies", "check", "compliance"},
 	{"agents", "/agents", "agent", "admin"},
 	{"users", "/users", "users", "admin"},
 	{"settings", "/settings", "settings", "admin"},
@@ -143,8 +146,9 @@ var navigation = []navItem{
 
 var pageNames = []string{
 	"login", "loginmfa", "setup", "error", "dashboard", "servers", "server", "vulnerabilities", "vulnerability",
-	"packages", "package", "jobs", "job", "schedules", "schedule", "agents", "notifications", "users", "user", "profile", "settings", "audit", "system",
-	"groups", "group", "report", "channels", "software", "softwareitem", "hostscore", "scoresettings", "healthchecks", "rollouts", "rolloutnew", "rollout", "standards", "standard", "channel",
+	"packages", "package", "jobs", "job", "schedules", "schedule", "agents", "notifications", "users", "user", "profile", "settings", "system",
+	"groups", "group", "channels", "software", "softwareitem", "hostscore", "scoresettings", "healthchecks", "rollouts", "rolloutnew", "rollout", "standards", "standard", "channel",
+	"compliance", "compliancereports", "compliancereport", "complianceevidence", "complianceitem", "compliancehistory", "compliancepolicies",
 }
 
 // New parses templates and returns the Server for the default language
@@ -403,6 +407,20 @@ func (s *Server) funcs() template.FuncMap {
 			}
 			return string(r[:n]) + "…"
 		},
+		// Compliance & audit labels.
+		"outcomeLabel": func(o string) string { return l.T("compliance.outcome." + o) },
+		"outcomeClass": outcomeClass,
+		"platform":     func(p string) string { return l.T("compliance.platform." + p) },
+		"evidenceKind": func(k string) string { return l.T("compliance.kind." + k) },
+		"reviewLabel":  func(st string) string { return l.T("compliance.review." + st) },
+		// lastDay is the last moment before an exclusive period end.
+		"lastDay": func(t time.Time) time.Time { return t.Add(-time.Second) },
+		"shortHash": func(h string) string {
+			if len(h) > 12 {
+				return h[:12]
+			}
+			return h
+		},
 	}
 }
 
@@ -497,7 +515,26 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("POST /groups/{id}", admin(s.groupUpdate))
 	mux.Handle("POST /groups/{id}/delete", admin(s.groupDelete))
 
-	mux.Handle("GET /reports", view(s.report))
+	// The compliance report moved into Compliance & audit.
+	mux.Handle("GET /reports", view(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/compliance/reports", http.StatusMovedPermanently)
+	}))
+	mux.Handle("GET /compliance", view(s.complianceOverview))
+	mux.Handle("GET /compliance/reports", view(s.complianceReports))
+	mux.Handle("POST /compliance/reports", operate(s.complianceReportCreate))
+	mux.Handle("GET /compliance/reports/{id}", view(s.complianceReport))
+	mux.Handle("POST /compliance/reports/{id}/regenerate", operate(s.complianceRegenerate))
+	mux.Handle("POST /compliance/reports/{id}/delete", admin(s.complianceDelete))
+	mux.Handle("POST /compliance/reports/{id}/versions/{n}/review", admin(s.complianceReview))
+	mux.Handle("POST /compliance/reports/{id}/versions/{n}/finalize", admin(s.complianceFinalize))
+	mux.Handle("GET /compliance/reports/{id}/versions/{n}/export", view(s.complianceExport))
+	mux.Handle("GET /compliance/evidence", view(s.complianceEvidence))
+	mux.Handle("POST /compliance/evidence", operate(s.complianceEvidenceAdd))
+	mux.Handle("GET /compliance/evidence/{id}", view(s.complianceEvidenceItem))
+	mux.Handle("GET /compliance/history", view(s.complianceHistory))
+	mux.Handle("GET /compliance/policies", view(s.compliancePolicies))
+	mux.Handle("POST /compliance/policies", admin(s.compliancePoliciesSave))
+	mux.Handle("POST /compliance/policies/controls", admin(s.complianceControlsSave))
 
 	mux.Handle("GET /vulnerabilities", view(s.vulnerabilities))
 	mux.Handle("GET /vulnerabilities.csv", view(s.vulnerabilitiesCSV))
@@ -568,7 +605,9 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("POST /settings", admin(s.settingsSave))
 	mux.Handle("POST /settings/test-email", admin(s.settingsTestEmail))
 	mux.Handle("POST /settings/scan-now", admin(s.settingsScanNow))
-	mux.Handle("GET /settings/audit", admin(s.auditLog))
+	mux.Handle("GET /settings/audit", admin(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/compliance/history?tab=audit", http.StatusMovedPermanently)
+	}))
 	mux.Handle("GET /settings/system", admin(s.systemConfig))
 	mux.Handle("POST /settings/system", admin(s.systemSave))
 	mux.Handle("POST /settings/system/reset", admin(s.systemReset))
@@ -607,6 +646,9 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("GET /api/v1/drift", s.apiAuth(false, s.apiDrift))
 	mux.Handle("GET /api/v1/hosts/{id}/health", s.apiAuth(false, s.apiHostHealth))
 	mux.Handle("GET /api/v1/rollouts", s.apiAuth(false, s.apiRollouts))
+	mux.Handle("GET /api/v1/compliance/reports", s.apiAuth(false, s.apiComplianceReports))
+	mux.Handle("GET /api/v1/compliance/reports/{id}/versions/{n}", s.apiAuth(false, s.apiComplianceVersion))
+	mux.Handle("GET /api/v1/compliance/evidence", s.apiAuth(false, s.apiComplianceEvidence))
 	mux.Handle("POST /api/v1/hosts/{id}/jobs", s.apiAuth(true, s.apiCreateJob))
 	mux.Handle("GET /api/v1/vulnerabilities", s.apiAuth(false, s.apiVulnerabilities))
 	mux.Handle("GET /api/v1/vulnerabilities/{id}", s.apiAuth(false, s.apiVulnerability))

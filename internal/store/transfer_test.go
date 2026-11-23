@@ -129,6 +129,21 @@ func populate(t *testing.T, s *Store) {
 		[]MonitorResult{{Key: MonitorDiskPrefix + "/", Type: "disk", OK: false, Value: "90%"}})
 	must(err)
 	must(s.TakeSnapshot(ctx, time.Now()))
+	// Compliance: evidence (with its hash chain), host states, a report version.
+	must(s.TakeHostStates(ctx, time.Now(), SLA{Critical: 15}, map[int64]string{hosts[0]: "supported"}))
+	_, err = s.AddEvidence(ctx, []EvidenceItem{{Kind: EvidenceManual, Source: SourceUser, SourceRef: "manual:1", Subject: "Yama prosedürü",
+		Actor: "op@example.test", Outcome: "recorded", OccurredAt: time.Now(), Payload: `{"controls":["isms:ISMS-12"],"title":"Yama prosedürü"}`}})
+	must(err)
+	ev, err := s.EvidenceItems(ctx, EvidenceFilter{})
+	must(err)
+	repID, err := s.CreateComplianceReport(ctx, ComplianceReport{Title: "Yıllık denetim", Profiles: []string{"isms@1"}, From: time.Now().AddDate(0, -1, 0),
+		To: time.Now(), CreatedByID: admin, CreatedBy: "Yönetici@Example.test"})
+	must(err)
+	_, _, err = s.AddReportVersion(ctx, ReportVersion{ReportID: repID, GeneratedAt: time.Now(), GeneratedBy: "op@example.test", Engine: "1", Content: "{}", SHA256: "x"},
+		[]ControlAssessment{{Profile: "isms", Control: "ISMS-12", Outcome: "manual_evidence", Applicable: true}},
+		[]AssessmentEvidence{{Profile: "isms", Control: "ISMS-12", EvidenceID: ev[0].ID, Relevance: "manual"}})
+	must(err)
+	must(s.SaveControlSetting(ctx, ControlSetting{Profile: "itsm", Control: "ITSM-08", Applicable: false, Justification: "Hizmet masası yok", UpdatedBy: "op@example.test"}))
 }
 
 // dump returns every table's rows as sorted, type-normalized strings.
@@ -235,6 +250,10 @@ func TestTransferRoundTrip(t *testing.T) {
 		t.Errorf("result: %+v", res)
 	}
 	compareDumps(t, want, dump(t, dst))
+	// The evidence chain survives the transfer unchanged.
+	if st, err := dst.VerifyEvidence(ctx); err != nil || !st.OK || st.Items == 0 {
+		t.Errorf("evidence chain after import: %+v %v", st, err)
+	}
 
 	// The target database works normally afterwards; ids continue after the
 	// imported ones (PostgreSQL identity sequences are moved on).

@@ -1,0 +1,81 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}{{$q := $d.Q}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.compliance_evidence"}}</h1>
+    <p class="pagehead__sub">{{t "compliance.evidence.subtitle"}}</p>
+  </div>
+</header>
+
+<form class="filters" method="get" action="/compliance/evidence">
+  {{if $d.Version}}<input type="hidden" name="version" value="{{$d.Version}}">{{end}}
+  {{if $d.Control}}<input type="hidden" name="control" value="{{$d.Control}}">{{end}}
+  <input class="field__input" type="search" name="q" value="{{$q.Get "q"}}" placeholder="{{t "compliance.evidence.search"}}" aria-label="{{t "compliance.evidence.search"}}">
+  <select class="field__input" name="kind" aria-label="{{t "compliance.csv.kind"}}">
+    <option value="">{{t "compliance.evidence.all_kinds"}}</option>
+    {{range $d.Kinds}}<option value="{{.}}"{{if eq . ($q.Get "kind")}} selected{{end}}>{{evidenceKind .}}</option>{{end}}
+  </select>
+  <select class="field__input" name="platform" aria-label="{{t "compliance.csv.platform"}}">
+    <option value="">{{t "compliance.evidence.all_platforms"}}</option>
+    {{range $d.Platforms}}<option value="{{.}}"{{if eq . ($q.Get "platform")}} selected{{end}}>{{platform .}}</option>{{end}}
+  </select>
+  <input class="field__input" type="date" name="from" value="{{$q.Get "from"}}" aria-label="{{t "compliance.report.from"}}">
+  <input class="field__input" type="date" name="to" value="{{$q.Get "to"}}" aria-label="{{t "compliance.report.to"}}">
+  <button class="button" type="submit">{{t "common.filter"}}</button>
+</form>
+{{if $d.Version}}<p class="alert alert--info">{{t "compliance.evidence.of_version"}}{{with $d.Control}} · <span class="mono">{{.}}</span>{{end}} <a href="/compliance/evidence">{{t "compliance.evidence.clear"}}</a></p>{{end}}
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{t "compliance.evidence.items"}} <span class="muted">({{$d.Total}})</span></h2></div>
+  {{if $d.Items}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>ID</th><th>{{t "compliance.csv.kind"}}</th><th>{{t "compliance.csv.occurred"}}</th><th>{{t "compliance.csv.hostname"}}</th><th>{{t "compliance.csv.subject"}}</th><th>{{t "compliance.csv.actor"}}</th><th>SHA-256</th></tr></thead>
+    <tbody>
+    {{range $d.Items}}
+    <tr>
+      <td><a class="mono" href="/compliance/evidence/{{.ID}}">{{.ID}}</a></td>
+      <td>{{evidenceKind .Kind}}{{if .Retroactive}} <span class="pill" title="{{t "compliance.evidence.retroactive_hint"}}">{{t "compliance.evidence.retroactive"}}</span>{{end}}</td>
+      <td>{{datetime .OccurredAt}}</td>
+      <td>{{.Hostname}}{{with .Platform}}<div class="cell-sub">{{platform .}}</div>{{end}}</td>
+      <td>{{template "evsubject" .}}</td>
+      <td class="cell-sub">{{.Actor}}</td>
+      <td class="mono" title="{{.SHA256}}">{{shortHash .SHA256}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "compliance.empty.evidence")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+
+{{if $d.CanAdd}}
+<form class="form" method="post" action="/compliance/evidence" id="manual">
+  {{template "csrf" $root}}
+  <section class="panel">
+    <h2 class="panel__title">{{t "compliance.evidence.add"}}</h2>
+    <p class="muted">{{t "compliance.evidence.add_hint"}}</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "compliance.evidence.doc_title"}}</span>
+        <input class="field__input" type="text" name="title" maxlength="200" required placeholder="{{t "compliance.evidence.doc_title_placeholder"}}"></label>
+      <label class="field"><span class="field__label">{{t "compliance.evidence.doc_date"}}</span>
+        <input class="field__input" type="date" name="date" value="{{$d.Today}}" max="{{$d.Today}}"></label>
+    </div>
+    <label class="field"><span class="field__label">{{t "compliance.evidence.reference"}}</span>
+      <input class="field__input" type="text" name="reference" maxlength="500" placeholder="{{t "compliance.evidence.reference_placeholder"}}">
+      <span class="field__hint">{{t "compliance.evidence.reference_hint"}}</span></label>
+    <label class="field"><span class="field__label">{{t "compliance.evidence.description"}}</span>
+      <textarea class="field__input" name="description" rows="3" maxlength="2000"></textarea></label>
+    <label class="field"><span class="field__label">{{t "compliance.evidence.controls"}}</span>
+      <select class="field__input" name="controls" multiple size="10" required>
+        {{range $d.Controls}}<option value="{{.Key}}">{{.Label}}</option>{{end}}
+      </select>
+      <span class="field__hint">{{t "compliance.evidence.controls_hint"}}</span></label>
+  </section>
+  <div><button class="button button--primary" type="submit">{{template "icon" "plus"}}{{t "compliance.evidence.add_button"}}</button></div>
+</form>
+{{end}}
+{{end}}

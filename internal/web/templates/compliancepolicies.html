@@ -1,0 +1,96 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}{{$admin := .User.IsAdmin}}{{$cfg := $d.Cfg}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.compliance_policies"}}</h1>
+    <p class="pagehead__sub">{{t "compliance.policies.subtitle"}}</p>
+  </div>
+</header>
+{{template "policytabs" $d.Tab}}
+{{if not $admin}}<p class="alert alert--info">{{t "compliance.policies.readonly"}}</p>{{end}}
+
+{{if eq $d.Tab "general"}}
+<form class="form" method="post" action="/compliance/policies">
+  {{template "csrf" $root}}
+  <fieldset class="fieldset"{{if not $admin}} disabled{{end}}>
+  <section class="panel">
+    <h2 class="panel__title">{{t "compliance.policies.profiles"}}</h2>
+    <p class="muted">{{t "compliance.policies.profiles_hint"}}</p>
+    <div class="plain-list">
+      {{range $d.Profiles}}<label class="check-label"><input type="checkbox" name="profiles" value="{{.ID}}"{{if .Enabled}} checked{{end}}> <strong>{{.Name}}</strong> <span class="muted mono">{{.Key}}</span><span class="cell-sub">{{.Desc}}</span></label>{{end}}
+    </div>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">{{t "compliance.policies.thresholds"}}</h2>
+    <p class="muted">{{t "compliance.policies.thresholds_hint"}}</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "compliance.policies.coverage_min"}}</span>
+        <input class="field__input" type="number" name="compliance_coverage_min" min="0" max="100" value="{{$cfg.ComplianceCoverageMin}}" required>
+        <span class="field__hint">{{t "compliance.policies.coverage_min_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "compliance.policies.patch_failure_max"}}</span>
+        <input class="field__input" type="number" name="compliance_patch_failure_max" min="0" max="100" value="{{$cfg.CompliancePatchFailMax}}" required>
+        <span class="field__hint">{{t "compliance.policies.patch_failure_max_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "compliance.policies.currency_min"}}</span>
+        <input class="field__input" type="number" name="compliance_currency_min" min="0" max="100" value="{{$cfg.ComplianceCurrencyMin}}" required>
+        <span class="field__hint">{{t "compliance.policies.currency_min_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "compliance.policies.sla_min"}}</span>
+        <input class="field__input" type="number" name="compliance_sla_min" min="0" max="100" value="{{$cfg.ComplianceSLAMin}}" required>
+        <span class="field__hint">{{t "compliance.policies.sla_min_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "compliance.policies.reboot_max_days"}}</span>
+        <input class="field__input" type="number" name="compliance_reboot_max_days" min="1" max="365" value="{{$cfg.ComplianceRebootMaxDays}}" required></label>
+      <label class="field"><span class="field__label">{{t "compliance.policies.evidence_days"}}</span>
+        <input class="field__input" type="number" name="compliance_evidence_days" min="{{$d.MinEvidenceDays}}" max="3650" value="{{$cfg.ComplianceEvidenceDays}}" required>
+        <span class="field__hint">{{t "compliance.policies.evidence_days_hint" "min" $d.MinEvidenceDays}}</span></label>
+    </div>
+  </section>
+  {{if $admin}}<div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>{{end}}
+  </fieldset>
+</form>
+
+<section class="panel">
+  <h2 class="panel__title">{{t "compliance.policies.related"}}</h2>
+  <p class="muted">{{t "compliance.policies.related_hint"}}</p>
+  <dl class="dl">
+    <dt>{{t "compliance.policies.sla"}}</dt><dd>{{t "compliance.sla.days" "critical" $cfg.SLACriticalDays "high" $cfg.SLAHighDays "medium" $cfg.SLAMediumDays "low" $cfg.SLALowDays}}{{if $admin}} · <a href="/settings#sla">{{t "common.edit"}}</a>{{end}}</dd>
+    <dt>{{t "compliance.policies.risk_days"}}</dt><dd>{{riskTerm $cfg.RiskMaxDays}}{{if $admin}} · <a href="/settings#security">{{t "common.edit"}}</a>{{end}}</dd>
+    <dt>{{t "compliance.policies.require_mfa"}}</dt><dd>{{if $cfg.AuthRequireMFA}}{{t "common.yes"}}{{else}}{{t "common.no"}}{{end}}{{if $admin}} · <a href="/settings#security">{{t "common.edit"}}</a>{{end}}</dd>
+    <dt>{{t "compliance.policies.require_preview"}}</dt><dd>{{if $cfg.RequirePreview}}{{t "common.yes"}}{{else}}{{t "common.no"}}{{end}}{{if $admin}} · <a href="/settings#updates">{{t "common.edit"}}</a>{{end}}</dd>
+    <dt>{{t "compliance.policies.backup"}}</dt><dd>{{if $cfg.BackupEnabled}}{{t "common.yes"}}{{else}}{{t "common.no"}}{{end}}{{if $admin}} · <a href="/settings#backup">{{t "common.edit"}}</a>{{end}}</dd>
+    <dt>{{t "compliance.policies.monitoring"}}</dt><dd>{{if $cfg.HealthMonitor}}{{t "compliance.policies.monitoring_every" "n" $cfg.HealthMonitor}}{{else}}{{t "common.no"}}{{end}}{{if $admin}} · <a href="/settings#monitoring">{{t "common.edit"}}</a>{{end}}</dd>
+  </dl>
+</section>
+{{end}}
+
+{{if eq $d.Tab "controls"}}
+<p class="muted">{{t "compliance.policies.controls_hint"}}</p>
+{{range $p := $d.Profiles}}
+<form class="form" method="post" action="/compliance/policies/controls" id="p-{{$p.ID}}">
+  {{template "csrf" $root}}<input type="hidden" name="profile" value="{{$p.ID}}">
+  <fieldset class="fieldset"{{if not $admin}} disabled{{end}}>
+  <section class="panel panel--flush">
+    <div class="panel__head"><h2 class="panel__title">{{$p.Name}} <span class="muted mono">{{$p.Key}}</span>{{if not $p.Enabled}} <span class="pill">{{t "common.disabled"}}</span>{{end}}</h2></div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>{{t "compliance.csv.control"}}</th><th>{{t "compliance.csv.checks"}}</th><th>{{t "compliance.csv.applicable"}}</th><th>{{t "compliance.csv.justification"}}</th></tr></thead>
+      <tbody>
+      {{range $p.Controls}}
+      <tr>
+        <td><strong class="mono">{{.ID}}</strong> {{.Title}}<div class="cell-sub">{{.Desc}}</div></td>
+        <td class="cell-sub">{{range .Checks}}<div>{{.}}</div>{{end}}{{with .Manual}}<div>{{.}}</div>{{end}}</td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_{{.ID}}" value="1"{{if .Applicable}} checked{{end}}> {{t "compliance.csv.applicable"}}</label></td>
+        <td><input class="field__input" type="text" name="justification_{{.ID}}" value="{{.Setting.Justification}}" maxlength="1000" aria-label="{{t "compliance.csv.justification"}}">
+          {{if .Setting.UpdatedBy}}<div class="cell-sub">{{.Setting.UpdatedBy}} · {{datetime .Setting.UpdatedAt}}</div>{{end}}</td>
+      </tr>
+      {{end}}
+      </tbody>
+    </table>
+    </div>
+  </section>
+  {{if $admin}}<div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>{{end}}
+  </fieldset>
+</form>
+{{end}}
+{{end}}
+{{end}}

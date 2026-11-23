@@ -60,7 +60,20 @@ const (
 	KeyHealthMemoryWarn     = "health.memory_warn"
 	KeyHealthCPUWarn        = "health.cpu_warn"
 	KeyRequirePreview       = "updates.require_preview"
+	// Compliance & audit (internal/compliance): enabled frameworks, the
+	// thresholds of the automated checks and the evidence retention.
+	KeyComplianceProfiles      = "compliance.profiles"
+	KeyComplianceCoverageMin   = "compliance.coverage_min"
+	KeyCompliancePatchFailMax  = "compliance.patch_failure_max"
+	KeyComplianceCurrencyMin   = "compliance.currency_min"
+	KeyComplianceSLAMin        = "compliance.sla_min"
+	KeyComplianceRebootMaxDays = "compliance.reboot_max_days"
+	KeyComplianceEvidenceDays  = "compliance.evidence_days"
 )
+
+// MinEvidenceDays is the shortest evidence retention: a twelve-month audit
+// period must always be covered.
+const MinEvidenceDays = 400
 
 // ScoreWeight is one adjustable weight of the security score.
 type ScoreWeight struct {
@@ -154,6 +167,21 @@ type Values struct {
 	// RequirePreview: an update started on a server page first runs a dry
 	// run; the update starts only after the plan is approved.
 	RequirePreview bool
+	// Compliance: enabled framework profiles (ids without version), the
+	// percentages and day counts the automated checks compare against, and
+	// how long evidence is kept (MinEvidenceDays or more).
+	ComplianceProfiles      []string
+	ComplianceCoverageMin   int
+	CompliancePatchFailMax  int
+	ComplianceCurrencyMin   int
+	ComplianceSLAMin        int
+	ComplianceRebootMaxDays int
+	ComplianceEvidenceDays  int
+}
+
+// EvidenceRetention is how long compliance evidence is kept.
+func (v Values) EvidenceRetention() time.Duration {
+	return time.Duration(v.ComplianceEvidenceDays) * 24 * time.Hour
 }
 
 // EOLWarn is the end-of-support warning period.
@@ -170,38 +198,45 @@ func (v Values) Retention() time.Duration { return time.Duration(v.RetentionDays
 // Defaults returns the built-in defaults.
 func Defaults() Values {
 	return Values{
-		EmailEnabled:         true,
-		EmailMinSeverity:     vuln.SeverityHigh,
-		EmailKEVAlways:       true,
-		EmailDigestThreshold: 5,
-		EmailAgentOffline:    false,
-		EmailJobFailed:       true,
-		EmailServerUpdate:    true,
-		AgentOfflineMinutes:  10,
-		AgentCheckinSeconds:  60,
-		AgentReportMinutes:   60,
-		AgentAutoUpdate:      true,
-		ScanEnabled:          true,
-		RetentionDays:        90,
-		RiskMaxDays:          365,
-		BackupEnabled:        true,
-		BackupMinute:         2*60 + 30,
-		BackupKeep:           7,
-		SLACriticalDays:      15,
-		SLAHighDays:          30,
-		SLAMediumDays:        90,
-		SLALowDays:           180,
-		EmailSLAOverdue:      true,
-		SoftwareNotify:       true,
-		EOLWarnDays:          90,
-		EOLNotify:            true,
-		ScoreWeights:         score.DefaultWeights(),
-		HealthDelay:          15,
-		HealthMonitor:        5,
-		HealthDiskWarn:       90,
-		HealthMemoryWarn:     95,
-		HealthCPUWarn:        90,
-		RequirePreview:       true,
+		EmailEnabled:            true,
+		EmailMinSeverity:        vuln.SeverityHigh,
+		EmailKEVAlways:          true,
+		EmailDigestThreshold:    5,
+		EmailAgentOffline:       false,
+		EmailJobFailed:          true,
+		EmailServerUpdate:       true,
+		AgentOfflineMinutes:     10,
+		AgentCheckinSeconds:     60,
+		AgentReportMinutes:      60,
+		AgentAutoUpdate:         true,
+		ScanEnabled:             true,
+		RetentionDays:           90,
+		RiskMaxDays:             365,
+		BackupEnabled:           true,
+		BackupMinute:            2*60 + 30,
+		BackupKeep:              7,
+		SLACriticalDays:         15,
+		SLAHighDays:             30,
+		SLAMediumDays:           90,
+		SLALowDays:              180,
+		EmailSLAOverdue:         true,
+		SoftwareNotify:          true,
+		EOLWarnDays:             90,
+		EOLNotify:               true,
+		ScoreWeights:            score.DefaultWeights(),
+		HealthDelay:             15,
+		HealthMonitor:           5,
+		HealthDiskWarn:          90,
+		HealthMemoryWarn:        95,
+		HealthCPUWarn:           90,
+		RequirePreview:          true,
+		ComplianceProfiles:      []string{"isms", "baseline", "itsm", "general"},
+		ComplianceCoverageMin:   95,
+		CompliancePatchFailMax:  10,
+		ComplianceCurrencyMin:   90,
+		ComplianceSLAMin:        90,
+		ComplianceRebootMaxDays: 7,
+		ComplianceEvidenceDays:  1095,
 	}
 }
 
@@ -293,6 +328,20 @@ func FromMap(raw map[string]string) Values {
 	i(KeyHealthMemoryWarn, &v.HealthMemoryWarn, 0, 100)
 	i(KeyHealthCPUWarn, &v.HealthCPUWarn, 0, 1000)
 	b(KeyRequirePreview, &v.RequirePreview)
+	if s, ok := raw[KeyComplianceProfiles]; ok {
+		v.ComplianceProfiles = nil
+		for _, p := range strings.Split(s, ",") {
+			if p = strings.TrimSpace(p); p != "" {
+				v.ComplianceProfiles = append(v.ComplianceProfiles, p)
+			}
+		}
+	}
+	i(KeyComplianceCoverageMin, &v.ComplianceCoverageMin, 0, 100)
+	i(KeyCompliancePatchFailMax, &v.CompliancePatchFailMax, 0, 100)
+	i(KeyComplianceCurrencyMin, &v.ComplianceCurrencyMin, 0, 100)
+	i(KeyComplianceSLAMin, &v.ComplianceSLAMin, 0, 100)
+	i(KeyComplianceRebootMaxDays, &v.ComplianceRebootMaxDays, 1, 365)
+	i(KeyComplianceEvidenceDays, &v.ComplianceEvidenceDays, MinEvidenceDays, 3650)
 	return v
 }
 

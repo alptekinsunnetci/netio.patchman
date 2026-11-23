@@ -3,6 +3,7 @@ module netio.patchman
 go 1.26.0
 
 require (
+	github.com/go-pdf/fpdf v0.9.0
 	github.com/jackc/pgx/v5 v5.13.0
 	golang.org/x/sys v0.49.0
 	modernc.org/sqlite v1.61.1

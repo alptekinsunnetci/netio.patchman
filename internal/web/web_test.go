@@ -712,7 +712,11 @@ func TestEndToEnd(t *testing.T) {
 	}
 
 	// Audit trail.
-	status, body, _ = e.do(admin, "GET", "/settings/audit", nil)
+	status, _, hdr = e.do(admin, "GET", "/settings/audit", nil)
+	if status != http.StatusMovedPermanently || hdr.Get("Location") != "/compliance/history?tab=audit" {
+		t.Errorf("old audit address: %d %s", status, hdr.Get("Location"))
+	}
+	status, body, _ = e.do(admin, "GET", "/compliance/history?tab=audit", nil)
 	expect(t, "audit", status, 200, body, "Kayıt anahtarı oluşturuldu", "Güncelleme işi başlatıldı", "Sunucu kaldırıldı", "Başarısız giriş denemesi",
 		"Zamanlama oluşturuldu", "Zamanlama elle çalıştırıldı", "Zamanlama silindi")
 }

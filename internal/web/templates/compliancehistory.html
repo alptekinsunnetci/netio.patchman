@@ -1,0 +1,87 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.compliance_history"}}</h1>
+    <p class="pagehead__sub">{{t "compliance.history.subtitle"}}</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <a class="tab{{if eq $d.Tab "versions"}} is-active{{end}}" href="/compliance/history">{{t "compliance.history.tab.versions"}}</a>
+  {{if .User.IsAdmin}}
+  <a class="tab{{if eq $d.Tab "audit"}} is-active{{end}}" href="/compliance/history?tab=audit">{{t "audit.title"}}</a>
+  <a class="tab{{if eq $d.Tab "integrity"}} is-active{{end}}" href="/compliance/history?tab=integrity">{{t "compliance.history.tab.integrity"}}</a>
+  {{end}}
+</nav>
+
+{{if eq $d.Tab "versions"}}
+<section class="panel panel--flush">
+  {{if $d.Versions}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "compliance.history.generated"}}</th><th>{{t "compliance.col.title"}}</th><th>{{t "compliance.col.version"}}</th><th>{{t "compliance.history.by"}}</th><th>SHA-256</th><th>{{t "compliance.report.finalized"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Versions}}
+    <tr>
+      <td>{{datetime .GeneratedAt}}</td>
+      <td><a href="/compliance/reports/{{.ReportID}}?v={{.Version}}">{{.ReportTitle}}</a></td>
+      <td>v{{.Version}} <span class="pill{{if .Final}} pill--succeeded{{end}}">{{t (printf "compliance.status.%s" .Status)}}</span></td>
+      <td>{{.GeneratedBy}}</td>
+      <td class="mono" title="{{.SHA256}}">{{shortHash .SHA256}}</td>
+      <td>{{if .Final}}{{datetime .FinalizedAt}}<div class="cell-sub">{{.FinalizedBy}}</div>{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "compliance.empty.reports")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+{{end}}
+
+{{if eq $d.Tab "audit"}}
+<p class="muted">{{t "audit.subtitle"}}</p>
+<section class="panel panel--flush">
+  {{if $d.Rows}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "audit.at"}}</th><th>{{t "audit.user"}}</th><th>{{t "audit.action"}}</th><th>{{t "audit.target"}}</th><th>{{t "audit.details"}}</th><th>{{t "audit.ip"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Rows}}
+    <tr>
+      <td>{{datetime .At}}</td>
+      <td>{{if .UserEmail}}{{.UserEmail}}{{else}}<span class="muted">{{t "common.system"}}</span>{{end}}</td>
+      <td>{{t (printf "audit.action.%s" .Action)}}</td>
+      <td class="mono">{{.Target}}</td>
+      <td class="mono cell-sub">{{.Details}}</td>
+      <td class="mono">{{.IP}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "audit.empty")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+{{end}}
+
+{{if eq $d.Tab "integrity"}}
+{{$ch := $d.Chain}}
+<section class="panel{{if not $ch.OK}} panel--danger{{end}}">
+  <h2 class="panel__title">{{t "compliance.history.chain"}}</h2>
+  {{if $ch.OK}}<p class="alert alert--success">{{t "compliance.chain.ok" "n" $ch.Items}}</p>
+  {{else}}<p class="alert alert--error">{{t "compliance.chain.broken" "id" $ch.BrokenID}} {{t (printf "compliance.chain.reason.%s" $ch.Reason)}}</p>{{end}}
+  <dl class="dl">
+    <dt>{{t "compliance.history.items"}}</dt><dd>{{$ch.Items}}</dd>
+    {{if $ch.Items}}<dt>{{t "compliance.history.first"}}</dt><dd>{{datetime $ch.First}}</dd>
+    <dt>{{t "compliance.history.last"}}</dt><dd>{{datetime $ch.Last}}</dd>{{end}}
+    <dt>{{t "compliance.history.head"}}</dt><dd class="mono break">{{if $ch.Head}}{{$ch.Head}}{{else}}{{t "common.empty"}}{{end}}</dd>
+    <dt>{{t "compliance.history.checked"}}</dt><dd>{{datetime $d.CheckedAt}}</dd>
+  </dl>
+  <p class="footnote">{{t "compliance.history.chain_hint"}}</p>
+</section>
+{{end}}
+{{end}}

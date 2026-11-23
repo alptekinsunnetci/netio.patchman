@@ -1,0 +1,18 @@
+{
+  "id": "isms",
+  "version": "1",
+  "controls": [
+    {"id": "ISMS-01", "checks": [{"check": "inventory.completeness", "relevance": "primary"}, {"check": "agent.coverage", "relevance": "supporting"}]},
+    {"id": "ISMS-02", "checks": [{"check": "vuln.sla", "relevance": "primary"}, {"check": "vuln.kev", "relevance": "primary"}, {"check": "patch.applied", "relevance": "supporting"}, {"check": "patch.currency", "relevance": "supporting"}]},
+    {"id": "ISMS-03", "checks": [{"check": "config.drift", "relevance": "primary"}]},
+    {"id": "ISMS-04", "checks": [{"check": "change.recorded", "relevance": "primary"}, {"check": "change.approval", "relevance": "primary"}]},
+    {"id": "ISMS-05", "checks": [{"check": "change.recorded", "relevance": "primary"}, {"check": "change.approval", "relevance": "primary"}, {"check": "patch.applied", "relevance": "supporting"}], "manual": "process"},
+    {"id": "ISMS-06", "checks": [{"check": "log.integrity", "relevance": "primary"}]},
+    {"id": "ISMS-07", "checks": [{"check": "monitoring.coverage", "relevance": "primary"}, {"check": "agent.coverage", "relevance": "supporting"}]},
+    {"id": "ISMS-08", "checks": [{"check": "backup.daily", "relevance": "primary"}]},
+    {"id": "ISMS-09", "checks": [{"check": "access.mfa", "relevance": "primary"}]},
+    {"id": "ISMS-10", "checks": [{"check": "eol.unsupported", "relevance": "primary"}]},
+    {"id": "ISMS-11", "checks": [{"check": "risk.accepted", "relevance": "primary"}]},
+    {"id": "ISMS-12", "manual": "policy"}
+  ]
+}

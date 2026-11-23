@@ -1,0 +1,61 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "compliance.title"}}</h1>
+    <p class="pagehead__sub">{{t "compliance.subtitle"}}</p>
+  </div>
+  {{if .User.CanOperate}}<div class="pagehead__actions"><a class="button button--primary" href="/compliance/reports#new">{{template "icon" "plus"}}{{t "compliance.report.new"}}</a></div>{{end}}
+</header>
+
+<p class="alert alert--info">{{t "compliance.disclaimer"}}</p>
+
+<section class="stats stats--compact">
+  <div class="stat"><p class="stat__label">{{t "compliance.stat.reports"}}</p><p class="stat__value">{{len $d.Reports}}</p><p class="stat__meta">{{t "compliance.stat.finals" "n" $d.Finals}}</p></div>
+  {{if $d.Kinds}}
+  <div class="stat"><p class="stat__label">{{t "compliance.stat.evidence"}}</p><p class="stat__value">{{$d.EvidenceTotal}}</p><p class="stat__meta">{{if $d.Start.IsZero}}{{t "compliance.stat.not_started"}}{{else}}{{t "compliance.stat.since" "date" (date $d.Start)}}{{end}}</p></div>
+  {{end}}
+  <div class="stat"><p class="stat__label">{{t "compliance.stat.profiles"}}</p><p class="stat__value">{{len $d.Profiles}}</p><p class="stat__meta"><a href="/compliance/policies">{{t "nav.compliance_policies"}}</a></p></div>
+</section>
+
+<div class="grid-2 grid-2--wide-left">
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{t "compliance.overview.reports"}}</h2><a href="/compliance/reports">{{t "compliance.overview.all_reports"}}</a></div>
+  {{if $d.Reports}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "compliance.col.title"}}</th><th>{{t "compliance.report.period"}}</th><th>{{t "compliance.col.version"}}</th><th>{{t "compliance.col.outcomes"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Reports}}
+    <tr>
+      <td><a href="/compliance/reports/{{.ID}}">{{.Title}}</a><div class="cell-sub">{{join .Profiles ", "}} · {{.Scope}}</div></td>
+      <td>{{date .From}} – {{date (lastDay .To)}}</td>
+      <td>{{if .LatestVersion}}v{{.LatestVersion}} <span class="pill{{if eq .LatestStatus "final"}} pill--succeeded{{end}}">{{t (printf "compliance.status.%s" .LatestStatus)}}</span>{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td>{{range .Counts}}<span class="pill {{outcomeClass .Outcome}}" title="{{outcomeLabel .Outcome}}">{{outcomeLabel .Outcome}}: {{.N}}</span> {{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "compliance.empty.reports")}}{{end}}
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">{{t "compliance.overview.profiles"}}</h2>
+  {{if $d.Profiles}}
+  <ul class="plain-list">
+    {{range $d.Profiles}}<li><strong>{{t .NameKey}}</strong> <span class="muted mono">{{.Key}}</span><div class="cell-sub">{{t (printf "compliance.profile.%s.desc" .ID)}}</div></li>{{end}}
+  </ul>
+  {{else}}{{template "empty" (t "compliance.empty.profiles")}}{{end}}
+  {{if $d.Kinds}}
+  <h2 class="panel__title">{{t "compliance.overview.evidence"}}</h2>
+  <dl class="dl">
+    {{range $d.Kinds}}<dt><a href="/compliance/evidence?kind={{.Outcome}}">{{evidenceKind .Outcome}}</a></dt><dd>{{.N}}</dd>{{end}}
+  </dl>
+  {{end}}
+</section>
+</div>
+<p class="footnote">{{t "compliance.overview.footnote"}}</p>
+{{end}}

@@ -111,7 +111,7 @@ Sunucuları “Üretim”, “Test”, “Veritabanı” gibi gruplara ayırabil
 
 - **Grup oluşturma, yeniden adlandırma, silme:** **Sunucu Grupları** sayfasından (yalnızca yöneticiler). Grup silinince sunucular silinmez.
 - **Sunucu ekleme ve çıkarma (operatör ve yönetici):** Sunucu Envanteri'nde sunucuları işaretleyip **Seçili sunucuları gruba** çubuğundan grubu seçin ve **Gruba ekle** ya da **Gruptan çıkar** düğmesine basın. Tek bir sunucunun gruplarını, sunucu ayrıntısındaki **Sistem Bilgisi → Gruplar** bölümünden de değiştirebilirsiniz.
-- **Kullanım:** Sunucu Envanteri gruba göre süzülebilir; zamanlanmış güncellemeler bir grubu hedefleyebilir; uyumluluk raporu grup için alınabilir. Grup sayfasında grubun kritik ve KEV açık sayıları görünür.
+- **Kullanım:** Sunucu Envanteri gruba göre süzülebilir; zamanlanmış güncellemeler bir grubu hedefleyebilir; uyum raporları bir grup için oluşturulabilir. Grup sayfasında grubun kritik ve KEV açık sayıları görünür.
 
 Bir grubu hedefleyen zamanlama, çalıştığı anda grubun üyelerine uygulanır; gruba sonradan eklenen sunucular da kapsanır. Grup silinirse bu zamanlamalar devre dışı bırakılır ve hedefleri boşaltılır; hiçbir zaman kendiliğinden tüm sunuculara yönelmez.
 
@@ -163,24 +163,115 @@ Risk Kabul Edildi ve Hatalı Tespit durumundaki bulgular sayımlara ve bildiriml
 **Sistem Ayarları → Düzeltme süreleri (SLA)** bölümünde her önem derecesi için gün sayısı belirlenir (varsayılan: kritik 15, yüksek 30, orta 90, düşük 180; 0 = süre yok). Son tarih, bulgunun ilk tespitinden itibaren hesaplanır.
 
 - Bulgu listelerinde **Son tarih** sütunu ve süresi geçenlerde **Süresi geçti** etiketi görünür; **Süresi geçenler** süzgeciyle yalnızca bunlar listelenir.
-- Gösterge panelinde **Süresi geçen bulgular** kartı, Uyumluluk Raporu'nda ayrı bir bölüm vardır.
+- Gösterge panelinde **Süresi geçen bulgular** kartı, uyum raporlarında **Güvenlik güncellemesi SLA'sı** bölümü vardır.
 - Bir bulgunun süresi dolduğunda bildirim merkezine tek bir özet bildirim düşer; ayarda açıksa e-posta gönderilir. Her bulgu için bir kez bildirilir.
 
 **EPSS** (FIRST Exploit Prediction Scoring System), açığın önümüzdeki 30 günde istismar edilme olasılığıdır ve her gün güncellenir. Açık listesinde EPSS sütunu bulunur; **İstismar olasılığına göre (KEV, EPSS)** sıralaması önce aktif olarak istismar edilenleri, sonra EPSS'i yüksek olanları gösterir. Hangi açığın önce kapatılacağına karar verirken CVSS'ten daha iyi bir göstergedir.
 
-## Uyumluluk Raporu
+## Uyum ve Denetim
 
-**Uyumluluk Raporu** sayfası seçilen dönem (varsayılan son 30 gün, en fazla 366 gün) ve isteğe bağlı bir grup için denetime hazır bir özet üretir:
+Denetime giren kuruluşların ihtiyaç duyduğu raporlar tek bir alandan üretilir: kenar çubuğundaki **Uyum ve Denetim** grubu. Ayrı çerçeveler için ayrı menüler veya ayrı rapor sistemleri yoktur; tek raporlama motoru, ortak bir kanıt deposu ve her çerçeve için ayrı kontrol değerlendirmeleri vardır.
 
-- Sunucu sayısı, kritik ve yüksek açıklar, aktif olarak istismar edilen (KEV) açıklar, yeniden başlatma bekleyen sunucular
-- Dönemde tespit edilen ve kapatılan bulgular, ortalama kapatma süresi (gün)
-- Günlük eğilim grafikleri (tüm filo için)
-- Açık KEV açıkları, CISA'nın belirlediği son tarih ve **Süresi geçti** işareti
-- Sunucu bazında durum: işletim sistemi, platform, açıklar, bekleyen güvenlik güncellemeleri, yeniden başlatma
-- Kabul edilen riskler: açıklama, kabul eden kullanıcı ve bitiş tarihi (süresiz olanlar ayrıca işaretlenir)
-- Dönemde oluşturulan güncelleme işlerinin sonuçlara göre dağılımı
+| Bölüm | İçerik |
+|---|---|
+| **Genel Bakış** | Son raporlar ve kontrol sonuçları, kanıt deposunun büyüklüğü, kanıt toplamanın başladığı tarih |
+| **Uyum Raporları** | Rapor oluşturma, sürümler, inceleme, kesinleştirme, PDF / CSV / JSON dışa aktarma |
+| **Denetim Kanıtları** | Ortak kanıt deposu: arama, ayrıntı, hash, kanıtın kullanıldığı kontroller; manuel kanıt ekleme |
+| **Denetim Geçmişi** | Rapor sürümleri, kullanıcı denetim kayıtları (yöneticiler), kanıt zincirinin bütünlük denetimi |
+| **Uyum Politikaları** | Etkin çerçeveler, otomatik kontrol eşikleri, kontrol uygulanabilirliği, sunucu standartları |
 
-**Yazdır / PDF kaydet** düğmesi tarayıcının yazdırma penceresini açar. Hedef olarak “PDF olarak kaydet” seçildiğinde rapor menüler olmadan, beyaz zeminde kaydedilir. Rapor, oluşturulma zamanını ve oluşturan kullanıcıyı içerir. ISO 27001 ve KVKK denetimlerinde düzenli olarak (örneğin aylık) alınıp saklanabilir. Tüm roller raporu görüntüleyebilir.
+> Raporlar otomatik toplanan teknik kanıtlara dayanır. Bir belgelendirme, sertifika veya uygunluk beyanı değildir. Bir kanıtın birden fazla çerçevede kullanılması, o çerçevelerin bütün gereksinimlerinin karşılandığı anlamına gelmez; değerlendirme ve karar denetçiye aittir. Bu not her raporda ve her dışa aktarımda yer alır.
+
+### Değerlendirme çerçeveleri
+
+Rapor oluştururken aşağıdakilerden biri veya birkaçı seçilir. Kontrol kimlikleri ve açıklamaları netio.patchman'e aittir; hiçbir standardın metni kopyalanmamıştır. Kataloglar sürümlüdür (ör. `isms@1`); bir rapor oluşturulduğu katalog sürümünü korur.
+
+| Çerçeve | Kapsam | Kontrol |
+|---|---|---|
+| Bilgi Güvenliği Yönetimi Denetimleri (`isms`) | Varlık envanteri, açıklık yönetimi, yapılandırma, değişiklik, kayıt, izleme, yedekleme, erişim, yaşam döngüsü, risk işleme, politikalar | 12 |
+| BT Temel Koruma Denetimleri (`baseline`) | Yama ve değişiklik yönetimi; Linux sunucular, Windows sunucular ve Windows istemciler için ayrı kontroller; kayıt, yedekleme, kimlik yönetimi | 12 |
+| BT Hizmet Yönetimi Değerlendirmeleri (`itsm`) | Değişiklik etkinleştirme, sürüm ve dağıtım, yapılandırma ve varlık yönetimi, izleme, hizmet seviyeleri | 8 |
+| Genel Güvenlik ve Yama Uyumu (`general`) | Ölçülebilir hedefli temel güvenlik ve güncelleme kontrolleri | 12 |
+
+Birden fazla çerçeve seçildiğinde kanıtlar ve ölçümler bir kez hesaplanır, her çerçeve kendi kontrolleriyle ayrıca değerlendirilir ve sonuç tek bir rapordur.
+
+### Kanıt deposu
+
+Kanıtlar sunucu çalıştıkça dakikada bir mevcut kayıtlardan toplanır; çerçeveye özel veri toplanmaz:
+
+| Kanıt türü | Kaynak |
+|---|---|
+| Güncelleme işi | Biten paket güncellemeleri ve geri dönüşler (Linux paketleri ve Windows KB'leri): sonuç, kalan paketler, başlatan (kullanıcı, zamanlama, kademeli güncelleme, otomatik), önizleme onayı |
+| Değişiklik işi | Yeniden başlatma, servis yeniden başlatma, ajan güncellemesi, önizleme, sağlık kontrolü |
+| Giderilen açık | CVE, paket, önem derecesi, tespit ve giderme zamanı, SLA içinde mi, KEV mi |
+| Denetim kaydı | Kullanıcı ve sistem işlemleri |
+| Standart sapması | Sunucu standartlarından ilk tespit edilen sapmalar |
+| Yedekleme | Başarılı ve başarısız yedekler |
+| Günlük envanter | Her UTC günü sonunda o günün sunucu durumlarının hash'i |
+| Manuel kanıt | Kullanıcının eklediği belge kaydı (ad, tarih, konum, eşlenen kontroller) |
+
+Ayrıca her sunucunun günlük durumu saklanır: platform, işletim sistemi, ajan sürümü, son bağlantı, bekleyen güncellemeler, önem derecesine göre açık bulgular, KEV ve SLA durumu, yeniden başlatma, işletim sisteminin destek durumu ve izleme. Böylece işler ve çözülen bulgular saklama süresi (varsayılan 90 gün) dolup silindikten sonra da 12 aylık bir denetim dönemi raporlanabilir.
+
+- Kayıtlar değiştirilmez. Her kaydın SHA-256 hash'i içeriğini ve bir önceki kaydın hash'ini kapsar (hash zinciri); bir kayıt değiştirilir veya silinirse **Denetim Geçmişi → Kanıt bütünlüğü** bunu gösterir.
+- Kanıt saklama süresi işletim verisinden bağımsızdır (varsayılan 1095 gün, en az 400). Kesinleşmiş rapor sürümlerinin kullandığı kanıtlar hiç silinmez.
+- İlk çalıştırmada henüz silinmemiş geçmiş kayıtlar da aktarılır; bunlar **Geriye dönük** olarak işaretlenir. Kanıt toplama dönem başlangıcından sonra başladıysa rapor bunu uyarı olarak belirtir.
+- **Manuel kanıt**, politika veya süreç belgesi gibi otomatik toplanamayan kanıtlar içindir. Belgenin kendisi değil; adı, tarihi, bulunduğu yer (belge yönetim numarası, adres) ve eşlendiği kontroller saklanır.
+- Platform her sunucu için ayrı belirlenir: Linux, Windows Server, Windows 10, Windows 11.
+
+### Rapor oluşturma ve rapor yapısı
+
+**Uyum Raporları → Yeni rapor**: başlık, çerçeveler, denetim dönemi (son 30/90 gün, geçen çeyrek, son 12 ay, geçen takvim yılı veya en fazla 731 günlük özel aralık), kapsam (tüm sunucular veya bir grup) ve isteğe bağlı platformlar seçilir. Raporun bölümleri:
+
+1. Yönetici özeti (çerçeve başına kontrol sonuçları, uyarılar)
+2. Rapor kapsamı ve değerlendirme dönemi
+3. Yönetilen varlık envanteri
+4. Linux ve Windows güncelleme durumu (platforma göre)
+5. Güvenlik açığı yönetimi (dönem başında ve sonunda açık bulgular, giderilenler, ortalama giderme süresi, açık KEV'ler)
+6. Yama uyumu
+7. Güvenlik güncellemesi SLA'sı
+8. Desteği biten sistemler
+9. Değişiklik yönetimi (türe ve başlatana göre, önizleme onayları)
+10. Denetim kayıtları ve kanıt zincirinin durumu
+11. Çerçevelere göre kontrol değerlendirmeleri ve ortak ölçümler
+12. Toplanan teknik kanıtlar (kimlik, tür, hash, eşlendiği kontroller)
+13. Eksik kanıtlar ve iyileştirme önerileri
+
+Her kontrolün **otomatik sonucu** yalnızca birincil ölçümlerden hesaplanır; destekleyici ölçümler kanıt ekler ama sonucu iyileştirmez:
+
+| Sonuç | Anlamı |
+|---|---|
+| Kanıt yeterli | Dönemin kanıtları kontrolü destekliyor |
+| Kısmi | Kanıt var, eşiklerin altında kalan veya eksik yönler var |
+| Sapma | Kanıt bir sapma gösteriyor (ör. süresi dolmuş açık, desteği biten sistem, MFA'sız yönetici) |
+| Kanıt eksik | Dönem için kanıt yok |
+| Manuel kanıt gerekli / mevcut | Kontrol yalnızca belgeyle desteklenebilir; belge eklenmiş olsa da incelenmesi gerekir |
+| Uygulanamaz | Kapsam dışı bırakıldı (gerekçesiyle) veya kapsamda o platformda sunucu yok |
+
+Örnek: bir Windows güvenlik güncellemesinin başarıyla uygulanması tek bir kanıt kaydıdır ve aynı raporda açıklık yönetimi (`ISMS-02`), yama ve değişiklik yönetimi (`BASE-01`), değişiklik etkinleştirme (`ITSM-01`) ve güncelleme başarısı (`GEN-04`) kontrollerinde, her birinde kendi ilişki düzeyiyle (birincil veya destekleyici) görünür.
+
+### Sürümler, inceleme ve dışa aktarma
+
+- Rapor her oluşturulduğunda yeni bir **sürüm** açılır; eski sürümler değişmeden saklanır. **Yeni sürüm oluştur** güncel kanıtlarla yeniden değerlendirir.
+- Yöneticiler her kontrol için **manuel inceleme** kaydeder (incelendi, kabul edildi / incelendi, eksik var ve not). İnceleme otomatik sonucun yanında ayrıca saklanır, onu değiştirmez. Otomatik sonucu değişmeyen kontrollerin incelemeleri yeni sürüme aktarılır.
+- **Sürümü kesinleştir** sürümü ve incelemelerini dondurur; kesin sürüm değiştirilemez, kesin sürümü olan rapor silinemez. Kesin sürüm içerik ve incelemeleri kapsayan ayrı bir SHA-256 taşır.
+- Dışa aktarma saklanan sürümden üretilir, yeniden hesaplanmaz: aynı sürüm her zaman aynı içeriği verir.
+  - **PDF**: sunucuda üretilir (gömülü yazı tipi, Türkçe ve Kiril harfler); sayfa altında sürüm hash'i bulunur.
+  - **CSV**: ZIP içinde `summary`, `controls`, `checks`, `gaps`, `assets`, `evidence` dosyaları.
+  - **JSON**: içerik, incelemeler ve hash'leriyle birlikte tüm kanıtlar (`netio.patchman/compliance-export/v1`).
+- Dışa aktarmalar denetim kaydına yazılır. Denetim kaydı ayrıntılarını yalnızca yöneticiler görür; diğer rollerin dışa aktarımlarında bu kayıtların kişi ve ayrıntı alanları gizlenir.
+
+### Uyum Politikaları
+
+- **Çerçeveler ve eşikler**: rapor oluştururken sunulacak çerçeveler; erişim ve izleme kapsamı, güncelleme hatası oranı, güncel sunucu oranı, SLA içinde giderme oranı, en uzun yeniden başlatma bekleme süresi ve kanıt saklama süresi. Eşikler yeni oluşturulan sürümlerde kullanılır.
+- SLA süreleri, risk kabul süresi, MFA zorunluluğu, önizleme onayı, yedekleme ve izleme ayarları kendi sayfalarında tek bir yerde tutulur; burada gösterilir ve bağlantı verilir.
+- **Kontrol uygulanabilirliği**: kuruluşa uygulanmayan bir kontrol gerekçesiyle kapsam dışı bırakılır; gerekçe raporda kontrolün yanında görünür.
+- **Sunucu standartları** da bu bölümdedir (bkz. sonraki başlık).
+
+### Yetkiler
+
+Tüm roller raporları ve kanıtları görür ve dışa aktarır. Rapor ve yeni sürüm oluşturmak ve manuel kanıt eklemek operatör ve yöneticilere; inceleme, kesinleştirme, silme ve politika değişiklikleri yöneticilere açıktır. Grup bazlı erişimi olan kullanıcılar yalnızca kendi gruplarından biri için rapor oluşturur ve görür; kanıt deposunda yalnızca kendi sunucularının kanıtlarını görür.
+
+API: `/api/v1/compliance/reports`, `/api/v1/compliance/reports/{id}/versions/{n}`, `/api/v1/compliance/evidence` (bkz. [api.md](api.md)).
 
 ## Güvenlik Puanı
 
@@ -205,7 +296,7 @@ Her sunucu için 0-100 arası bir güvenlik puanı hesaplanır (yüksek = iyi). 
 
 ## Sunucu Standartları ve Sapmalar
 
-**Sunucu Standartları** sayfasında tüm sunucular veya bir grup için kurallar tanımlanır (kural tanımlamak yalnızca yöneticilere açıktır, sapma raporunu tüm roller görür). Örnek: “Web sunucularında PHP yalnızca 8.2 veya 8.3 olmalı, telnetd kurulu olmamalı, nginx çalışıyor olmalı.”
+**Uyum ve Denetim → Uyum Politikaları → Sunucu Standartları** sayfasında tüm sunucular veya bir grup için kurallar tanımlanır (kural tanımlamak yalnızca yöneticilere açıktır, sapma raporunu tüm roller görür). Örnek: “Web sunucularında PHP yalnızca 8.2 veya 8.3 olmalı, telnetd kurulu olmamalı, nginx çalışıyor olmalı.”
 
 | Kural | Anlamı |
 |---|---|
@@ -486,7 +577,7 @@ Arayüz Türkçe, İngilizce, Almanca ve Rusça kullanılabilir. Giriş ekranın
 
 ## Denetim Kayıtları
 
-**Sistem Ayarları → Denetim Kayıtları** sayfasında girişler, başarısız giriş denemeleri, kullanıcı ve ayar değişiklikleri, başlatılan işler, kayıt anahtarı işlemleri ve sunucu kaldırma işlemleri kullanıcı ve IP adresiyle birlikte listelenir. Grup değişiklikleri, iki adımlı doğrulamanın açılıp kapatılması, hatalı doğrulama kodları ve süresi dolan risk kabulleri de kaydedilir.
+**Uyum ve Denetim → Denetim Geçmişi → Denetim kayıtları** sekmesinde (yöneticiler) girişler, başarısız giriş denemeleri, kullanıcı ve ayar değişiklikleri, başlatılan işler, kayıt anahtarı işlemleri ve sunucu kaldırma işlemleri kullanıcı ve IP adresiyle birlikte listelenir. Grup değişiklikleri, iki adımlı doğrulamanın açılıp kapatılması, hatalı doğrulama kodları ve süresi dolan risk kabulleri de kaydedilir.
 
 ## İki adımlı doğrulama
 

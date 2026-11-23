@@ -602,15 +602,3 @@ func (s *Server) settingsScanNow(w http.ResponseWriter, r *http.Request) {
 	s.audit(r, "scan.trigger", "", "")
 	s.redirect(w, r, "/settings", "success", s.l.T("settings.scan.triggered"))
 }
-
-func (s *Server) auditLog(w http.ResponseWriter, r *http.Request) {
-	pg := pageNumber(r)
-	rows, total, err := s.st.ListAudit(r.Context(), store.Page{Number: pg, Size: pageSize})
-	if err != nil {
-		s.serverError(w, r, err)
-		return
-	}
-	d := s.page(r, s.l.T("audit.title"), "settings")
-	d.Data = map[string]any{"Rows": rows, "Pager": newPager(r, pg, total)}
-	s.render(w, r, http.StatusOK, "audit", d)
-}

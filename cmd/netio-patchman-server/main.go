@@ -23,6 +23,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strconv"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -31,6 +32,7 @@ import (
 	"netio.patchman/internal/auth"
 	"netio.patchman/internal/backup"
 	"netio.patchman/internal/brand"
+	"netio.patchman/internal/compliance"
 	"netio.patchman/internal/config"
 	"netio.patchman/internal/drift"
 	"netio.patchman/internal/eol"
@@ -222,6 +224,10 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 		_ = st.PruneOSVQueries(ctx, 30*24*time.Hour)
 		_ = st.PruneOSVRecords(ctx, 90*24*time.Hour)
 		_ = st.PruneMSRCKB(ctx, 30*24*time.Hour)
+		// Compliance evidence has its own, longer retention (final reports keep theirs).
+		if err := (&compliance.Collector{Store: st}).Prune(ctx); err != nil {
+			logger.Warn(l.T("log.maintenance.failed"), slog.String("error", err.Error()))
+		}
 		_ = st.DeleteExpiredSessions(ctx)
 		_ = st.ReclaimSpace(ctx)
 	}
@@ -316,7 +322,8 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 		logger.Info(l.T("log.config.updated"), slog.String("base_url", cur.BaseURLString()), slog.String("timezone", cur.Timezone),
 			slog.String("log_level", cur.LogLevelName()), slog.Bool("smtp", cur.SMTP.Enabled()))
 	})
-	go maintenance(ctx, st, notifier, sched, backups, &selfupdate.Manager{DataDir: cfg.DataDir}, eolSrc, scores, rollouts, l, logger)
+	evidence := &compliance.Collector{Store: st, EOL: eolSrc.Data, Logger: logger, L: l}
+	go maintenance(ctx, st, notifier, sched, backups, &selfupdate.Manager{DataDir: cfg.DataDir}, eolSrc, scores, rollouts, evidence, l, logger)
 
 	srv := &http.Server{
 		Addr:              cfg.HTTPAddr,
@@ -454,7 +461,7 @@ func healthcheck(cfg config.Config) int {
 
 // maintenance runs periodic checks: scheduled updates, offline agents and
 // stale jobs.
-func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched *schedule.Runner, backups *backup.Runner, su *selfupdate.Manager, eolSrc *eol.Source, scores *scoring.Engine, rollouts *rollout.Runner, l i18n.Localizer, logger *slog.Logger) {
+func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched *schedule.Runner, backups *backup.Runner, su *selfupdate.Manager, eolSrc *eol.Source, scores *scoring.Engine, rollouts *rollout.Runner, evidence *compliance.Collector, l i18n.Localizer, logger *slog.Logger) {
 	// Align ticks to the start of a minute so a 03:00 schedule fires at 03:00.
 	if !sleepUntil(ctx, timeutil.Now().Truncate(time.Minute).Add(time.Minute)) {
 		return
@@ -462,6 +469,9 @@ func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
 	var lastSnapshot, lastEOL time.Time
+	// Evidence collection runs in its own goroutine (the first run on an
+	// existing installation takes over the stored history); one at a time.
+	var collecting atomic.Bool
 	for {
 		now := timeutil.Now()
 		sched.Tick(ctx, now)
@@ -507,6 +517,15 @@ func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched
 			} else {
 				lastSnapshot = now
 			}
+			if err := evidence.Snapshot(ctx, now); err != nil {
+				logger.Warn(l.T("log.compliance.failed"), slog.String("error", err.Error()))
+			}
+		}
+		if collecting.CompareAndSwap(false, true) {
+			go func() {
+				defer collecting.Store(false)
+				evidence.Collect(ctx)
+			}()
 		}
 		jobs, err := st.TimeOutJobs(ctx, 3*time.Hour)
 		if err != nil {

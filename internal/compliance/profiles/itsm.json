@@ -1,0 +1,14 @@
+{
+  "id": "itsm",
+  "version": "1",
+  "controls": [
+    {"id": "ITSM-01", "checks": [{"check": "change.recorded", "relevance": "primary"}, {"check": "change.approval", "relevance": "primary"}, {"check": "patch.applied", "relevance": "supporting"}]},
+    {"id": "ITSM-02", "checks": [{"check": "patch.applied", "relevance": "primary"}, {"check": "reboot.pending", "relevance": "supporting"}]},
+    {"id": "ITSM-03", "checks": [{"check": "inventory.completeness", "relevance": "primary"}, {"check": "config.drift", "relevance": "supporting"}]},
+    {"id": "ITSM-04", "checks": [{"check": "inventory.completeness", "relevance": "primary"}, {"check": "eol.unsupported", "relevance": "supporting"}]},
+    {"id": "ITSM-05", "checks": [{"check": "monitoring.coverage", "relevance": "primary"}, {"check": "agent.coverage", "relevance": "supporting"}]},
+    {"id": "ITSM-06", "checks": [{"check": "vuln.sla", "relevance": "primary"}, {"check": "vuln.kev", "relevance": "primary"}, {"check": "access.mfa", "relevance": "supporting"}]},
+    {"id": "ITSM-07", "checks": [{"check": "vuln.sla", "relevance": "primary"}]},
+    {"id": "ITSM-08", "manual": "process"}
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "general",
+  "version": "1",
+  "controls": [
+    {"id": "GEN-01", "checks": [{"check": "vuln.sla", "relevance": "primary"}]},
+    {"id": "GEN-02", "checks": [{"check": "vuln.kev", "relevance": "primary"}]},
+    {"id": "GEN-03", "checks": [{"check": "patch.currency", "relevance": "primary"}]},
+    {"id": "GEN-04", "checks": [{"check": "patch.applied", "relevance": "primary"}]},
+    {"id": "GEN-05", "checks": [{"check": "eol.unsupported", "relevance": "primary"}]},
+    {"id": "GEN-06", "checks": [{"check": "agent.coverage", "relevance": "primary"}]},
+    {"id": "GEN-07", "checks": [{"check": "reboot.pending", "relevance": "primary"}]},
+    {"id": "GEN-08", "checks": [{"check": "risk.accepted", "relevance": "primary"}]},
+    {"id": "GEN-09", "checks": [{"check": "access.mfa", "relevance": "primary"}]},
+    {"id": "GEN-10", "checks": [{"check": "backup.daily", "relevance": "primary"}]},
+    {"id": "GEN-11", "checks": [{"check": "log.integrity", "relevance": "primary"}]},
+    {"id": "GEN-12", "checks": [{"check": "monitoring.coverage", "relevance": "primary"}]}
+  ]
+}

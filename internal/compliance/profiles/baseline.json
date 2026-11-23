@@ -1,0 +1,18 @@
+{
+  "id": "baseline",
+  "version": "1",
+  "controls": [
+    {"id": "BASE-01", "checks": [{"check": "patch.applied", "relevance": "primary"}, {"check": "change.recorded", "relevance": "primary"}], "manual": "process"},
+    {"id": "BASE-02", "checks": [{"check": "vuln.sla", "relevance": "primary"}, {"check": "vuln.kev", "relevance": "primary"}, {"check": "patch.currency", "relevance": "supporting"}]},
+    {"id": "BASE-03", "checks": [{"check": "patch.currency", "relevance": "primary", "platforms": ["linux"]}, {"check": "eol.unsupported", "relevance": "primary", "platforms": ["linux"]}, {"check": "reboot.pending", "relevance": "supporting", "platforms": ["linux"]}]},
+    {"id": "BASE-04", "checks": [{"check": "patch.currency", "relevance": "primary", "platforms": ["windows_server"]}, {"check": "eol.unsupported", "relevance": "primary", "platforms": ["windows_server"]}, {"check": "reboot.pending", "relevance": "supporting", "platforms": ["windows_server"]}]},
+    {"id": "BASE-05", "checks": [{"check": "patch.currency", "relevance": "primary", "platforms": ["windows_10", "windows_11", "windows_other"]}, {"check": "eol.unsupported", "relevance": "primary", "platforms": ["windows_10", "windows_11", "windows_other"]}, {"check": "reboot.pending", "relevance": "supporting", "platforms": ["windows_10", "windows_11", "windows_other"]}]},
+    {"id": "BASE-06", "checks": [{"check": "inventory.completeness", "relevance": "primary"}, {"check": "agent.coverage", "relevance": "primary"}]},
+    {"id": "BASE-07", "checks": [{"check": "log.integrity", "relevance": "primary"}]},
+    {"id": "BASE-08", "checks": [{"check": "backup.daily", "relevance": "primary"}]},
+    {"id": "BASE-09", "checks": [{"check": "access.mfa", "relevance": "primary"}]},
+    {"id": "BASE-10", "checks": [{"check": "monitoring.coverage", "relevance": "primary"}, {"check": "vuln.kev", "relevance": "supporting"}]},
+    {"id": "BASE-11", "checks": [{"check": "config.drift", "relevance": "primary"}]},
+    {"id": "BASE-12", "manual": "process"}
+  ]
+}

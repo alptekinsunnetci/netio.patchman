@@ -1,0 +1,267 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}{{$c := $d.C}}{{$v := $d.V}}{{$rep := $d.Report}}
+<nav class="breadcrumb no-print"><a href="/compliance/reports">{{t "nav.compliance_reports"}}</a> / <span>{{$rep.Title}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{$rep.Title}}</h1>
+    <p class="pagehead__sub">{{t "compliance.report.period"}}: {{date $c.PeriodFrom}} – {{date $d.PeriodEnd}} · {{$d.Scope}}{{with $d.ScopePlatforms}} · {{.}}{{end}}</p>
+    <p class="report__meta">v{{$v.Version}} <span class="pill{{if $v.Final}} pill--succeeded{{end}}">{{t (printf "compliance.status.%s" $v.Status)}}</span>
+      · {{t "compliance.report.generated" "time" (datetime $v.GeneratedAt) "user" $v.GeneratedBy}} · SHA-256 <span class="mono" title="{{$v.SHA256}}">{{shortHash $v.SHA256}}</span>
+      {{if $v.Final}} · {{t "compliance.report.finalized_by" "time" (datetime $v.FinalizedAt) "user" $v.FinalizedBy}}{{end}}</p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="button" href="/compliance/reports/{{$rep.ID}}/versions/{{$v.Version}}/export?format=pdf">{{template "icon" "download"}}PDF</a>
+    <a class="button" href="/compliance/reports/{{$rep.ID}}/versions/{{$v.Version}}/export?format=csv">{{template "icon" "download"}}CSV</a>
+    <a class="button" href="/compliance/reports/{{$rep.ID}}/versions/{{$v.Version}}/export?format=json">{{template "icon" "download"}}JSON</a>
+    <button class="button" type="button" data-print>{{template "icon" "print"}}{{t "compliance.report.print"}}</button>
+  </div>
+</header>
+
+<div class="no-print">
+{{if not $d.Latest}}<p class="alert alert--info">{{t "compliance.report.old_version" "n" $rep.LatestVersion}} <a href="/compliance/reports/{{$rep.ID}}">{{t "compliance.report.show_latest"}}</a></p>{{end}}
+<div class="filters">
+  <form class="filters" method="get" action="/compliance/reports/{{$rep.ID}}">
+    <label class="field field--inline"><span class="field__label">{{t "compliance.col.version"}}</span>
+      <select class="field__input" name="v">{{range $d.Versions}}<option value="{{.Version}}"{{if eq .Version $v.Version}} selected{{end}}>v{{.Version}} · {{datetime .GeneratedAt}} · {{t (printf "compliance.status.%s" .Status)}}</option>{{end}}</select></label>
+    <button class="button" type="submit">{{t "compliance.report.show"}}</button>
+  </form>
+  {{if $d.CanRegenerate}}
+  <form method="post" action="/compliance/reports/{{$rep.ID}}/regenerate">{{template "csrf" $root}}
+    <button class="button" type="submit" title="{{t "compliance.report.regenerate_hint"}}">{{template "icon" "refresh"}}{{t "compliance.report.regenerate"}}</button></form>
+  {{end}}
+  {{if $d.CanReview}}
+  <form method="post" action="/compliance/reports/{{$rep.ID}}/versions/{{$v.Version}}/finalize" data-confirm="{{t "compliance.report.finalize_confirm"}}">{{template "csrf" $root}}
+    <button class="button button--primary" type="submit">{{template "icon" "check"}}{{t "compliance.report.finalize"}}</button></form>
+  {{end}}
+  {{if and .User.IsAdmin (not $rep.HasFinal)}}
+  <form method="post" action="/compliance/reports/{{$rep.ID}}/delete" data-confirm="{{t "compliance.report.delete_confirm"}}">{{template "csrf" $root}}
+    <button class="button button--danger" type="submit">{{t "compliance.report.delete"}}</button></form>
+  {{end}}
+</div>
+</div>
+
+<p class="alert alert--info">{{$d.Disclaimer}}</p>
+{{range $d.Warnings}}<p class="alert alert--warning">{{.}}</p>{{end}}
+{{with $c.Note}}<p class="muted">{{.}}</p>{{end}}
+
+<section class="panel report__section">
+  <h2 class="panel__title">1. {{t "compliance.section.summary"}}</h2>
+  <p>{{t "compliance.summary.hosts" "n" $c.Summary.Hosts}} {{range $d.Platforms}}<span class="pill">{{.Label}}: {{.N}}</span> {{end}}</p>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "compliance.csv.profile"}}</th><th>{{t "compliance.col.controls"}}</th><th>{{t "compliance.col.outcomes"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Blocks}}<tr><td><a href="#p-{{.ID}}">{{.Name}}</a> <span class="muted mono">{{.ID}}@{{.Version}}</span></td><td>{{len .Rows}}</td>
+      <td>{{range .Counts}}<span class="pill {{outcomeClass .Outcome}}">{{outcomeLabel .Outcome}}: {{.N}}</span> {{end}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  </div>
+  <p class="footnote">{{t "compliance.summary.note"}}</p>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">2. {{t "compliance.section.scope"}}</h2>
+  <dl class="dl">
+    <dt>{{t "compliance.report.period"}}</dt><dd>{{date $c.PeriodFrom}} – {{date $d.PeriodEnd}}</dd>
+    <dt>{{t "compliance.report.scope"}}</dt><dd>{{$d.Scope}}{{with $d.ScopePlatforms}} · {{.}}{{end}}</dd>
+    <dt>{{t "compliance.report.profiles"}}</dt><dd>{{range $d.Blocks}}<div>{{.Name}} <span class="muted mono">{{.ID}}@{{.Version}}</span><div class="cell-sub">{{.Desc}}</div></div>{{end}}</dd>
+    <dt>{{t "compliance.report.collection_start"}}</dt><dd>{{if $c.CollectionStart.IsZero}}{{t "common.empty"}}{{else}}{{datetime $c.CollectionStart}}{{end}}</dd>
+    <dt>{{t "compliance.report.engine"}}</dt><dd class="mono">{{$c.Engine}} · {{$c.Product}} {{$c.ProductVersion}}</dd>
+    <dt>SHA-256</dt><dd class="mono break">{{$v.SHA256}}</dd>
+    {{if $v.Final}}<dt>{{t "compliance.report.final_sha"}}</dt><dd class="mono break">{{$v.FinalSHA256}}</dd>{{end}}
+  </dl>
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">3. {{t "compliance.section.inventory"}} <span class="muted">({{$d.InventoryTotal}})</span></h2></div>
+  {{if $d.Inventory}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "compliance.csv.hostname"}}</th><th>{{t "compliance.csv.platform"}}</th><th>{{t "compliance.csv.os"}}</th><th>{{t "compliance.csv.agent"}}</th><th>{{t "compliance.csv.last_seen"}}</th><th>{{t "compliance.csv.groups"}}</th><th>{{t "compliance.csv.os_support"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Inventory}}
+    <tr><td><a href="/servers/{{.HostID}}">{{.Hostname}}</a></td><td>{{platform .Platform}}</td><td>{{.OSName}} <span class="muted">{{.OSVersion}}</span></td>
+      <td class="mono">{{.AgentVersion}}</td><td>{{datetime .LastSeen}}</td><td class="cell-sub">{{join .Groups ", "}}</td>
+      <td>{{with .OSSupport}}{{t (printf "eol.status.%s" .)}}{{end}}</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{if gt $d.InventoryTotal (len $d.Inventory)}}<p class="footnote">{{t "compliance.inventory.truncated" "shown" (len $d.Inventory) "total" $d.InventoryTotal}}</p>{{end}}
+  {{else}}{{template "empty" (t "compliance.empty.inventory")}}{{end}}
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">4. {{t "compliance.section.updates"}}</h2></div>
+  {{if $c.Updates}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "compliance.csv.platform"}}</th><th>{{t "compliance.col.hosts"}}</th><th>{{t "compliance.col.hosts_security"}}</th><th>{{t "compliance.col.security_updates"}}</th><th>{{t "compliance.col.updates"}}</th><th>{{t "compliance.col.reboot"}}</th><th>{{t "compliance.col.jobs_ok"}}</th><th>{{t "compliance.col.jobs_failed"}}</th></tr></thead>
+    <tbody>
+    {{range $c.Updates}}<tr><td>{{platform .Platform}}</td><td>{{.Hosts}}</td><td>{{.HostsWithSecurity}}</td><td>{{.SecurityUpdates}}</td><td>{{.Updates}}</td><td>{{.RebootPending}}</td><td>{{.UpdateJobsSucceeded}}</td><td>{{.UpdateJobsFailed}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "compliance.empty.updates")}}{{end}}
+</section>
+
+{{$vu := $c.Vulnerabilities}}
+<section class="panel report__section">
+  <h2 class="panel__title">5. {{t "compliance.section.vulnerabilities"}}</h2>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th></th><th>{{t "severity.critical"}}</th><th>{{t "severity.high"}}</th><th>{{t "severity.medium"}}</th><th>{{t "severity.low"}}</th><th>KEV</th></tr></thead>
+    <tbody>
+      <tr><td>{{t "compliance.vuln.open_start"}}</td><td>{{$vu.OpenAtStart.Critical}}</td><td>{{$vu.OpenAtStart.High}}</td><td>{{$vu.OpenAtStart.Medium}}</td><td>{{$vu.OpenAtStart.Low}}</td><td>{{$vu.OpenAtStart.KEV}}</td></tr>
+      <tr><td>{{t "compliance.vuln.open_end"}}</td><td>{{$vu.OpenAtEnd.Critical}}</td><td>{{$vu.OpenAtEnd.High}}</td><td>{{$vu.OpenAtEnd.Medium}}</td><td>{{$vu.OpenAtEnd.Low}}</td><td>{{$vu.OpenAtEnd.KEV}}</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>{{t "compliance.vuln.resolved" "n" $vu.Resolved "days" $d.MeanFix "kev" $vu.KEVResolved}}</p>
+  {{if $vu.KEVOpen}}
+  <h3 class="panel__title">{{t "compliance.vuln.kev_open"}}</h3>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>CVE</th><th>{{t "compliance.col.title"}}</th><th>{{t "compliance.col.due"}}</th><th>{{t "compliance.col.hosts"}}</th></tr></thead>
+    <tbody>{{range $vu.KEVOpen}}<tr><td><a class="mono" href="/vulnerabilities/{{.CVE}}">{{.CVE}}</a></td><td lang="en">{{truncate .Title 90}}</td><td class="mono">{{.DueDate}}</td><td>{{.Hosts}}</td></tr>{{end}}</tbody>
+  </table>
+  </div>
+  {{end}}
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">6. {{t "compliance.section.patch"}}</h2>
+  <p>{{t "compliance.patch.text" "jobs" $c.Patch.Jobs "ok" $c.Patch.Succeeded "partial" $c.Patch.Partial "failed" $c.Patch.Failed "packages" $c.Patch.Packages}}</p>
+  <p>{{t "compliance.patch.clean" "clean" $c.Patch.HostsClean "hosts" $c.Patch.Hosts}}</p>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">7. {{t "compliance.section.sla"}}</h2>
+  {{if $c.SLA.Enabled}}
+  <p>{{t "compliance.sla.days" "critical" (index $c.SLA.Days "critical") "high" (index $c.SLA.Days "high") "medium" (index $c.SLA.Days "medium") "low" (index $c.SLA.Days "low")}}</p>
+  <p>{{t "compliance.sla.text" "resolved" $c.SLA.Resolved "within" $c.SLA.WithinSLA "late" $c.SLA.Late "open" $c.SLA.OpenOverdue}}</p>
+  {{else}}<p>{{t "compliance.sla.disabled"}}</p>{{end}}
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">8. {{t "compliance.section.eol"}}</h2></div>
+  {{if $c.EOL}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "compliance.csv.hostname"}}</th><th>{{t "compliance.csv.platform"}}</th><th>{{t "compliance.csv.os"}}</th><th>{{t "compliance.csv.os_support"}}</th></tr></thead>
+    <tbody>{{range $c.EOL}}<tr><td>{{.Hostname}}</td><td>{{platform .Platform}}</td><td>{{.OSName}}</td><td><span class="pill{{if eq .Status "eol"}} pill--failed{{else}} pill--warning{{end}}">{{t (printf "eol.status.%s" .Status)}}</span></td></tr>{{end}}</tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "compliance.empty.eol")}}{{end}}
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">9. {{t "compliance.section.changes"}}</h2>
+  <p>{{t "compliance.changes.text" "total" $c.Changes.Total "approvals" $c.Changes.Approvals}}</p>
+  <div class="grid-2">
+    <dl class="dl">{{range $d.ByType}}<dt>{{.Label}}</dt><dd>{{.N}}</dd>{{end}}</dl>
+    <dl class="dl">{{range $d.ByOrigin}}<dt>{{.Label}}</dt><dd>{{.N}}</dd>{{end}}</dl>
+  </div>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">10. {{t "compliance.section.audit"}}</h2>
+  <p>{{t "compliance.audit.text" "n" $c.Audit.Events}} {{if $c.Audit.ChainOK}}{{t "compliance.chain.ok" "n" $c.Audit.ChainItems}}{{else}}<span class="pill pill--failed">{{t "compliance.chain.broken" "id" $c.Audit.ChainBroken}}</span>{{end}}</p>
+  {{if $d.ByAction}}<details><summary>{{t "compliance.audit.by_action"}}</summary><dl class="dl">{{range $d.ByAction}}<dt>{{.Label}}</dt><dd>{{.N}}</dd>{{end}}</dl></details>{{end}}
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">11. {{t "compliance.section.controls"}}</h2>
+  <p class="footnote">{{t "compliance.controls.note"}}</p>
+</section>
+{{range $b := $d.Blocks}}
+<section class="panel panel--flush report__section" id="p-{{$b.ID}}">
+  <div class="panel__head"><h3 class="panel__title">{{$b.Name}} <span class="muted mono">{{$b.ID}}@{{$b.Version}}</span></h3>
+    <span>{{range $b.Counts}}<span class="pill {{outcomeClass .Outcome}}">{{outcomeLabel .Outcome}}: {{.N}}</span> {{end}}</span></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "compliance.csv.control"}}</th><th>{{t "compliance.csv.outcome"}}</th><th>{{t "compliance.csv.checks"}}</th><th>{{t "compliance.csv.evidence"}}</th><th>{{t "compliance.csv.review"}}</th></tr></thead>
+    <tbody>
+    {{range $b.Rows}}
+    <tr id="c-{{$b.ID}}-{{.ID}}">
+      <td><strong class="mono">{{.ID}}</strong> {{.Title}}<div class="cell-sub">{{.Desc}}</div></td>
+      <td><span class="pill {{outcomeClass .Outcome}}">{{outcomeLabel .Outcome}}</span>{{with .Justification}}<div class="cell-sub">{{.}}</div>{{end}}</td>
+      <td>{{range .Checks}}<div>{{.Label}} <span class="muted">· {{.Relevance}}</span> <span class="pill {{outcomeClass .Outcome}}">{{outcomeLabel .Outcome}}</span></div>{{end}}
+        {{if .Manual}}<div class="cell-sub">{{t "compliance.controls.manual" "type" .Manual "n" .ManualItems}}</div>{{end}}</td>
+      <td>{{if .Evidence}}<a href="/compliance/evidence?version={{$v.ID}}&amp;control={{$b.ID}}:{{.ID}}">{{.Evidence}}</a>{{else}}0{{end}}</td>
+      <td>{{reviewLabel .Review.ReviewStatus}}{{with .Review.ReviewNote}}<div class="cell-sub">{{.}}</div>{{end}}{{if .Review.ReviewedBy}}<div class="cell-sub">{{.Review.ReviewedBy}} · {{datetime .Review.ReviewedAt}}</div>{{end}}
+        {{if $d.CanReview}}
+        <details class="no-print"><summary>{{t "compliance.review.edit"}}</summary>
+          <form method="post" action="/compliance/reports/{{$rep.ID}}/versions/{{$v.Version}}/review">{{template "csrf" $root}}
+            <input type="hidden" name="profile" value="{{$b.ID}}"><input type="hidden" name="control" value="{{.ID}}">
+            {{$cur := .Review.ReviewStatus}}
+            <select class="field__input" name="status" aria-label="{{t "compliance.csv.review"}}">{{range $d.Reviews}}<option value="{{.}}"{{if eq . $cur}} selected{{end}}>{{reviewLabel .}}</option>{{end}}</select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="{{t "compliance.csv.review_note"}}">{{.Review.ReviewNote}}</textarea>
+            <button class="button button--sm" type="submit">{{t "common.save"}}</button>
+          </form>
+        </details>
+        {{end}}
+      </td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+</section>
+{{end}}
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">{{t "compliance.section.checks"}}</h2></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "compliance.csv.check"}}</th><th>{{t "compliance.csv.outcome"}}</th><th>{{t "compliance.csv.metrics"}}</th><th>{{t "compliance.csv.gaps"}}</th><th>{{t "compliance.csv.evidence"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Checks}}
+    <tr><td>{{.Label}}</td><td><span class="pill {{outcomeClass .Outcome}}">{{outcomeLabel .Outcome}}</span></td>
+      <td class="cell-sub">{{range .Metrics}}<div>{{.Name}}: <strong>{{.Value}}</strong></div>{{end}}</td>
+      <td class="cell-sub">{{range .Gaps}}<div>{{.}}</div>{{end}}</td><td>{{.Evidence}}</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">12. {{t "compliance.section.evidence"}} <span class="muted">({{$c.Evidence.Total}})</span></h2>
+    <a class="no-print" href="/compliance/evidence?version={{$v.ID}}">{{t "compliance.evidence.all_of_version"}}</a></div>
+  {{if $d.Evidence}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>ID</th><th>{{t "compliance.csv.kind"}}</th><th>{{t "compliance.csv.occurred"}}</th><th>{{t "compliance.csv.hostname"}}</th><th>{{t "compliance.csv.subject"}}</th><th>{{t "compliance.csv.controls"}}</th><th>SHA-256</th></tr></thead>
+    <tbody>
+    {{range $d.Evidence}}
+    <tr><td><a class="mono" href="/compliance/evidence/{{.ID}}">{{.ID}}</a></td><td>{{evidenceKind .Kind}}</td><td>{{datetime .OccurredAt}}</td><td>{{.Hostname}}</td>
+      <td>{{template "evsubject" .}}</td><td class="cell-sub">{{join .Controls ", "}}</td><td class="mono" title="{{.SHA256}}">{{shortHash .SHA256}}</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{if gt $c.Evidence.Total (len $d.Evidence)}}<p class="footnote">{{t "compliance.evidence.truncated" "shown" (len $d.Evidence) "total" $c.Evidence.Total}}</p>{{end}}
+  {{else}}{{template "empty" (t "compliance.empty.evidence")}}{{end}}
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">13. {{t "compliance.section.gaps"}} <span class="muted">({{len $d.Gaps}})</span></h2></div>
+  {{if $d.Gaps}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "compliance.csv.control"}}</th><th>{{t "compliance.csv.outcome"}}</th><th>{{t "compliance.csv.gaps"}}</th><th>{{t "compliance.csv.recommendations"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Gaps}}
+    <tr><td>{{.Profile}}<div><strong class="mono">{{.Control}}</strong> {{.Title}}</div></td><td><span class="pill {{outcomeClass .Outcome}}">{{outcomeLabel .Outcome}}</span></td>
+      <td class="cell-sub">{{range .Gaps}}<div>{{.}}</div>{{end}}</td><td class="cell-sub">{{range .Recs}}<div>{{.}}</div>{{end}}</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "compliance.empty.gaps")}}{{end}}
+</section>
+<p class="footnote">{{t "compliance.report.footnote"}}</p>
+{{end}}

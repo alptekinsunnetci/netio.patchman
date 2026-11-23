@@ -1,0 +1,55 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$e := $d.E}}
+<nav class="breadcrumb"><a href="/compliance/evidence">{{t "nav.compliance_evidence"}}</a> / <span>{{.Title}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{.Title}}</h1>
+    <p class="pagehead__sub">{{evidenceKind $e.Kind}} · {{datetime $e.OccurredAt}}{{if $e.Retroactive}} · <span class="pill" title="{{t "compliance.evidence.retroactive_hint"}}">{{t "compliance.evidence.retroactive"}}</span>{{end}}</p>
+  </div>
+</header>
+
+<div class="grid-2">
+<section class="panel">
+  <h2 class="panel__title">{{t "compliance.evidence.fact"}}</h2>
+  <dl class="dl">
+    <dt>{{t "compliance.csv.kind"}}</dt><dd>{{evidenceKind $e.Kind}}</dd>
+    <dt>{{t "compliance.evidence.source"}}</dt><dd>{{t (printf "compliance.source.%s" $e.Source)}} <span class="muted mono">{{$e.SourceRef}}</span></dd>
+    {{if $e.HostID}}<dt>{{t "compliance.csv.hostname"}}</dt><dd><a href="/servers/{{$e.HostID}}">{{$e.Hostname}}</a>{{with $e.Platform}} · {{platform .}}{{end}}</dd>{{end}}
+    {{with $e.Subject}}<dt>{{t "compliance.csv.subject"}}</dt><dd class="mono break">{{.}}</dd>{{end}}
+    {{with $e.Outcome}}<dt>{{t "compliance.csv.outcome_raw"}}</dt><dd class="mono">{{.}}</dd>{{end}}
+    {{with $e.Actor}}<dt>{{t "compliance.csv.actor"}}</dt><dd>{{.}}</dd>{{end}}
+    <dt>{{t "compliance.csv.occurred"}}</dt><dd>{{datetime $e.OccurredAt}}</dd>
+    <dt>{{t "compliance.evidence.collected"}}</dt><dd>{{datetime $e.CollectedAt}}</dd>
+    {{range $d.Payload}}<dt class="mono">{{.Key}}</dt><dd class="mono break">{{.Value}}</dd>{{end}}
+  </dl>
+</section>
+<section class="panel">
+  <h2 class="panel__title">{{t "compliance.evidence.integrity"}}</h2>
+  <dl class="dl">
+    <dt>SHA-256</dt><dd class="mono break">{{$e.SHA256}}</dd>
+    <dt>{{t "compliance.evidence.prev_hash"}}</dt><dd class="mono break">{{if $e.PrevSHA256}}{{$e.PrevSHA256}}{{else}}{{t "compliance.evidence.chain_start"}}{{end}}</dd>
+  </dl>
+  <p class="footnote">{{t "compliance.evidence.integrity_hint"}}</p>
+</section>
+</div>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{t "compliance.evidence.uses"}} <span class="muted">({{len $d.Uses}})</span></h2></div>
+  {{if $d.Uses}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "compliance.col.title"}}</th><th>{{t "compliance.col.version"}}</th><th>{{t "compliance.csv.control"}}</th><th>{{t "compliance.evidence.relevance"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Uses}}
+    <tr><td><a href="/compliance/reports/{{.ReportID}}?v={{.Version}}">{{.Title}}</a></td><td>v{{.Version}} <span class="pill{{if eq .Status "final"}} pill--succeeded{{end}}">{{t (printf "compliance.status.%s" .Status)}}</span></td>
+      <td><a href="/compliance/reports/{{.ReportID}}?v={{.Version}}#c-{{.Profile}}-{{.Control}}">{{.Ref}}</a></td><td>{{.Relevance}}</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "compliance.evidence.unused")}}{{end}}
+</section>
+<p class="footnote">{{t "compliance.evidence.reuse_note"}}</p>
+{{end}}

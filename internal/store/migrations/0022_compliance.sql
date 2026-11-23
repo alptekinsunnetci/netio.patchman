@@ -1,0 +1,128 @@
+-- Compliance & audit (store/evidence.go, store/compliance.go).
+--
+-- Evidence repository: append-only facts collected from jobs, findings, the
+-- audit log, drift and backups. Every row carries the SHA-256 of its content
+-- chained to the previous row (prev_sha256), so changes and deletions show
+-- up in the integrity check. host_id has no foreign key: evidence outlives
+-- the host, hostname and platform are copied.
+CREATE TABLE evidence_items (
+    id           INTEGER PRIMARY KEY,
+    kind         TEXT NOT NULL,
+    source       TEXT NOT NULL,
+    source_ref   TEXT NOT NULL,
+    host_id      INTEGER NOT NULL DEFAULT 0,
+    hostname     TEXT NOT NULL DEFAULT '',
+    platform     TEXT NOT NULL DEFAULT '',
+    subject      TEXT NOT NULL DEFAULT '',
+    actor        TEXT NOT NULL DEFAULT '',
+    outcome      TEXT NOT NULL DEFAULT '',
+    occurred_at  INTEGER NOT NULL,
+    collected_at INTEGER NOT NULL,
+    payload      TEXT NOT NULL DEFAULT '{}',
+    sha256       TEXT NOT NULL,
+    prev_sha256  TEXT NOT NULL DEFAULT ''
+);
+CREATE UNIQUE INDEX evidence_items_ref ON evidence_items(source_ref, kind);
+CREATE INDEX evidence_items_time ON evidence_items(occurred_at);
+CREATE INDEX evidence_items_host ON evidence_items(host_id, occurred_at);
+
+-- Daily state of every host (one row per UTC day, rewritten during the day):
+-- the asset inventory and update state of past periods, after the
+-- operational data has been pruned. group_ids is ",1,4," (empty: none).
+CREATE TABLE evidence_host_states (
+    day                   INTEGER NOT NULL,
+    host_id               INTEGER NOT NULL,
+    hostname              TEXT NOT NULL,
+    platform              TEXT NOT NULL,
+    os_name               TEXT NOT NULL DEFAULT '',
+    os_version            TEXT NOT NULL DEFAULT '',
+    agent_version         TEXT NOT NULL DEFAULT '',
+    group_ids             TEXT NOT NULL DEFAULT '',
+    last_seen_at          INTEGER NOT NULL DEFAULT 0,
+    updates               INTEGER NOT NULL DEFAULT 0,
+    security_updates      INTEGER NOT NULL DEFAULT 0,
+    critical              INTEGER NOT NULL DEFAULT 0,
+    high                  INTEGER NOT NULL DEFAULT 0,
+    medium                INTEGER NOT NULL DEFAULT 0,
+    low                   INTEGER NOT NULL DEFAULT 0,
+    kev                   INTEGER NOT NULL DEFAULT 0,
+    kev_overdue           INTEGER NOT NULL DEFAULT 0,
+    sla_overdue           INTEGER NOT NULL DEFAULT 0,
+    reboot_required_since INTEGER NOT NULL DEFAULT 0,
+    os_eol                TEXT NOT NULL DEFAULT '',
+    monitored             INTEGER NOT NULL DEFAULT 0,
+    taken_at              INTEGER NOT NULL,
+    PRIMARY KEY (day, host_id)
+);
+CREATE INDEX evidence_host_states_host ON evidence_host_states(host_id, day);
+
+-- A report: frameworks (profiles, "isms@1"), audit period [period_from,
+-- period_to) and scope ({"groups":[..],"platforms":[..]}).
+CREATE TABLE compliance_reports (
+    id               INTEGER PRIMARY KEY,
+    title            TEXT NOT NULL,
+    profiles         TEXT NOT NULL,
+    period_from      INTEGER NOT NULL,
+    period_to        INTEGER NOT NULL,
+    scope            TEXT NOT NULL DEFAULT '{}',
+    note             TEXT NOT NULL DEFAULT '',
+    created_by       INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_by_email TEXT NOT NULL DEFAULT '',
+    created_at       INTEGER NOT NULL
+);
+
+-- Generated versions. content is the report model (JSON) and sha256 its
+-- hash; a final version never changes (final_sha256 covers the reviews).
+CREATE TABLE compliance_report_versions (
+    id           INTEGER PRIMARY KEY,
+    report_id    INTEGER NOT NULL REFERENCES compliance_reports(id) ON DELETE CASCADE,
+    version      INTEGER NOT NULL,
+    status       TEXT NOT NULL DEFAULT 'draft',
+    generated_at INTEGER NOT NULL,
+    generated_by TEXT NOT NULL DEFAULT '',
+    engine       TEXT NOT NULL,
+    content      TEXT NOT NULL,
+    sha256       TEXT NOT NULL,
+    finalized_at INTEGER NOT NULL DEFAULT 0,
+    finalized_by TEXT NOT NULL DEFAULT '',
+    final_sha256 TEXT NOT NULL DEFAULT ''
+);
+CREATE UNIQUE INDEX compliance_report_versions_n ON compliance_report_versions(report_id, version);
+
+-- One row per control of a version: the automated outcome and, separately,
+-- the manual review.
+CREATE TABLE control_assessments (
+    version_id    INTEGER NOT NULL REFERENCES compliance_report_versions(id) ON DELETE CASCADE,
+    profile       TEXT NOT NULL,
+    control       TEXT NOT NULL,
+    outcome       TEXT NOT NULL,
+    applicable    INTEGER NOT NULL DEFAULT 1,
+    review_status TEXT NOT NULL DEFAULT 'not_reviewed',
+    review_note   TEXT NOT NULL DEFAULT '',
+    reviewed_by   TEXT NOT NULL DEFAULT '',
+    reviewed_at   INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (version_id, profile, control)
+);
+
+-- Which evidence a version used for which control, and how strongly
+-- (primary, supporting, manual).
+CREATE TABLE assessment_evidence (
+    version_id  INTEGER NOT NULL REFERENCES compliance_report_versions(id) ON DELETE CASCADE,
+    profile     TEXT NOT NULL,
+    control     TEXT NOT NULL,
+    evidence_id INTEGER NOT NULL,
+    relevance   TEXT NOT NULL,
+    PRIMARY KEY (version_id, profile, control, evidence_id)
+);
+CREATE INDEX assessment_evidence_item ON assessment_evidence(evidence_id);
+
+-- Applicability of a control in this installation, with the reason.
+CREATE TABLE compliance_control_settings (
+    profile       TEXT NOT NULL,
+    control       TEXT NOT NULL,
+    applicable    INTEGER NOT NULL DEFAULT 1,
+    justification TEXT NOT NULL DEFAULT '',
+    updated_by    TEXT NOT NULL DEFAULT '',
+    updated_at    INTEGER NOT NULL,
+    PRIMARY KEY (profile, control)
+);

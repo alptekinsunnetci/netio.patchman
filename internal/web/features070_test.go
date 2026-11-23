@@ -149,8 +149,6 @@ func TestOperationsFeatures(t *testing.T) {
 	if n != 1 {
 		t.Errorf("sla_overdue notifications: %d", n)
 	}
-	status, body, _ = e.do(admin, "GET", "/reports", nil)
-	expect(t, "report overdue", status, 200, body, "Düzeltme süresi (SLA) dolan bulgular", "CVE-2026-0001")
 
 	// ---- Group-limited operator.
 	pw := "kisitli-parola-1"

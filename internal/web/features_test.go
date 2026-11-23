@@ -221,13 +221,11 @@ func TestTrendsAndReport(t *testing.T) {
 	_, body, _ = e.do(admin, "GET", "/dashboard", nil)
 	expect(t, "dashboard trend", 200, 200, body, `class="trend__plot"`, `data-values="`, ",,1,,,1\"", `class="trend__line" d="M`, "Kritik ve yüksek açık (CVE)", "Günlük değerleri tablo olarak göster")
 
-	_, body, _ = e.do(admin, "GET", "/reports", nil)
-	expect(t, "report", 200, 200, body, "Uyumluluk Raporu", "Aktif olarak istismar edilen açıklar (CISA KEV)", "CVE-2026-0001", "2026-11-23",
-		"VMware sanal makine", "Tüm sunucular (1)", "Yazdır / PDF kaydet", "data-print", `class="trend__plot"`)
-	_, body, _ = e.do(admin, "GET", "/reports?from=2026-13-01", nil)
-	expect(t, "bad report date", 200, 200, body, "Tarih biçimi geçersiz")
-	_, body, _ = e.do(admin, "GET", "/reports?from=2024-01-01&to=2026-01-01", nil)
-	expect(t, "long report range", 200, 200, body, "en fazla 366 gün")
+	// The compliance report moved into Compliance & audit.
+	status, _, hdr := e.do(admin, "GET", "/reports", nil)
+	if status != http.StatusMovedPermanently || hdr.Get("Location") != "/compliance/reports" {
+		t.Errorf("old report address: %d %s", status, hdr.Get("Location"))
+	}
 }
 
 func TestTwoFactorLogin(t *testing.T) {
