@@ -1,0 +1,69 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$h := $d.Host}}
+<nav class="breadcrumb"><a href="/servers">{{t "nav.servers"}}</a> / <a href="/servers/{{$h.ID}}">{{$h.Hostname}}</a> / <span>{{t "score.title"}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "score.title"}} · {{$h.Hostname}}</h1>
+    <p class="pagehead__sub">{{t "score.subtitle"}}</p>
+  </div>
+  {{if .User.IsAdmin}}<div class="pagehead__actions"><a class="button" href="/settings/score">{{template "icon" "settings"}}{{t "score.settings_title"}}</a></div>{{end}}
+</header>
+
+{{if $d.Computed}}
+<section class="panel">
+  <div class="score-head">
+    <span class="score score-big score--{{scoreBand $d.Score}}">{{$d.Score}}</span>
+    <div>
+      <p><strong>{{t (printf "score.band.%s" (scoreBand $d.Score))}}</strong></p>
+      <p class="muted">{{t "score.deducted" "points" (printf "%.1f" $d.Detail.Deducted)}}</p>
+    </div>
+  </div>
+</section>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{t "score.breakdown"}}</h2></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "score.field.category"}}</th><th class="num">{{t "score.field.count"}}</th><th class="num">{{t "score.field.points"}}</th><th>{{t "score.field.items"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Detail.Categories}}
+    <tr>
+      <td>{{t (printf "score.category.%s" .Key)}}{{if .Cap}}<div class="cell-sub">{{t "score.cap" "n" (printf "%g" .Cap)}}{{if .Capped}} · <strong>{{t "score.capped"}}</strong>{{end}}</div>{{end}}</td>
+      <td class="num">{{.Count}}</td>
+      <td class="num mono">{{if .Points}}−{{printf "%.1f" .Points}}{{else}}0{{end}}</td>
+      <td>
+        {{if .Items}}{{$key := .Key}}
+        <ul class="plain-list score-items">
+          {{range .Items}}
+          <li>{{if eq $key "vulns"}}<a class="mono" href="/vulnerabilities/{{.Label}}">{{.Label}}</a> {{template "sev" .Severity}} <span class="muted">{{t (printf "score.reason.%s" .Reason)}}</span>{{else if eq $key "security_updates"}}{{t "score.updates_uncovered" "n" .Label}}{{else}}{{.Label}} <span class="muted">{{t (printf "eol.status.%s" .Reason)}}</span>{{end}} <span class="mono muted">−{{printf "%.1f" .Points}}</span></li>
+          {{end}}
+        </ul>
+        {{if gt .Count (len .Items)}}<p class="cell-sub">{{t "score.more_items" "n" .Count}}</p>{{end}}
+        {{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}
+      </td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+</section>
+{{else}}
+<section class="panel">{{template "empty" (t "score.pending_long")}}</section>
+{{end}}
+
+{{template "trends" $d.Trend}}
+
+<section class="panel">
+  <h2 class="panel__title">{{t "score.how_title"}}</h2>
+  <p>{{t "score.how_body"}}</p>
+  {{with $d.Weights}}
+  <ul class="plain-list">
+    <li>{{t "score.how_vulns" "critical" (printf "%g" .Critical) "high" (printf "%g" .High) "medium" (printf "%g" .Medium) "low" (printf "%g" .Low) "kev" (printf "%g" .KEV) "epss" (printf "%g" .EPSS) "overdue" (printf "%g" .Overdue) "cap" (printf "%g" .VulnCap)}}</li>
+    <li>{{t "score.how_eol" "os" (printf "%g" .OSEOL) "soon" (printf "%g" .OSSoon) "software" (printf "%g" .SoftwareEOL) "cap" (printf "%g" .SoftwareEOLCap)}}</li>
+    <li>{{t "score.how_updates" "points" (printf "%g" .SecurityUpdate) "cap" (printf "%g" .SecurityUpdateCap)}}</li>
+  </ul>
+  {{end}}
+</section>
+{{end}}

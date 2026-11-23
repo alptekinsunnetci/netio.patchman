@@ -182,11 +182,69 @@ Risk Kabul Edildi ve Hatalı Tespit durumundaki bulgular sayımlara ve bildiriml
 
 **Yazdır / PDF kaydet** düğmesi tarayıcının yazdırma penceresini açar. Hedef olarak “PDF olarak kaydet” seçildiğinde rapor menüler olmadan, beyaz zeminde kaydedilir. Rapor, oluşturulma zamanını ve oluşturan kullanıcıyı içerir. ISO 27001 ve KVKK denetimlerinde düzenli olarak (örneğin aylık) alınıp saklanabilir. Tüm roller raporu görüntüleyebilir.
 
+## Güvenlik Puanı
+
+Her sunucu için 0-100 arası bir güvenlik puanı hesaplanır (yüksek = iyi). Puan 15 dakikada bir yenilenir ve günlük geçmişi saklanır. 100'den şu kesintiler düşülür:
+
+| Ölçüt | Varsayılan |
+|---|---|
+| Açık CVE: kritik / yüksek / orta / düşük / bilinmeyen | 10 / 5 / 2 / 0,5 / 1 |
+| CVE KEV kataloğunda | 25 |
+| EPSS olasılığı | 20 × EPSS (ör. EPSS 0,5 → 10) |
+| Düzeltme süresi (SLA) geçmiş | 12 |
+| Açıklar için üst sınır | 70 |
+| İşletim sistemi desteği bitmiş / yakında bitecek | 25 / 5 |
+| Desteği bitmiş yazılım (dağıtımın desteklediği hariç) | yazılım başına 5, en fazla 15 |
+| Bir açığa bağlanmamış güvenlik güncellemesi | güncelleme başına 1, en fazla 10 |
+
+- **Bir CVE yalnızca bir kez sayılır.** Bir CVE aynı anda kritik, KEV kataloğunda ve süresi geçmiş olsa bile yalnızca en yüksek ölçütün kesintisi uygulanır. Aynı CVE birden çok pakette bulunsa da bir kez düşülür. Kabul edilen riskler ve yanlış pozitifler puana katılmaz.
+- Güvenlik güncellemeleri yalnızca bir açık bulgusuna karşılık gelmiyorsa düşülür; aynı sorun hem açık hem güncelleme olarak iki kez cezalandırılmaz.
+- Sunucu listesindeki puana tıklandığında hangi ölçütten kaç puan düşüldüğü ve son 90 günün puan geçmişi gösterilir. Liste puana göre sıralanabilir ve “Puanı 60'ın altında” gibi süzülebilir. Gösterge panelinde filonun ortalama ve en düşük puanı, Sunucu Grupları sayfasında her grubun ortalaması bulunur.
+- Ağırlıklar **Sistem Ayarları → Güvenlik puanı** sayfasında (yalnızca yöneticiler) değiştirilir. Aynı sayfada bir eşik verilirse puanı bu eşiğin altına düşen sunucular için bir kez bildirim gönderilir. Puan eşiğin üstüne çıktıktan sonra yeniden düşerse yeniden bildirilir.
+- API: `/api/v1/hosts/{id}/score`; Prometheus: `netio_patchman_security_score`.
+
+## Sunucu Standartları ve Sapmalar
+
+**Sunucu Standartları** sayfasında tüm sunucular veya bir grup için kurallar tanımlanır (kural tanımlamak yalnızca yöneticilere açıktır, sapma raporunu tüm roller görür). Örnek: “Web sunucularında PHP yalnızca 8.2 veya 8.3 olmalı, telnetd kurulu olmamalı, nginx çalışıyor olmalı.”
+
+| Kural | Anlamı |
+|---|---|
+| Kurulu olmalı | Yazılım veya paket kurulu olmalı |
+| Kurulu olmamalı | Yazılım veya paket kurulu olmamalı |
+| İzin verilen sürüm serileri | Yazılımın serisi listedekilerden biri olmalı (ör. `8.2, 8.3`) |
+| En düşük sürüm | Paket sürümü en az bu olmalı |
+| Çalışıyor olmalı | Yazılımın servisi çalışıyor olmalı |
+
+- Kural konusu bir **yazılım** (Yazılım Envanteri'ndeki ürün, ör. `nginx`) veya tam bir **paket adı** olabilir.
+- **En düşük sürüm** dağıtımın kendi sürüm numarasıyla karşılaştırılır (ör. `1.22.1-9+deb12u1`). Böylece dağıtımların güvenlik düzeltmelerini eski üst sürüme geri taşıması (backport) yanlış sapma üretmez. Üst proje sürümüyle karşılaştırma yapılmaz.
+- Sapmalar her kaydetmede ve 15 dakikada bir yeniden değerlendirilir. Yeni bir sapma ilk görüldüğünde bildirim gönderilir. Giderilen sapmalar listeden kendiliğinden düşer.
+- **Sapmalar** sekmesi her sapma için sunucuyu, kuralı, bulunan durumu ve ilk görülme zamanını gösterir. Bekleyen bir güncelleme sapmayı giderebiliyorsa öneri olarak gösterilir (ör. “php8.1-common güncelle”). Sunucu sayfasının Yazılım sekmesinde o sunucunun sapmaları listelenir.
+- Sapmalar bir uyumluluk bulgusudur, güvenlik açığı değildir; güvenlik puanını etkilemez. API: `/api/v1/drift`.
+
 ## Paket Yönetimi
 
 - **Bekleyen Güncellemeler:** Tüm sunuculardaki güncellemeler paket bazında toplanır. **Tüm sunucularda güncelle** ile bir paketi her yerde güncelleyebilir, **Tüm güvenlik güncellemelerini uygula** ile bütün sunucularda güvenlik güncellemelerini başlatabilirsiniz.
 - **Paket ayrıntısı:** Paket adına tıkladığınızda güncelleme bekleyen sunucular listelenir. Sunucuları işaretleyip **Seçili sunucularda güncelle** ile paketi yalnızca bu sunucularda güncelleyebilirsiniz (örneğin önce test sunucularında).
 - **Kurulu Paket Ara:** Bir paketin hangi sunucuda hangi sürümle kurulu olduğunu bulun.
+
+## Yazılım Envanteri
+
+**Yazılım Envanteri** sayfası paket listesinden tanınan sunucu yazılımlarını gösterir: web ve uygulama sunucuları, veritabanları, dil çalışma zamanları, kontrol panelleri ve benzerleri. Paket adları ürün adına eşlenir (örneğin `nginx-core` → nginx, `php8.2-fpm` → PHP 8.2).
+
+- **Yazılımlar:** Her ürünün hangi sunucularda, hangi sürüm serisiyle kurulu olduğu. Ürün sayfasında sunucu başına paket, sürüm ve servis durumu yer alır.
+- **Kurulu ve çalışan:** Ajan servis listesini de gönderir (systemd, OpenRC, Windows servisleri). Kurulu olup servisi çalışmayan yazılımlar ayrıca işaretlenir. Servis bilgisi yalnızca 1.0.0 ve üstü ajanlardan gelir.
+- **Güvenlik açığı ve EOL bağlantısı:** Ürün satırlarında o yazılımın paketlerindeki açık bulgular ve destek bitiş durumu gösterilir.
+- **Sunucu karşılaştırma:** İki sunucunun yazılımları ve sürüm serileri yan yana karşılaştırılır. Yalnızca birinde olan veya sürümü farklı olan satırlar işaretlenir.
+- **Değişiklik geçmişi:** Kurulan, kaldırılan ve sürümü değişen yazılımlar tarih, sunucu, eski ve yeni sürümle listelenir. **Sistem Ayarları → Yazılım envanteri** bölümünde bu değişiklikler için bildirim açılıp kapatılabilir.
+
+### Destek bitişi (EOL)
+
+Yazılım Envanteri'nin **Destek bitişi (EOL)** sekmesi işletim sistemlerinin ve tanınan yazılımların destek takvimini gösterir: desteklenen, yakında bitecek, desteği bitmiş ve bilinmeyen.
+
+- Takvimler [endoflife.date](https://endoflife.date) verisinden günde bir kez güncellenir. Ürünle birlikte gelen yerleşik takvim, internet erişimi olmayan kurulumlarda kullanılır (`PATCHMAN_EOL_URL=off`).
+- Ubuntu, Debian ve RHEL ailesi gibi dağıtımlar kendi paketledikleri yazılımları (örneğin dağıtımın PHP veya Python sürümü) üst projenin desteği bittikten sonra da güvenlik güncellemeleriyle sürdürür. Bu kurulumlar **dağıtım destekliyor** olarak işaretlenir. EOL bildirimlerine ve güvenlik puanına dahil edilmez.
+- **Uyarı süresi** (varsayılan 90 gün) **Sistem Ayarları → Destek bitişi** bölümünden değiştirilir. Desteği yaklaşan veya biten her sürüm için bir kez bildirim gönderilir.
+- Sayfa durum, tür ve grup ile süzülebilir. API: `/api/v1/eol`.
 
 ## Zamanlanmış Güncellemeler
 
@@ -239,6 +297,60 @@ Güncellenemeyen paketler iş sayfasında listelenir. **Kalanları yeniden dene*
 
 Kurulu olmayan yeni bağımlılıklar (örneğin yeni çekirdek sürümü veya bölünmüş firmware paketleri) güncelleme listesinde gösterilmez. Bunları gerektiren paket güncellendiğinde paket yöneticisi onları kendiliğinden kurar.
 
+### Ön izleme ve onay (dry-run)
+
+Sunucu sayfasından başlatılan bir güncelleme önce **ön izleme** olarak çalışır. Ajan, paket yöneticisinin simülasyon kipini kullanır: `apt-get -s`, `dnf`/`yum` için `--assumeno`, `zypper --dry-run`. Bu sırada hiçbir paket değişmez. İş sayfasında güncellenecek, yeni kurulacak, kaldırılacak ve sürümü düşürülecek paketler, indirme boyutu ve yeniden başlatma gerekip gerekmeyeceği listelenir. Kaldırma veya sürüm düşürme varsa sayfa ayrıca uyarı gösterir. Güncelleme ancak **Onayla ve güncellemeyi başlat** düğmesine basıldıktan sonra başlar. Onay denetim kayıtlarına yazılır.
+
+- Ön izleme zorunluluğu **Sistem Ayarları → Güncelleme ayarları → Sunucu sayfasından başlatılan güncellemeler önce ön izlemeden geçsin** ile kapatılabilir (varsayılan açık).
+- Zamanlanmış güncellemeler, kademeli güncellemeler ve API ile başlatılan işler ön izleme beklemez.
+- Ön izleme yalnızca bu özelliği bildiren ajanlarda (1.0.0 ve üstü) ve APT, DNF, YUM ve Zypper'da yapılır. Eski ajanlarda güncelleme eskisi gibi doğrudan başlar.
+- Onaylanmadan bekleyen ön izleme hiçbir şey değiştirmez. Ön izlemeden sonra paket listesi değişse bile ajan güncelleme sırasında hedefleri yeniden belirler ve sonucu doğrular.
+
+### Sağlık kontrolleri
+
+**Sistem Ayarları → Sağlık kontrolleri** sayfasında (yalnızca yöneticiler) güncellemeden önce ve sonra çalışacak kontroller tanımlanır. Her kontrol tüm sunuculara, bir gruba veya tek bir sunucuya uygulanabilir.
+
+| Tür | Kontrol |
+|---|---|
+| HTTP/HTTPS | Adres beklenen durum koduyla (isteğe bağlı olarak beklenen metinle) yanıt veriyor mu |
+| TCP bağlantı noktası | Bağlantı kabul ediliyor mu |
+| Servis | Servis çalışıyor mu (systemd, OpenRC, Windows servisleri) |
+| CPU, bellek ve disk | Yük, bellek ve disk kullanımı verilen sınırların altında mı |
+| Yerel komut (health.d) | Sunucudaki `health.d` klasöründe bulunan betik 0 ile çıkıyor mu |
+
+- Yerel komutlar güvenlik nedeniyle yalnızca adla çağrılır; panel ajana komut satırı gönderemez. Betiği sunucunun yöneticisi `/etc/netio-patchman/health.d/` klasörüne koyar. Windows'ta bu klasör `C:\ProgramData\netio-patchman\health.d\` olur ve `.ps1`, `.cmd`, `.bat` ve `.exe` dosyaları kabul edilir. Dosya ve klasör root'a ait olmalı, grup veya diğer kullanıcılar tarafından yazılabilir olmamalıdır. Ayrıntılar için bkz. [kurulum.md](kurulum.md), bölüm 4.6.
+- Güncelleme işinde kontroller önce çalışır. Bir kontrol başarısızsa varsayılan olarak güncelleme yapılmaz ve iş başarısız sayılır. **Önceden başarısız kontrol olsa da güncellemeye devam et** seçilirse güncelleme yine yapılır.
+- Güncellemeden sonra kontroller ayarlanan bekleme süresi geçince (varsayılan 15 saniye) yeniden çalışır. Önce başarılı olup sonra başarısız olan bir kontrol **bozulma** olarak işaretlenir. İş başarısız sayılır ve bildirim gönderilir.
+- Sonuçlar iş sayfasında ve sunucu sayfasının **Sağlık** sekmesinde görünür. Sunucu sayfasındaki **Sağlık kontrollerini çalıştır** düğmesi kontrolleri güncelleme yapmadan çalıştırır.
+
+### Geri dönüş (rollback)
+
+netio.patchman disk veya sanal makine anlık görüntüsü (snapshot) almaz. Geri dönüş, paket yöneticisinin önceki sürümü kurmasıyla yapılır:
+
+1. Her güncelleme işinde ajan işten önceki ve sonraki paket sürümlerini bildirir. Eski ajanlarda iş başlangıcındaki envanter saklanır. İş sayfasındaki **Paket değişiklikleri** bölümü bu farkı gösterir.
+2. Geri alınacak paketleri seçip **Seçilenlerin geri alınabilirliğini kontrol et** düğmesine basın. Kontrol hiçbir şeyi değiştirmez. Önceki sürümlerin depolarda bulunup bulunmadığına bakar ve paket yöneticisinin simülasyonunu gösterir.
+3. Kontrol sayfasında **Onayla ve geri al** ile geri dönüş başlatılır. İsterseniz geri alınan paketler bu sunucuda güncelleme dışı bırakılır; böylece bir sonraki güncellemede yeniden yükseltilmezler.
+4. Ajan geri dönüşten sonra sürümleri yeniden okur. Her paket için **Geri alındı** veya **Başarısız** yazılır. Bazı paketler geri dönmezse iş “Kısmen başarılı” olur; başarı olarak gösterilmez. Sağlık kontrolleri tanımlıysa geri dönüşten sonra da çalışır.
+
+Kısıtlar: Eski sürümü depodan kaldırılmış paketler geri alınamaz. Bu genellikle Ubuntu güvenlik depolarında ve tek sürüm tutan depolarda görülür. Yeni kurulan ve kaldırılan paketler geri dönüşe dahil edilmez. Alpine (apk) ve Windows Update desteklenmez. Çekirdek geri dönüşünden sonra sunucunun yeniden başlatılması gerekir. Kontrol ve geri dönüş denetim kayıtlarına yazılır.
+
+## Kademeli Güncellemeler
+
+**Kademeli Güncellemeler** sayfasında (operatör ve yöneticiler) bir güncelleme çok sayıda sunucuya aşama aşama uygulanır:
+
+| Alan | Açıklama |
+|---|---|
+| Sunucular | Seçili sunucular, bir grup veya tüm sunucular. Sıralama sunucu adına veya grup sırasına göre yapılır. |
+| Canary sunucu sayısı | İlk aşamada güncellenecek sunucu sayısı. 0 olursa canary aşaması olmaz. |
+| Aşama başına sunucu | Sonraki aşamaların büyüklüğü |
+| En fazla eşzamanlı güncelleme | Bir aşamada aynı anda çalışan iş sayısı |
+| Aşamalar arası bekleme | Bir aşama bittikten sonra sonrakine geçmeden beklenen süre |
+| En yüksek hata oranı | Bu oran aşılırsa dağıtım kendiliğinden durur |
+| Canary aşamasından sonra dur | Canary bitince dağıtım duraklar ve elle devam ettirilmesini bekler |
+| Sağlık kontrolü bozulursa başarısız say | Sağlık kontrolü bozulan sunucular hata oranına dahil edilir |
+
+Dağıtım arka planda, sunucunun bakım döngüsünde (dakikada bir) ilerler. Sayfa kapatılsa da devam eder. **Duraklat**, **Devam ettir** ve **İptal et** düğmeleri denetim kayıtlarına yazılır. İptal edilen dağıtımda henüz ajana iletilmemiş işler iptal edilir. Başlamış işler tamamlanır. Hata oranı aşıldığında, canary sonrası beklerken ve dağıtım bittiğinde bildirim gönderilir. Hata oranı aşılıp durmuş bir dağıtım devam ettirilirse o ana kadarki hatalar kabul edilmiş sayılır ve oran sonraki sunucular için yeniden hesaplanır. Kısmen başarılı işler, ajan bağlanmadığı için süresi dolan veya zaman aşımına uğrayan işler de hata oranına başarısız olarak katılır.
+
 ## Ajan Yönetimi
 
 - **Kayıt anahtarları:** Yeni sunucuların kaydolması için kullanılır. Anahtar yalnızca oluşturulduğu anda gösterilir. Geçerlilik süresi ve kullanım sınırı verilmesi önerilir. Bir anahtarın iptal edilmesi kayıtlı ajanları etkilemez.
@@ -266,18 +378,56 @@ E-postaların gönderileceği SMTP sunucusu **Sistem Ayarları → Sunucu yapıl
 [KRİTİK] CVE-2026-12345 - 12 sunucuda güvenlik açığı tespit edildi
 ```
 
-### Slack, Microsoft Teams, Telegram ve webhook
+### Bildirim kanalları ve entegrasyonlar
 
-**Sistem Ayarları → Bildirim kanalları** sayfasında (yalnızca yöneticiler) bildirim merkezine düşen her bildirim ayrıca sohbet kanallarına gönderilebilir. Her kanal için en düşük seviye seçilir: **Bilgi** her şeyi, **Uyarı** yalnızca uyarı ve kritik olanları, **Kritik** yalnızca kritik olanları (kritik açıklar, KEV açıkları, başarısız yedekleme) gönderir.
+**Sistem Ayarları → Bildirim kanalları** sayfasında (yalnızca yöneticiler) bildirim merkezine düşen bildirimler sohbet kanallarına, kendi sistemlerinize, kayıt (ticket) sistemlerine ve Zabbix'e gönderilebilir. Her kanal için iki süzgeç vardır:
+
+- **En düşük seviye:** **Bilgi** her şeyi, **Uyarı** yalnızca uyarı ve kritik olanları, **Kritik** yalnızca kritik olanları (kritik açıklar, KEV açıkları, başarısız yedekleme) gönderir.
+- **Olaylar:** Bir veya daha fazla olay seçilirse yalnızca bu olaylar gönderilir ve seviyeye bakılmaz. Böylece örneğin bilgi seviyesindeki “Güncelleme başladı” olayı bir kanala abone edilebilir. Hiçbiri seçilmezse yalnızca seviye uygulanır.
+
+| Olay | Ne zaman |
+|---|---|
+| Kritik CVE | Kritik bir açık yeni tespit edildiğinde |
+| Aktif istismar edilen açık (KEV) | KEV kataloğundaki bir açık tespit edildiğinde |
+| Diğer yeni açıklar | Kritik olmayan, KEV'de bulunmayan yeni açıklar |
+| EOL yaklaşan veya geçen yazılım | Destek bitişi yaklaştığında veya geçtiğinde |
+| Güncelleme başladı / başarılı / başarısız veya kısmi | Güncelleme işinin ajan tarafından alınması ve sonucu |
+| Geri dönüş yapıldı | Bir geri dönüş tamamlandığında |
+| Yeniden başlatma gerekiyor | Sunucu yeniden başlatma gerektirdiğini ilk kez bildirdiğinde |
+| Sağlık kontrolü başarısız | Güncellemeden önce veya sonra bir kontrol başarısız olduğunda |
+| SLA süresi aşıldı | Düzeltme süresi geçen bulgular olduğunda |
+| Güvenlik puanı eşiğin altında | Bir sunucunun puanı eşiğin altına düştüğünde |
+| Sunucu çevrimdışı | Ajana ulaşılamadığında |
+| Standart sapması | Yeni bir standart sapması bulunduğunda |
+| Kademeli dağıtım durumu | Dağıtım durduğunda, onay beklediğinde veya bittiğinde |
+| Yazılım envanteri değişti | Yazılım kurulduğunda, kaldırıldığında veya sürümü değiştiğinde |
+| Diğer bildirimler | Yedekleme hataları, yeni sürüm, risk kabulü bitişi ve diğerleri |
+
+“Güncelleme başladı” ve “Yeniden başlatma gerekiyor” olayları sık oluştuğu için bildirim merkezine yazılmaz; yalnızca bu olaylara abone olan kanallara gönderilir.
 
 | Tür | Gerekenler |
 |---|---|
 | Slack | Kanal için **Incoming Webhook** adresi (`https://hooks.slack.com/services/…`) |
 | Microsoft Teams | Kanalda **Workflows → "Post to a channel when a webhook request is received"** ile oluşturulan adres. Mesaj, "Panelde aç" düğmeli bir Adaptive Card olarak gelir. |
 | Telegram | @BotFather ile oluşturulan botun anahtarı ve sohbet kimliği (grup için `-100…`, kanal için `@kanal_adi`). Bot gruba eklenmiş olmalıdır. |
-| Webhook (JSON) | Kendi sisteminizin adresi. Her bildirim `kind`, `level`, `text`, `url`, `params`, `created_at` alanlarıyla POST edilir. İmza anahtarı girilirse gövdenin HMAC-SHA256 imzası `X-Netio-Patchman-Signature: sha256=<hex>` başlığında gönderilir. |
+| Webhook (JSON) | Kendi sisteminizin adresi. Gövde ve imza biçimi aşağıda. |
+| Jira | Jira adresi, kullanıcı (Jira Cloud'da e-posta adresi), API anahtarı (Jira Server'da kişisel erişim anahtarı), proje anahtarı ve kayıt türü (varsayılan `Task`). Her bildirim REST API v2 ile bir kayıt açar; kayda `netio.patchman` ve olay adı etiketleri eklenir. |
+| ServiceNow | Örnek adresi (`https://<ornek>.service-now.com`), kullanıcı, parola ve tablo (varsayılan `incident`). Kayıt Table API ile açılır; kritik bildirimlerin aciliyeti 1, uyarıların 2, diğerlerinin 3 olur. |
+| GLPI | REST API kök adresi (`…/apirest.php`), kullanıcının API anahtarı (user_token) ve API istemcisinin App-Token değeri. Her bildirim için oturum açılır, bir talep (Ticket) oluşturulur ve oturum kapatılır. |
+| Zabbix (trapper) | Zabbix sunucusu veya proxy (`adres:port`, varsayılan port 10051), Zabbix'teki host adı ve öğe anahtarı (varsayılan `netio.patchman.event`). Bildirim, Zabbix sender protokolüyle “Zabbix trapper” türündeki metin öğesine JSON değer olarak gönderilir. Zabbix değeri işlediğini bildirmezse gönderim başarısız sayılır. |
 
-Kanal eklendikten sonra **Deneme mesajı gönder** ile ayarı doğrulayın. Gönderim başarısız olursa iki kez yeniden denenir; hata, kanal listesinde "Hata" durumuyla ve mesajıyla gösterilir (bildirim merkezine ayrıca bildirim düşmez). Webhook adresleri ve bot anahtarları gizli bilgidir; kaydedildikten sonra tam olarak gösterilmez, değiştirmek için kanal silinip yeniden eklenir. Kanallar geçici olarak **Devre dışı bırak** ile durdurulabilir.
+**Webhook gövdesi:** Her bildirim `product`, `version`, `event_id`, `event` (yukarıdaki olay kimliği, ör. `update_failed`), `kind`, `level`, `title`, `text`, `link`, `url`, `params`, `created_at` alanlarıyla JSON olarak POST edilir. Başlıklar `X-Netio-Patchman-Event` (bildirim türü) ve `X-Netio-Patchman-Timestamp` (Unix saniye) değerlerini taşır. İmza anahtarı girilirse:
+
+- `X-Netio-Patchman-Signature: sha256=<hex>`: gövdenin HMAC-SHA256 imzası (önceki sürümlerle uyumlu)
+- `X-Netio-Patchman-Signature-V2: t=<zaman>,sha256=<hex>`: `<zaman>.<gövde>` metninin HMAC-SHA256 imzası. Alıcı zamanı da doğrulayıp (ör. 5 dakikadan eski istekleri reddederek) tekrar gönderilen eski istekleri ayırt edebilir.
+
+Kanal eklendikten sonra **Deneme mesajı gönder** ile ayarı doğrulayın. Başarısız gönderim 5 saniye, 30 saniye ve 2 dakika sonra olmak üzere en fazla üç kez yeniden denenir. Bir kanalın yeniden denemeyi beklemesi diğer kanalları geciktirmez. Hata, kanal listesinde "Hata" durumuyla ve mesajıyla gösterilir (bildirim merkezine ayrıca bildirim düşmez).
+
+Kanal adına tıklandığında kanalın sayfası açılır. Bu sayfada olay süzgeci değiştirilir ve **teslimat geçmişi** görülür: her gönderimin zamanı, olayı, sonucu, deneme sayısı, süresi ve hata mesajı. Teslim edilemeyen bir bildirim **Yeniden gönder** ile tekrar gönderilebilir. Teslimat geçmişi bildirim saklama süresi kadar tutulur.
+
+Adresler, parolalar, API anahtarları ve bot anahtarları gizli bilgidir. Kaydedildikten sonra tam olarak gösterilmez, hata mesajlarından da çıkarılır. Değiştirmek için kanal silinip yeniden eklenir. Kanallar geçici olarak **Devre dışı bırak** ile durdurulabilir.
+
+**Grafana, Prometheus ve Netdata:** Bu sistemler veriyi netio.patchman'den çeker. Prometheus `/metrics` adresini okur (sunucu, açık, güncelleme, güvenlik puanı, EOL, sapma, kademeli dağıtım ve kanal durumu metrikleri). Grafana bu Prometheus verisinden pano oluşturur. Netdata'nın Prometheus toplayıcısı (`go.d/prometheus`) aynı adresi okuyabilir. Ayrıntılar ve örnek yapılandırmalar için bkz. [api.md](api.md).
 
 ## Otomatik yedekleme
 

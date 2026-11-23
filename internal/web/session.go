@@ -370,7 +370,7 @@ func (s *Server) profilePassword(w http.ResponseWriter, r *http.Request) {
 // fleetWidePath reports pages that concern every host (schedules, agent
 // enrollment and versions): group-limited users cannot open them.
 func fleetWidePath(p string) bool {
-	for _, prefix := range []string{"/schedules", "/agents"} {
+	for _, prefix := range []string{"/schedules", "/agents", "/rollouts"} {
 		if p == prefix || strings.HasPrefix(p, prefix+"/") {
 			return true
 		}

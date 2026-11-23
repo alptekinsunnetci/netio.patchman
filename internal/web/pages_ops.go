@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -105,8 +106,11 @@ var (
 
 // channelTarget describes a channel without revealing its secret.
 func (s *Server) channelTarget(c store.Channel) string {
-	if c.Type == store.ChannelTelegram {
+	switch c.Type {
+	case store.ChannelTelegram:
 		return s.l.T("channel.telegram_target", "chat", c.ChatID)
+	case store.ChannelZabbix:
+		return c.URL + " · " + c.Config["host"]
 	}
 	if u, err := url.Parse(c.URL); err == nil && u.Host != "" {
 		return u.Scheme + "://" + u.Host + "/…"
@@ -126,7 +130,7 @@ func (s *Server) renderChannels(w http.ResponseWriter, r *http.Request, status i
 	}
 	d := s.page(r, s.l.T("channels.title"), "settings")
 	d.Error = errMsg
-	d.Data = map[string]any{"Channels": list, "Form": form, "Types": []string{store.ChannelSlack, store.ChannelTeams, store.ChannelTelegram, store.ChannelWebhook},
+	d.Data = map[string]any{"Channels": list, "Form": form, "Types": store.ChannelTypes, "Events": notify.Events,
 		"Levels": []string{store.LevelInfo, store.LevelWarning, store.LevelCritical}, "Dispatcher": s.o.Channels != nil}
 	s.render(w, r, status, "channels", d)
 }
@@ -139,6 +143,23 @@ func (s *Server) parseChannel(r *http.Request) (store.Channel, map[string]string
 	}
 	form := map[string]string{"name": c.Name, "type": c.Type, "min_level": c.MinLevel, "chat_id": c.ChatID}
 	var bad []string
+	events, ok := s.channelEvents(r)
+	if !ok {
+		bad = append(bad, s.l.T("validation.invalid_choice"))
+	}
+	c.Events = events
+	c.Config = map[string]string{}
+	cfg := func(key string, max int, required bool) {
+		v := strings.TrimSpace(r.PostFormValue(key))
+		form[key] = v
+		if (required && v == "") || len(v) > max || hasControl(v) {
+			bad = append(bad, s.l.T("validation.required", "field", s.l.T("channel.field."+key)))
+			return
+		}
+		if v != "" {
+			c.Config[key] = v
+		}
+	}
 	if c.Name == "" || utf8.RuneCountInString(c.Name) > 60 {
 		bad = append(bad, s.l.T("channel.error.name"))
 	}
@@ -171,10 +192,129 @@ func (s *Server) parseChannel(r *http.Request) (store.Channel, map[string]string
 		if len(c.Secret) > 200 {
 			bad = append(bad, s.l.T("channel.error.secret"))
 		}
+	case store.ChannelJira, store.ChannelServiceNow, store.ChannelGLPI:
+		// Own field names: the webhook section with url/secret is in the same form.
+		c.URL = strings.TrimSpace(r.PostFormValue("ticket_url"))
+		c.Secret = r.PostFormValue("ticket_secret")
+		if u, err := url.Parse(c.URL); err != nil || u.Host == "" || u.Scheme != "https" && u.Scheme != "http" {
+			bad = append(bad, s.l.T("channel.error.url"))
+		}
+		c.ChatID = ""
+		if c.Secret == "" || len(c.Secret) > 500 {
+			bad = append(bad, s.l.T("channel.error.secret"))
+		}
+		switch c.Type {
+		case store.ChannelJira:
+			cfg("user", 200, true)
+			cfg("project", 50, true)
+			cfg("issue_type", 50, false)
+		case store.ChannelServiceNow:
+			cfg("user", 200, true)
+			cfg("table", 80, false)
+			if t := c.Config["table"]; t != "" && !tableNameRE.MatchString(t) {
+				bad = append(bad, s.l.T("validation.invalid_choice"))
+			}
+		case store.ChannelGLPI:
+			cfg("app_token", 200, false)
+		}
+	case store.ChannelZabbix:
+		c.URL = strings.TrimSpace(r.PostFormValue("zabbix_server"))
+		form["zabbix_server"] = c.URL
+		if c.URL == "" || hasControl(c.URL) || strings.Contains(c.URL, "/") || len(c.URL) > 255 {
+			bad = append(bad, s.l.T("channel.error.zabbix_server"))
+		}
+		c.ChatID, c.Secret = "", ""
+		cfg("host", 128, true)
+		cfg("key", 255, false)
 	default:
 		bad = append(bad, s.l.T("validation.invalid_choice"))
 	}
 	return c, form, bad
+}
+
+var tableNameRE = regexp.MustCompile(`^[a-z][a-z0-9_]{0,79}$`)
+
+// channelEvents reads the event checkboxes; ok is false for unknown ids.
+func (s *Server) channelEvents(r *http.Request) ([]string, bool) {
+	var out []string
+	for _, e := range r.PostForm["events"] {
+		if !slices.Contains(notify.Events, e) {
+			return nil, false
+		}
+		if !slices.Contains(out, e) {
+			out = append(out, e)
+		}
+	}
+	return out, true
+}
+
+// channelDetail shows a channel's filter and delivery history.
+func (s *Server) channelDetail(w http.ResponseWriter, r *http.Request) {
+	c, ok := s.channelOr404(w, r)
+	if !ok {
+		return
+	}
+	pg := pageNumber(r)
+	list, total, err := s.st.ListDeliveries(r.Context(), c.ID, store.Page{Number: pg, Size: pageSize})
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	d := s.page(r, c.Name, "settings")
+	d.Data = map[string]any{"C": c, "Deliveries": list, "Pager": newPager(r, pg, total), "Events": notify.Events,
+		"Levels": []string{store.LevelInfo, store.LevelWarning, store.LevelCritical}, "Dispatcher": s.o.Channels != nil}
+	s.render(w, r, http.StatusOK, "channel", d)
+}
+
+// channelFilter saves a channel's minimum level and events.
+func (s *Server) channelFilter(w http.ResponseWriter, r *http.Request) {
+	c, ok := s.channelOr404(w, r)
+	if !ok {
+		return
+	}
+	back := "/settings/channels/" + strconv.FormatInt(c.ID, 10)
+	level := r.PostFormValue("min_level")
+	events, valid := s.channelEvents(r)
+	if !valid || (store.LevelRank(level) == 0 && level != store.LevelInfo) {
+		s.redirect(w, r, back, "error", s.l.T("validation.invalid_choice"))
+		return
+	}
+	if err := s.st.SetChannelFilter(r.Context(), c.ID, level, events); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	s.audit(r, "channel.update", c.Name, "min_level="+level+" events="+strings.Join(events, ","))
+	s.redirect(w, r, back, "success", s.l.T("common.saved"))
+}
+
+// channelResend sends a recorded delivery again.
+func (s *Server) channelResend(w http.ResponseWriter, r *http.Request) {
+	c, ok := s.channelOr404(w, r)
+	if !ok {
+		return
+	}
+	back := "/settings/channels/" + strconv.FormatInt(c.ID, 10)
+	did, err := strconv.ParseInt(r.PathValue("delivery"), 10, 64)
+	if err != nil {
+		s.errorPage(w, r, http.StatusNotFound, "error.not_found")
+		return
+	}
+	dl, err := s.st.DeliveryByID(r.Context(), c.ID, did)
+	if err != nil {
+		s.errorPage(w, r, http.StatusNotFound, "error.not_found")
+		return
+	}
+	if s.o.Channels == nil {
+		s.redirect(w, r, back, "error", s.l.T("channel.unavailable"))
+		return
+	}
+	err = s.o.Channels.Resend(r.Context(), c, dl.Payload)
+	s.audit(r, "channel.test", c.Name, "resend="+strconv.FormatInt(did, 10)+" ok="+strconv.FormatBool(err == nil))
+	if err != nil {
+		s.redirect(w, r, back, "error", s.l.T("channel.test_failed", "name", c.Name, "error", err.Error()))
+		return
+	}
+	s.redirect(w, r, back, "success", s.l.T("channel.resent"))
 }
 
 func (s *Server) channelCreate(w http.ResponseWriter, r *http.Request) {

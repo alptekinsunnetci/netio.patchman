@@ -76,6 +76,10 @@
     <label class="field"><span class="field__label">{{t "system.epss_url"}}</span>
       <input class="field__input mono" type="url" name="epss_url" value="{{$f.EPSSURL}}">
       <span class="field__hint">{{t "system.epss_url_hint"}}</span></label>
+    <label class="check-label"><input type="checkbox" name="eol_enabled" value="1"{{if $f.EOLEnabled}} checked{{end}}> {{t "system.eol_enabled"}}</label>
+    <label class="field"><span class="field__label">{{t "system.eol_url"}}</span>
+      <input class="field__input mono" type="url" name="eol_url" value="{{$f.EOLURL}}">
+      <span class="field__hint">{{t "system.eol_url_hint"}}</span></label>
   </section>
 
   <section class="panel">

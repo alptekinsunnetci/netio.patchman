@@ -11,6 +11,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -41,9 +42,11 @@ func Text(l i18n.Localizer, n store.Notification) string {
 const DefaultTelegramAPI = "https://api.telegram.org"
 
 // Dispatcher forwards notifications to Slack, Microsoft Teams, Telegram and
-// generic webhooks. Notifications are queued and sent by Run; a failed
-// delivery is retried twice and then recorded on the channel (never as a new
-// notification, so a broken channel cannot cause a loop).
+// generic webhooks, and opens tickets in Jira, ServiceNow and GLPI or sends
+// Zabbix trapper values. Notifications are queued and sent by Run; a failed
+// delivery is retried three times and then recorded on the channel and in
+// its delivery history (never as a new notification, so a broken channel
+// cannot cause a loop).
 type Dispatcher struct {
 	st          *store.Store
 	l           i18n.Localizer
@@ -53,6 +56,9 @@ type Dispatcher struct {
 	telegramAPI string
 	retryDelays []time.Duration
 	q           chan store.Notification
+	// sending bounds concurrent deliveries; a channel waiting for a retry
+	// does not hold up the others.
+	sending chan struct{}
 }
 
 // DispatcherOptions configures a Dispatcher.
@@ -63,19 +69,19 @@ type DispatcherOptions struct {
 	Logger *slog.Logger
 	// TelegramAPI replaces DefaultTelegramAPI (tests, API proxies).
 	TelegramAPI string
-	// RetryDelays between attempts; nil uses 5 s and 30 s.
+	// RetryDelays between attempts; nil uses 5 s, 30 s and 2 min.
 	RetryDelays []time.Duration
 }
 
 // NewDispatcher returns a Dispatcher; call Run to start delivery.
 func NewDispatcher(o DispatcherOptions) *Dispatcher {
 	d := &Dispatcher{st: o.Store, l: o.L, sys: o.System, logger: o.Logger, telegramAPI: o.TelegramAPI, retryDelays: o.RetryDelays,
-		client: &http.Client{Timeout: 15 * time.Second}, q: make(chan store.Notification, 256)}
+		client: &http.Client{Timeout: 15 * time.Second}, q: make(chan store.Notification, 256), sending: make(chan struct{}, 8)}
 	if d.telegramAPI == "" {
 		d.telegramAPI = DefaultTelegramAPI
 	}
 	if d.retryDelays == nil {
-		d.retryDelays = []time.Duration{5 * time.Second, 30 * time.Second}
+		d.retryDelays = []time.Duration{5 * time.Second, 30 * time.Second, 2 * time.Minute}
 	}
 	return d
 }
@@ -109,27 +115,63 @@ func (d *Dispatcher) deliver(ctx context.Context, n store.Notification) {
 		return
 	}
 	for _, c := range chans {
-		if !c.Accepts(n.Level) {
+		if !c.Accepts(n.Level, EventOf(n)) {
 			continue
 		}
-		var err error
-		for attempt := 0; ; attempt++ {
-			if err = d.Send(ctx, c, n); err == nil || attempt >= len(d.retryDelays) {
-				break
-			}
-			select {
-			case <-ctx.Done():
-				return
-			case <-time.After(d.retryDelays[attempt]):
-			}
+		select {
+		case <-ctx.Done():
+			return
+		case d.sending <- struct{}{}:
 		}
-		msg := ""
-		if err != nil {
-			msg = err.Error()
-			d.logger.Warn(d.l.T("log.channel.failed"), slog.String("channel", c.Name), slog.String("type", c.Type), slog.String("error", msg))
-		}
-		_ = d.st.RecordChannelResult(ctx, c.ID, msg)
+		go func() {
+			defer func() { <-d.sending }()
+			d.deliverTo(ctx, c, n)
+		}()
 	}
+}
+
+// deliverTo sends n to one channel with retries and records the outcome.
+func (d *Dispatcher) deliverTo(ctx context.Context, c store.Channel, n store.Notification) {
+	start := time.Now()
+	var err error
+	attempts := 0
+	for attempt := 0; ; attempt++ {
+		attempts++
+		if err = d.Send(ctx, c, n); err == nil || attempt >= len(d.retryDelays) {
+			break
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(d.retryDelays[attempt]):
+		}
+	}
+	d.record(ctx, c, n, err, attempts, time.Since(start))
+}
+
+// record stores the outcome of a delivery on the channel and in its history.
+func (d *Dispatcher) record(ctx context.Context, c store.Channel, n store.Notification, err error, attempts int, took time.Duration) {
+	msg := ""
+	if err != nil {
+		msg = err.Error()
+		d.logger.Warn(d.l.T("log.channel.failed"), slog.String("channel", c.Name), slog.String("type", c.Type), slog.String("error", msg))
+	}
+	_ = d.st.RecordChannelResult(ctx, c.ID, msg)
+	payload, _ := json.Marshal(n)
+	_ = d.st.RecordDelivery(ctx, store.Delivery{ChannelID: c.ID, Event: EventOf(n), Kind: n.Kind, OK: err == nil, Attempts: attempts,
+		Error: msg, DurationMS: took.Milliseconds(), Payload: string(payload)})
+}
+
+// Resend delivers a recorded notification to a channel again, once.
+func (d *Dispatcher) Resend(ctx context.Context, c store.Channel, payload string) error {
+	var n store.Notification
+	if err := json.Unmarshal([]byte(payload), &n); err != nil {
+		return err
+	}
+	start := time.Now()
+	err := d.Send(ctx, c, n)
+	d.record(ctx, c, n, err, 1, time.Since(start))
+	return err
 }
 
 // Message is the rendered notification sent to a channel.
@@ -183,16 +225,28 @@ func (d *Dispatcher) Send(ctx context.Context, c store.Channel, n store.Notifica
 		body, _ = json.Marshal(map[string]any{"chat_id": c.ChatID, "text": text, "disable_web_page_preview": true})
 	case store.ChannelWebhook:
 		body, _ = json.Marshal(map[string]any{
-			"product": brand.Name, "version": version.Version, "event_id": n.ID, "kind": n.Kind, "level": n.Level,
+			"product": brand.Name, "version": version.Version, "event_id": n.ID, "event": EventOf(n), "kind": n.Kind, "level": n.Level,
 			"title": m.Title, "text": m.Text, "link": n.Link, "url": m.URL, "params": n.Params,
 			"created_at": n.CreatedAt.UTC().Format(time.RFC3339),
 		})
 		headers["X-Netio-Patchman-Event"] = n.Kind
+		ts := strconv.FormatInt(time.Now().Unix(), 10)
+		headers["X-Netio-Patchman-Timestamp"] = ts
 		if c.Secret != "" {
+			// Body only (kept for existing receivers) and timestamp + "." + body,
+			// which lets a receiver reject replays of old deliveries.
 			mac := hmac.New(sha256.New, []byte(c.Secret))
 			mac.Write(body)
 			headers["X-Netio-Patchman-Signature"] = "sha256=" + hex.EncodeToString(mac.Sum(nil))
+			mac = hmac.New(sha256.New, []byte(c.Secret))
+			mac.Write([]byte(ts + "."))
+			mac.Write(body)
+			headers["X-Netio-Patchman-Signature-V2"] = "t=" + ts + ",sha256=" + hex.EncodeToString(mac.Sum(nil))
 		}
+	case store.ChannelJira, store.ChannelServiceNow, store.ChannelGLPI:
+		return d.clean(c, d.ticket(ctx, c, n, m))
+	case store.ChannelZabbix:
+		return d.clean(c, d.zabbix(ctx, c, n, m))
 	default:
 		return fmt.Errorf("unknown channel type %q", c.Type)
 	}
@@ -219,8 +273,11 @@ func (d *Dispatcher) Send(ctx context.Context, c store.Channel, n store.Notifica
 
 // clean removes the channel's secrets from an error message.
 func (d *Dispatcher) clean(c store.Channel, err error) error {
+	if err == nil {
+		return nil
+	}
 	msg := err.Error()
-	for _, secret := range []string{c.URL, c.Secret} {
+	for _, secret := range []string{c.URL, c.Secret, c.Config["app_token"]} {
 		if len(secret) >= 8 {
 			msg = strings.ReplaceAll(msg, secret, "***")
 		}

@@ -506,6 +506,27 @@ func (s *Server) settingsSave(w http.ResponseWriter, r *http.Request) {
 		}
 		kv[settings.KeyEmailSLAOverdue] = b("email_sla_overdue")
 	}
+	if _, ok := r.PostForm["inventory_section"]; ok {
+		kv[settings.KeySoftwareNotify] = b("software_notify")
+		kv[settings.KeyEOLNotify] = b("eol_notify")
+		if v, ok := intIn("eol_warn_days", 0, 730); ok {
+			kv[settings.KeyEOLWarnDays] = v
+		} else {
+			bad = append(bad, s.l.T("validation.range", "field", s.l.T("settings.eol.warn_days"), "min", 0, "max", 730))
+		}
+	}
+	if _, ok := r.PostForm["health_delay"]; ok {
+		kv[settings.KeyRequirePreview] = b("require_preview")
+		kv[settings.KeyHealthPolicy] = "abort"
+		if r.PostFormValue("health_policy") == "continue" {
+			kv[settings.KeyHealthPolicy] = "continue"
+		}
+		if v, ok := intIn("health_delay", 0, 600); ok {
+			kv[settings.KeyHealthDelay] = v
+		} else {
+			bad = append(bad, s.l.T("validation.range", "field", s.l.T("settings.health.delay"), "min", 0, "max", 600))
+		}
+	}
 	if raw, ok := r.PostForm["update_exclude"]; ok {
 		patterns, invalid := protocol.ParseExcludePatterns(raw[0])
 		if len(invalid) > 0 {

@@ -33,5 +33,7 @@ func wingetList(ctx context.Context, exe string) ([]protocol.Update, error) {
 	return nil, errNotWindows
 }
 
+func listServices(ctx context.Context) ([]protocol.Service, error) { return linuxServices(ctx) }
+
 // windowsPrograms lists installed programs (Windows only).
 func windowsPrograms() ([]protocol.Package, error) { return nil, errNotWindows }

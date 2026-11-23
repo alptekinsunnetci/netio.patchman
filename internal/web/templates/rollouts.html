@@ -1,0 +1,35 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.rollouts"}}</h1>
+    <p class="pagehead__sub">{{t "rollout.subtitle"}}</p>
+  </div>
+  {{if .User.CanOperate}}<div class="pagehead__actions"><a class="button button--primary" href="/rollouts/new">{{template "icon" "plus"}}{{t "rollout.new"}}</a></div>{{end}}
+</header>
+<section class="panel panel--flush">
+  {{if $d.Rollouts}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "rollout.field.name"}}</th><th>{{t "job.field.type"}}</th><th>{{t "rollout.field.status"}}</th><th>{{t "rollout.field.progress"}}</th><th>{{t "rollout.field.stage"}}</th><th>{{t "job.field.created_by"}}</th><th>{{t "job.field.created_at"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Rollouts}}
+    <tr>
+      <td><a href="/rollouts/{{.ID}}">{{.Name}}</a></td>
+      <td>{{jobType .JobType}}</td>
+      <td>{{template "rolloutstatus" .Status}}</td>
+      <td>{{template "rolloutprogress" .Counts}}</td>
+      <td class="num">{{add .CurrentStage 1}} / {{.Stages}}</td>
+      <td>{{if .CreatedBy}}{{.CreatedBy}}{{else}}<span class="muted">{{t "common.system"}}</span>{{end}}</td>
+      <td>{{datetime .CreatedAt}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "rollout.empty")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+{{end}}

@@ -1,0 +1,162 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.software"}}</h1>
+    <p class="pagehead__sub">{{t "software.subtitle"}}</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <a class="tab{{if eq $d.Tab "software"}} is-active{{end}}" href="/software">{{t "software.tab.software"}}</a>
+  <a class="tab{{if eq $d.Tab "eol"}} is-active{{end}}" href="/software?tab=eol">{{t "software.tab.eol"}}</a>
+  <a class="tab{{if eq $d.Tab "compare"}} is-active{{end}}" href="/software?tab=compare">{{t "software.tab.compare"}}</a>
+  <a class="tab{{if eq $d.Tab "changes"}} is-active{{end}}" href="/software?tab=changes">{{t "software.tab.changes"}}</a>
+</nav>
+
+{{if eq $d.Tab "software"}}
+<form class="filters" method="get" action="/software">
+  <input class="field__input" type="search" name="q" value="{{$d.Q}}" placeholder="{{t "software.search_placeholder"}}" aria-label="{{t "common.search"}}">
+  <select class="field__input" name="category" aria-label="{{t "software.field.category"}}">
+    <option value="">{{t "software.category.all"}}</option>
+    {{range $d.Categories}}<option value="{{.}}"{{if eq . $d.Category}} selected{{end}}>{{t (printf "software.category.%s" .)}}</option>{{end}}
+  </select>
+  <button class="button" type="submit">{{t "common.filter"}}</button>
+</form>
+<section class="panel panel--flush">
+  {{if $d.Rows}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "software.field.name"}}</th><th>{{t "software.field.category"}}</th><th class="num">{{t "software.field.hosts"}}</th><th class="num">{{t "software.field.running"}}</th><th>{{t "software.field.cycles"}}</th><th>{{t "host.field.vulns"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Rows}}
+    <tr>
+      <td><a href="/software/{{.Def.ID}}">{{.Def.Name}}</a></td>
+      <td class="cell-sub">{{t (printf "software.category.%s" .Def.Category)}}</td>
+      <td class="num">{{.Hosts}}</td>
+      <td class="num">{{.Running}}</td>
+      <td><div class="chips">{{$id := .Def.ID}}{{range .Cycles}}<a class="chip" href="/software/{{$id}}?cycle={{.Cycle}}">{{if .Cycle}}{{.Cycle}}{{else}}?{{end}} <span>{{.Hosts}}</span></a>{{end}}</div></td>
+      <td>{{if .CVECount}}{{template "sev" .Severity}} {{t "watch.cve_count" "n" .CVECount}}{{if .KnownExploited}} {{template "kev"}}{{end}}{{else}}<span class="muted">{{t "watch.no_vulns"}}</span>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "software.empty")}}{{end}}
+</section>
+<p class="footnote">{{t "software.catalog_hint"}}</p>
+
+{{else if eq $d.Tab "eol"}}
+{{$s := $d.EOLSummary}}{{$f := $d.EOLFilter}}
+<section class="stats stats--compact">
+  <a class="stat{{if $s.OSEOL}} stat--critical{{end}}" href="/software?tab=eol&kind=os&status=eol"><p class="stat__label">{{t "eol.stat.os_eol"}}</p><p class="stat__value">{{$s.OSEOL}}</p><p class="stat__meta">{{t "eol.stat.hosts"}}</p></a>
+  <a class="stat{{if $s.OSSoon}} stat--warning{{end}}" href="/software?tab=eol&kind=os&status=soon"><p class="stat__label">{{t "eol.stat.os_soon"}}</p><p class="stat__value">{{$s.OSSoon}}</p><p class="stat__meta">{{t "eol.stat.within_days" "n" $d.EOLWarnDays}}</p></a>
+  <a class="stat{{if $s.SoftwareEOL}} stat--critical{{end}}" href="/software?tab=eol&kind=software&status=eol"><p class="stat__label">{{t "eol.stat.software_eol"}}</p><p class="stat__value">{{$s.SoftwareEOL}}</p><p class="stat__meta">{{t "eol.stat.distro" "n" $s.SoftwareEOLDistro}}</p></a>
+  <a class="stat{{if $s.SoftwareSoon}} stat--warning{{end}}" href="/software?tab=eol&kind=software&status=soon"><p class="stat__label">{{t "eol.stat.software_soon"}}</p><p class="stat__value">{{$s.SoftwareSoon}}</p><p class="stat__meta">{{t "eol.stat.installs"}}</p></a>
+</section>
+<form class="filters" method="get" action="/software">
+  <input type="hidden" name="tab" value="eol">
+  <input class="field__input" type="search" name="q" value="{{$f.Q}}" placeholder="{{t "eol.search_placeholder"}}" aria-label="{{t "common.search"}}">
+  <select class="field__input" name="kind" aria-label="{{t "eol.field.kind"}}">
+    <option value="">{{t "eol.kind.all"}}</option>
+    <option value="os"{{if eq $f.Kind "os"}} selected{{end}}>{{t "eol.kind.os"}}</option>
+    <option value="software"{{if eq $f.Kind "software"}} selected{{end}}>{{t "eol.kind.software"}}</option>
+  </select>
+  <select class="field__input" name="status" aria-label="{{t "eol.field.status"}}">
+    <option value="">{{t "eol.filter.attention"}}</option>
+    {{range (list "eol" "soon" "supported" "unknown")}}<option value="{{.}}"{{if eq . $f.Status}} selected{{end}}>{{t (printf "eol.status.%s" .)}}</option>{{end}}
+    <option value="all"{{if eq $f.Status "all"}} selected{{end}}>{{t "eol.filter.all"}}</option>
+  </select>
+  {{if $d.Groups}}<select class="field__input" name="group" aria-label="{{t "nav.groups"}}">
+    <option value="">{{t "servers.filter.all_groups"}}</option>
+    {{range $d.Groups}}<option value="{{.ID}}"{{if eq .ID $f.GroupID}} selected{{end}}>{{.Name}}</option>{{end}}
+  </select>{{end}}
+  <button class="button" type="submit">{{t "common.filter"}}</button>
+</form>
+<section class="panel panel--flush">
+  {{if $d.EOLGroups}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "eol.field.release"}}</th><th>{{t "eol.field.support"}}</th><th>{{t "eol.field.status"}}</th><th>{{t "software.field.hosts"}}</th><th>{{t "eol.field.note"}}</th></tr></thead>
+    <tbody>
+    {{range $d.EOLGroups}}
+    <tr>
+      <td>{{if .Software}}<a href="/software/{{.Software}}?cycle={{.Cycle}}">{{.Name}} {{.Cycle}}</a>{{else}}{{.Name}} {{.Cycle}}{{end}}<div class="cell-sub">{{t (printf "eol.kind.%s" .Kind)}}</div></td>
+      <td>{{if .Found}}{{if .Release.EOL.IsZero}}<span class="muted">{{if .Release.Ended}}{{t "eol.ended_no_date"}}{{else}}{{t "eol.no_date"}}{{end}}</span>{{else}}<time datetime="{{iso .Release.EOL}}">{{date .Release.EOL}}</time>{{end}}{{if not .Release.Extended.IsZero}}<div class="cell-sub">{{t "eol.extended_until" "date" (date .Release.Extended)}}</div>{{end}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td>{{template "eolpill" .}}</td>
+      <td><strong>{{len .Hosts}}</strong>{{range $i, $h := .Hosts}}{{if lt $i 5}}{{if $i}},{{end}} <a href="/servers/{{$h.HostID}}{{if $h.Software}}?tab=software{{end}}">{{$h.Hostname}}</a>{{end}}{{end}}{{if gt (len .Hosts) 5}} <span class="muted">{{t "eol.more_hosts" "n" (len .Hosts)}}</span>{{end}}</td>
+      <td class="cell-sub">{{if .Via}}{{t "eol.via" "name" .Via}}{{end}}{{if .DistroSupported}}<div title="{{t "eol.distro_hint"}}">{{t "eol.distro_hosts" "n" .DistroSupported}}</div>{{end}}{{if not .Found}}{{t "eol.no_calendar"}}{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "eol.empty")}}{{end}}
+</section>
+<p class="footnote">{{t "eol.source_note"}}{{if $d.EOLSource}} {{if $d.EOLUpdatedAt.IsZero}}{{t "eol.source_builtin"}}{{else}}{{t "eol.source_updated" "time" (datetime $d.EOLUpdatedAt)}}{{end}}{{else}} {{t "eol.source_off"}}{{end}}</p>
+
+{{else if eq $d.Tab "compare"}}
+<form class="filters" method="get" action="/software">
+  <input type="hidden" name="tab" value="compare">
+  <select class="field__input" name="a" aria-label="{{t "software.compare_a"}}" required>
+    <option value="">{{t "software.compare_a"}}</option>
+    {{range $d.Hosts}}<option value="{{.ID}}"{{if eq .ID $d.A}} selected{{end}}>{{.Hostname}}</option>{{end}}
+  </select>
+  <select class="field__input" name="b" aria-label="{{t "software.compare_b"}}" required>
+    <option value="">{{t "software.compare_b"}}</option>
+    {{range $d.Hosts}}<option value="{{.ID}}"{{if eq .ID $d.B}} selected{{end}}>{{.Hostname}}</option>{{end}}
+  </select>
+  <button class="button" type="submit">{{t "software.compare"}}</button>
+</form>
+{{with $d.Compare}}
+<section class="panel panel--flush">
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "software.field.name"}}</th><th>{{t "software.compare_a"}}</th><th>{{t "software.compare_b"}}</th><th>{{t "software.field.result"}}</th></tr></thead>
+    <tbody>
+    {{range .}}
+    <tr>
+      <td>{{swName .Software}} <span class="muted">{{.Cycle}}</span></td>
+      <td class="mono">{{with .A}}{{.PackageVersion}}{{else}}<span class="muted">{{t "software.not_installed"}}</span>{{end}}</td>
+      <td class="mono">{{with .B}}{{.PackageVersion}}{{else}}<span class="muted">{{t "software.not_installed"}}</span>{{end}}</td>
+      <td>{{if .Same}}<span class="pill pill--online">{{t "software.compare.same"}}</span>{{else if and .A .B}}<span class="pill pill--warning">{{t "software.compare.different"}}</span>{{else}}<span class="pill pill--muted">{{t "software.compare.only_one"}}</span>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+</section>
+{{else}}{{if and $d.A $d.B}}<section class="panel">{{template "empty" (t "software.compare_empty")}}</section>{{end}}{{end}}
+
+{{else}}
+<form class="filters" method="get" action="/software">
+  <input type="hidden" name="tab" value="changes">
+  {{if $d.Filter.HostID}}<input type="hidden" name="host" value="{{$d.Filter.HostID}}">{{end}}
+  <select class="field__input" name="software" aria-label="{{t "software.field.name"}}">
+    <option value="">{{t "software.all"}}</option>
+    {{range $d.Catalog}}<option value="{{.ID}}"{{if eq .ID $d.Filter.Software}} selected{{end}}>{{.Name}}</option>{{end}}
+  </select>
+  <select class="field__input" name="event" aria-label="{{t "software.field.change"}}">
+    <option value="">{{t "software.event.all"}}</option>
+    {{range (list "installed" "removed" "upgraded" "downgraded")}}<option value="{{.}}"{{if eq . $d.Filter.Event}} selected{{end}}>{{t (printf "software.event.%s" .)}}</option>{{end}}
+  </select>
+  <button class="button" type="submit">{{t "common.filter"}}</button>
+  {{if $d.Filter.HostID}}<a class="button button--sm button--ghost" href="/software?tab=changes">{{t "common.clear"}}</a>{{end}}
+</form>
+<section class="panel panel--flush">
+  {{if $d.Events}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "software.field.when"}}</th><th>{{t "host.field.hostname"}}</th><th>{{t "software.field.name"}}</th><th>{{t "software.field.change"}}</th><th>{{t "software.field.old"}}</th><th>{{t "software.field.new"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Events}}<tr><td>{{datetime .CreatedAt}}</td><td><a href="/servers/{{.HostID}}?tab=software">{{.Hostname}}</a></td><td><a href="/software/{{.Software}}">{{swName .Software}}</a> <span class="muted">{{.Cycle}}</span></td><td>{{template "swevent" .Event}}</td><td class="mono cell-sub">{{.OldVersion}}</td><td class="mono cell-sub">{{.NewVersion}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "software.no_changes")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+{{end}}
+{{end}}

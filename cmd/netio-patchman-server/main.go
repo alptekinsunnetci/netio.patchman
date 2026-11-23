@@ -32,13 +32,17 @@ import (
 	"netio.patchman/internal/backup"
 	"netio.patchman/internal/brand"
 	"netio.patchman/internal/config"
+	"netio.patchman/internal/drift"
+	"netio.patchman/internal/eol"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/logging"
 	"netio.patchman/internal/notify"
 	"netio.patchman/internal/notify/email"
 	"netio.patchman/internal/release"
+	"netio.patchman/internal/rollout"
 	"netio.patchman/internal/scanner"
 	"netio.patchman/internal/schedule"
+	"netio.patchman/internal/scoring"
 	"netio.patchman/internal/selfupdate"
 	"netio.patchman/internal/settings"
 	"netio.patchman/internal/store"
@@ -205,13 +209,15 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 			return
 		}
 		r := v.Retention()
-		for _, fn := range []func(context.Context, time.Duration) error{st.PruneResolvedFindings, st.PruneJobs, st.PruneNotifications} {
+		for _, fn := range []func(context.Context, time.Duration) error{st.PruneResolvedFindings, st.PruneJobs, st.PruneNotifications, st.PruneHealthResults, st.PruneDeliveries} {
 			if err := fn(ctx, r); err != nil {
 				logger.Warn(l.T("log.maintenance.failed"), slog.String("error", err.Error()))
 			}
 		}
 		_ = st.PruneAudit(ctx, 365*24*time.Hour)
 		_ = st.PruneSnapshots(ctx, 2*365*24*time.Hour)
+		_ = st.PruneSoftwareEvents(ctx, 2*365*24*time.Hour)
+		_ = st.PruneHostScores(ctx, 2*365*24*time.Hour)
 		_ = st.PruneOSVQueries(ctx, 30*24*time.Hour)
 		_ = st.PruneOSVRecords(ctx, 90*24*time.Hour)
 		_ = st.PruneMSRCKB(ctx, 30*24*time.Hour)
@@ -223,6 +229,19 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 		Store: st, OSV: scanner.NewOSVClient(sys.OSVURL), System: live, Logger: logger, L: l,
 		AfterScan: notifier.ProcessAlerts, Daily: retention,
 	})
+	// Support calendars: built-in snapshot plus the stored daily downloads.
+	eolSrc := &eol.Source{Store: st, System: live, Logger: logger, L: l}
+	if err := eolSrc.Load(ctx); err != nil {
+		logger.Warn(l.T("log.eol.failed"), slog.String("error", err.Error()))
+	}
+	scores := &scoring.Engine{Store: st, EOL: eolSrc.Data, OnBelow: notifier.ScoreBelow}
+	rollouts := &rollout.Runner{Store: st, L: l, Logger: logger, Notify: func(ctx context.Context, kind, level string, r store.Rollout) {
+		// Counts are read again so the notification shows the final numbers.
+		if cur, err := st.RolloutByID(ctx, r.ID); err == nil {
+			r.Counts = cur.Counts
+		}
+		notifier.RolloutEvent(ctx, kind, level, r)
+	}}
 	agentRelease := release.Load(cfg.AgentDistDir, version.Version)
 	if agentRelease.Available() {
 		archs := make([]string, 0, len(agentRelease.Binaries))
@@ -245,7 +264,7 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 	})
 	site, err := web.New(web.Options{
 		Store: st, Localizer: l, Formatter: formatter, Logger: logger, Scanner: scan, Notifier: notifier,
-		System: live, API: agentAPI, Release: agentRelease, Updates: updates, Bundle: bundle, Backups: backups, Channels: channels,
+		System: live, API: agentAPI, Release: agentRelease, Updates: updates, Bundle: bundle, Backups: backups, Channels: channels, EOL: eolSrc, Scores: scores, Rollouts: rollouts,
 		SelfUpdate: &selfupdate.Manager{DataDir: cfg.DataDir},
 	})
 	if err != nil {
@@ -283,13 +302,20 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 				}
 			}()
 		}
+		if cur.EOLURL != "" && old.EOLURL != cur.EOLURL {
+			go func() {
+				if err := eolSrc.Refresh(ctx); err != nil {
+					logger.Warn(l.T("log.eol.failed"), slog.String("error", err.Error()))
+				}
+			}()
+		}
 		if cur.UpdateURL != "" && old.UpdateURL != cur.UpdateURL {
 			go updates.Check(ctx)
 		}
 		logger.Info(l.T("log.config.updated"), slog.String("base_url", cur.BaseURLString()), slog.String("timezone", cur.Timezone),
 			slog.String("log_level", cur.LogLevelName()), slog.Bool("smtp", cur.SMTP.Enabled()))
 	})
-	go maintenance(ctx, st, notifier, sched, backups, &selfupdate.Manager{DataDir: cfg.DataDir}, l, logger)
+	go maintenance(ctx, st, notifier, sched, backups, &selfupdate.Manager{DataDir: cfg.DataDir}, eolSrc, scores, rollouts, l, logger)
 
 	srv := &http.Server{
 		Addr:              cfg.HTTPAddr,
@@ -427,17 +453,18 @@ func healthcheck(cfg config.Config) int {
 
 // maintenance runs periodic checks: scheduled updates, offline agents and
 // stale jobs.
-func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched *schedule.Runner, backups *backup.Runner, su *selfupdate.Manager, l i18n.Localizer, logger *slog.Logger) {
+func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched *schedule.Runner, backups *backup.Runner, su *selfupdate.Manager, eolSrc *eol.Source, scores *scoring.Engine, rollouts *rollout.Runner, l i18n.Localizer, logger *slog.Logger) {
 	// Align ticks to the start of a minute so a 03:00 schedule fires at 03:00.
 	if !sleepUntil(ctx, timeutil.Now().Truncate(time.Minute).Add(time.Minute)) {
 		return
 	}
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
-	var lastSnapshot time.Time
+	var lastSnapshot, lastEOL time.Time
 	for {
 		now := timeutil.Now()
 		sched.Tick(ctx, now)
+		rollouts.Tick(ctx, now)
 		go backups.Tick(ctx, now)
 		n.CheckOffline(ctx)
 		if risks, err := st.ExpireAcceptedRisks(ctx, now); err != nil {
@@ -451,8 +478,29 @@ func maintenance(ctx context.Context, st *store.Store, n *notify.Notifier, sched
 		}
 		n.SLAOverdue(ctx)
 		n.SelfUpdateFinished(ctx, su)
-		// The trend chart keeps one row per day with the latest state.
+		// Support calendars: refreshed daily, end-of-life notices checked hourly.
+		if now.Sub(lastEOL) >= time.Hour {
+			lastEOL = now
+			go func() {
+				if eolSrc.Due(ctx, now) {
+					if err := eolSrc.Refresh(ctx); err != nil {
+						logger.Warn(l.T("log.eol.failed"), slog.String("error", err.Error()))
+					}
+				}
+				n.EOLCheck(ctx, eolSrc.Data())
+			}()
+		}
+		// The trend chart keeps one row per day with the latest state; the
+		// security scores are computed first so the day's average is current.
 		if now.Sub(lastSnapshot) >= 15*time.Minute {
+			if err := scores.Run(ctx, now); err != nil {
+				logger.Warn(l.T("log.maintenance.failed"), slog.String("error", err.Error()))
+			}
+			if hosts, err := drift.Check(ctx, st); err != nil {
+				logger.Warn(l.T("log.maintenance.failed"), slog.String("error", err.Error()))
+			} else if len(hosts) > 0 {
+				n.DriftDetected(ctx, hosts)
+			}
 			if err := st.TakeSnapshot(ctx, now); err != nil {
 				logger.Warn(l.T("log.maintenance.failed"), slog.String("error", err.Error()))
 			} else {

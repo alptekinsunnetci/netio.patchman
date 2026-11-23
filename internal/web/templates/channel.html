@@ -1,0 +1,54 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$c := $d.C}}{{$root := .}}
+<nav class="breadcrumb"><a href="/settings">{{t "nav.settings"}}</a> / <a href="/settings/channels">{{t "channels.title"}}</a> / <span>{{$c.Name}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{$c.Name}}</h1>
+    <p class="pagehead__sub">{{t (printf "channel.type.%s" $c.Type)}} · <span class="mono">{{channelTarget $c}}</span></p>
+  </div>
+  <div class="pagehead__actions">
+    <form method="post" action="/settings/channels/{{$c.ID}}/test">{{template "csrf" $root}}<button class="button" type="submit">{{t "channel.test"}}</button></form>
+  </div>
+</header>
+
+<section class="panel">
+  <h2 class="panel__title">{{t "channel.filter_title"}}</h2>
+  <form class="form" method="post" action="/settings/channels/{{$c.ID}}/filter">
+    {{template "csrf" $root}}
+    <label class="field"><span class="field__label">{{t "channel.field.min_level"}}</span>
+      <select class="field__input" name="min_level">{{range $d.Levels}}<option value="{{.}}"{{if eq $c.MinLevel .}} selected{{end}}>{{levelLabel .}}</option>{{end}}</select></label>
+    <fieldset class="fieldset">
+      <legend>{{t "channel.field.events"}}</legend>
+      <div class="checklist">{{range $e := $d.Events}}<label class="check-label"><input type="checkbox" name="events" value="{{$e}}"{{range $c.Events}}{{if eq . $e}} checked{{end}}{{end}}> {{t (printf "channel.event.%s" $e)}}</label>{{end}}</div>
+      <p class="field__hint">{{t "channel.events_hint"}}</p>
+    </fieldset>
+    <div><button class="button button--primary" type="submit">{{t "common.save"}}</button></div>
+  </form>
+</section>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{t "channel.history"}}</h2></div>
+  {{if $d.Deliveries}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "software.field.when"}}</th><th>{{t "channel.field.event"}}</th><th>{{t "rollout.field.status"}}</th><th class="num">{{t "channel.field.attempts"}}</th><th class="num">{{t "channel.field.duration"}}</th><th></th></tr></thead>
+    <tbody>
+    {{range $d.Deliveries}}
+    <tr>
+      <td>{{datetime .CreatedAt}}</td>
+      <td>{{t (printf "channel.event.%s" .Event)}}<div class="cell-sub mono">{{.Kind}}</div></td>
+      <td>{{if .OK}}<span class="pill pill--succeeded">{{t "channel.delivered"}}</span>{{else}}<span class="pill pill--failed">{{t "channel.not_delivered"}}</span><div class="cell-sub text-danger break">{{.Error}}</div>{{end}}</td>
+      <td class="num">{{.Attempts}}</td>
+      <td class="num">{{.DurationMS}} ms</td>
+      <td>{{if and (not .OK) $d.Dispatcher}}<form method="post" action="/settings/channels/{{$c.ID}}/deliveries/{{.ID}}/resend">{{template "csrf" $root}}<button class="button button--sm" type="submit">{{t "channel.resend"}}</button></form>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "channel.no_history")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+{{end}}

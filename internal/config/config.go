@@ -27,6 +27,9 @@ const (
 	DefaultMSRCURL = "https://api.msrc.microsoft.com/sug/v2.0/en-US"
 	// DefaultEPSSURL is the daily EPSS score file (FIRST.org model, CSV, gzip).
 	DefaultEPSSURL = "https://epss.empiricalsecurity.com/epss_scores-current.csv.gz"
+	// DefaultEOLURL is the endoflife.date API (support calendars of operating
+	// systems and software); <url>/<product>.json is read once a day.
+	DefaultEOLURL = "https://endoflife.date/api"
 	// DefaultUpdateURL is the VERSION file on the default branch: the version
 	// an operator gets with "git pull" (see internal/updatecheck).
 	DefaultUpdateURL = "https://raw.githubusercontent.com/" + brand.RepositoryPath + "/main/VERSION"
@@ -58,6 +61,7 @@ type Config struct {
 	KEVURL       string // empty disables the KEV feed
 	MSRCURL      string // empty disables MSRC lookups
 	EPSSURL      string // empty disables EPSS scores
+	EOLURL       string // empty: only the built-in support calendars
 	UpdateURL    string // empty disables the new-version check
 }
 
@@ -247,6 +251,12 @@ func Load(b *i18n.Bundle, getenv func(string) string) (Config, error) {
 		cfg.EPSSURL = ""
 	} else if u, err := url.Parse(cfg.EPSSURL); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
 		fail("config.error.invalid_url", "name", "PATCHMAN_EPSS_URL", "value", cfg.EPSSURL)
+	}
+	cfg.EOLURL = strings.TrimRight(env("EOL_URL", DefaultEOLURL), "/")
+	if strings.EqualFold(cfg.EOLURL, "off") {
+		cfg.EOLURL = ""
+	} else if u, err := url.Parse(cfg.EOLURL); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		fail("config.error.invalid_url", "name", "PATCHMAN_EOL_URL", "value", cfg.EOLURL)
 	}
 	cfg.UpdateURL = env("UPDATE_CHECK_URL", DefaultUpdateURL)
 	if strings.EqualFold(cfg.UpdateURL, "off") {

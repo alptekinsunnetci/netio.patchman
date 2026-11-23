@@ -37,6 +37,8 @@ type trendSet struct {
 	Rows      []store.Snapshot
 	From, To  string
 	Available bool
+	// Scores is the table of a score trend (host or group), nil otherwise.
+	Scores []store.DayScore
 }
 
 // niceCeil rounds up to 1, 2 or 5 times a power of ten (minimum 1).
@@ -62,8 +64,47 @@ func calendarDay(t time.Time) time.Time {
 
 func coord(f float64) string { return strconv.FormatFloat(math.Round(f*100)/100, 'f', -1, 64) }
 
+// trendMetric is one chart: a value per day (ok false: no data that day)
+// and an optional fixed top (scores use 100).
+type trendMetric struct {
+	key      string
+	val      func(store.Snapshot) (int, bool)
+	fixedMax int
+}
+
+func count(f func(store.Snapshot) int) func(store.Snapshot) (int, bool) {
+	return func(sn store.Snapshot) (int, bool) { return f(sn), true }
+}
+
 // buildTrends lays out the snapshots between from and to (UTC days).
 func (s *Server) buildTrends(snaps []store.Snapshot, from, to time.Time) trendSet {
+	metrics := []trendMetric{
+		{key: "security_score", val: func(sn store.Snapshot) (int, bool) { return sn.SecurityScore, sn.SecurityScore >= 0 }, fixedMax: 100},
+		{key: "critical_high", val: count(func(sn store.Snapshot) int { return sn.Sev.Critical + sn.Sev.High })},
+		{key: "kev", val: count(func(sn store.Snapshot) int { return sn.KEV })},
+		{key: "open_findings", val: count(func(sn store.Snapshot) int { return sn.OpenFindings })},
+		{key: "security_updates", val: count(func(sn store.Snapshot) int { return sn.SecurityUpdates })},
+	}
+	return s.layoutTrends(snaps, from, to, metrics)
+}
+
+// scoreTrend lays out daily scores (host or group) as one chart.
+func (s *Server) scoreTrend(scores []store.DayScore, from, to time.Time) trendSet {
+	snaps := make([]store.Snapshot, len(scores))
+	for i, d := range scores {
+		snaps[i] = store.Snapshot{Day: d.Day, SecurityScore: d.Score}
+	}
+	set := s.layoutTrends(snaps, from, to, []trendMetric{
+		{key: "security_score", val: func(sn store.Snapshot) (int, bool) { return sn.SecurityScore, sn.SecurityScore >= 0 }, fixedMax: 100},
+	})
+	set.Rows, set.Scores = nil, scores // the snapshot table does not apply
+	if set.Scores == nil {
+		set.Scores = []store.DayScore{}
+	}
+	return set
+}
+
+func (s *Server) layoutTrends(snaps []store.Snapshot, from, to time.Time, metrics []trendMetric) trendSet {
 	from, to = calendarDay(from), calendarDay(to)
 	days := int(to.Sub(from).Hours()/24) + 1
 	if days < 2 {
@@ -77,15 +118,6 @@ func (s *Server) buildTrends(snaps []store.Snapshot, from, to time.Time) trendSe
 	for i := range labels {
 		labels[i] = s.f.Date(from.AddDate(0, 0, i))
 	}
-	metrics := []struct {
-		key string
-		val func(store.Snapshot) int
-	}{
-		{"critical_high", func(sn store.Snapshot) int { return sn.Sev.Critical + sn.Sev.High }},
-		{"kev", func(sn store.Snapshot) int { return sn.KEV }},
-		{"open_findings", func(sn store.Snapshot) int { return sn.OpenFindings }},
-		{"security_updates", func(sn store.Snapshot) int { return sn.SecurityUpdates }},
-	}
 	set := trendSet{Rows: snaps, From: labels[0], To: labels[days-1], Available: len(snaps) >= 2}
 	for _, m := range metrics {
 		c := trendChart{Key: m.key, Labels: strings.Join(labels, "|")}
@@ -93,12 +125,17 @@ func (s *Server) buildTrends(snaps []store.Snapshot, from, to time.Time) trendSe
 		peak := 0
 		for i := 0; i < days; i++ {
 			if sn, ok := byDay[i]; ok {
-				peak = max(peak, m.val(sn))
+				if v, ok := m.val(sn); ok {
+					peak = max(peak, v)
+				}
 			}
 		}
 		c.Max = niceCeil(peak)
-		// Days without a snapshot (server down) break the line instead of
-		// being bridged; each run of days is its own segment.
+		if m.fixedMax > 0 {
+			c.Max = m.fixedMax
+		}
+		// Days without a value (server down, nothing computed) break the line
+		// instead of being bridged; each run of days is its own segment.
 		var line, area strings.Builder
 		prev, segX := -2, 0.0
 		lastX := 0.0
@@ -109,7 +146,10 @@ func (s *Server) buildTrends(snaps []store.Snapshot, from, to time.Time) trendSe
 			if !ok {
 				continue
 			}
-			v := m.val(sn)
+			v, ok := m.val(sn)
+			if !ok {
+				continue
+			}
 			vals[i] = strconv.Itoa(v)
 			x := float64(i) / float64(days-1) * trendW
 			y := trendH - float64(v)/float64(c.Max)*trendH

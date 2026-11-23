@@ -36,6 +36,8 @@ type Job struct {
 	ScheduleID   int64
 	ScheduleName string
 	ExpiresAt    time.Time
+	// Data is the structured part of the result (see JobData), zero when none.
+	Data JobData
 }
 
 // Active reports whether the job has not finished yet.
@@ -136,8 +138,8 @@ func (s *Store) CompleteJob(ctx context.Context, hostID, jobID int64, r protocol
 		}
 	}
 	rem, _ := json.Marshal(nonNil(remaining))
-	res, err := s.db.ExecContext(ctx, `UPDATE jobs SET status = ?, finished_at = ?, exit_code = ?, output = ?, remaining = ? WHERE id = ? AND host_id = ? AND status IN ('queued','dispatched')`,
-		status, now(), r.ExitCode, truncate(r.Output, protocol.MaxOutputBytes), string(rem), jobID, hostID)
+	res, err := s.db.ExecContext(ctx, `UPDATE jobs SET status = ?, finished_at = ?, exit_code = ?, output = ?, remaining = ?, result = ? WHERE id = ? AND host_id = ? AND status IN ('queued','dispatched')`,
+		status, now(), r.ExitCode, truncate(r.Output, protocol.MaxOutputBytes), string(rem), jobDataFrom(r).encode(), jobID, hostID)
 	if err != nil {
 		return Job{}, err
 	}
@@ -145,6 +147,19 @@ func (s *Store) CompleteJob(ctx context.Context, hostID, jobID int64, r protocol
 		return Job{}, ErrNotFound
 	}
 	return s.JobByID(ctx, jobID)
+}
+
+// JobFromParam returns the newest job whose parameter key equals value
+// (for example the job approved from a preview), 0 when there is none.
+func (s *Store) JobFromParam(ctx context.Context, key, value string) (int64, error) {
+	needle, _ := json.Marshal(map[string]string{key: value})
+	var id int64
+	err := s.db.QueryRowContext(ctx, `SELECT id FROM jobs WHERE params LIKE ? ESCAPE '\' ORDER BY id DESC LIMIT 1`,
+		likeEscape(strings.Trim(string(needle), "{}"))).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+	return id, err
 }
 
 // CancelJob cancels a job that has not been dispatched yet.
@@ -193,15 +208,15 @@ func (s *Store) TimeOutJobs(ctx context.Context, d time.Duration) ([]Job, error)
 }
 
 const jobSelect = `SELECT j.id, j.host_id, h.hostname, j.type, j.packages, j.params, j.status, COALESCE(u.name, ''), j.created_at, j.dispatched_at, j.finished_at, j.exit_code, j.output, j.remaining,
- COALESCE(j.schedule_id, 0), COALESCE(sc.name, ''), j.expires_at
+ COALESCE(j.schedule_id, 0), COALESCE(sc.name, ''), j.expires_at, j.result
  FROM jobs j JOIN hosts h ON h.id = j.host_id LEFT JOIN users u ON u.id = j.created_by LEFT JOIN schedules sc ON sc.id = j.schedule_id`
 
 func scanJob(row interface{ Scan(...any) error }, withOutput bool) (Job, error) {
 	var j Job
-	var pk, params, rem string
+	var pk, params, rem, data string
 	var c, d, f, e int64
 	err := row.Scan(&j.ID, &j.HostID, &j.Hostname, &j.Type, &pk, &params, &j.Status, &j.CreatedBy, &c, &d, &f, &j.ExitCode, &j.Output, &rem,
-		&j.ScheduleID, &j.ScheduleName, &e)
+		&j.ScheduleID, &j.ScheduleName, &e, &data)
 	if errors.Is(err, sql.ErrNoRows) {
 		return j, ErrNotFound
 	}
@@ -211,6 +226,9 @@ func scanJob(row interface{ Scan(...any) error }, withOutput bool) (Job, error) 
 	_ = json.Unmarshal([]byte(pk), &j.Packages)
 	_ = json.Unmarshal([]byte(params), &j.Params)
 	_ = json.Unmarshal([]byte(rem), &j.Remaining)
+	if data != "" {
+		_ = json.Unmarshal([]byte(data), &j.Data)
+	}
 	j.CreatedAt, j.DispatchedAt, j.FinishedAt, j.ExpiresAt = fromTS(c), fromTS(d), fromTS(f), fromTS(e)
 	if !withOutput {
 		j.Output = ""
@@ -624,10 +642,11 @@ func (s *Store) FleetStats(ctx context.Context, offlineAfter time.Duration) (Fle
 	return st, err
 }
 
-// TopVulnerableHosts returns hosts with the most critical/high findings.
+// TopVulnerableHosts returns the riskiest hosts: lowest security score
+// first, then the most critical/high findings.
 func (s *Store) TopVulnerableHosts(ctx context.Context, limit int) ([]Host, error) {
 	where, args := andScope(ctx, "", nil, "h.id")
-	rows, err := s.db.QueryContext(ctx, hostSelect+where+` ORDER BY crit_count DESC, high_count DESC, sec_count DESC, h.hostname LIMIT ?`, append(args, limit)...)
+	rows, err := s.db.QueryContext(ctx, hostSelect+where+` ORDER BY CASE WHEN h.security_score < 0 THEN 101 ELSE h.security_score END, crit_count DESC, high_count DESC, sec_count DESC, h.hostname LIMIT ?`, append(args, limit)...)
 	if err != nil {
 		return nil, err
 	}
@@ -638,7 +657,7 @@ func (s *Store) TopVulnerableHosts(ctx context.Context, limit int) ([]Host, erro
 		if err != nil {
 			return nil, err
 		}
-		if h.Vulns.Total() == 0 && h.SecurityUpdateCount == 0 {
+		if h.Vulns.Total() == 0 && h.SecurityUpdateCount == 0 && (h.SecurityScore < 0 || h.SecurityScore == 100) {
 			continue
 		}
 		out = append(out, h)

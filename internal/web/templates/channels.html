@@ -18,9 +18,9 @@
     <tbody>
     {{range $d.Channels}}
     <tr>
-      <td><strong>{{.Name}}</strong><div class="cell-sub mono">{{channelTarget .}}</div></td>
+      <td><a href="/settings/channels/{{.ID}}"><strong>{{.Name}}</strong></a><div class="cell-sub mono">{{channelTarget .}}</div></td>
       <td>{{t (printf "channel.type.%s" .Type)}}</td>
-      <td>{{levelLabel .MinLevel}}</td>
+      <td>{{if .Events}}{{t "channel.events_count" "n" (len .Events)}}{{else}}{{levelLabel .MinLevel}}{{end}}</td>
       <td>
         {{if not .Enabled}}<span class="pill pill--muted">{{t "common.disabled"}}</span>
         {{else if .Failing}}<span class="pill pill--failed">{{t "channel.status.failing"}}</span>
@@ -75,6 +75,30 @@
         <input class="field__input mono" type="text" name="chat_id" value="{{index $f "chat_id"}}" autocomplete="off" placeholder="-1001234567890"></label>
       <p class="field__hint">{{t "channel.help.telegram"}}</p>
     </div>
+    <div data-show-when="type=jira|servicenow|glpi">
+      <label class="field"><span class="field__label">{{t "channel.field.base_url"}}</span>
+        <input class="field__input mono" type="url" name="ticket_url" autocomplete="off" placeholder="https://…"></label>
+      {{range list "jira" "servicenow" "glpi"}}<p class="field__hint" data-show-when="type={{.}}">{{t (printf "channel.help.%s" .)}}</p>{{end}}
+      <div class="form-grid">
+        <label class="field" data-show-when="type=jira|servicenow"><span class="field__label">{{t "channel.field.user"}}</span><input class="field__input" type="text" name="user" value="{{index $f "user"}}" maxlength="200" autocomplete="off"></label>
+        <label class="field"><span class="field__label">{{t "channel.field.token"}}</span><input class="field__input mono" type="password" name="ticket_secret" maxlength="500" autocomplete="new-password"></label>
+        <label class="field" data-show-when="type=jira"><span class="field__label">{{t "channel.field.project"}}</span><input class="field__input mono" type="text" name="project" value="{{index $f "project"}}" maxlength="50" placeholder="OPS"></label>
+        <label class="field" data-show-when="type=jira"><span class="field__label">{{t "channel.field.issue_type"}}</span><input class="field__input" type="text" name="issue_type" value="{{index $f "issue_type"}}" maxlength="50" placeholder="Task"></label>
+        <label class="field" data-show-when="type=servicenow"><span class="field__label">{{t "channel.field.table"}}</span><input class="field__input mono" type="text" name="table" value="{{index $f "table"}}" maxlength="80" placeholder="incident"></label>
+        <label class="field" data-show-when="type=glpi"><span class="field__label">{{t "channel.field.app_token"}}</span><input class="field__input mono" type="password" name="app_token" maxlength="200" autocomplete="new-password"></label>
+      </div>
+    </div>
+    <div data-show-when="type=zabbix" class="form-grid">
+      <label class="field"><span class="field__label">{{t "channel.field.zabbix_server"}}</span><input class="field__input mono" type="text" name="zabbix_server" value="{{index $f "zabbix_server"}}" maxlength="255" placeholder="zabbix.your-domain:10051"></label>
+      <label class="field"><span class="field__label">{{t "channel.field.host"}}</span><input class="field__input mono" type="text" name="host" value="{{index $f "host"}}" maxlength="128"></label>
+      <label class="field"><span class="field__label">{{t "channel.field.key"}}</span><input class="field__input mono" type="text" name="key" value="{{index $f "key"}}" maxlength="255" placeholder="netio.patchman.event"></label>
+      <p class="field__hint">{{t "channel.help.zabbix"}}</p>
+    </div>
+    <fieldset class="fieldset">
+      <legend>{{t "channel.field.events"}}</legend>
+      <div class="checklist">{{range $d.Events}}<label class="check-label"><input type="checkbox" name="events" value="{{.}}"> {{t (printf "channel.event.%s" .)}}</label>{{end}}</div>
+      <p class="field__hint">{{t "channel.events_hint"}}</p>
+    </fieldset>
     <p class="field__hint">{{t "channels.secret_note"}}</p>
     <div><button class="button button--primary" type="submit">{{template "icon" "plus"}}{{t "channels.add"}}</button></div>
   </form>

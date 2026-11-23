@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"math"
 	"time"
 )
 
@@ -63,6 +64,8 @@ type Snapshot struct {
 	OpenFindings    int
 	SecurityUpdates int
 	RebootRequired  int
+	// SecurityScore is the fleet average score, -1 when none was computed.
+	SecurityScore int
 }
 
 // DayStart returns the UTC midnight of t.
@@ -79,24 +82,31 @@ func (s *Store) TakeSnapshot(ctx context.Context, at time.Time) error {
 		return err
 	}
 	var hosts, open, sec, reboot int
+	var avg sql.NullFloat64
 	if err := s.db.QueryRowContext(ctx, `SELECT (SELECT COUNT(*) FROM hosts),
 		(SELECT COUNT(*) FROM findings WHERE status IN `+activeStatuses+`),
 		(SELECT COUNT(*) FROM host_updates WHERE security = 1),
-		(SELECT COUNT(*) FROM hosts WHERE reboot_required = 1)`).Scan(&hosts, &open, &sec, &reboot); err != nil {
+		(SELECT COUNT(*) FROM hosts WHERE reboot_required = 1),
+		(SELECT AVG(security_score) FROM hosts WHERE security_score >= 0)`).Scan(&hosts, &open, &sec, &reboot, &avg); err != nil {
 		return err
 	}
-	_, err = s.db.ExecContext(ctx, `INSERT INTO daily_snapshots (day, hosts, critical, high, medium, low, other, kev, open_findings, security_updates, reboot_required, taken_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	score := -1
+	if avg.Valid {
+		score = int(math.Round(avg.Float64))
+	}
+	_, err = s.db.ExecContext(ctx, `INSERT INTO daily_snapshots (day, hosts, critical, high, medium, low, other, kev, open_findings, security_updates, reboot_required, taken_at, security_score)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT (day) DO UPDATE SET hosts = excluded.hosts, critical = excluded.critical, high = excluded.high, medium = excluded.medium,
 		low = excluded.low, other = excluded.other, kev = excluded.kev, open_findings = excluded.open_findings,
-		security_updates = excluded.security_updates, reboot_required = excluded.reboot_required, taken_at = excluded.taken_at`,
-		DayStart(at).Unix(), hosts, sev.Critical, sev.High, sev.Medium, sev.Low, sev.Other, kev, open, sec, reboot, now())
+		security_updates = excluded.security_updates, reboot_required = excluded.reboot_required, taken_at = excluded.taken_at,
+		security_score = excluded.security_score`,
+		DayStart(at).Unix(), hosts, sev.Critical, sev.High, sev.Medium, sev.Low, sev.Other, kev, open, sec, reboot, now(), score)
 	return err
 }
 
 // Snapshots returns the snapshots of the UTC days in [from, to], oldest first.
 func (s *Store) Snapshots(ctx context.Context, from, to time.Time) ([]Snapshot, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT day, hosts, critical, high, medium, low, other, kev, open_findings, security_updates, reboot_required
+	rows, err := s.db.QueryContext(ctx, `SELECT day, hosts, critical, high, medium, low, other, kev, open_findings, security_updates, reboot_required, security_score
 		FROM daily_snapshots WHERE day >= ? AND day <= ? ORDER BY day`, DayStart(from).Unix(), DayStart(to).Unix())
 	if err != nil {
 		return nil, err
@@ -107,7 +117,7 @@ func (s *Store) Snapshots(ctx context.Context, from, to time.Time) ([]Snapshot, 
 		var sn Snapshot
 		var day int64
 		if err := rows.Scan(&day, &sn.Hosts, &sn.Sev.Critical, &sn.Sev.High, &sn.Sev.Medium, &sn.Sev.Low, &sn.Sev.Other, &sn.KEV,
-			&sn.OpenFindings, &sn.SecurityUpdates, &sn.RebootRequired); err != nil {
+			&sn.OpenFindings, &sn.SecurityUpdates, &sn.RebootRequired, &sn.SecurityScore); err != nil {
 			return nil, err
 		}
 		sn.Day = fromTS(day)

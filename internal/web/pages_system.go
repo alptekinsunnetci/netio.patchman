@@ -42,6 +42,8 @@ type systemForm struct {
 	MSRCURL         string
 	EPSSEnabled     bool
 	EPSSURL         string
+	EOLEnabled      bool
+	EOLURL          string
 	UpdateEnabled   bool
 	UpdateURL       string
 }
@@ -54,6 +56,7 @@ func systemFormFrom(sys settings.System) systemForm {
 		OSVURL: sys.OSVURL, KEVEnabled: sys.KEVURL != "", KEVURL: sys.KEVSourceURL,
 		MSRCEnabled: sys.MSRCURL != "", MSRCURL: sys.MSRCSourceURL,
 		EPSSEnabled: sys.EPSSURL != "", EPSSURL: sys.EPSSSourceURL,
+		EOLEnabled: sys.EOLURL != "", EOLURL: sys.EOLSourceURL,
 		UpdateEnabled: sys.UpdateURL != "", UpdateURL: sys.UpdateSourceURL,
 	}
 }
@@ -111,6 +114,7 @@ func (s *Server) systemSave(w http.ResponseWriter, r *http.Request) {
 		OSVURL: in("osv_url"), KEVEnabled: r.PostFormValue("kev_enabled") == "1", KEVURL: in("kev_url"),
 		MSRCEnabled: r.PostFormValue("msrc_enabled") == "1", MSRCURL: in("msrc_url"),
 		EPSSEnabled: r.PostFormValue("epss_enabled") == "1", EPSSURL: in("epss_url"),
+		EOLEnabled: r.PostFormValue("eol_enabled") == "1", EOLURL: in("eol_url"),
 		UpdateEnabled: r.PostFormValue("update_enabled") == "1", UpdateURL: in("update_url"),
 	}
 	password := r.PostFormValue("smtp_password") // not trimmed
@@ -202,6 +206,16 @@ func (s *Server) systemSave(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			kv[settings.KeyEPSSURL] = u
+		}
+	}
+	if _, ok := r.PostForm["eol_url"]; ok {
+		kv[settings.KeyEOLEnabled] = strconv.FormatBool(f.EOLEnabled)
+		if u, err := settings.ParseSourceURL(f.EOLURL); err != nil {
+			if f.EOLEnabled || f.EOLURL != "" {
+				bad = append(bad, s.l.T("system.error.url", "field", field("system.eol_url")))
+			}
+		} else {
+			kv[settings.KeyEOLURL] = u
 		}
 	}
 	kv[settings.KeyUpdateEnabled] = strconv.FormatBool(f.UpdateEnabled)

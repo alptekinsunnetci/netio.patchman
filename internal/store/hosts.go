@@ -54,6 +54,10 @@ type Host struct {
 	LivepatchCVEs   []string
 	// Exclude are package name patterns no job updates on this host.
 	Exclude string
+	// Capabilities are the optional agent features (protocol.Cap*).
+	Capabilities []string
+	// SecurityScore is 0-100 (higher is better), -1 before the first computation.
+	SecurityScore int
 	// Groups the host belongs to (filled by list and detail queries).
 	Groups []GroupRef
 	// RestartServices still run code replaced by an update.
@@ -83,7 +87,7 @@ func (h Host) HostInfo() protocol.HostInfo {
 	return protocol.HostInfo{
 		Hostname: h.Hostname, FQDN: h.FQDN, MachineID: h.MachineID, OSID: h.OSID,
 		OSVersionID: h.OSVersionID, OSVersion: h.OSVersion, OSName: h.OSName,
-		Kernel: h.Kernel, Arch: h.Arch, PackageManager: h.PackageManager, Upstream: h.Upstream,
+		Kernel: h.Kernel, Arch: h.Arch, PackageManager: h.PackageManager, Upstream: h.Upstream, Capabilities: h.Capabilities,
 	}
 }
 
@@ -92,7 +96,7 @@ const activeStatuses = `('open','in_progress')`
 const hostSelect = `SELECT h.id, h.machine_id, h.hostname, h.fqdn, h.os_id, h.os_version_id, h.os_name, h.os_version,
  h.kernel, h.arch, h.ip_addresses, h.package_manager, h.ecosystem, h.agent_version, h.remote_updates,
  h.reboot_required, h.uptime_seconds, h.enrolled_at, h.last_seen_at, h.last_report_at, h.last_scan_at,
- h.report_errors, h.notes, h.self_update, h.restart_services, h.reboot_required_since, h.virtualization, h.upstream, h.kernel_patch, h.kernel_effective, h.livepatch_cves, h.exclude_packages,
+ h.report_errors, h.notes, h.self_update, h.restart_services, h.reboot_required_since, h.virtualization, h.upstream, h.kernel_patch, h.kernel_effective, h.livepatch_cves, h.exclude_packages, h.capabilities, h.security_score,
  (SELECT COUNT(*) FROM host_packages p WHERE p.host_id = h.id) AS pkg_count,
  (SELECT COUNT(*) FROM host_updates u WHERE u.host_id = h.id) AS upd_count,
  (SELECT COUNT(*) FROM host_updates u WHERE u.host_id = h.id AND u.security = 1) AS sec_count,
@@ -105,12 +109,12 @@ const hostSelect = `SELECT h.id, h.machine_id, h.hostname, h.fqdn, h.os_id, h.os
 
 func scanHost(row interface{ Scan(...any) error }) (Host, error) {
 	var h Host
-	var ips, errs, svcs, lpCVEs string
+	var ips, errs, svcs, lpCVEs, caps string
 	var remote, reboot, self int
 	var enrolled, seen, report, scan, rebootSince int64
 	err := row.Scan(&h.ID, &h.MachineID, &h.Hostname, &h.FQDN, &h.OSID, &h.OSVersionID, &h.OSName, &h.OSVersion,
 		&h.Kernel, &h.Arch, &ips, &h.PackageManager, &h.Ecosystem, &h.AgentVersion, &remote,
-		&reboot, &h.UptimeSeconds, &enrolled, &seen, &report, &scan, &errs, &h.Notes, &self, &svcs, &rebootSince, &h.Virtualization, &h.Upstream, &h.KernelPatch, &h.KernelEffective, &lpCVEs, &h.Exclude,
+		&reboot, &h.UptimeSeconds, &enrolled, &seen, &report, &scan, &errs, &h.Notes, &self, &svcs, &rebootSince, &h.Virtualization, &h.Upstream, &h.KernelPatch, &h.KernelEffective, &lpCVEs, &h.Exclude, &caps, &h.SecurityScore,
 		&h.PackageCount, &h.UpdateCount, &h.SecurityUpdateCount,
 		&h.Vulns.Critical, &h.Vulns.High, &h.Vulns.Medium, &h.Vulns.Low, &h.Vulns.Other)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -123,6 +127,7 @@ func scanHost(row interface{ Scan(...any) error }) (Host, error) {
 	_ = json.Unmarshal([]byte(errs), &h.ReportErrors)
 	_ = json.Unmarshal([]byte(svcs), &h.RestartServices)
 	_ = json.Unmarshal([]byte(lpCVEs), &h.LivepatchCVEs)
+	_ = json.Unmarshal([]byte(caps), &h.Capabilities)
 	h.RemoteUpdates, h.RebootRequired, h.SelfUpdate = remote == 1, reboot == 1, self == 1
 	h.EnrolledAt, h.LastSeenAt, h.LastReportAt, h.LastScanAt = fromTS(enrolled), fromTS(seen), fromTS(report), fromTS(scan)
 	h.RebootRequiredSince = fromTS(rebootSince)
@@ -131,6 +136,9 @@ func scanHost(row interface{ Scan(...any) error }) (Host, error) {
 
 // IsVirtual reports whether the platform is a virtual machine or container.
 func (h Host) IsVirtual() bool { return h.Virtualization != "" && h.Virtualization != "none" }
+
+// Supports reports whether the host's agent declared capability c (protocol.Cap*).
+func (h Host) Supports(c string) bool { return h.HostInfo().Supports(c) }
 
 // HostFilter narrows the host list.
 type HostFilter struct {
@@ -141,6 +149,10 @@ type HostFilter struct {
 	// Platform is "virtual", "physical", "unknown" or one virtualization id.
 	Platform     string
 	OfflineAfter time.Duration
+	// ScoreBelow keeps hosts with a security score under it (0 = no filter).
+	ScoreBelow int
+	// Sort is "" (hostname) or "score" (lowest security score first).
+	Sort string
 }
 
 // ListHosts returns hosts matching f, ordered by hostname, and the total count.
@@ -151,7 +163,11 @@ func (s *Store) ListHosts(ctx context.Context, f HostFilter, p Page) ([]Host, in
 	if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM hosts h`+where, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.db.QueryContext(ctx, hostSelect+where+` ORDER BY lower(h.hostname), h.hostname, h.id LIMIT ? OFFSET ?`, append(args, p.limit(), p.Offset())...)
+	order := ` ORDER BY lower(h.hostname), h.hostname, h.id`
+	if f.Sort == "score" {
+		order = ` ORDER BY CASE WHEN h.security_score < 0 THEN 1 ELSE 0 END, h.security_score, lower(h.hostname), h.id`
+	}
+	rows, err := s.db.QueryContext(ctx, hostSelect+where+order+` LIMIT ? OFFSET ?`, append(args, p.limit(), p.Offset())...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -181,6 +197,10 @@ func hostWhere(f HostFilter) (string, []any) {
 		conds = append(conds, `(h.hostname LIKE ? ESCAPE '\' OR h.fqdn LIKE ? ESCAPE '\' OR h.ip_addresses LIKE ? ESCAPE '\' OR h.os_name LIKE ? ESCAPE '\')`)
 		l := likeEscape(q)
 		args = append(args, l, l, l, l)
+	}
+	if f.ScoreBelow > 0 {
+		conds = append(conds, `h.security_score >= 0 AND h.security_score < ?`)
+		args = append(args, f.ScoreBelow)
 	}
 	if f.OSID != "" {
 		conds = append(conds, `h.os_id = ?`)
@@ -419,13 +439,14 @@ func nonNil(s []string) []string {
 func updateHostInfo(ctx context.Context, tx *Tx, id int64, info protocol.HostInfo, ecosystem string) error {
 	ips, _ := json.Marshal(nonNil(info.IPAddresses))
 	virt := protocol.CleanVirtualization(info.Virtualization)
+	caps, _ := json.Marshal(protocol.CleanCapabilities(info.Capabilities))
 	// Agents before 0.3.0 do not report the platform; keep what is known.
 	_, err := tx.ExecContext(ctx, `UPDATE hosts SET hostname = ?, fqdn = ?, os_id = ?, os_version_id = ?, os_name = ?, os_version = ?,
 		kernel = ?, arch = ?, ip_addresses = ?, package_manager = ?, ecosystem = ?, agent_version = ?, remote_updates = ?, self_update = ?,
-		uptime_seconds = ?, last_seen_at = ?, offline_notified = 0, virtualization = CASE WHEN ? = '' THEN virtualization ELSE ? END, upstream = ? WHERE id = ?`,
+		uptime_seconds = ?, last_seen_at = ?, offline_notified = 0, virtualization = CASE WHEN ? = '' THEN virtualization ELSE ? END, upstream = ?, capabilities = ? WHERE id = ?`,
 		info.Hostname, info.FQDN, info.OSID, info.OSVersionID, info.OSName, info.OSVersion,
 		info.Kernel, info.Arch, string(ips), info.PackageManager, ecosystem, info.AgentVersion, boolInt(info.RemoteUpdates), boolInt(info.SelfUpdate),
-		info.UptimeSeconds, now(), virt, virt, protocol.CleanUpstream(info.Upstream), id)
+		info.UptimeSeconds, now(), virt, virt, protocol.CleanUpstream(info.Upstream), string(caps), id)
 	return err
 }
 
@@ -490,6 +511,9 @@ func (s *Store) SaveReport(ctx context.Context, id int64, r protocol.Report, eco
 			pkgRows = append(pkgRows, row)
 		}
 		if err := insertRows(ctx, tx, `INSERT INTO host_packages (host_id, name, arch, version, source_name, source_version)`, "", 6, pkgRows); err != nil {
+			return err
+		}
+		if err := saveServices(ctx, tx, id, r); err != nil {
 			return err
 		}
 		if _, err := tx.ExecContext(ctx, `DELETE FROM host_updates WHERE host_id = ?`, id); err != nil {

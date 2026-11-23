@@ -1,0 +1,57 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$r := $d.R}}{{$root := .}}
+<nav class="breadcrumb"><a href="/rollouts">{{t "nav.rollouts"}}</a> / <span>{{$r.Name}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{$r.Name}} {{template "rolloutstatus" $r.Status}}</h1>
+    <p class="pagehead__sub">{{jobType $r.JobType}}{{with $r.Packages}} · <span class="mono">{{join . ", "}}</span>{{end}} · {{t "rollout.stage_of" "n" (add $r.CurrentStage 1) "total" $r.Stages}}</p>
+  </div>
+  {{if .User.CanOperate}}
+  <div class="pagehead__actions">
+    {{if eq $r.Status "running"}}<form method="post" action="/rollouts/{{$r.ID}}/pause">{{template "csrf" $root}}<button class="button" type="submit">{{t "rollout.pause"}}</button></form>{{end}}
+    {{if or (eq $r.Status "paused") (eq $r.Status "failed")}}<form method="post" action="/rollouts/{{$r.ID}}/resume" data-confirm="{{t "rollout.resume_confirm"}}">{{template "csrf" $root}}<button class="button button--primary" type="submit">{{template "icon" "play"}}{{t "rollout.resume"}}</button></form>{{end}}
+    {{if or $r.Active (eq $r.Status "failed")}}<form method="post" action="/rollouts/{{$r.ID}}/cancel" data-confirm="{{t "rollout.cancel_confirm"}}">{{template "csrf" $root}}<button class="button button--danger" type="submit">{{t "rollout.cancel"}}</button></form>{{end}}
+  </div>
+  {{end}}
+</header>
+
+{{if $r.Reason}}<p class="alert {{if eq $r.Status "failed"}}alert--error{{else}}alert--info{{end}}">{{t (printf "rollout.reason.%s" $r.Reason)}}</p>{{end}}
+
+<section class="stats stats--compact">
+  <div class="stat"><p class="stat__label">{{t "rollout.field.progress"}}</p><p class="stat__value">{{$r.Counts.Done}} / {{$r.Counts.Total}}</p><p class="stat__meta">{{template "rolloutprogress" $r.Counts}}</p></div>
+  <div class="stat{{if $r.Counts.Failed}} stat--critical{{end}}"><p class="stat__label">{{t "rollout.host.failed"}}</p><p class="stat__value">{{$r.Counts.Failed}}</p><p class="stat__meta">{{t "rollout.max_failure_value" "n" $r.MaxFailurePct}}</p></div>
+  <div class="stat"><p class="stat__label">{{t "rollout.field.max_parallel"}}</p><p class="stat__value">{{$r.MaxParallel}}</p><p class="stat__meta">{{t "rollout.wait_value" "n" $r.WaitMinutes}}</p></div>
+  <div class="stat"><p class="stat__label">{{t "rollout.field.require_health"}}</p><p class="stat__value stat__value--sm">{{if $r.RequireHealth}}{{t "common.yes"}}{{else}}{{t "common.no"}}{{end}}</p><p class="stat__meta">{{if $r.Canary}}{{t "rollout.canary_value" "n" $r.Canary}}{{else}}{{t "rollout.no_canary"}}{{end}}</p></div>
+</section>
+
+{{range $d.Stages}}
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{if and (eq .Index 0) $r.Canary}}{{t "rollout.canary_stage"}}{{else}}{{t "rollout.stage_n" "n" (add .Index 1)}}{{end}} <span class="muted">({{len .Hosts}})</span></h2>
+    {{if and (eq .Index $r.CurrentStage) $r.Active}}<span class="pill pill--queued">{{t "rollout.current_stage"}}</span>{{end}}
+  </div>
+  <table class="table">
+    <thead><tr><th>{{t "host.field.hostname"}}</th><th>{{t "rollout.field.status"}}</th><th>{{t "nav.jobs"}}</th><th>{{t "rollout.field.note"}}</th></tr></thead>
+    <tbody>
+    {{range .Hosts}}<tr>
+      <td><a href="/servers/{{.HostID}}">{{.Hostname}}</a></td>
+      <td>{{template "rollouthost" .Status}}</td>
+      <td>{{if .JobID}}<a class="mono" href="/jobs/{{.JobID}}">#{{.JobID}}</a> {{if .JobStatus}}{{template "jobstatus" .JobStatus}}{{end}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td class="cell-sub mono">{{.Note}}</td>
+    </tr>{{end}}
+    </tbody>
+  </table>
+</section>
+{{end}}
+
+<section class="panel">
+  <dl class="dl">
+    <dt>{{t "job.field.created_by"}}</dt><dd>{{if $r.CreatedBy}}{{$r.CreatedBy}}{{else}}{{t "common.system"}}{{end}}</dd>
+    <dt>{{t "job.field.created_at"}}</dt><dd>{{long $r.CreatedAt}}</dd>
+    <dt>{{t "job.field.finished_at"}}</dt><dd>{{long $r.FinishedAt}}</dd>
+    <dt>{{t "rollout.field.job_timeout"}}</dt><dd>{{$r.JobTimeoutMinutes}}</dd>
+  </dl>
+</section>
+{{end}}

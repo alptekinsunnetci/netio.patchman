@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"netio.patchman/internal/eol"
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/scanner"
 	"netio.patchman/internal/settings"
@@ -56,9 +57,19 @@ func (s *Server) dashboard(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	eolItems, err := s.assessEOL(ctx, 0)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	fleetScore, err := s.st.FleetScore(ctx)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
 	d := s.page(r, s.l.T("dashboard.title"), "dashboard")
 	d.Data = map[string]any{
-		"Stats": stats, "Sev": sev, "KEV": kev, "TopVulns": topVulns, "TopHosts": topHosts, "Jobs": jobs, "Watched": watched,
+		"Stats": stats, "Sev": sev, "KEV": kev, "TopVulns": topVulns, "TopHosts": topHosts, "Jobs": jobs, "Watched": watched, "EOL": eol.Summarize(eolItems), "FleetScore": fleetScore,
 		"SLAEnabled": sla.Enabled(), "Overdue": overdue, "OverdueCVEs": overdueCVEs,
 		"Scan": s.o.Scanner.Status(), "Trend": s.buildTrends(snaps, from, to),
 	}
@@ -74,7 +85,13 @@ func (s *Server) hostFilter(r *http.Request) store.HostFilter {
 	if platform != "virtual" && platform != "physical" && platform != "unknown" {
 		platform = protocol.CleanVirtualization(platform)
 	}
-	return store.HostFilter{Search: q.Get("q"), Status: q.Get("status"), OSID: q.Get("os"), GroupID: max(group, 0), Platform: platform, OfflineAfter: s.offlineAfter()}
+	below, _ := strconv.Atoi(q.Get("score_below"))
+	sort := q.Get("sort")
+	if sort != "score" {
+		sort = ""
+	}
+	return store.HostFilter{Search: q.Get("q"), Status: q.Get("status"), OSID: q.Get("os"), GroupID: max(group, 0), Platform: platform, OfflineAfter: s.offlineAfter(),
+		ScoreBelow: min(max(below, 0), 100), Sort: sort}
 }
 
 // virtLabel names a platform id in Turkish; unknown ids are shown verbatim.
@@ -127,6 +144,7 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 	userID := sessionFrom(r).user.ID
 	watchedCount, _ := s.st.CountHostWatched(ctx, userID, id)
 	data := map[string]any{"Host": h, "Tab": tab, "Online": h.Online(s.offlineAfter()), "Q": q, "WatchedCount": watchedCount,
+		"OSEOL":         osEOL(s.hostEOL(ctx, h, nil)),
 		"ScanSupported": scanner.TargetFor(h.HostInfo()).Supported()}
 	pg := pageNumber(r)
 	switch tab {
@@ -161,6 +179,59 @@ func (s *Server) server(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		data["WatchedRows"], data["WatchedMissing"] = rows, missing
+	case "health":
+		latest, err := s.st.LatestHostHealth(ctx, id)
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		hist, total, err := s.st.HostHealth(ctx, id, store.Page{Number: pg, Size: pageSize})
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		checks, err := s.st.ChecksForHost(ctx, id, false)
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		data["HealthLatest"], data["HealthHistory"], data["Pager"], data["HealthChecks"] = latest, hist, newPager(r, pg, total), checks
+	case "software":
+		sw, err := s.st.HostSoftware(ctx, id)
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		svcs, known, err := s.st.HostServices(ctx, id)
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		if r.URL.Query().Get("services") != "all" {
+			// Running and failed services by default; stopped ones on request.
+			var shown []protocol.Service
+			for _, sv := range svcs {
+				if sv.State != protocol.ServiceStopped {
+					shown = append(shown, sv)
+				}
+			}
+			data["ServicesHidden"] = len(svcs) - len(shown)
+			svcs = shown
+		}
+		events, _, err := s.st.ListSoftwareEvents(ctx, store.SoftwareEventFilter{HostID: id}, store.Page{Number: 1, Size: 10})
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		data["Software"], data["Services"], data["ServicesKnown"], data["SoftwareEvents"] = sw, svcs, known, events
+		data["SoftwareEOL"] = softwareEOL(s.hostEOL(ctx, h, sw))
+		driftRows, _, err := s.st.ListDrift(ctx, store.DriftFilter{HostID: id}, store.Page{Number: 1, Size: 200})
+		if err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+		data["Drift"] = driftRows
+		data["AllServices"] = r.URL.Query().Get("services") == "all"
 	case "jobs":
 		jobs, total, err := s.st.ListJobs(ctx, store.JobFilter{HostID: id}, store.Page{Number: pg, Size: pageSize})
 		if err != nil {
@@ -241,6 +312,22 @@ func (s *Server) queueJob(r *http.Request, h store.Host, typ string, pkgs []stri
 		}
 		params, pkgs = p, nil
 	case protocol.JobRefresh:
+		pkgs = nil
+	case protocol.JobHealthCheck:
+		// Read-only: allowed with remote updates off, needs agent support.
+		if !h.Supports(protocol.CapHealth) {
+			return 0, s.l.T("job.error.agent_capability", "hostname", h.Hostname)
+		}
+		checks, err := s.st.ChecksForHost(r.Context(), h.ID, false)
+		if err != nil {
+			return 0, s.l.T("error.internal.body")
+		}
+		if len(checks) == 0 {
+			return 0, s.l.T("job.error.no_health_checks", "hostname", h.Hostname)
+		}
+		if active, _ := s.st.HasActiveJob(r.Context(), h.ID, typ); active {
+			return 0, s.l.T("job.error.already_queued", "hostname", h.Hostname)
+		}
 		pkgs = nil
 	default:
 		if !h.RemoteUpdates {
@@ -401,7 +488,19 @@ func (s *Server) serverCreateJob(w http.ResponseWriter, r *http.Request) {
 	if t := r.PostFormValue("back_tab"); t != "" {
 		back += "?tab=" + t
 	}
-	id, msg := s.queueJob(r, h, r.PostFormValue("type"), r.PostForm["packages"])
+	typ := r.PostFormValue("type")
+	// With previews required, an update started here first shows its plan;
+	// the update runs after the plan is approved on the job page.
+	if cfg, _ := settings.Load(r.Context(), s.st); cfg.RequirePreview && isPackageJobType(typ) && h.Supports(protocol.CapPreview) && h.RemoteUpdates {
+		id, msg := s.queuePreview(r, h, typ, r.PostForm["packages"])
+		if msg != "" {
+			s.redirect(w, r, back, "error", msg)
+			return
+		}
+		s.redirect(w, r, "/jobs/"+strconv.FormatInt(id, 10), "success", s.l.T("preview.queued_required"))
+		return
+	}
+	id, msg := s.queueJob(r, h, typ, r.PostForm["packages"])
 	if msg != "" {
 		s.redirect(w, r, back, "error", msg)
 		return
@@ -818,7 +917,36 @@ func (s *Server) job(w http.ResponseWriter, r *http.Request) {
 	}
 	d := s.page(r, s.l.T("job.title", "id", j.ID), "jobs")
 	_, _, canRetry := retryJob(j)
-	d.Data = map[string]any{"Job": j, "CanRetry": canRetry}
+	outcome, failedChecks := j.Data.HealthOutcome()
+	d.Data = map[string]any{"Job": j, "CanRetry": canRetry, "HealthRows": healthRows(j.Data.Health), "HealthOutcome": outcome, "HealthFailed": failedChecks}
+	if j.Type == protocol.JobPreview {
+		if h, err := s.st.HostByID(r.Context(), j.HostID); err == nil {
+			ok, why := s.approvable(j, h)
+			d.Data.(map[string]any)["CanApprove"], d.Data.(map[string]any)["ApproveBlocked"] = ok, why
+			d.Data.(map[string]any)["PreviewStale"] = !j.FinishedAt.IsZero() && time.Since(j.FinishedAt) > previewStale
+		}
+	}
+	if pid := j.Params[ParamPreviewJob]; pid != "" {
+		d.Data.(map[string]any)["PreviewJob"] = pid
+	}
+	if changes, source := s.jobChanges(r.Context(), j); len(changes) > 0 {
+		dm := d.Data.(map[string]any)
+		dm["Changes"], dm["ChangesSource"] = changes, source
+		if h, err := s.st.HostByID(r.Context(), j.HostID); err == nil {
+			dm["RollbackBlocked"] = s.rollbackBlocked(h)
+		}
+	}
+	if j.Type == protocol.JobRollback {
+		dm := d.Data.(map[string]any)
+		dm["RollbackOf"], dm["RollbackCheck"] = j.Params[store.ParamRollbackOf], j.Params[store.ParamRollbackCheck]
+		if j.Params[protocol.ParamRollbackMode] == protocol.RollbackCheck {
+			applied, _ := s.st.JobFromParam(r.Context(), store.ParamRollbackCheck, strconv.FormatInt(j.ID, 10))
+			dm["RollbackApplied"] = applied
+			if h, err := s.st.HostByID(r.Context(), j.HostID); err == nil {
+				dm["RollbackBlocked"] = s.rollbackBlocked(h)
+			}
+		}
+	}
 	s.render(w, r, http.StatusOK, "job", d)
 }
 

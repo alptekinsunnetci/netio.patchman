@@ -43,6 +43,14 @@ netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve
 - **Merkezi güncelleme:** Panelden tek bir sunucuda, seçilen sunucularda veya tümünde güvenlik güncellemeleri, tüm güncellemeler ya da seçili paketler kurulabilir. Bir CVE için **Düzeltmeyi uygula** ile etkilenen tüm sunucularda ilgili paketler güncellenir. Ajan her işten sonra paketlerin gerçekten güncellendiğini doğrular; güncellenemeyenler listelenir ve tek tıkla yeniden denenebilir.
 - **Servis ve sunucu yeniden başlatma:** Güncellenen kütüphaneleri hâlâ eski sürümle kullanan servisler tespit edilir ve panelden yeniden başlatılabilir; sunucu panelden yeniden başlatılabilir.
 - **Zamanlanmış güncellemeler:** "Her pazar 03:00'te Ubuntu sunucularında güvenlik güncellemelerini uygula" gibi bakım pencereleri. Zamanlamalar sunucuları kendiliğinden yeniden başlatmaz.
+- **Ön izleme ve onay:** Sunucu sayfasından başlatılan güncelleme önce paket yöneticisinin simülasyon kipiyle (APT, DNF, YUM, Zypper) çalışır. Güncellenecek, kurulacak, kaldırılacak ve sürümü düşecek paketler, indirme boyutu ve yeniden başlatma ihtiyacı gösterilir; güncelleme onaydan sonra başlar.
+- **Sağlık kontrolleri:** Güncellemeden önce ve sonra HTTP/HTTPS, TCP, servis, CPU/bellek/disk ve sunucudaki yerel betik (health.d) kontrolleri. Önceden başarısız kontrolde güncelleme yapılmaz; güncellemeden sonra bozulan kontrol işi başarısız sayar ve bildirilir.
+- **Kademeli güncellemeler:** Canary sunucular, aşamalar, eşzamanlı iş sınırı, aşamalar arası bekleme ve hata oranı politikası. Hata oranı aşılınca dağıtım kendiliğinden durur; duraklatma, devam ettirme ve iptal elle yapılır ve denetime yazılır.
+- **Geri dönüş (snapshot olmadan):** Her işten önceki ve sonraki paket sürümleri saklanır. Eski sürümlerin depoda bulunup bulunmadığı önce kontrol edilir, onaydan sonra paket yöneticisiyle geri dönülür ve sonuç doğrulanır; geri dönmeyen paketler başarı gibi gösterilmez.
+- **Yazılım ve servis envanteri:** nginx, PHP, MariaDB, PostgreSQL, Redis, Java gibi yazılımlar paketlerden tanınır; kurulu ve çalışan servisler ayrılır, iki sunucu karşılaştırılır, kurulan/kaldırılan/sürümü değişen yazılımların geçmişi tutulur.
+- **Destek bitişi (EOL) takibi:** İşletim sistemleri ve yazılımlar için endoflife.date takvimi (çevrimdışı yerleşik takvimle). Dağıtımın kendisi sürdürdüğü paketler ayrıca işaretlenir; yaklaşan ve geçen tarihler bildirilir.
+- **Güvenlik puanı:** Her sunucu, grup ve tüm filo için 0-100 puan, günlük geçmiş, ayarlanabilir ağırlıklar ve eşik bildirimi. Bir CVE birden çok ölçüte uysa da yalnızca bir kez düşülür.
+- **Sunucu standartları ve sapma:** “PHP yalnızca 8.2 veya 8.3”, “telnetd kurulu olmamalı”, “nginx çalışmalı” gibi kurallar. Sürüm kuralları dağıtımın sürüm numarasıyla karşılaştırılır (backport'lar yanlış sapma üretmez), yeni sapmalar bildirilir, uygun güncelleme önerilir.
 - **Otomatik ajan güncellemesi:** Merkezi sunucu yeni sürüme geçince ajanlar yeni sürümü indirir, SHA-256 özetini doğrular ve kendini günceller.
 - **Yeni sürüm bildirimi:** Panel, GitHub'da yeni bir netio.patchman sürümü yayımlandığında yöneticileri uyarır ve güncelleme komutlarını gösterir. İnternet erişimi olmayan kurulumlarda kapatılabilir. İsteğe bağlı güncelleyici konteyneriyle sürüm yükseltmesi panelden tek tıkla yapılır (git pull, yedek, derleme, yeniden başlatma).
 - **Bulgu yönetimi:** Açık, İşlemde, Risk Kabul Edildi, Hatalı Tespit durumları. Paket güncellenince bulgu otomatik olarak "Çözüldü" olur. Risk kabulü süreli verilir (30, 90, 180, 365 gün; en uzun süre ayarlardan sınırlanır). Süre dolunca bulgu yeniden açılır, bildirim ve e-posta gönderilir.
@@ -53,7 +61,7 @@ netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve
 - **Uyumluluk raporu:** Seçilen dönem ve grup için yazdırılabilir rapor (tarayıcıdan PDF olarak kaydedilebilir). Raporda özet sayılar, dönemde tespit edilen ve kapatılan bulgular, ortalama kapatma süresi, CISA son tarihi geçmiş KEV açıkları, sunucu durumu, kabul edilen riskler (kabul eden kişi ve bitiş tarihiyle) ve güncelleme işleri yer alır. ISO 27001 ve KVKK denetimlerinde kanıt olarak kullanılabilir.
 - **İki adımlı doğrulama:** Google Authenticator, Microsoft Authenticator gibi uygulamalarla TOTP kodu ve tek kullanımlık yedek kodlar. Yönetici, iki adımlı doğrulamayı tüm kullanıcılar için zorunlu kılabilir; kaybolan bir telefon için kullanıcının doğrulamasını sıfırlayabilir.
 - **Bildirimler:** Bildirim merkezi ve e-posta bildirimleri: yeni açıklar, bağlantısı kesilen ajanlar, başarısız veya kısmen tamamlanan güncelleme işleri.
-- **Slack, Microsoft Teams, Telegram ve webhook:** Bildirimler seviyeye göre (bilgi, uyarı, kritik) sohbet kanallarına ve HMAC-SHA256 imzalı JSON webhook ile kendi sistemlerinize (SIEM, olay yönetimi) de gönderilir.
+- **Bildirim kanalları ve entegrasyonlar:** Slack, Microsoft Teams, Telegram, HMAC-SHA256 imzalı (zaman damgalı) JSON webhook, Jira, ServiceNow ve GLPI kayıt açma ile Zabbix trapper. Her kanal seviyeye veya olaylara (kritik CVE, KEV, EOL, güncelleme başladı/başarılı/başarısız, geri dönüş, yeniden başlatma, sağlık kontrolü, SLA, puan, çevrimdışı sunucu, sapma…) abone olur. Başarısız gönderimler yeniden denenir; teslimat geçmişi tutulur ve başarısız bir teslimat tekrar gönderilebilir.
 - **Otomatik yedekleme:** Veritabanı her gün belirlenen saatte yedeklenir, en yeni N yedek saklanır. Yedekler panelden indirilebilir; başarısız yedekleme bildirilir.
 - **Çok dilli arayüz:** Türkçe, İngilizce, Almanca ve Rusça. Her kullanıcı arayüz dilini seçer; tarih, ondalık ayracı ve CSV biçimi dile uyar.
 - **Kullanıcılar ve yetkiler:** Yönetici, Operatör ve İzleyici rolleri; denetim kayıtları.
@@ -362,7 +370,8 @@ docker compose down -v     # konteyneri ve veritabanını siler (geri alınamaz)
 Yapılandırmanın tamamı yönetim panelinden yapılabilir:
 
 - **Sistem Ayarları:** Bildirim eşikleri ve alıcıları, ajan bağlantı aralıkları, otomatik ajan güncellemesi, tarama, kayıt saklama süresi, güvenlik (iki adımlı doğrulama, risk kabulü süresi) ve otomatik yedekleme.
-- **Sistem Ayarları → Bildirim kanalları:** Slack, Microsoft Teams, Telegram ve webhook kanalları.
+- **Sistem Ayarları → Bildirim kanalları:** Slack, Microsoft Teams, Telegram, webhook, Jira, ServiceNow, GLPI ve Zabbix kanalları, olay süzgeçleri ve teslimat geçmişi.
+- **Sistem Ayarları → Sağlık kontrolleri, Güvenlik puanı:** Güncelleme öncesi/sonrası kontroller, puan ağırlıkları ve eşik.
 - **Sistem Ayarları → Sunucu yapılandırması:** Sunucu adresi, ters vekil, saat dilimi, günlük seviyesi, SMTP ve veri kaynakları (OSV, CISA KEV, Microsoft Security Update Guide).
 
 `.env` dosyasındaki `PATCHMAN_` önekli değişkenler yalnızca ilk değerleri verir; panelde kaydedilen değer bunların yerine geçer. Aşağıdaki tabloda "Panelden" sütununda "—" ile işaretli değerler sunucu başlarken gerektiği için yalnızca `.env` ile değiştirilebilir ve yeniden başlatma gerektirir. Tüm seçenekler açıklamalarıyla [.env.example](.env.example) dosyasındadır.
@@ -383,6 +392,7 @@ Yapılandırmanın tamamı yönetim panelinden yapılabilir:
 | `PATCHMAN_KEV_URL` | CISA KEV adresi | KEV kataloğu adresi; `off` ile kapatılır | evet |
 | `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Windows sunucularının CVE eşlemesi için Microsoft Security Update Guide adresi; `off` ile kapatılır | evet |
 | `PATCHMAN_EPSS_URL` | `https://epss.empiricalsecurity.com/epss_scores-current.csv.gz` | Günlük EPSS puan dosyası; `off` ile kapatılır | evet |
+| `PATCHMAN_EOL_URL` | `https://endoflife.date/api` | İşletim sistemi ve yazılım destek bitiş takvimleri; `off` ile kapatılır (yerleşik takvim kullanılır) | evet |
 | `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | E-posta sunucusu | evet |
 | `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP kimlik bilgileri | evet |
 | `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Gönderen adı ve adresi | evet |

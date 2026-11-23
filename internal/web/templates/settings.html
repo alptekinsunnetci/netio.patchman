@@ -10,6 +10,8 @@
   <div class="pagehead__actions">
     <a class="button" href="/settings/system">{{template "icon" "settings"}}{{t "settings.system_link"}}</a>
     <a class="button" href="/settings/channels">{{template "icon" "bell"}}{{t "channels.title"}}</a>
+    <a class="button" href="/settings/score">{{template "icon" "shield"}}{{t "score.settings_title"}}</a>
+    <a class="button" href="/settings/health">{{template "icon" "refresh"}}{{t "health.title"}}</a>
     <a class="button" href="/settings/audit">{{template "icon" "list"}}{{t "audit.title"}}</a>
   </div>
 </header>
@@ -79,6 +81,18 @@
     <label class="field"><span class="field__label">{{t "settings.updates.exclude"}}</span>
       <textarea class="field__input mono" name="update_exclude" rows="3" maxlength="4000">{{join $c.UpdateExclude ", "}}</textarea>
       <span class="field__hint">{{t "settings.updates.exclude_hint"}}</span></label>
+    <label class="check-label"><input type="checkbox" name="require_preview" value="1"{{if $c.RequirePreview}} checked{{end}}> {{t "settings.updates.require_preview"}}</label>
+    <p class="field__hint">{{t "settings.updates.require_preview_hint"}}</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "settings.health.policy"}}</span>
+        <select class="field__input" name="health_policy">
+          <option value="abort"{{if not $c.HealthContinue}} selected{{end}}>{{t "settings.health.policy_abort"}}</option>
+          <option value="continue"{{if $c.HealthContinue}} selected{{end}}>{{t "settings.health.policy_continue"}}</option>
+        </select></label>
+      <label class="field"><span class="field__label">{{t "settings.health.delay"}}</span>
+        <input class="field__input" type="number" name="health_delay" min="0" max="600" value="{{$c.HealthDelay}}">
+        <span class="field__hint">{{t "settings.health.delay_hint"}}</span></label>
+    </div>
   </section>
 
   <section class="panel" id="sla">
@@ -96,6 +110,19 @@
     </div>
     <label class="check-label"><input type="checkbox" name="email_sla_overdue" value="1"{{if $c.EmailSLAOverdue}} checked{{end}}> {{t "settings.sla.email"}}</label>
   </section>
+  <section class="panel" id="inventory">
+    <h2 class="panel__title">{{t "settings.inventory.title"}}</h2>
+    <input type="hidden" name="inventory_section" value="1">
+    <label class="check-label"><input type="checkbox" name="software_notify" value="1"{{if $c.SoftwareNotify}} checked{{end}}> {{t "settings.inventory.software_notify"}}</label>
+    <p class="field__hint">{{t "settings.inventory.software_notify_hint"}}</p>
+    <label class="check-label"><input type="checkbox" name="eol_notify" value="1"{{if $c.EOLNotify}} checked{{end}}> {{t "settings.eol.notify"}}</label>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "settings.eol.warn_days"}}</span>
+        <input class="field__input" type="number" name="eol_warn_days" min="0" max="730" value="{{$c.EOLWarnDays}}">
+        <span class="field__hint">{{t "settings.eol.warn_days_hint"}}</span></label>
+    </div>
+  </section>
+
   <section class="panel" id="backup">
     <h2 class="panel__title">{{t "settings.backup.title"}}</h2>
     <label class="check-label"><input type="checkbox" name="backup_enabled" value="1"{{if $c.BackupEnabled}} checked{{end}}> {{t "settings.backup.enabled"}}</label>

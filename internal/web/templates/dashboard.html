@@ -18,7 +18,12 @@
 </section>
 {{else}}
 
-<section class="stats{{if $d.SLAEnabled}} stats--7{{end}}">
+<section class="stats {{if $d.SLAEnabled}}stats--8{{else}}stats--7{{end}}">
+  <a class="stat" href="/servers?sort=score">
+    <p class="stat__label">{{t "score.fleet"}}</p>
+    <p class="stat__value">{{template "score" $d.FleetScore.Avg}}</p>
+    <p class="stat__meta">{{if ge $d.FleetScore.Min 0}}{{t "score.fleet_min" "n" $d.FleetScore.Min}}{{else}}{{t "score.pending"}}{{end}}</p>
+  </a>
   <a class="stat" href="/servers">
     <p class="stat__label">{{t "dashboard.stat.servers"}}</p>
     <p class="stat__value">{{$d.Stats.Hosts}}</p>
@@ -84,6 +89,21 @@
   {{end}}
 </section>
 
+{{with $d.EOL}}{{if or .OSEOL .OSSoon .SoftwareEOL .SoftwareSoon}}
+<section class="panel">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "eol.dashboard_title"}}</h2>
+    <a class="panel__link" href="/software?tab=eol">{{t "common.view_all"}}</a>
+  </div>
+  <ul class="legend">
+    <li><a href="/software?tab=eol&kind=os&status=eol"><span class="legend__dot legend__dot--critical"></span>{{t "eol.stat.os_eol"}} <strong>{{.OSEOL}}</strong></a></li>
+    <li><a href="/software?tab=eol&kind=os&status=soon"><span class="legend__dot legend__dot--medium"></span>{{t "eol.stat.os_soon"}} <strong>{{.OSSoon}}</strong></a></li>
+    <li><a href="/software?tab=eol&kind=software&status=eol"><span class="legend__dot legend__dot--critical"></span>{{t "eol.stat.software_eol"}} <strong>{{.SoftwareEOL}}</strong></a></li>
+    <li><a href="/software?tab=eol&kind=software&status=soon"><span class="legend__dot legend__dot--medium"></span>{{t "eol.stat.software_soon"}} <strong>{{.SoftwareSoon}}</strong></a></li>
+  </ul>
+</section>
+{{end}}{{end}}
+
 <section class="panel panel--flush">
   <div class="panel__head">
     <h2 class="panel__title">{{t "watch.dashboard_title"}}{{with $d.Watched}} <span class="muted">({{len .}})</span>{{end}}</h2>
@@ -132,15 +152,16 @@
   <section class="panel panel--flush">
     <div class="panel__head">
       <h2 class="panel__title">{{t "dashboard.top_hosts"}}</h2>
-      <a class="panel__link" href="/servers?status=vulnerable">{{t "common.view_all"}}</a>
+      <a class="panel__link" href="/servers?sort=score">{{t "common.view_all"}}</a>
     </div>
     {{if $d.TopHosts}}
     <table class="table">
-      <thead><tr><th>{{t "host.field.hostname"}}</th><th>{{t "host.field.vulns"}}</th><th class="num">{{t "host.field.security_updates"}}</th></tr></thead>
+      <thead><tr><th>{{t "host.field.hostname"}}</th><th class="num">{{t "score.short"}}</th><th>{{t "host.field.vulns"}}</th><th class="num">{{t "host.field.security_updates"}}</th></tr></thead>
       <tbody>
       {{range $d.TopHosts}}
       <tr>
         <td><a href="/servers/{{.ID}}">{{.Hostname}}</a><div class="cell-sub">{{.OSName}}</div></td>
+        <td class="num"><a href="/servers/{{.ID}}/score">{{template "score" .SecurityScore}}</a></td>
         <td>{{template "sevcounts" .Vulns}}</td>
         <td class="num">{{.SecurityUpdateCount}}</td>
       </tr>

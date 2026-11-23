@@ -15,6 +15,7 @@
 </header>
 
 <section class="stats stats--compact">
+  <a class="stat" href="/servers?group={{$g.ID}}&sort=score"><p class="stat__label">{{t "score.group"}}</p><p class="stat__value">{{template "score" $d.Score.Avg}}</p><p class="stat__meta">{{if ge $d.Score.Min 0}}{{t "score.fleet_min" "n" $d.Score.Min}}{{else}}{{t "score.pending"}}{{end}}</p></a>
   <div class="stat"><p class="stat__label">{{t "dashboard.stat.critical"}}</p><p class="stat__value">{{$d.Sev.Critical}}</p><p class="stat__meta">{{t "dashboard.stat.high" "n" $d.Sev.High}}</p></div>
   <div class="stat{{if $d.KEV}} stat--critical{{end}}"><p class="stat__label">{{t "dashboard.stat.kev"}}</p><p class="stat__value">{{$d.KEV}}</p><p class="stat__meta">{{t "dashboard.stat.kev_meta"}}</p></div>
   <div class="stat"><p class="stat__label">{{t "group.field.hosts"}}</p><p class="stat__value">{{$g.HostCount}}</p><p class="stat__meta">{{t "group.field.created_at"}}: {{date $g.CreatedAt}}</p></div>
@@ -26,7 +27,7 @@
   {{if $d.Hosts}}
   <div class="table-wrap">
   <table class="table">
-    <thead><tr>{{if $op}}<th class="check"><input type="checkbox" data-check-all="host_ids" aria-label="{{t "common.select_all"}}"></th>{{end}}<th>{{t "host.field.hostname"}}</th><th>{{t "host.field.os"}}</th><th>{{t "host.field.status"}}</th><th>{{t "host.field.vulns"}}</th><th class="num">{{t "host.field.security_updates"}}</th></tr></thead>
+    <thead><tr>{{if $op}}<th class="check"><input type="checkbox" data-check-all="host_ids" aria-label="{{t "common.select_all"}}"></th>{{end}}<th>{{t "host.field.hostname"}}</th><th>{{t "host.field.os"}}</th><th>{{t "host.field.status"}}</th><th class="num">{{t "score.short"}}</th><th>{{t "host.field.vulns"}}</th><th class="num">{{t "host.field.security_updates"}}</th></tr></thead>
     <tbody>
     {{range $d.Hosts}}
     <tr>
@@ -34,6 +35,7 @@
       <td><a href="/servers/{{.ID}}"><strong>{{.Hostname}}</strong></a>{{if .RebootRequired}} <span class="pill pill--warning">{{t "host.reboot_required"}}</span>{{end}}</td>
       <td>{{.OSName}}<div class="cell-sub">{{virt .Virtualization}}</div></td>
       <td>{{template "hoststatus" .}}</td>
+      <td class="num"><a href="/servers/{{.ID}}/score">{{template "score" .SecurityScore}}</a></td>
       <td>{{template "sevcounts" .Vulns}}</td>
       <td class="num">{{.SecurityUpdateCount}}</td>
     </tr>
@@ -46,6 +48,8 @@
 </section>
 </form>
 {{template "pager" $d.Pager}}
+
+{{template "trends" $d.Trend}}
 
 {{if .User.IsAdmin}}
 <div class="grid-2">

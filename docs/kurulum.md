@@ -101,6 +101,7 @@ Geçişten önceki hale dönmek için `-in` ile aktarılan eski dosyayı (`/data
 | SMTP sunucusu, port, kullanıcı adı, parola, gönderen adı ve adresi | `PATCHMAN_SMTP_*` |
 | OSV API adresi, CISA KEV kataloğu (açık/kapalı ve adresi) | `PATCHMAN_OSV_URL`, `PATCHMAN_KEV_URL` |
 | Yeni sürüm denetimi (açık/kapalı ve adresi) | `PATCHMAN_UPDATE_CHECK_URL` (`off` ile kapanır) |
+| Destek bitiş takvimleri, endoflife.date (açık/kapalı ve adresi) | `PATCHMAN_EOL_URL` (`off` ile kapanır; yerleşik takvim kullanılır) |
 
 - Ortam değişkenleri yalnızca ilk değerdir: panelde bir kez kaydedilen değer ortam değişkeninin yerine geçer. **Ortam değişkenlerine dön** düğmesi paneldeki değerleri siler.
 - SMTP parolası veritabanında saklanır, sayfada hiçbir zaman gösterilmez ve denetim kaydına yazılmaz. Veritabanı yedeklerini buna göre koruyun.
@@ -313,6 +314,25 @@ Remove-Item -Recurse -Force 'C:\Program Files\netio-patchman', 'C:\ProgramData\n
 
 Ardından panelde sunucunun **Sistem Bilgisi** sekmesinden sunucuyu kaldırın.
 
+### 4.6 Sağlık kontrolü betikleri (health.d)
+
+HTTP, TCP, servis ve kaynak kontrolleri panelden tanımlanır ve ajanın içinde çalışır. Sunucuya özgü bir kontrol gerekiyorsa (ör. veritabanı çoğaltmasının durumu) yerel bir betik yazın. Panelde **Yerel komut (health.d)** türünde bir kontrol oluşturup betiğin dosya adını verin. Panel ajana yalnızca dosya adını gönderir; komut satırı veya parametre gönderemez. Bu yüzden çalışacak betikleri her zaman sunucunun yöneticisi belirler.
+
+Linux:
+
+```sh
+sudo install -d -o root -g root -m 0755 /etc/netio-patchman/health.d
+sudo install -o root -g root -m 0755 replikasyon-kontrol /etc/netio-patchman/health.d/replikasyon-kontrol
+```
+
+- Klasör ve dosya root'a ait olmalı, grup veya diğer kullanıcılar tarafından yazılabilir olmamalıdır. Aksi hâlde ajan betiği çalıştırmaz ve kontrol başarısız sayılır.
+- Dosya adı harf veya rakamla başlar; harf, rakam, nokta, tire ve alt çizgiden oluşur (en fazla 64 karakter). Alt klasör ve sembolik bağlantı kabul edilmez.
+- Betik 0 ile çıkarsa kontrol başarılıdır. Çıktının son beş satırı sonuç olarak gösterilir. Kontrolde verilen zaman aşımı (varsayılan 10 saniye, en fazla 2 dakika) geçilirse betik durdurulur.
+
+Windows'ta klasör `C:\ProgramData\netio-patchman\health.d\` olur. `.ps1`, `.cmd`, `.bat` ve `.exe` dosyaları kabul edilir; PowerShell betikleri `-NoProfile -NonInteractive -ExecutionPolicy Bypass -File` ile çalıştırılır. Klasöre yalnızca yöneticilerin yazabildiğinden emin olun.
+
+Sağlık kontrolleri, servis listesi, ön izleme ve geri dönüş 1.0.0 ve üstü ajanlarda çalışır. Ajanlar otomatik güncellemeyle yeni sürüme geçer (bkz. bölüm 6).
+
 ## 5. Yedekleme ve geri yükleme
 
 ### 5.1 Otomatik yedekleme
@@ -460,6 +480,7 @@ Komut, kullanıcının doğrulayıcısını ve yedek kodlarını kaldırır, otu
 - **Ajanlar:** Panelin **Ajan Yönetimi** sayfasındaki indirme adreslerinden ajan dosyasını, `netio-patchman-agent.service` dosyasını ve `install-agent.sh` betiğini alın, sunucuya kopyalayıp `--binary` seçeneğiyle kurun. Windows'ta `install-agent.ps1` ve `netio-patchman-agent-windows-amd64.exe` ile `-Binary` kullanılır.
 - **Güvenlik açığı verisi:** **Sunucu yapılandırması** sayfasında OSV API adresini iç ağdaki bir yansıya yönlendirin. KEV kataloğunun adresini iç ağdaki bir kopyaya çevirin veya kataloğu kapatın. Windows sunucuları için Microsoft Security Update Guide adresini bir vekil sunucuya yönlendirin ya da kapatın; kapalıyken yalnızca Windows Update'in kendisinin bildirdiği CVE'ler kullanılır. (Ortam değişkenleri: `PATCHMAN_OSV_URL`, `PATCHMAN_KEV_URL`, `PATCHMAN_MSRC_URL`.)
 - **Yeni sürüm denetimi:** **Sunucu yapılandırması → Sürüm denetimi** bölümünden kapatın veya iç ağdaki bir `VERSION` dosyasına yönlendirin (`PATCHMAN_UPDATE_CHECK_URL=off`).
+- **Destek bitiş (EOL) takvimleri:** endoflife.date erişimini **Sunucu yapılandırması** sayfasından kapatın (`PATCHMAN_EOL_URL=off`). Sürümle birlikte gelen yerleşik takvim kullanılır; her netio.patchman sürümünde güncellenir. Kurum içi bir yansı varsa adresini verin (`/api/<ürün>.json` biçiminde yanıt vermelidir).
 - **Docker imajları:** Sunucu imajının derlenmesi için `golang:1.26-alpine` ve `gcr.io/distroless/static-debian12`, veritabanı için `postgres:17-alpine` gerekir. İnternete erişen bir makinede `docker pull` ve `docker save` ile alıp hedefte `docker load` ile yükleyin.
 - Panel dış kaynak (CDN, yazı tipi) kullanmaz.
 

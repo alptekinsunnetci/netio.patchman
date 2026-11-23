@@ -11,11 +11,14 @@ import (
 	"strings"
 	"sync"
 
+	"netio.patchman/internal/drift"
+	"netio.patchman/internal/eol"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify/email"
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/selfupdate"
 	"netio.patchman/internal/settings"
+	"netio.patchman/internal/software"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
 	"netio.patchman/internal/vuln"
@@ -156,8 +159,12 @@ func (n *Notifier) ProcessAlerts(ctx context.Context) {
 				if err != nil || len(d.Hostnames) == 0 {
 					continue
 				}
+				kevFlag := "0"
+				if a.KEV {
+					kevFlag = "1"
+				}
 				_ = n.st.AddNotification(ctx, levelFor(a.Severity, a.KEV), "vuln_detected", map[string]string{
-					"cve": a.CVEID, "severity": string(a.Severity), "count": strconv.Itoa(len(d.Hostnames)), "package": d.PackageName,
+					"cve": a.CVEID, "severity": string(a.Severity), "count": strconv.Itoa(len(d.Hostnames)), "package": d.PackageName, "kev": kevFlag,
 				}, "/vulnerabilities/"+a.CVEID)
 				if !sendMail {
 					continue
@@ -177,15 +184,18 @@ func (n *Notifier) ProcessAlerts(ctx context.Context) {
 			}
 		} else {
 			top := vuln.SeverityUnknown
-			kev := false
+			kev, kevCount := false, 0
 			for _, a := range qualifying {
 				if a.Severity.Rank() > top.Rank() {
 					top = a.Severity
 				}
-				kev = kev || a.KEV
+				if a.KEV {
+					kev = true
+					kevCount++
+				}
 			}
 			_ = n.st.AddNotification(ctx, levelFor(top, kev), "vulns_detected", map[string]string{
-				"count": strconv.Itoa(len(qualifying)), "severity": string(top),
+				"count": strconv.Itoa(len(qualifying)), "severity": string(top), "kev": strconv.Itoa(kevCount),
 			}, "/vulnerabilities")
 			if sendMail {
 				items := make([]email.DigestItem, 0, len(qualifying))
@@ -272,10 +282,15 @@ func (n *Notifier) JobFinished(ctx context.Context, j store.Job) {
 	link := "/jobs/" + strconv.FormatInt(j.ID, 10)
 	params := map[string]string{"hostname": j.Hostname, "job_type": j.Type, "id": strconv.FormatInt(j.ID, 10)}
 	if j.Status == protocol.JobSucceeded {
-		// Fleet-wide automatic agent updates and scheduled runs would flood
-		// the notification center; only their failures are reported (a
-		// schedule run adds one summary notification).
-		if j.Type != "agent_update" && j.ScheduleID == 0 {
+		switch {
+		case j.Type == protocol.JobRollback && j.Params[protocol.ParamRollbackMode] == protocol.RollbackApply:
+			_ = n.st.AddNotification(ctx, store.LevelInfo, "rollback_done", params, link)
+		case j.Type == protocol.JobPreview || j.Type == protocol.JobHealthCheck || j.Type == protocol.JobRollback:
+			// Read-only runs: the result is on the job page.
+		case j.Type != "agent_update" && j.ScheduleID == 0:
+			// Fleet-wide automatic agent updates and scheduled runs would flood
+			// the notification center; only their failures are reported (a
+			// schedule run adds one summary notification).
 			_ = n.st.AddNotification(ctx, store.LevelInfo, "job_succeeded", params, link)
 		}
 		return
@@ -513,4 +528,122 @@ func (n *Notifier) SendTest(ctx context.Context, to string) error {
 		m.From = from
 	}
 	return sender.Send(m)
+}
+
+// SoftwareChanged records software installed, removed or changed on a host
+// (one notification per report). Product names are verbatim.
+func (n *Notifier) SoftwareChanged(ctx context.Context, hostID int64, hostname string, events []store.SoftwareEvent) {
+	cfg, err := settings.Load(ctx, n.st)
+	if err != nil || !cfg.SoftwareNotify || len(events) == 0 {
+		return
+	}
+	var added, removed, changed []string
+	for _, e := range events {
+		name := e.Software
+		if d, ok := software.ByID(e.Software); ok {
+			name = d.Name
+		}
+		if e.Cycle != "" {
+			name += " " + e.Cycle
+		}
+		switch e.Event {
+		case store.SoftwareInstalled:
+			added = append(added, name)
+		case store.SoftwareRemoved:
+			removed = append(removed, name)
+		default:
+			changed = append(changed, name+" ("+e.OldVersion+" → "+e.NewVersion+")")
+		}
+	}
+	list := func(s []string) string {
+		if len(s) == 0 {
+			return "-"
+		}
+		return strings.Join(s, ", ")
+	}
+	_ = n.st.AddNotification(ctx, store.LevelInfo, "software_changed", map[string]string{
+		"hostname": hostname, "added": list(added), "removed": list(removed), "changed": list(changed),
+	}, "/servers/"+strconv.FormatInt(hostID, 10)+"?tab=software")
+}
+
+// EOLCheck notifies once per release whose end of support was reached or
+// is near (see eol.Notices). Disabled notifications leave the releases
+// unmarked, so enabling them later still reports them.
+func (n *Notifier) EOLCheck(ctx context.Context, d eol.Data) {
+	cfg, err := settings.Load(ctx, n.st)
+	if err != nil || !cfg.EOLNotify {
+		return
+	}
+	notices, err := eol.Notices(ctx, n.st, d, timeutil.Now(), cfg.EOLWarn())
+	if err != nil {
+		n.logger.Error(n.l.T("log.notify.failed"), slog.String("error", err.Error()))
+	}
+	for _, x := range notices {
+		kind, level := "eol_approaching", store.LevelWarning
+		if x.Kind == eol.StatusEOL {
+			kind = "eol_reached"
+			if x.Group.Kind == eol.KindOS {
+				level = store.LevelCritical
+			}
+		}
+		date := "-"
+		if !x.Release.EOL.IsZero() {
+			date = n.f.Date(x.Release.EOL)
+		}
+		_ = n.st.AddNotification(ctx, level, kind, map[string]string{
+			"product": x.Name + " " + x.Cycle, "date": date, "hosts": strconv.Itoa(len(x.Hosts)),
+		}, "/software?tab=eol")
+	}
+}
+
+// ScoreBelow notifies about hosts whose security score dropped below the
+// configured threshold (once until the score recovers).
+func (n *Notifier) ScoreBelow(ctx context.Context, hosts []store.HostRef, threshold int) {
+	for _, h := range hosts {
+		_ = n.st.AddNotification(ctx, store.LevelWarning, "score_below", map[string]string{
+			"hostname": h.Hostname, "score": h.Version, "threshold": strconv.Itoa(threshold),
+		}, "/servers/"+strconv.FormatInt(h.ID, 10)+"/score")
+	}
+}
+
+// HealthResult notifies when a job's health checks failed: regressed after
+// an update, failed before it (the update was skipped) or in a manual run.
+func (n *Notifier) HealthResult(ctx context.Context, j store.Job) {
+	outcome, checks := j.Data.HealthOutcome()
+	kind, level := "", store.LevelWarning
+	switch outcome {
+	case store.HealthRegressed:
+		kind, level = "health_regressed", store.LevelCritical
+	case store.HealthAborted:
+		kind = "health_aborted"
+	case store.HealthFailed:
+		kind = "health_failed"
+	default:
+		return
+	}
+	_ = n.st.AddNotification(ctx, level, kind, map[string]string{
+		"hostname": j.Hostname, "id": strconv.FormatInt(j.ID, 10), "checks": strings.Join(checks, ", "), "job_type": j.Type,
+	}, "/jobs/"+strconv.FormatInt(j.ID, 10))
+}
+
+// RolloutEvent records that a rolling update paused, stopped or completed.
+func (n *Notifier) RolloutEvent(ctx context.Context, kind, level string, r store.Rollout) {
+	reason := ""
+	if r.Reason != "" {
+		reason = n.l.T("rollout.reason." + r.Reason)
+	}
+	_ = n.st.AddNotification(ctx, level, kind, map[string]string{
+		"name": r.Name, "reason": reason,
+		"done": strconv.Itoa(r.Counts.Done()), "failed": strconv.Itoa(r.Counts.Failed), "total": strconv.Itoa(r.Counts.Total),
+	}, "/rollouts/"+strconv.FormatInt(r.ID, 10))
+}
+
+// DriftDetected notifies about hosts that deviate from their standards in
+// new ways (one notification per host).
+func (n *Notifier) DriftDetected(ctx context.Context, hosts []drift.HostDrift) {
+	for _, h := range hosts {
+		_ = n.st.AddNotification(ctx, store.LevelWarning, "drift_detected", map[string]string{
+			"hostname": h.Hostname, "count": strconv.Itoa(h.Count), "standards": strings.Join(h.Standards, ", "),
+		}, "/servers/"+strconv.FormatInt(h.HostID, 10)+"?tab=software")
+	}
 }

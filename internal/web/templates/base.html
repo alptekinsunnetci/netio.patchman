@@ -31,6 +31,28 @@
 
 {{define "star"}}<form class="star-form" method="post" action="/watched"><input type="hidden" name="_csrf" value="{{.CSRF}}"><input type="hidden" name="name" value="{{.Name}}"><input type="hidden" name="back" value="{{.Back}}"><input type="hidden" name="watch" value="{{if .On}}0{{else}}1{{end}}"><button class="star{{if .On}} is-on{{end}}" type="submit" aria-pressed="{{if .On}}true{{else}}false{{end}}" title="{{if .On}}{{t "watch.remove"}}{{else}}{{t "watch.add"}}{{end}}" aria-label="{{if .On}}{{t "watch.remove"}}{{else}}{{t "watch.add"}}{{end}}: {{.Name}}">{{template "icon" "star"}}</button></form>{{end}}
 
+{{define "running"}}{{if eq . 1}}<span class="pill pill--online">{{t "software.running.yes"}}</span>{{else if eq . 0}}<span class="pill pill--muted">{{t "software.running.no"}}</span>{{else}}<span class="muted" title="{{t "software.running.unknown_hint"}}">{{t "common.empty"}}</span>{{end}}{{end}}
+
+{{define "svcstate"}}{{if eq . "running"}}<span class="pill pill--online">{{t "service.state.running"}}</span>{{else if eq . "failed"}}<span class="pill pill--danger">{{t "service.state.failed"}}</span>{{else}}<span class="pill pill--muted">{{t "service.state.stopped"}}</span>{{end}}{{end}}
+
+{{define "swevent"}}<span class="pill {{if eq . "installed"}}pill--queued{{else if eq . "upgraded"}}pill--online{{else}}pill--warning{{end}}">{{t (printf "software.event.%s" .)}}</span>{{end}}
+
+{{define "eolpill"}}{{if eq .Status "eol"}}<span class="pill pill--danger">{{t "eol.status.eol"}}</span>{{else if eq .Status "soon"}}<span class="pill pill--warning">{{t "eol.status.soon_days" "n" (eolDays .Release)}}</span>{{else if eq .Status "supported"}}<span class="pill pill--online">{{t "eol.status.supported"}}</span>{{else}}<span class="pill pill--muted">{{t "eol.status.unknown"}}</span>{{end}}{{end}}
+
+{{define "score"}}{{if lt . 0}}<span class="muted" title="{{t "score.pending"}}">{{t "common.empty"}}</span>{{else}}<span class="score score--{{scoreBand .}}">{{.}}</span>{{end}}{{end}}
+
+{{define "healthpill"}}{{if .}}<span class="pill pill--online">{{t "health.ok"}}</span>{{else}}<span class="pill pill--danger">{{t "health.fail"}}</span>{{end}}{{end}}
+
+{{define "rolloutstatus"}}<span class="pill {{if eq . "completed"}}pill--online{{else if eq . "failed"}}pill--danger{{else if eq . "running"}}pill--queued{{else if eq . "paused"}}pill--warning{{else}}pill--muted{{end}}">{{t (printf "rollout.status.%s" .)}}</span>{{end}}
+
+{{define "rollouthost"}}<span class="pill {{if eq . "succeeded"}}pill--online{{else if eq . "failed"}}pill--danger{{else if eq . "queued"}}pill--queued{{else}}pill--muted{{end}}">{{t (printf "rollout.host.%s" .)}}</span>{{end}}
+
+{{define "rolloutprogress"}}<span class="progress" role="img" aria-label="{{t "rollout.progress_aria" "done" .Done "total" .Total}}">{{if .Succeeded}}<span class="progress__seg progress__seg--ok" data-grow="{{.Succeeded}}"></span>{{end}}{{if .Failed}}<span class="progress__seg progress__seg--bad" data-grow="{{.Failed}}"></span>{{end}}{{if .Queued}}<span class="progress__seg progress__seg--run" data-grow="{{.Queued}}"></span>{{end}}{{if or .Pending .Skipped}}<span class="progress__seg" data-grow="{{add .Pending .Skipped}}"></span>{{end}}</span>{{end}}
+
+{{define "driftrule"}}{{t (printf "standard.kind.%s" .Kind)}}: {{if eq .SubjectType "software"}}<strong>{{swName .Subject}}</strong>{{else}}<span class="mono">{{.Subject}}</span>{{end}}{{with .Value}} <span class="mono muted">{{.}}</span>{{end}}{{end}}
+
+{{define "driftfound"}}{{if eq .Rule.Kind "required"}}{{t "standard.found.required"}}{{else if eq .Rule.Kind "running"}}{{t "standard.found.running"}}{{else}}{{t (printf "standard.found.%s" .Rule.Kind) "found" .Found "value" .Rule.Value}}{{end}}{{end}}
+
 {{define "kev"}}<span class="badge badge--kev" title="{{t "vuln.kev_tooltip"}}">KEV</span>{{end}}
 
 {{define "jobstatus"}}<span class="pill pill--{{.}}">{{jobStatus .}}</span>{{end}}
@@ -63,7 +85,7 @@
     <span class="panel__link muted">{{.From}} – {{.To}}</span>
   </div>
   {{if .Available}}
-  <div class="trends">
+  <div class="trends{{if eq (len .Charts) 1}} trends--single{{end}}">
     {{range .Charts}}
     <figure class="trend" data-trend>
       <figcaption class="trend__head"><span class="trend__title">{{t (printf "trend.metric.%s" .Key)}}</span><span class="trend__last">{{.Last}}</span></figcaption>
@@ -86,12 +108,19 @@
   <details class="details">
     <summary>{{t "trend.table"}}</summary>
     <div class="table-wrap">
+    {{if .Scores}}
     <table class="table">
-      <thead><tr><th>{{t "trend.day"}}</th><th class="num">{{t "trend.metric.critical_high"}}</th><th class="num">{{t "trend.metric.kev"}}</th><th class="num">{{t "trend.metric.open_findings"}}</th><th class="num">{{t "trend.metric.security_updates"}}</th><th class="num">{{t "trend.reboot"}}</th><th class="num">{{t "trend.hosts"}}</th></tr></thead>
+      <thead><tr><th>{{t "trend.day"}}</th><th class="num">{{t "trend.metric.security_score"}}</th></tr></thead>
+      <tbody>{{range .Scores}}<tr><td>{{date .Day}}</td><td class="num">{{.Score}}</td></tr>{{end}}</tbody>
+    </table>
+    {{else}}
+    <table class="table">
+      <thead><tr><th>{{t "trend.day"}}</th><th class="num">{{t "trend.metric.security_score"}}</th><th class="num">{{t "trend.metric.critical_high"}}</th><th class="num">{{t "trend.metric.kev"}}</th><th class="num">{{t "trend.metric.open_findings"}}</th><th class="num">{{t "trend.metric.security_updates"}}</th><th class="num">{{t "trend.reboot"}}</th><th class="num">{{t "trend.hosts"}}</th></tr></thead>
       <tbody>
-      {{range .Rows}}<tr><td>{{date .Day}}</td><td class="num">{{add .Sev.Critical .Sev.High}}</td><td class="num">{{.KEV}}</td><td class="num">{{.OpenFindings}}</td><td class="num">{{.SecurityUpdates}}</td><td class="num">{{.RebootRequired}}</td><td class="num">{{.Hosts}}</td></tr>{{end}}
+      {{range .Rows}}<tr><td>{{date .Day}}</td><td class="num">{{if ge .SecurityScore 0}}{{.SecurityScore}}{{else}}{{t "common.empty"}}{{end}}</td><td class="num">{{add .Sev.Critical .Sev.High}}</td><td class="num">{{.KEV}}</td><td class="num">{{.OpenFindings}}</td><td class="num">{{.SecurityUpdates}}</td><td class="num">{{.RebootRequired}}</td><td class="num">{{.Hosts}}</td></tr>{{end}}
       </tbody>
     </table>
+    {{end}}
     </div>
   </details>
   {{else}}<p class="muted">{{t "trend.collecting"}}</p>{{end}}

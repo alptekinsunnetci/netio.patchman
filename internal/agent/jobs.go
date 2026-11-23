@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -95,6 +96,15 @@ type JobRunner struct {
 	Services func(ctx context.Context) []string
 	// Exec runs one command; nil uses execCommand. Tests replace it.
 	Exec func(ctx context.Context, c command, out *tailBuffer) int
+	// Health runs health checks (CapHealth).
+	Health HealthRunner
+	// Sleep waits between an update and the checks after it; nil uses a timer.
+	Sleep func(ctx context.Context, d time.Duration) bool
+	// Installed lists installed packages (package changes, rollback); nil
+	// records no changes.
+	Installed func(ctx context.Context) ([]protocol.Package, error)
+	// Available reports whether a repository offers a package version.
+	Available func(ctx context.Context, pm, name, arch, version string) (bool, error)
 }
 
 // jobState collects the output of one job.
@@ -152,11 +162,95 @@ func execCommand(ctx context.Context, c command, out *tailBuffer) int {
 }
 
 // Run executes the job and returns the result. It never panics on bad input.
+// Package jobs with health checks run them before and after the update.
 func (r JobRunner) Run(ctx context.Context, job protocol.Job) protocol.JobResult {
 	s := &jobState{r: r, res: protocol.JobResult{StartedAt: timeutil.Now()}, out: &tailBuffer{max: protocol.MaxOutputBytes - 1024}}
 	if job.Type == protocol.JobRefresh {
 		return s.finish(true, 0, r.L.T("agent.job.refresh_done"))
 	}
+	checks, err := ParseHealthChecks(job.Params[protocol.ParamHealth])
+	if err != nil {
+		return s.finish(false, -1, r.L.T("agent.health.invalid"))
+	}
+	if job.Type == protocol.JobHealthCheck {
+		// Read-only: allowed even when remote updates are off.
+		res := r.Health.Run(ctx, checks)
+		s.res.Health = &protocol.HealthReport{Checks: res}
+		if failed := Failed(res); len(failed) > 0 {
+			return s.finish(false, 1, r.L.T("agent.health.failed", "checks", listNames(failed)))
+		}
+		return s.finish(true, 0, r.L.T("agent.health.passed", "count", len(res)))
+	}
+	if job.Type == protocol.JobPreview {
+		// A dry run changes nothing (only the package lists are refreshed).
+		ctx, cancel := context.WithTimeout(ctx, JobTimeout)
+		defer cancel()
+		return r.preview(ctx, s, job)
+	}
+	exec := r.runTracked
+	healthJob := isPackageJob(job.Type)
+	if job.Type == protocol.JobRollback {
+		exec = func(ctx context.Context, s *jobState, job protocol.Job) protocol.JobResult {
+			ctx, cancel := context.WithTimeout(ctx, JobTimeout)
+			defer cancel()
+			return r.rollback(ctx, s, job)
+		}
+		healthJob = job.Params[protocol.ParamRollbackMode] == protocol.RollbackApply
+	}
+	if len(checks) == 0 || !r.RemoteUpdates || !healthJob {
+		return exec(ctx, s, job)
+	}
+	before := r.Health.Run(ctx, checks)
+	s.res.Health = &protocol.HealthReport{Before: before}
+	if failed := Failed(before); len(failed) > 0 {
+		if job.Params[protocol.ParamHealthPolicy] != "continue" {
+			s.res.Health.Aborted = true
+			return s.finish(false, -1, r.L.T("agent.health.aborted", "checks", listNames(failed)))
+		}
+		s.note(r.L.T("agent.health.failed_before", "checks", listNames(failed)))
+	}
+	res := exec(ctx, s, job)
+	delay := 15 * time.Second
+	if v, err := strconv.Atoi(job.Params[protocol.ParamHealthDelay]); err == nil && v >= 0 && v <= 600 {
+		delay = time.Duration(v) * time.Second
+	}
+	sleep := r.Sleep
+	if sleep == nil {
+		sleep = sleepCtx
+	}
+	if !sleep(ctx, delay) {
+		return res
+	}
+	after := r.Health.Run(ctx, checks)
+	res.Health = &protocol.HealthReport{Before: before, After: after}
+	msg := r.L.T("agent.health.passed", "count", len(after))
+	if failed := Failed(after); len(failed) > 0 {
+		msg = r.L.T("agent.health.failed_after", "checks", listNames(failed))
+	}
+	res.Output = strings.TrimRight(res.Output, "\n") + "\n\n[netio.patchman] " + msg + "\n"
+	return res
+}
+
+func isPackageJob(t string) bool {
+	return t == protocol.JobUpgradeAll || t == protocol.JobUpgradeSecurity || t == protocol.JobUpgradePackages
+}
+
+func sleepCtx(ctx context.Context, d time.Duration) bool {
+	if d <= 0 {
+		return ctx.Err() == nil
+	}
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-ctx.Done():
+		return false
+	case <-t.C:
+		return true
+	}
+}
+
+// run executes a job without health checks.
+func (r JobRunner) run(ctx context.Context, s *jobState, job protocol.Job) protocol.JobResult {
 	if !r.RemoteUpdates {
 		return s.finish(false, -1, r.L.T("agent.job.remote_updates_disabled"))
 	}

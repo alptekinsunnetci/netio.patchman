@@ -5,7 +5,7 @@
 <nav class="breadcrumb"><a href="/servers">{{t "nav.servers"}}</a> / <span>{{$h.Hostname}}</span></nav>
 <header class="pagehead">
   <div>
-    <h1 class="pagehead__title">{{$h.Hostname}} {{template "hoststatus" $h}} {{if $h.RebootRequired}}<span class="pill pill--warning">{{t "host.reboot_required"}}{{if not $h.RebootRequiredSince.IsZero}} · {{ago $h.RebootRequiredSince}}{{end}}</span>{{end}}</h1>
+    <h1 class="pagehead__title">{{$h.Hostname}} {{template "hoststatus" $h}} {{if $h.RebootRequired}}<span class="pill pill--warning">{{t "host.reboot_required"}}{{if not $h.RebootRequiredSince.IsZero}} · {{ago $h.RebootRequiredSince}}{{end}}</span>{{end}}{{with $d.OSEOL}}{{if eq .Status "eol"}} <a class="pill pill--danger" href="/software?tab=eol&kind=os" title="{{t "eol.os_title" "name" .Name "cycle" .Cycle}}">{{t "eol.os_eol"}}</a>{{else if eq .Status "soon"}} <a class="pill pill--warning" href="/software?tab=eol&kind=os" title="{{t "eol.os_title" "name" .Name "cycle" .Cycle}}">{{t "eol.os_soon" "date" (date .Release.EOL)}}</a>{{end}}{{end}}</h1>
     <p class="pagehead__sub">{{$h.OSName}} · <span class="mono">{{$h.Kernel}}</span>{{if $h.KernelPatch}} <span class="pill pill--muted">{{t (printf "kernel_patch.%s" $h.KernelPatch)}}</span>{{end}} · {{virt $h.Virtualization}} · {{t "host.last_seen_ago" "ago" (ago $h.LastSeenAt)}}</p>
     {{if $h.Groups}}<div class="tags">{{range $h.Groups}}<a class="tag" href="/groups/{{.ID}}">{{.Name}}</a>{{end}}</div>{{end}}
   </div>
@@ -51,7 +51,8 @@
 {{end}}
 {{if $h.ReportErrors}}<div class="alert alert--warning"><strong>{{t "server.report_errors"}}</strong><ul class="plain-list mono">{{range $h.ReportErrors}}<li>{{.}}</li>{{end}}</ul></div>{{end}}
 
-<section class="stats stats--compact">
+<section class="stats stats--compact stats--5">
+  <a class="stat" href="/servers/{{$h.ID}}/score"><p class="stat__label">{{t "score.title"}}</p><p class="stat__value">{{template "score" $h.SecurityScore}}</p><p class="stat__meta">{{if ge $h.SecurityScore 0}}{{t (printf "score.band.%s" (scoreBand $h.SecurityScore))}}{{else}}{{t "score.pending"}}{{end}}</p></a>
   <div class="stat"><p class="stat__label">{{t "host.field.vulns"}}</p><p class="stat__value">{{$h.Vulns.Total}}</p><p class="stat__meta">{{template "sevcounts" $h.Vulns}}</p></div>
   <div class="stat"><p class="stat__label">{{t "host.field.security_updates"}}</p><p class="stat__value">{{$h.SecurityUpdateCount}}</p><p class="stat__meta">{{t "server.updates_total" "n" $h.UpdateCount}}</p></div>
   <div class="stat"><p class="stat__label">{{t "host.field.packages"}}</p><p class="stat__value">{{$h.PackageCount}}</p><p class="stat__meta">{{$h.PackageManager}}</p></div>
@@ -63,6 +64,8 @@
   <a class="tab{{if eq $d.Tab "updates"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=updates">{{t "server.tab.updates"}} <span class="tab__count">{{$h.UpdateCount}}</span></a>
   <a class="tab{{if eq $d.Tab "packages"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=packages">{{t "server.tab.packages"}} <span class="tab__count">{{$h.PackageCount}}</span></a>
   <a class="tab{{if eq $d.Tab "watched"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=watched">{{t "server.tab.watched"}} <span class="tab__count">{{$d.WatchedCount}}</span></a>
+  <a class="tab{{if eq $d.Tab "software"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=software">{{t "server.tab.software"}}</a>
+  <a class="tab{{if eq $d.Tab "health"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=health">{{t "server.tab.health"}}</a>
   <a class="tab{{if eq $d.Tab "jobs"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=jobs">{{t "server.tab.jobs"}}</a>
   <a class="tab{{if eq $d.Tab "info"}} is-active{{end}}" href="/servers/{{$h.ID}}?tab=info">{{t "server.tab.info"}}</a>
 </nav>
@@ -111,6 +114,12 @@
 {{template "pager" $d.Pager}}
 
 {{else if eq $d.Tab "updates"}}
+{{if and $root.User.CanOperate ($h.Supports "preview") $d.Updates}}
+<div class="inline-actions">
+  <form method="post" action="/servers/{{$h.ID}}/preview">{{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_security"><button class="button button--sm" type="submit"{{if not $h.SecurityUpdateCount}} disabled{{end}}>{{template "icon" "list"}}{{t "preview.run_security"}}</button></form>
+  <form method="post" action="/servers/{{$h.ID}}/preview">{{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_all"><button class="button button--sm" type="submit">{{template "icon" "list"}}{{t "preview.run_all"}}</button></form>
+</div>
+{{end}}
 <form class="filters" method="get" action="/servers/{{$h.ID}}">
   <input type="hidden" name="tab" value="updates">
   <input class="field__input" type="search" name="q" value="{{$d.Q}}" placeholder="{{if eq $h.OSID "windows"}}{{t "server.updates_search_windows"}}{{else}}{{t "package.search_placeholder"}}{{end}}" aria-label="{{t "common.search"}}">
@@ -158,7 +167,7 @@
     </table>
     {{end}}
     </div>
-    {{if and $root.User.CanOperate $h.RemoteUpdates}}<div class="panel__foot"><button class="button button--primary" type="submit">{{t "server.action.upgrade_selected"}}</button></div>{{end}}
+    {{if and $root.User.CanOperate $h.RemoteUpdates}}<div class="panel__foot button-row"><button class="button button--primary" type="submit">{{t "server.action.upgrade_selected"}}</button>{{if $h.Supports "preview"}}<button class="button" type="submit" formaction="/servers/{{$h.ID}}/preview" data-confirm="">{{template "icon" "list"}}{{t "preview.run_selected"}}</button>{{end}}</div>{{end}}
   </form>
   {{else if $d.Q}}{{template "empty" (t "server.no_updates_match")}}{{else}}{{template "empty" (t "server.no_updates")}}{{end}}
 </section>
@@ -222,6 +231,128 @@
   {{else}}{{template "empty" (t "watch.host_empty")}}{{end}}
 </section>
 {{if $d.WatchedMissing}}<p class="footnote">{{t "watch.host_missing" "n" $d.WatchedMissing}}</p>{{end}}
+
+{{else if eq $d.Tab "health"}}
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "health.host_title"}}</h2>
+    <div class="button-row">
+      {{if $root.User.IsAdmin}}<a class="button button--sm button--ghost" href="/settings/health">{{t "health.manage"}}</a>{{end}}
+      {{if and $root.User.CanOperate $d.HealthChecks}}{{if $h.Supports "health"}}
+      <form method="post" action="/servers/{{$h.ID}}/jobs">{{template "csrf" $root}}<input type="hidden" name="type" value="health_check"><input type="hidden" name="back_tab" value="health">
+        <button class="button button--sm button--primary" type="submit">{{template "icon" "play"}}{{t "health.run_now"}}</button></form>
+      {{end}}{{end}}
+    </div>
+  </div>
+  {{if not ($h.Supports "health")}}<p class="panel__note">{{t "health.agent_unsupported"}}</p>{{end}}
+  {{if $d.HealthChecks}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "health.field.name"}}</th><th>{{t "health.field.type"}}</th><th>{{t "health.field.target"}}</th><th>{{t "health.field.result"}}</th><th>{{t "health.field.value"}}</th><th>{{t "health.field.when"}}</th></tr></thead>
+    <tbody>
+    {{range $c := $d.HealthChecks}}
+    <tr>
+      <td>{{$c.Name}}</td>
+      <td class="cell-sub">{{t (printf "health.type.%s" $c.Type)}}</td>
+      <td class="mono cell-sub">{{$c.Target}}</td>
+      {{$found := false}}{{range $d.HealthLatest}}{{if and (not $found) (eq .ID $c.ID)}}{{$found = true}}<td>{{template "healthpill" .OK}}</td><td class="mono cell-sub">{{.Value}}{{with .Message}}<div>{{.}}</div>{{end}}</td><td>{{datetime .CreatedAt}}{{if .JobID}} · <a href="/jobs/{{.JobID}}">#{{.JobID}}</a>{{end}}</td>{{end}}{{end}}
+      {{if not $found}}<td colspan="3" class="muted">{{t "health.never_run"}}</td>{{end}}
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "health.no_checks")}}{{end}}
+</section>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{t "health.history"}}</h2></div>
+  {{if $d.HealthHistory}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "health.field.when"}}</th><th>{{t "health.field.name"}}</th><th>{{t "health.field.phase"}}</th><th>{{t "health.field.result"}}</th><th>{{t "health.field.value"}}</th></tr></thead>
+    <tbody>
+    {{range $d.HealthHistory}}<tr><td>{{datetime .CreatedAt}}{{if .JobID}}<div class="cell-sub"><a href="/jobs/{{.JobID}}">#{{.JobID}}</a></div>{{end}}</td><td>{{.Name}}</td><td class="cell-sub">{{t (printf "health.phase.%s" .Phase)}}</td><td>{{template "healthpill" .OK}}</td><td class="mono cell-sub">{{.Value}}{{with .Message}}<div>{{.}}</div>{{end}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "health.no_history")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+
+{{else if eq $d.Tab "software"}}
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "software.host_title"}}</h2>
+    <a class="panel__link" href="/software?tab=compare&a={{$h.ID}}">{{t "software.compare_with"}}</a>
+  </div>
+  {{if $d.Software}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "software.field.name"}}</th><th>{{t "software.field.version"}}</th><th>{{t "software.field.package"}}</th><th>{{t "software.field.state"}}</th><th>{{t "host.field.vulns"}}</th><th>{{t "eol.field.support"}}</th><th>{{t "software.field.first_seen"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Software}}
+    <tr>
+      <td><a href="/software/{{.Software}}?cycle={{.Cycle}}">{{swName .Software}}</a> <span class="muted">{{.Cycle}}</span><div class="cell-sub">{{t (printf "software.category.%s" (swCategory .Software))}}</div></td>
+      <td class="mono">{{.Version}}</td>
+      <td class="mono cell-sub">{{.Package}} {{.PackageVersion}}</td>
+      <td>{{template "running" .Running}}{{if .Service}} <span class="muted mono">{{.Service}}</span>{{end}}</td>
+      <td>{{if .CVECount}}<a href="/servers/{{$h.ID}}?q={{.Package}}">{{template "sev" .Severity}} {{t "watch.cve_count" "n" .CVECount}}</a>{{if .KnownExploited}} {{template "kev"}}{{end}}{{else}}<span class="muted">{{t "watch.no_vulns"}}</span>{{end}}</td>
+      <td>{{with eolItem $d.SoftwareEOL .Software .Cycle}}{{template "eolpill" .}}{{if .Found}}{{if not .Release.EOL.IsZero}}<div class="cell-sub">{{date .Release.EOL}}</div>{{end}}{{end}}{{if .DistroSupported}}<div class="cell-sub" title="{{t "eol.distro_hint"}}">{{t "eol.distro_supported"}}</div>{{end}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td><time datetime="{{iso .FirstSeenAt}}">{{date .FirstSeenAt}}</time></td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "software.host_empty")}}{{end}}
+</section>
+
+{{with $d.Drift}}
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "standard.host_title"}} <span class="muted">({{len .}})</span></h2>
+    <a class="panel__link" href="/standards?tab=drift">{{t "common.view_all"}}</a>
+  </div>
+  <table class="table">
+    <thead><tr><th>{{t "standard.field.name"}}</th><th>{{t "standard.field.rule"}}</th><th>{{t "standard.field.deviation"}}</th><th>{{t "standard.field.suggestion"}}</th></tr></thead>
+    <tbody>{{range .}}<tr><td class="cell-sub">{{.Standard}}</td><td>{{template "driftrule" .Rule}}</td><td>{{template "driftfound" .}}</td><td class="cell-sub">{{t (printf "standard.suggest.%s" .Rule.Kind)}}</td></tr>{{end}}</tbody>
+  </table>
+</section>
+{{end}}
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "service.title"}}</h2>
+    {{if $d.ServicesKnown}}{{if $d.AllServices}}<a class="panel__link" href="/servers/{{$h.ID}}?tab=software">{{t "service.show_active"}}</a>{{else if $d.ServicesHidden}}<a class="panel__link" href="/servers/{{$h.ID}}?tab=software&services=all">{{t "service.show_all" "n" $d.ServicesHidden}}</a>{{end}}{{end}}
+  </div>
+  {{if not $d.ServicesKnown}}{{template "empty" (t "service.unknown")}}
+  {{else if $d.Services}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "service.field.name"}}</th><th>{{t "service.field.state"}}</th><th>{{t "service.field.enabled"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Services}}<tr><td class="mono">{{.Name}}</td><td>{{template "svcstate" .State}}</td><td>{{if .Enabled}}{{t "common.yes"}}{{else}}<span class="muted">{{t "common.no"}}</span>{{end}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "service.none")}}{{end}}
+</section>
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "software.changes_title"}}</h2>
+    <a class="panel__link" href="/software?tab=changes&host={{$h.ID}}">{{t "common.view_all"}}</a>
+  </div>
+  {{if $d.SoftwareEvents}}
+  <table class="table">
+    <thead><tr><th>{{t "software.field.when"}}</th><th>{{t "software.field.name"}}</th><th>{{t "software.field.change"}}</th><th>{{t "software.field.old"}}</th><th>{{t "software.field.new"}}</th></tr></thead>
+    <tbody>
+    {{range $d.SoftwareEvents}}<tr><td>{{datetime .CreatedAt}}</td><td>{{swName .Software}} <span class="muted">{{.Cycle}}</span></td><td>{{template "swevent" .Event}}</td><td class="mono cell-sub">{{.OldVersion}}</td><td class="mono cell-sub">{{.NewVersion}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  {{else}}{{template "empty" (t "software.no_changes")}}{{end}}
+</section>
 
 {{else if eq $d.Tab "jobs"}}
 <section class="panel panel--flush">

@@ -41,6 +41,14 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 - **Central updates:** Install security updates, all updates or selected packages on one server, on selected servers or on all of them from the dashboard. **Apply fix** on a CVE updates the related packages on every affected server. After each job the agent verifies that the packages were really updated; packages that were not updated are listed and can be retried with one click.
 - **Service and server restarts:** Services still using old versions of updated libraries are detected and can be restarted from the dashboard; servers can be rebooted from the dashboard.
 - **Scheduled updates:** Maintenance windows such as "apply security updates to Ubuntu servers every Sunday at 03:00". Schedules never reboot servers by themselves.
+- **Preview and approval:** An update started on a server page first runs in the package manager's simulation mode (APT, DNF, YUM, Zypper). Packages to upgrade, install, remove or downgrade, the download size and whether a reboot will be needed are shown; the update starts after approval.
+- **Health checks:** HTTP/HTTPS, TCP, service, CPU/memory/disk and local script (health.d) checks before and after an update. A failing check before skips the update; a check that breaks after it fails the job and is notified.
+- **Rolling updates:** Canary hosts, stages, a parallel job limit, a wait between stages and a failure-rate policy. The rollout stops on its own when the rate is exceeded; pause, resume and cancel are manual and audited.
+- **Rollback without snapshots:** Package versions before and after every job are kept. Whether the old versions are still in the repositories is checked first; after approval the package manager goes back and the result is verified, and packages that did not go back are never shown as a success.
+- **Software and service inventory:** Software such as nginx, PHP, MariaDB, PostgreSQL, Redis and Java is recognized from packages; installed and running services are told apart, two servers can be compared, and installs, removals and version changes are kept as history.
+- **End-of-life (EOL) tracking:** endoflife.date calendars for operating systems and software (with a built-in calendar offline). Packages the distribution still maintains are marked; approaching and past dates are notified.
+- **Security score:** A 0-100 score per server, group and fleet with daily history, adjustable weights and a threshold notification. A CVE matching several criteria is deducted only once.
+- **Server standards and drift:** Rules such as "PHP only 8.2 or 8.3", "telnetd must not be installed", "nginx must be running". Version rules compare distribution version numbers (backports cause no false drift), new deviations are notified and a fitting update is suggested.
 - **Automatic agent updates:** When the central server moves to a new version, agents download it, verify its SHA-256 digest and update themselves.
 - **New version notice:** The dashboard tells administrators when a new netio.patchman version is released on GitHub and shows the update commands. It can be turned off for installations without internet access. With the optional updater container, the upgrade runs from the dashboard with one click (git pull, backup, build, restart).
 - **Finding management:** Open, In Progress, Risk Accepted and False Positive statuses. When a package is updated, its finding becomes "Resolved" automatically. Risks are accepted for a limited term (30, 90, 180 or 365 days; the maximum is set in Settings). When the term ends, the finding reopens and a notification and email are sent.
@@ -51,7 +59,7 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 - **Compliance report:** A printable report (save it as PDF from the browser) for a chosen period and group: summary figures, findings detected and resolved in the period, mean time to remediate, KEV vulnerabilities past their CISA due date, server status, accepted risks (with who accepted them and when they expire) and update jobs. Useful as evidence in ISO 27001 and similar audits.
 - **Two-factor authentication:** TOTP codes from apps such as Google Authenticator or Microsoft Authenticator, plus single-use recovery codes. Administrators can require two-factor authentication for all users and reset it for a user who lost their phone.
 - **Notifications:** Notification center and email notifications for new vulnerabilities, disconnected agents and failed or partially completed update jobs.
-- **Slack, Microsoft Teams, Telegram and webhooks:** Notifications are also sent, filtered by level (info, warning, critical), to chat channels and to your own systems (SIEM, incident management) through JSON webhooks signed with HMAC-SHA256.
+- **Notification channels and integrations:** Slack, Microsoft Teams, Telegram, HMAC-SHA256 signed (timestamped) JSON webhooks, Jira, ServiceNow and GLPI tickets and Zabbix trapper items. Each channel subscribes by level or by event (critical CVE, KEV, EOL, update started/succeeded/failed, rollback, reboot, health check, SLA, score, offline server, drift…). Failed deliveries are retried; a delivery history is kept and a failed delivery can be sent again.
 - **Automatic backups:** The database is backed up every day at a set time and the newest N backups are kept. Backups can be downloaded from the dashboard; failed backups are reported.
 - **Multilingual interface:** Turkish, English, German and Russian. Each user picks the interface language; dates, decimal separators and CSV format follow the language.
 - **Users and roles:** Administrator, Operator and Viewer roles; audit log.
@@ -363,7 +371,8 @@ After `down -v`, `docker compose up -d` starts with an empty database at the **I
 All configuration can be done in the dashboard:
 
 - **Settings:** Notification thresholds and recipients, agent connection intervals, automatic agent updates, scanning, retention, security (two-factor authentication, risk acceptance term) and automatic backups.
-- **Settings → Notification channels:** Slack, Microsoft Teams, Telegram and webhook channels.
+- **Settings → Notification channels:** Slack, Microsoft Teams, Telegram, webhook, Jira, ServiceNow, GLPI and Zabbix channels, event filters and delivery history.
+- **Settings → Health checks, Security score:** Checks before and after updates, score weights and threshold.
 - **Settings → Server configuration:** Server address, reverse proxy, time zone, log level, SMTP and data sources (OSV, CISA KEV, Microsoft Security Update Guide).
 
 The `PATCHMAN_`-prefixed variables in `.env` only provide the initial values; a value saved in the dashboard replaces them. Values marked "—" in the "Dashboard" column are needed when the server starts, so they can only be changed in `.env` and require a restart. All options are described in [.env.example](.env.example) (comments in Turkish).
@@ -384,6 +393,7 @@ The `PATCHMAN_`-prefixed variables in `.env` only provide the initial values; a 
 | `PATCHMAN_KEV_URL` | CISA KEV address | KEV catalog address; `off` turns it off | yes |
 | `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Microsoft Security Update Guide address for the CVE mapping of Windows servers; `off` turns it off | yes |
 | `PATCHMAN_EPSS_URL` | `https://epss.empiricalsecurity.com/epss_scores-current.csv.gz` | Daily EPSS score file; `off` turns it off | yes |
+| `PATCHMAN_EOL_URL` | `https://endoflife.date/api` | End-of-life calendars of operating systems and software; `off` turns it off (the built-in calendar is used) | yes |
 | `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | Email server | yes |
 | `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP credentials | yes |
 | `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Sender name and address | yes |

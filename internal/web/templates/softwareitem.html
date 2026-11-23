@@ -1,0 +1,55 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$def := $d.Def}}
+<nav class="breadcrumb"><a href="/software">{{t "nav.software"}}</a> / <span>{{$def.Name}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{$def.Name}}</h1>
+    <p class="pagehead__sub">{{t (printf "software.category.%s" $def.Category)}} · {{t "software.hosts_total" "n" $d.Total}}</p>
+  </div>
+</header>
+
+{{if $d.Cycles}}
+<div class="chips">
+  <a class="chip{{if not $d.Cycle}} is-active{{end}}" href="/software/{{$def.ID}}">{{t "software.all_cycles"}} <span>{{$d.Total}}</span></a>
+  {{range $d.Cycles}}<a class="chip{{if eq . $d.Cycle}} is-active{{end}}" href="/software/{{$def.ID}}?cycle={{.}}">{{if .}}{{.}}{{else}}?{{end}} <span>{{index $d.Counts .}}</span></a>{{end}}
+</div>
+{{end}}
+
+<section class="panel panel--flush">
+  {{if $d.Rows}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "host.field.hostname"}}</th><th>{{t "software.field.version"}}</th><th>{{t "software.field.package"}}</th><th>{{t "software.field.state"}}</th><th>{{t "host.field.vulns"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Rows}}
+    <tr>
+      <td><a href="/servers/{{.HostID}}?tab=software">{{.Hostname}}</a><div class="cell-sub">{{.OSName}}</div></td>
+      <td class="mono">{{.Version}} <span class="muted">({{.Cycle}})</span></td>
+      <td class="mono cell-sub">{{.Package}} {{.PackageVersion}}</td>
+      <td>{{template "running" .Running}}{{if .Service}} <span class="muted mono">{{.Service}}</span>{{end}}</td>
+      <td>{{if .CVECount}}<a href="/servers/{{.HostID}}?q={{.Package}}">{{template "sev" .Severity}} {{t "watch.cve_count" "n" .CVECount}}</a>{{if .KnownExploited}} {{template "kev"}}{{end}}{{else}}<span class="muted">{{t "watch.no_vulns"}}</span>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "software.not_found")}}{{end}}
+</section>
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "software.changes_title"}}</h2>
+    <a class="panel__link" href="/software?tab=changes&software={{$def.ID}}">{{t "common.view_all"}}</a>
+  </div>
+  {{if $d.Events}}
+  <table class="table">
+    <thead><tr><th>{{t "software.field.when"}}</th><th>{{t "host.field.hostname"}}</th><th>{{t "software.field.change"}}</th><th>{{t "software.field.old"}}</th><th>{{t "software.field.new"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Events}}<tr><td>{{datetime .CreatedAt}}</td><td><a href="/servers/{{.HostID}}?tab=software">{{.Hostname}}</a></td><td>{{template "swevent" .Event}} <span class="muted">{{.Cycle}}</span></td><td class="mono cell-sub">{{.OldVersion}}</td><td class="mono cell-sub">{{.NewVersion}}</td></tr>{{end}}
+    </tbody>
+  </table>
+  {{else}}{{template "empty" (t "software.no_changes")}}{{end}}
+</section>
+{{end}}

@@ -37,6 +37,8 @@ const (
 	KeyMSRCURL         = "sources.msrc_url"
 	KeyEPSSEnabled     = "sources.epss_enabled"
 	KeyEPSSURL         = "sources.epss_url"
+	KeyEOLEnabled      = "sources.eol_enabled"
+	KeyEOLURL          = "sources.eol_url"
 	KeyUpdateEnabled   = "updates.check_enabled"
 	KeyUpdateURL       = "updates.check_url"
 )
@@ -45,7 +47,7 @@ const (
 var SystemKeys = []string{
 	KeyBaseURL, KeyTrustProxy, KeyTimezone, KeyLogLevel, KeySMTPHost, KeySMTPPort, KeySMTPUsername, KeySMTPPassword,
 	KeySMTPFromName, KeySMTPFromAddress, KeyOSVURL, KeyKEVEnabled, KeyKEVURL, KeyMSRCEnabled, KeyMSRCURL, KeyEPSSEnabled, KeyEPSSURL,
-	KeyUpdateEnabled, KeyUpdateURL,
+	KeyEOLEnabled, KeyEOLURL, KeyUpdateEnabled, KeyUpdateURL,
 }
 
 // LogLevels are the selectable log levels.
@@ -71,6 +73,10 @@ type System struct {
 	// kept while it is off.
 	EPSSURL       string
 	EPSSSourceURL string
+	// EOLURL is the endoflife.date API, empty when only the built-in support
+	// calendars are used; EOLSourceURL is kept while it is off.
+	EOLURL       string
+	EOLSourceURL string
 	// UpdateURL is where the latest product version is read; empty when the
 	// new-version check is disabled. UpdateSourceURL is kept while it is off.
 	UpdateURL       string
@@ -93,7 +99,7 @@ func SystemFromEnv(c config.Config) System {
 	sys := System{
 		BaseURL: c.BaseURL, TrustProxy: c.TrustProxy, Timezone: c.TimezoneName, Location: c.Timezone,
 		LogLevel: c.LogLevel, SMTP: c.SMTP, OSVURL: c.OSVURL, KEVURL: c.KEVURL, KEVSourceURL: c.KEVURL,
-		MSRCURL: c.MSRCURL, MSRCSourceURL: c.MSRCURL, EPSSURL: c.EPSSURL, EPSSSourceURL: c.EPSSURL, UpdateURL: c.UpdateURL, UpdateSourceURL: c.UpdateURL,
+		MSRCURL: c.MSRCURL, MSRCSourceURL: c.MSRCURL, EPSSURL: c.EPSSURL, EPSSSourceURL: c.EPSSURL, EOLURL: c.EOLURL, EOLSourceURL: c.EOLURL, UpdateURL: c.UpdateURL, UpdateSourceURL: c.UpdateURL,
 	}
 	if sys.KEVSourceURL == "" {
 		sys.KEVSourceURL = config.DefaultKEVURL
@@ -103,6 +109,9 @@ func SystemFromEnv(c config.Config) System {
 	}
 	if sys.EPSSSourceURL == "" {
 		sys.EPSSSourceURL = config.DefaultEPSSURL
+	}
+	if sys.EOLSourceURL == "" {
+		sys.EOLSourceURL = config.DefaultEOLURL
 	}
 	if sys.UpdateSourceURL == "" {
 		sys.UpdateSourceURL = config.DefaultUpdateURL
@@ -216,6 +225,23 @@ func SystemFrom(raw map[string]string, c config.Config) System {
 			sys.EPSSURL = ""
 			if b {
 				sys.EPSSURL = sys.EPSSSourceURL
+			}
+		}
+	}
+	if v, ok := raw[KeyEOLURL]; ok {
+		if u, err := ParseSourceURL(v); err == nil {
+			u = strings.TrimRight(u, "/")
+			sys.EOLSourceURL = u
+			if sys.EOLURL != "" {
+				sys.EOLURL = u
+			}
+		}
+	}
+	if v, ok := raw[KeyEOLEnabled]; ok {
+		if b, err := strconv.ParseBool(v); err == nil {
+			sys.EOLURL = ""
+			if b {
+				sys.EOLURL = sys.EOLSourceURL
 			}
 		}
 	}

@@ -49,7 +49,8 @@ func populate(t *testing.T, s *Store) {
 				{Name: "libssl3", Version: "3.0.11-1", Arch: "amd64", SourceName: "openssl", SourceVersion: "3.0.11-1"}},
 			Updates: []protocol.Update{{Name: "openssl", CurrentVersion: "3.0.11-1", AvailableVersion: "3.0.13-1", Security: true, CVEs: []string{"CVE-2026-0001"}},
 				{Name: "libssl3", CurrentVersion: "3.0.11-1", AvailableVersion: "3.0.13-1", Title: "Güncelleme ü"}},
-			KernelPatch: &protocol.KernelPatch{Provider: protocol.Livepatch, CVEs: []string{"CVE-2026-0009"}}}
+			KernelPatch: &protocol.KernelPatch{Provider: protocol.Livepatch, CVEs: []string{"CVE-2026-0009"}},
+			Services:    []protocol.Service{{Name: "nginx", State: protocol.ServiceRunning, Enabled: true}}}
 		must(s.SaveReport(ctx, id, rep, "Debian:12"))
 		_, err = s.ApplyFindings(ctx, id, []DetectedFinding{{CVEID: "CVE-2026-0001", PackageName: "openssl", InstalledVersion: "3.0.11-1", FixedVersion: "3.0.13-1"},
 			{CVEID: "CVE-2026-0002", PackageName: "openssl", InstalledVersion: "3.0.11-1"}})
@@ -95,8 +96,34 @@ func populate(t *testing.T, s *Store) {
 	_, err = s.CreateAPIToken(ctx, admin, "grafana", "apihash", "npat_ab", true, time.Time{})
 	must(err)
 	must(s.WatchPackage(ctx, op, "openssl"))
-	_, err = s.CreateChannel(ctx, Channel{Name: "Slack", Type: ChannelSlack, URL: "https://hooks.example.test/x", MinLevel: LevelWarning, Enabled: true})
+	sw := SoftwareItem{Software: "nginx", Cycle: "1.22", Version: "1.22.1", Package: "nginx", PackageVersion: "1.22.1-9", Running: 1, Service: "nginx"}
+	_, err = s.SyncSoftware(ctx, hosts[0], "apt", []SoftwareItem{sw})
 	must(err)
+	hcID, err := s.CreateHealthCheck(ctx, HealthCheckDef{HealthCheck: protocol.HealthCheck{Name: "web", Type: protocol.HealthHTTP, Target: "https://127.0.0.1/", TimeoutSeconds: 5},
+		Scope: HealthScopeGroup, GroupID: g, WithUpdates: true, Enabled: true})
+	must(err)
+	must(s.RecordHealth(ctx, hosts[0], j, &protocol.HealthReport{Before: []protocol.HealthResult{{ID: hcID, Name: "web", Type: "http", OK: true, Value: "HTTP 200"}}}))
+	must(s.SaveJobInventory(ctx, j, hosts[0]))
+	stdID, err := s.SaveStandard(ctx, Standard{Name: "web", GroupID: g, Enabled: true, Rules: []StandardRule{{Kind: "forbidden", SubjectType: "package", Subject: "telnetd"}}})
+	must(err)
+	stdRules, err := s.StandardByID(ctx, stdID)
+	must(err)
+	_, err = s.SyncDrift(ctx, map[DriftKey]string{{HostID: hosts[0], RuleID: stdRules.Rules[0].ID}: "0.17"})
+	must(err)
+	_, err = s.CreateRollout(ctx, Rollout{Name: "tur", JobType: protocol.JobUpgradeSecurity, MaxParallel: 2, Canary: 1, JobTimeoutMinutes: 60, CreatedByID: admin},
+		[][]int64{{hosts[0]}, {hosts[1], hosts[2]}})
+	must(err)
+	must(s.SaveScores(ctx, time.Now(), map[int64]HostScore{hosts[0]: {Score: 72, Detail: `{"score":72}`}}))
+	must(s.SaveEOLProduct(ctx, "ubuntu", `[{"cycle":"20.04","eol":"2025-05-31"}]`))
+	_, err = s.MarkEOLNotice(ctx, "ubuntu", "20.04", "eol")
+	must(err)
+	sw.PackageVersion = "1.22.1-9+deb12u1"
+	_, err = s.SyncSoftware(ctx, hosts[0], "apt", []SoftwareItem{sw})
+	must(err)
+	chID, err := s.CreateChannel(ctx, Channel{Name: "Slack", Type: ChannelSlack, URL: "https://hooks.example.test/x", MinLevel: LevelWarning, Enabled: true,
+		Events: []string{"kev"}, Config: map[string]string{"project": "OPS"}})
+	must(err)
+	must(s.RecordDelivery(ctx, Delivery{ChannelID: chID, Event: "kev", Kind: "vuln_detected", OK: true, Attempts: 1, DurationMS: 12, Payload: "{}"}))
 	must(s.TakeSnapshot(ctx, time.Now()))
 }
 

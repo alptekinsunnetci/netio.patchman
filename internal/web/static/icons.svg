@@ -96,6 +96,20 @@
     <path d="M10 4H6.5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2H10"/>
     <path d="m15 7.5 4.5 4.5-4.5 4.5M19.5 12H9"/>
   </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24">
+    <path d="M5 4.5h14v15H5z"/>
+    <path d="m8.5 12 2.5 2.5 4.5-5"/>
+  </symbol>
+  <symbol id="i-rollout" viewBox="0 0 24 24">
+    <path d="M4 18.5h4v-4H4z"/>
+    <path d="M10 18.5h4v-8h-4z"/>
+    <path d="M16 18.5h4V5.5h-4z"/>
+  </symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24">
+    <path d="m12 3.5 8.5 4.25L12 12 3.5 7.75z"/>
+    <path d="m3.5 12 8.5 4.25L20.5 12"/>
+    <path d="m3.5 16.25 8.5 4.25 8.5-4.25"/>
+  </symbol>
   <symbol id="i-star" viewBox="0 0 24 24">
     <path stroke-linejoin="round" d="m12 3.75 2.55 5.17 5.7.83-4.13 4.02.98 5.68L12 16.77l-5.1 2.68.98-5.68-4.13-4.02 5.7-.83z"/>
   </symbol>

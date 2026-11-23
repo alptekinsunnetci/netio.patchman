@@ -62,6 +62,55 @@ type HostInfo struct {
 	// os-release UBUNTU_CODENAME or DEBIAN_CODENAME: "ubuntu:jammy", "debian:bookworm".
 	// Empty for Ubuntu and Debian themselves.
 	Upstream string `json:"upstream,omitempty"`
+	// Capabilities lists the optional features the agent implements (Cap*
+	// constants). The server only sends jobs and parameters an agent
+	// declared; agents before 1.0.0 send none.
+	Capabilities []string `json:"capabilities,omitempty"`
+}
+
+// Agent capabilities. A new feature that needs agent support adds a
+// constant here; old agents never see the jobs or parameters behind it.
+const (
+	// CapServices: Report.Services lists the host's services.
+	CapServices = "services"
+	// CapHealth: health_check jobs and the health parameter of package jobs.
+	CapHealth = "health"
+	// CapPreview: preview (dry-run) jobs.
+	CapPreview = "preview"
+	// CapRollback: rollback jobs and JobResult.Changes on package jobs.
+	CapRollback = "rollback"
+)
+
+// Supports reports whether the agent declared capability c.
+func (h HostInfo) Supports(c string) bool {
+	for _, x := range h.Capabilities {
+		if x == c {
+			return true
+		}
+	}
+	return false
+}
+
+var capabilityRE = regexp.MustCompile(`^[a-z][a-z0-9_-]{0,31}$`)
+
+// CleanCapabilities keeps valid, distinct capability names (at most 32).
+func CleanCapabilities(caps []string) []string {
+	out := []string{}
+	for _, c := range caps {
+		if len(out) < 32 && capabilityRE.MatchString(c) && !containsString(out, c) {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
+func containsString(list []string, s string) bool {
+	for _, x := range list {
+		if x == s {
+			return true
+		}
+	}
+	return false
 }
 
 var virtRE = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,31}$`)
@@ -146,7 +195,28 @@ type Report struct {
 	Errors          []string  `json:"errors,omitempty"`
 	// KernelPatch is the live kernel patching service, nil when none.
 	KernelPatch *KernelPatch `json:"kernel_patch,omitempty"`
+	// Services are the host's services (CapServices); nil when the agent
+	// does not report them or the service manager could not be read.
+	Services []Service `json:"services,omitempty"`
 }
+
+// Service states.
+const (
+	ServiceRunning = "running"
+	ServiceStopped = "stopped"
+	ServiceFailed  = "failed"
+)
+
+// Service is a system service (systemd unit without ".service", OpenRC
+// service or Windows service name).
+type Service struct {
+	Name    string `json:"name"`
+	State   string `json:"state"`
+	Enabled bool   `json:"enabled"`
+}
+
+// MaxServices bounds the services of one report.
+const MaxServices = 2000
 
 // Live kernel patching services.
 const (
@@ -178,7 +248,7 @@ const (
 // ValidJobType reports whether t is a known job type.
 func ValidJobType(t string) bool {
 	switch t {
-	case JobRefresh, JobUpgradeSecurity, JobUpgradeAll, JobUpgradePackages, JobAgentUpdate, JobRestartServices, JobReboot:
+	case JobRefresh, JobUpgradeSecurity, JobUpgradeAll, JobUpgradePackages, JobAgentUpdate, JobRestartServices, JobReboot, JobHealthCheck, JobPreview, JobRollback:
 		return true
 	}
 	return false
@@ -255,7 +325,186 @@ type JobResult struct {
 	Remaining  []string  `json:"remaining,omitempty"`
 	StartedAt  time.Time `json:"started_at"`
 	FinishedAt time.Time `json:"finished_at"`
+	// Health is the outcome of the health checks (CapHealth), nil without.
+	Health *HealthReport `json:"health,omitempty"`
+	// Preview is the plan of a preview job (CapPreview).
+	Preview *Preview `json:"preview,omitempty"`
+	// Changes are the package versions a package or rollback job changed
+	// (CapRollback): From before, To after; empty From = new, empty To = removed.
+	Changes []PackageChange `json:"changes,omitempty"`
+	// Rollback is the per-package outcome of a rollback job.
+	Rollback []RollbackItem `json:"rollback,omitempty"`
 }
+
+// ---------- health checks (CapHealth) ----------
+
+// Health check types.
+const (
+	HealthResources = "resources" // CPU load, memory and disk usage against limits
+	HealthService   = "service"   // a service must be running
+	HealthHTTP      = "http"      // an HTTP(S) URL must answer as expected
+	HealthTCP       = "tcp"       // a TCP port must accept connections
+	// HealthCommand runs an executable the host's administrator placed in
+	// the agent's health.d directory; the server only names it.
+	HealthCommand = "command"
+)
+
+// Job type and parameters of health checks.
+const (
+	JobHealthCheck = "health_check" // run the checks now (no update)
+	// ParamHealth carries the checks (JSON array of HealthCheck) on
+	// health_check jobs and on package jobs, which run them before and after.
+	ParamHealth = "health"
+	// ParamHealthPolicy: "abort" (default) skips the update when a check
+	// fails before it; "continue" runs it anyway.
+	ParamHealthPolicy = "health_policy"
+	// ParamHealthDelay is the wait in seconds between the update and the
+	// checks after it (services restart), default 15.
+	ParamHealthDelay = "health_delay"
+)
+
+// HealthCheck is one check to run on the host.
+type HealthCheck struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	Type string `json:"type"`
+	// Target: service name, URL, host:port or command name.
+	Target string `json:"target,omitempty"`
+	// HTTP: expected status (0 = any 2xx/3xx), required body text, and
+	// whether certificate errors are accepted.
+	Expect   int    `json:"expect,omitempty"`
+	Contains string `json:"contains,omitempty"`
+	Insecure bool   `json:"insecure,omitempty"`
+	// Resources: highest allowed usage in percent (0 = not checked); CPU is
+	// the 1-minute load average per CPU core.
+	CPU    int      `json:"cpu,omitempty"`
+	Memory int      `json:"memory,omitempty"`
+	Disk   int      `json:"disk,omitempty"`
+	Paths  []string `json:"paths,omitempty"` // file systems for Disk, default "/"
+	// TimeoutSeconds bounds the check (default 10, at most 120).
+	TimeoutSeconds int `json:"timeout_seconds,omitempty"`
+}
+
+// HealthResult is the outcome of one check. Value and Message are verbatim
+// measurements and program output; the agent's own text is localized.
+type HealthResult struct {
+	ID         int64  `json:"id"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	OK         bool   `json:"ok"`
+	Value      string `json:"value,omitempty"`
+	Message    string `json:"message,omitempty"`
+	DurationMS int64  `json:"duration_ms"`
+}
+
+// HealthReport holds the checks of a job: before and after an update, or
+// Checks for a health_check job. Aborted: a check failed before the update
+// and the update was not run.
+type HealthReport struct {
+	Before  []HealthResult `json:"before,omitempty"`
+	After   []HealthResult `json:"after,omitempty"`
+	Checks  []HealthResult `json:"checks,omitempty"`
+	Aborted bool           `json:"aborted,omitempty"`
+}
+
+// MaxHealthChecks bounds the checks of one job.
+const MaxHealthChecks = 50
+
+var commandNameRE = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$`)
+
+// ValidCommandName accepts health.d command names (no path separators).
+func ValidCommandName(name string) bool {
+	return commandNameRE.MatchString(name) && !strings.Contains(name, "..")
+}
+
+// ---------- update preview (CapPreview) ----------
+
+// JobPreview simulates a package job without changing the host: the
+// package manager's own dry run. ParamPreviewType names the job type to
+// simulate (upgrade_all, upgrade_security, upgrade_packages); Packages holds
+// the packages for upgrade_packages.
+const (
+	JobPreview       = "preview"
+	ParamPreviewType = "preview_type"
+)
+
+// PackageChange is one package in a plan: From is empty for a new package,
+// To is empty for a removal. Versions are verbatim.
+type PackageChange struct {
+	Name string `json:"name"`
+	Arch string `json:"arch,omitempty"`
+	From string `json:"from,omitempty"`
+	To   string `json:"to,omitempty"`
+}
+
+// Preview is the package manager's plan for a job.
+type Preview struct {
+	PackageManager string          `json:"package_manager"`
+	Upgrades       []PackageChange `json:"upgrades,omitempty"`
+	Installs       []PackageChange `json:"installs,omitempty"` // new packages (dependencies)
+	Removals       []PackageChange `json:"removals,omitempty"`
+	Downgrades     []PackageChange `json:"downgrades,omitempty"`
+	// Kernel: a kernel package changes; Reboot: a kernel, C library, init
+	// system or microcode package changes, so a reboot will be needed.
+	Kernel bool `json:"kernel"`
+	Reboot bool `json:"reboot"`
+	// DownloadBytes and DiskBytes (change in used space, negative when space
+	// is freed) are -1 when the package manager does not report them;
+	// FreeBytes is the free space of the file system the packages go to.
+	DownloadBytes int64 `json:"download_bytes"`
+	DiskBytes     int64 `json:"disk_bytes"`
+	FreeBytes     int64 `json:"free_bytes"`
+	// Conflicts are the package manager's error lines (dependency problems,
+	// conflicts); a plan with conflicts cannot be applied as is.
+	Conflicts []string `json:"conflicts,omitempty"`
+	// Plan is the package manager's output, verbatim and shortened.
+	Plan string `json:"plan,omitempty"`
+}
+
+// MaxPreviewPackages bounds each list of a preview.
+const MaxPreviewPackages = 5000
+
+// ---------- rollback (CapRollback) ----------
+
+// JobRollback returns packages to earlier versions. ParamRollbackTargets
+// holds the targets (JSON array of PackageChange: Name, Arch, To = version
+// to return to); ParamRollbackMode is "check" (availability and the package
+// manager's simulation, nothing changes) or "apply".
+const (
+	JobRollback          = "rollback"
+	ParamRollbackTargets = "targets"
+	ParamRollbackMode    = "mode"
+	RollbackCheck        = "check"
+	RollbackApply        = "apply"
+)
+
+// Rollback item statuses.
+const (
+	RollbackAvailable   = "available"   // the version can be installed
+	RollbackUnavailable = "unavailable" // no repository or cache offers the version
+	RollbackCurrent     = "current"     // already installed: nothing to do
+	RollbackDone        = "done"        // installed and verified
+	RollbackFailed      = "failed"      // not installed after the run
+)
+
+// RollbackItem is the outcome for one target package.
+type RollbackItem struct {
+	Name    string `json:"name"`
+	Arch    string `json:"arch,omitempty"`
+	From    string `json:"from,omitempty"` // installed version before the job
+	To      string `json:"to"`             // target version
+	Status  string `json:"status"`
+	Message string `json:"message,omitempty"`
+}
+
+// MaxRollbackTargets bounds a rollback job.
+const MaxRollbackTargets = 200
+
+var pkgVersionRE = regexp.MustCompile(`^[0-9A-Za-z][0-9A-Za-z.+~:_^-]{0,127}$`)
+
+// ValidPackageVersion accepts distribution package versions ("1:3.0.7-27.el9",
+// "1.22.1-9+deb12u2", "1.2.3-r0"). Both sides check it.
+func ValidPackageVersion(v string) bool { return pkgVersionRE.MatchString(v) }
 
 // ErrorResponse is returned with non-2xx statuses. Message is Turkish.
 type ErrorResponse struct {
@@ -310,4 +559,34 @@ func Excluded(patterns []string, name string) bool {
 		}
 	}
 	return false
+}
+
+// DiffPackages returns the packages whose version changed, appeared (From
+// empty) or disappeared (To empty) between two inventories.
+func DiffPackages(before, after []Package) []PackageChange {
+	key := func(p Package) string { return p.Name + "\x00" + p.Arch }
+	old := make(map[string]Package, len(before))
+	for _, p := range before {
+		old[key(p)] = p
+	}
+	var out []PackageChange
+	seen := map[string]bool{}
+	for _, p := range after {
+		k := key(p)
+		seen[k] = true
+		if o, ok := old[k]; !ok {
+			out = append(out, PackageChange{Name: p.Name, Arch: p.Arch, To: p.Version})
+		} else if o.Version != p.Version {
+			out = append(out, PackageChange{Name: p.Name, Arch: p.Arch, From: o.Version, To: p.Version})
+		}
+	}
+	for _, p := range before {
+		if !seen[key(p)] {
+			out = append(out, PackageChange{Name: p.Name, Arch: p.Arch, From: p.Version})
+		}
+	}
+	if len(out) > MaxPreviewPackages {
+		out = out[:MaxPreviewPackages]
+	}
+	return out
 }

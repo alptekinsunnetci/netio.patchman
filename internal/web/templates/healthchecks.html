@@ -1,0 +1,99 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$f := $d.Form}}{{$root := .}}
+<nav class="breadcrumb"><a href="/settings">{{t "nav.settings"}}</a> / <span>{{t "health.title"}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "health.title"}}</h1>
+    <p class="pagehead__sub">{{t "health.subtitle"}}</p>
+  </div>
+</header>
+
+<section class="panel panel--flush">
+  {{if $d.Checks}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "health.field.name"}}</th><th>{{t "health.field.type"}}</th><th>{{t "health.field.target"}}</th><th>{{t "health.field.scope"}}</th><th>{{t "health.field.with_updates"}}</th><th>{{t "health.field.enabled"}}</th><th></th></tr></thead>
+    <tbody>
+    {{range $d.Checks}}
+    <tr>
+      <td><a href="/settings/health/{{.ID}}">{{.Name}}</a></td>
+      <td class="cell-sub">{{t (printf "health.type.%s" .Type)}}</td>
+      <td class="mono cell-sub">{{if eq .Type "resources"}}{{if .CPU}}CPU ≤ {{.CPU}}% {{end}}{{if .Memory}}RAM ≤ {{.Memory}}% {{end}}{{if .Disk}}{{t "health.disk_short"}} ≤ {{.Disk}}%{{end}}{{else}}{{.Target}}{{end}}</td>
+      <td>{{if eq .Scope "group"}}<a href="/groups/{{.GroupID}}">{{.GroupName}}</a>{{else if eq .Scope "host"}}<a href="/servers/{{.HostID}}?tab=health">{{.Hostname}}</a>{{else}}{{t "health.scope.all"}}{{end}}</td>
+      <td>{{if .WithUpdates}}{{t "common.yes"}}{{else}}<span class="muted">{{t "common.no"}}</span>{{end}}</td>
+      <td>{{if .Enabled}}{{t "common.enabled"}}{{else}}<span class="muted">{{t "common.disabled"}}</span>{{end}}</td>
+      <td class="actions"><form method="post" action="/settings/health/{{.ID}}/delete" data-confirm="{{t "health.delete_confirm" "name" .Name}}">{{template "csrf" $root}}<button class="button button--sm button--ghost" type="submit">{{t "common.delete"}}</button></form></td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "health.none_defined")}}{{end}}
+</section>
+
+<section class="panel" id="form">
+  <h2 class="panel__title">{{if $f.ID}}{{t "health.edit" "name" $f.Name}}{{else}}{{t "health.new"}}{{end}}</h2>
+  <form class="form" method="post" action="/settings/health{{if $f.ID}}/{{$f.ID}}{{end}}">
+    {{template "csrf" $root}}
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "health.field.name"}}</span>
+        <input class="field__input" type="text" name="name" value="{{$f.Name}}" maxlength="100" required></label>
+      <label class="field"><span class="field__label">{{t "health.field.type"}}</span>
+        <select class="field__input" name="type">{{range $d.Types}}<option value="{{.}}"{{if eq . $f.Type}} selected{{end}}>{{t (printf "health.type.%s" .)}}</option>{{end}}</select></label>
+      <label class="field"><span class="field__label">{{t "health.field.target"}}</span>
+        <input class="field__input mono" type="text" name="target" value="{{$f.Target}}" maxlength="500" placeholder="https://127.0.0.1/health">
+        <span class="field__hint">{{t "health.target_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "health.field.timeout"}}</span>
+        <input class="field__input" type="number" name="timeout_seconds" min="1" max="120" value="{{$f.TimeoutSeconds}}"></label>
+    </div>
+    <fieldset class="fieldset">
+      <legend>{{t "health.http_options"}}</legend>
+      <div class="form-grid">
+        <label class="field"><span class="field__label">{{t "health.field.expect"}}</span>
+          <input class="field__input" type="number" name="expect" min="0" max="599" value="{{if $f.Expect}}{{$f.Expect}}{{end}}" placeholder="200">
+          <span class="field__hint">{{t "health.expect_hint"}}</span></label>
+        <label class="field"><span class="field__label">{{t "health.field.contains"}}</span>
+          <input class="field__input" type="text" name="contains" value="{{$f.Contains}}" maxlength="200"></label>
+      </div>
+      <label class="check-label"><input type="checkbox" name="insecure" value="1"{{if $f.Insecure}} checked{{end}}> {{t "health.field.insecure"}}</label>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend>{{t "health.resource_options"}}</legend>
+      <div class="form-grid">
+        <label class="field"><span class="field__label">{{t "health.field.cpu"}}</span><input class="field__input" type="number" name="cpu" min="0" max="1000" value="{{if $f.CPU}}{{$f.CPU}}{{end}}"></label>
+        <label class="field"><span class="field__label">{{t "health.field.memory"}}</span><input class="field__input" type="number" name="memory" min="0" max="100" value="{{if $f.Memory}}{{$f.Memory}}{{end}}"></label>
+        <label class="field"><span class="field__label">{{t "health.field.disk"}}</span><input class="field__input" type="number" name="disk" min="0" max="100" value="{{if $f.Disk}}{{$f.Disk}}{{end}}"></label>
+        <label class="field"><span class="field__label">{{t "health.field.paths"}}</span><input class="field__input mono" type="text" name="paths" value="{{join $f.Paths ", "}}" placeholder="/, /var"></label>
+      </div>
+      <p class="field__hint">{{t "health.resources_hint"}}</p>
+    </fieldset>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "health.field.scope"}}</span>
+        <select class="field__input" name="scope">
+          <option value="all"{{if eq $f.Scope "all"}} selected{{end}}>{{t "health.scope.all"}}</option>
+          <option value="group"{{if eq $f.Scope "group"}} selected{{end}}>{{t "health.scope.group"}}</option>
+          <option value="host"{{if eq $f.Scope "host"}} selected{{end}}>{{t "health.scope.host"}}</option>
+        </select></label>
+      <label class="field"><span class="field__label">{{t "host.field.groups"}}</span>
+        <select class="field__input" name="group_id"><option value="0">{{t "common.empty"}}</option>{{range $d.Groups}}<option value="{{.ID}}"{{if eq .ID $f.GroupID}} selected{{end}}>{{.Name}}</option>{{end}}</select></label>
+      <label class="field"><span class="field__label">{{t "host.field.hostname"}}</span>
+        <select class="field__input" name="host_id"><option value="0">{{t "common.empty"}}</option>{{range $d.Hosts}}<option value="{{.ID}}"{{if eq .ID $f.HostID}} selected{{end}}>{{.Hostname}}</option>{{end}}</select></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="with_updates" value="1"{{if $f.WithUpdates}} checked{{end}}> {{t "health.field.with_updates_long"}}</label>
+    <label class="check-label"><input type="checkbox" name="enabled" value="1"{{if $f.Enabled}} checked{{end}}> {{t "health.field.enabled"}}</label>
+    <div class="button-row">
+      <button class="button button--primary" type="submit">{{t "common.save"}}</button>
+      {{if $f.ID}}<a class="button button--ghost" href="/settings/health">{{t "common.cancel"}}</a>{{end}}
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">{{t "health.command_title"}}</h2>
+  <p>{{t "health.command_body"}}</p>
+  <pre class="output">/etc/netio-patchman/health.d/&lt;ad&gt;    (Linux: root:root, 0755)
+C:\ProgramData\netio-patchman\health.d\&lt;ad&gt;.ps1 | .cmd | .exe    (Windows)</pre>
+</section>
+{{end}}

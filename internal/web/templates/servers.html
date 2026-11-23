@@ -54,8 +54,16 @@
       <option value="unknown"{{if eq $d.Filter.Platform "unknown"}} selected{{end}}>{{t "host.virt.unknown"}}</option>
     </select>
   </label>
+  <label class="field field--inline">
+    <span class="visually-hidden">{{t "score.title"}}</span>
+    <select class="field__input" name="score_below">
+      <option value="">{{t "score.filter.all"}}</option>
+      {{range (list "40" "60" "80")}}<option value="{{.}}"{{if eq (printf "%d" $d.Filter.ScoreBelow) .}} selected{{end}}>{{t "score.filter.below" "n" .}}</option>{{end}}
+    </select>
+  </label>
+  <label class="check-label"><input type="checkbox" name="sort" value="score"{{if eq $d.Filter.Sort "score"}} checked{{end}}> {{t "score.sort_lowest"}}</label>
   <button class="button" type="submit">{{t "common.filter"}}</button>
-  {{if or $d.Filter.Search $d.Filter.Status $d.Filter.OSID $d.Filter.GroupID $d.Filter.Platform}}<a class="button button--ghost" href="/servers">{{t "common.clear"}}</a>{{end}}
+  {{if or $d.Filter.Search $d.Filter.Status $d.Filter.OSID $d.Filter.GroupID $d.Filter.Platform $d.Filter.ScoreBelow $d.Filter.Sort}}<a class="button button--ghost" href="/servers">{{t "common.clear"}}</a>{{end}}
 </form>
 
 {{$op := .User.CanOperate}}
@@ -96,6 +104,7 @@
         <th>{{t "host.field.hostname"}}</th>
         <th>{{t "host.field.os"}}</th>
         <th>{{t "host.field.status"}}</th>
+        <th class="num">{{t "score.short"}}</th>
         <th>{{t "host.field.vulns"}}</th>
         <th class="num">{{t "host.field.security_updates"}}</th>
         <th class="num">{{t "host.field.updates"}}</th>
@@ -115,6 +124,7 @@
       </td>
       <td>{{.OSName}}<div class="cell-sub"><span class="mono">{{.Kernel}}</span> · {{virt .Virtualization}}</div></td>
       <td>{{template "hoststatus" .}}</td>
+      <td class="num"><a href="/servers/{{.ID}}/score">{{template "score" .SecurityScore}}</a></td>
       <td>{{template "sevcounts" .Vulns}}</td>
       <td class="num">{{if .SecurityUpdateCount}}<strong class="text-danger">{{.SecurityUpdateCount}}</strong>{{else}}0{{end}}</td>
       <td class="num">{{.UpdateCount}}</td>

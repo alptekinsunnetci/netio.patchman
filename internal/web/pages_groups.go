@@ -9,6 +9,7 @@ import (
 
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/store"
+	"netio.patchman/internal/timeutil"
 )
 
 // ---------- host groups ----------
@@ -23,9 +24,14 @@ func (s *Server) renderGroups(w http.ResponseWriter, r *http.Request, status int
 		s.serverError(w, r, err)
 		return
 	}
+	scores, err := s.st.GroupScores(r.Context())
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
 	d := s.page(r, s.l.T("nav.groups"), "groups")
 	d.Error = errMsg
-	d.Data = map[string]any{"Groups": list, "Form": form}
+	d.Data = map[string]any{"Groups": list, "Form": form, "Scores": scores}
 	s.render(w, r, status, "groups", d)
 }
 
@@ -95,8 +101,24 @@ func (s *Server) group(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	scores, err := s.st.GroupScores(r.Context())
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	to := calendarDay(timeutil.Now())
+	from := to.AddDate(0, 0, -89)
+	hist, err := s.st.GroupScoreHistory(r.Context(), g.ID, from, to)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	st, ok := scores[g.ID]
+	if !ok {
+		st = store.ScoreStats{Avg: -1, Min: -1}
+	}
 	d := s.page(r, g.Name, "groups")
-	d.Data = map[string]any{"G": g, "Hosts": hosts, "Pager": newPager(r, pg, total), "Sev": sev, "KEV": kev}
+	d.Data = map[string]any{"G": g, "Hosts": hosts, "Pager": newPager(r, pg, total), "Sev": sev, "KEV": kev, "Score": st, "Trend": s.scoreTrend(hist, from, to)}
 	s.render(w, r, http.StatusOK, "group", d)
 }
 

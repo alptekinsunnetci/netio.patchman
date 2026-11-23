@@ -66,9 +66,11 @@ func NewRunner(cfg Config, l i18n.Localizer, logger *slog.Logger) (*Runner, erro
 	r := &Runner{cfg: cfg, l: l, logger: logger, client: client, pm: pm,
 		collector: Collector{PM: pm, RefreshLists: cfg.RefreshLists, StateDir: cfg.StateDir},
 	}
-	r.jobs = JobRunner{L: l, PM: pm, RemoteUpdates: cfg.RemoteUpdates, Winget: winget,
-		Pending:  func(ctx context.Context) ([]protocol.Update, error) { return PendingUpdates(ctx, pm) },
-		Services: func(ctx context.Context) []string { s, _ := RestartServices(ctx, pm); return s },
+	r.jobs = JobRunner{L: l, PM: pm, RemoteUpdates: cfg.RemoteUpdates, Winget: winget, Health: HealthRunner{L: l},
+		Installed: func(ctx context.Context) ([]protocol.Package, error) { return InstalledPackages(ctx, pm) },
+		Available: versionAvailable,
+		Pending:   func(ctx context.Context) ([]protocol.Update, error) { return PendingUpdates(ctx, pm) },
+		Services:  func(ctx context.Context) []string { s, _ := RestartServices(ctx, pm); return s },
 	}
 	r.updater = SelfUpdater{L: l, Client: client, Enabled: cfg.AutoUpdate}
 	return r, nil
@@ -131,7 +133,7 @@ func (r *Runner) sendReport(ctx context.Context) {
 	inv := r.collector.Collect(ctx)
 	rep := protocol.Report{
 		Host: r.hostInfo(), Packages: inv.Packages, Updates: inv.Updates, RebootRequired: inv.Reboot,
-		RestartServices: inv.Services, CollectedAt: timeutil.Now(), Errors: inv.Errors, KernelPatch: inv.KernelPatch,
+		RestartServices: inv.Services, CollectedAt: timeutil.Now(), Errors: inv.Errors, KernelPatch: inv.KernelPatch, Services: inv.ServiceList,
 	}
 	for _, e := range inv.Errors {
 		r.logger.Warn(r.l.T("log.agent.collect_warning"), slog.String("error", e))

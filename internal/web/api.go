@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"netio.patchman/internal/auth"
+	"netio.patchman/internal/eol"
 	"netio.patchman/internal/protocol"
+	"netio.patchman/internal/software"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
 	"netio.patchman/internal/version"
@@ -109,6 +111,9 @@ type apiHost struct {
 	Updates         int            `json:"updates"`
 	SecurityUpdates int            `json:"security_updates"`
 	Vulnerabilities map[string]int `json:"vulnerabilities"`
+	// SecurityScore is 0-100, null before the first computation.
+	SecurityScore *int     `json:"security_score"`
+	Capabilities  []string `json:"capabilities"`
 }
 
 func tsPtr(t time.Time) *time.Time {
@@ -124,7 +129,13 @@ func (s *Server) apiHostView(h store.Host) apiHost {
 	for _, g := range h.Groups {
 		groups = append(groups, g.Name)
 	}
+	var sc *int
+	if h.SecurityScore >= 0 {
+		v := h.SecurityScore
+		sc = &v
+	}
 	return apiHost{
+		SecurityScore: sc, Capabilities: append([]string{}, h.Capabilities...),
 		ID: h.ID, Hostname: h.Hostname, FQDN: h.FQDN, OSID: h.OSID, OSName: h.OSName, OSVersion: h.OSVersion, Kernel: h.Kernel,
 		Arch: h.Arch, IPAddresses: append([]string{}, h.IPAddresses...), PackageManager: h.PackageManager, Platform: h.Virtualization,
 		AgentVersion: h.AgentVersion, Online: h.Online(s.offlineAfter()), LastSeenAt: tsPtr(h.LastSeenAt), LastScanAt: tsPtr(h.LastScanAt),
@@ -276,6 +287,93 @@ func (s *Server) apiHostUpdates(w http.ResponseWriter, r *http.Request) {
 	s.apiJSON(w, http.StatusOK, map[string]any{"updates": out, "exclude": patterns})
 }
 
+// apiSoftwareItem is a product release on a host in the REST API.
+type apiSoftwareItem struct {
+	Software       string `json:"software"`
+	Name           string `json:"name"`
+	Cycle          string `json:"cycle"`
+	Version        string `json:"version"`
+	Package        string `json:"package"`
+	PackageVersion string `json:"package_version"`
+	// Running: true, false, or null when unknown.
+	Running        *bool  `json:"running"`
+	Service        string `json:"service,omitempty"`
+	HostID         int64  `json:"host_id"`
+	Hostname       string `json:"hostname"`
+	OpenCVEs       int    `json:"open_cves"`
+	Severity       string `json:"severity,omitempty"`
+	KnownExploited bool   `json:"known_exploited"`
+}
+
+func apiSoftware(rows []store.HostSoftwareRow) []apiSoftwareItem {
+	out := make([]apiSoftwareItem, 0, len(rows))
+	for _, r := range rows {
+		it := apiSoftwareItem{Software: r.Software, Cycle: r.Cycle, Version: r.Version, Package: r.Package, PackageVersion: r.PackageVersion,
+			Service: r.Service, HostID: r.HostID, Hostname: r.Hostname, OpenCVEs: r.CVECount, KnownExploited: r.KnownExploited}
+		if d, ok := software.ByID(r.Software); ok {
+			it.Name = d.Name
+		}
+		if r.Running >= 0 {
+			b := r.Running == 1
+			it.Running = &b
+		}
+		if r.CVECount > 0 {
+			it.Severity = string(r.Severity)
+		}
+		out = append(out, it)
+	}
+	return out
+}
+
+func (s *Server) apiHostSoftware(w http.ResponseWriter, r *http.Request) {
+	h, ok := s.apiHostOr404(w, r)
+	if !ok {
+		return
+	}
+	rows, err := s.st.HostSoftware(r.Context(), h.ID)
+	if err != nil {
+		s.apiError(w, http.StatusInternalServerError, "internal")
+		return
+	}
+	svcs, known, err := s.st.HostServices(r.Context(), h.ID)
+	if err != nil {
+		s.apiError(w, http.StatusInternalServerError, "internal")
+		return
+	}
+	if !known {
+		svcs = nil
+	}
+	s.apiJSON(w, http.StatusOK, map[string]any{"software": apiSoftware(rows), "services_known": known, "services": svcs})
+}
+
+// apiSoftwareList lists product releases across the visible fleet;
+// ?software=nginx and ?cycle=1.24 narrow it.
+func (s *Server) apiSoftwareList(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("software")
+	var rows []store.HostSoftwareRow
+	if id != "" {
+		if _, ok := software.ByID(id); !ok {
+			s.apiError(w, http.StatusBadRequest, "bad_request")
+			return
+		}
+		var err error
+		if rows, err = s.st.SoftwareHosts(r.Context(), id, r.URL.Query().Get("cycle")); err != nil {
+			s.apiError(w, http.StatusInternalServerError, "internal")
+			return
+		}
+	} else {
+		for _, d := range software.Catalog {
+			more, err := s.st.SoftwareHosts(r.Context(), d.ID, "")
+			if err != nil {
+				s.apiError(w, http.StatusInternalServerError, "internal")
+				return
+			}
+			rows = append(rows, more...)
+		}
+	}
+	s.apiJSON(w, http.StatusOK, map[string]any{"software": apiSoftware(rows)})
+}
+
 func (s *Server) apiVulnerabilities(w http.ResponseWriter, r *http.Request) {
 	f := s.vulnFilter(r)
 	rows, total, err := s.st.ListVulnSummaries(r.Context(), f, store.Page{Number: pageNumber(r), Size: pageSize})
@@ -405,7 +503,7 @@ func (s *Server) apiCreateJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !slices.Contains([]string{protocol.JobRefresh, protocol.JobUpgradeSecurity, protocol.JobUpgradeAll, protocol.JobUpgradePackages,
-		protocol.JobRestartServices, protocol.JobReboot, protocol.JobAgentUpdate}, req.Type) {
+		protocol.JobRestartServices, protocol.JobReboot, protocol.JobAgentUpdate, protocol.JobHealthCheck}, req.Type) {
 		s.apiError(w, http.StatusBadRequest, "bad_request")
 		return
 	}
@@ -477,6 +575,40 @@ func (s *Server) metrics(w http.ResponseWriter, r *http.Request) {
 	if st := s.o.Scanner.Status(); !st.LastRunAt.IsZero() {
 		gauge("netio_patchman_scan_last_run_timestamp_seconds", "Time of the last vulnerability scan.")
 		val("netio_patchman_scan_last_run_timestamp_seconds", "", st.LastRunAt.Unix())
+	}
+	if fs, err := s.st.FleetScore(ctx); err == nil && fs.Hosts > 0 {
+		gauge("netio_patchman_security_score", "Security score of the fleet (0-100, higher is better).")
+		val("netio_patchman_security_score", `stat="avg"`, fs.Avg)
+		val("netio_patchman_security_score", `stat="min"`, fs.Min)
+	}
+	if items, err := s.assessEOL(ctx, 0); err == nil {
+		sum := eol.Summarize(items)
+		gauge("netio_patchman_eol", "Operating systems (hosts) and software installations past or near end of life.")
+		val("netio_patchman_eol", `kind="os",status="eol"`, sum.OSEOL)
+		val("netio_patchman_eol", `kind="os",status="soon"`, sum.OSSoon)
+		val("netio_patchman_eol", `kind="software",status="eol"`, sum.SoftwareEOL)
+		val("netio_patchman_eol", `kind="software",status="soon"`, sum.SoftwareSoon)
+		val("netio_patchman_eol", `kind="software",status="eol_distro_maintained"`, sum.SoftwareEOLDistro)
+	}
+	if _, total, err := s.st.ListDrift(ctx, store.DriftFilter{}, store.Page{Number: 1, Size: 1}); err == nil {
+		gauge("netio_patchman_drift_deviations", "Open deviations from server standards.")
+		val("netio_patchman_drift_deviations", "", total)
+	}
+	if _, limited := store.ScopeFrom(ctx); !limited {
+		if counts, err := s.st.RolloutStatusCounts(ctx); err == nil {
+			gauge("netio_patchman_rollouts", "Rolling updates by status.")
+			for _, st := range []string{store.RolloutRunning, store.RolloutPaused, store.RolloutFailed} {
+				val("netio_patchman_rollouts", `status="`+st+`"`, counts[st])
+			}
+		}
+		if chans, err := s.st.ListChannels(ctx); err == nil {
+			gauge("netio_patchman_channel_failing", "1 if the last delivery to a notification channel failed.")
+			for _, c := range chans {
+				if c.Enabled {
+					val("netio_patchman_channel_failing", `channel="`+promLabel(c.Name)+`",type="`+c.Type+`"`, boolNum(c.Failing()))
+				}
+			}
+		}
 	}
 
 	// Per-host series.

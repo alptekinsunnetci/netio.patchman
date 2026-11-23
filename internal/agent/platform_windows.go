@@ -16,6 +16,8 @@ import (
 
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
+	"golang.org/x/sys/windows/svc"
+	"golang.org/x/sys/windows/svc/mgr"
 
 	"netio.patchman/internal/protocol"
 )
@@ -239,4 +241,48 @@ func programFromKey(k registry.Key, arch string) protocol.Package {
 		return protocol.Package{}
 	}
 	return cleanProgram(protocol.Package{Name: name, Version: regString(k, "DisplayVersion"), Arch: arch})
+}
+
+// listServices reads the Windows services from the service control manager:
+// state, and whether they start automatically.
+func listServices(ctx context.Context) ([]protocol.Service, error) {
+	m, err := mgr.Connect()
+	if err != nil {
+		return nil, err
+	}
+	defer m.Disconnect()
+	names, err := m.ListServices()
+	if err != nil {
+		return nil, err
+	}
+	var out []protocol.Service
+	for _, n := range names {
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+		if !protocol.ValidServiceName(n) {
+			continue
+		}
+		s, err := m.OpenService(n)
+		if err != nil {
+			continue
+		}
+		st, qerr := s.Query()
+		cfg, cerr := s.Config()
+		s.Close()
+		if qerr != nil || cerr != nil {
+			continue
+		}
+		// Kernel and file system drivers are not services in this sense.
+		if cfg.ServiceType&(windows.SERVICE_WIN32_OWN_PROCESS|windows.SERVICE_WIN32_SHARE_PROCESS) == 0 {
+			continue
+		}
+		state := protocol.ServiceStopped
+		switch st.State {
+		case svc.Running, svc.StartPending, svc.ContinuePending:
+			state = protocol.ServiceRunning
+		}
+		out = append(out, protocol.Service{Name: n, State: state, Enabled: cfg.StartType == mgr.StartAutomatic})
+	}
+	return finishServices(out), nil
 }

@@ -1,0 +1,80 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "nav.standards"}}</h1>
+    <p class="pagehead__sub">{{t "standard.subtitle"}}</p>
+  </div>
+  {{if .User.IsAdmin}}<div class="pagehead__actions"><a class="button button--primary" href="/standards/new">{{template "icon" "plus"}}{{t "standard.new"}}</a></div>{{end}}
+</header>
+
+<nav class="tabs">
+  <a class="tab{{if eq $d.Tab "standards"}} is-active{{end}}" href="/standards">{{t "standard.tab.standards"}}</a>
+  <a class="tab{{if eq $d.Tab "drift"}} is-active{{end}}" href="/standards?tab=drift">{{t "standard.tab.drift"}}</a>
+</nav>
+
+{{if eq $d.Tab "drift"}}
+<form class="filters" method="get" action="/standards">
+  <input type="hidden" name="tab" value="drift">
+  <select class="field__input" name="standard" aria-label="{{t "standard.field.name"}}">
+    <option value="">{{t "standard.all"}}</option>
+    {{range $d.Standards}}<option value="{{.ID}}"{{if eq .ID $d.Filter.StandardID}} selected{{end}}>{{.Name}}</option>{{end}}
+  </select>
+  {{if $d.Groups}}<select class="field__input" name="group" aria-label="{{t "nav.groups"}}">
+    <option value="">{{t "servers.filter.all_groups"}}</option>
+    {{range $d.Groups}}<option value="{{.ID}}"{{if eq .ID $d.Filter.GroupID}} selected{{end}}>{{.Name}}</option>{{end}}
+  </select>{{end}}
+  <button class="button" type="submit">{{t "common.filter"}}</button>
+</form>
+<section class="panel panel--flush">
+  {{if $d.Drift}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "host.field.hostname"}}</th><th>{{t "standard.field.name"}}</th><th>{{t "standard.field.rule"}}</th><th>{{t "standard.field.deviation"}}</th><th>{{t "standard.field.suggestion"}}</th><th>{{t "standard.field.since"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Drift}}
+    <tr>
+      <td><a href="/servers/{{.HostID}}?tab=software">{{.Hostname}}</a></td>
+      <td class="cell-sub">{{.Standard}}</td>
+      <td>{{template "driftrule" .Rule}}</td>
+      <td>{{template "driftfound" .}}</td>
+      <td class="cell-sub">{{t (printf "standard.suggest.%s" .Rule.Kind)}}
+        {{if and .HasUpdate $root.User.CanOperate .RemoteJobOK (eq .Rule.Kind "min_version" "allowed_cycles")}}
+        <form method="post" action="/servers/{{.HostID}}/jobs">{{template "csrf" $root}}<input type="hidden" name="type" value="upgrade_packages"><input type="hidden" name="packages" value="{{.UpdateName}}">
+          <button class="button button--sm" type="submit">{{t "standard.upgrade" "package" .UpdateName}}</button></form>
+        {{end}}</td>
+      <td>{{date .FirstSeen}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "standard.no_drift")}}{{end}}
+</section>
+{{template "pager" $d.Pager}}
+{{else}}
+<section class="panel panel--flush">
+  {{if $d.Standards}}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "standard.field.name"}}</th><th>{{t "standard.field.scope"}}</th><th>{{t "standard.field.rules"}}</th><th class="num">{{t "standard.field.deviations"}}</th><th>{{t "health.field.enabled"}}</th></tr></thead>
+    <tbody>
+    {{range $d.Standards}}
+    <tr>
+      <td>{{if $root.User.IsAdmin}}<a href="/standards/{{.ID}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}{{with .Description}}<div class="cell-sub">{{.}}</div>{{end}}</td>
+      <td>{{if .GroupID}}<a href="/groups/{{.GroupID}}">{{.GroupName}}</a>{{else}}{{t "standard.scope_all"}}{{end}}</td>
+      <td><ul class="plain-list">{{range .Rules}}<li>{{template "driftrule" .}}</li>{{end}}</ul></td>
+      <td class="num">{{if .Deviations}}<a href="/standards?tab=drift&standard={{.ID}}"><strong class="text-danger">{{.Deviations}}</strong></a>{{else}}0{{end}}</td>
+      <td>{{if .Enabled}}{{t "common.enabled"}}{{else}}<span class="muted">{{t "common.disabled"}}</span>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{else}}{{template "empty" (t "standard.empty")}}{{end}}
+</section>
+<p class="footnote">{{t "standard.backport_note"}}</p>
+{{end}}
+{{end}}

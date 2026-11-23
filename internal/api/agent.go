@@ -24,6 +24,7 @@ import (
 	"netio.patchman/internal/release"
 	"netio.patchman/internal/scanner"
 	"netio.patchman/internal/settings"
+	"netio.patchman/internal/software"
 	"netio.patchman/internal/store"
 )
 
@@ -264,6 +265,26 @@ func (s *Server) checkin(w http.ResponseWriter, r *http.Request, hostID int64) {
 		s.internal(w, err)
 		return
 	}
+	if err := s.attachHealth(r.Context(), hostID, req.Host, cfg, jobs); err != nil {
+		s.internal(w, err)
+		return
+	}
+	// The inventory before a package job: what a rollback can return to.
+	// Starting updates are announced to the channels (not stored).
+	for _, j := range jobs {
+		switch j.Type {
+		case protocol.JobUpgradeAll, protocol.JobUpgradeSecurity, protocol.JobUpgradePackages, protocol.JobRollback:
+			if j.Type != protocol.JobRollback {
+				if err := s.o.Store.SaveJobInventory(r.Context(), j.ID, hostID); err != nil {
+					s.o.Logger.Warn(s.o.L.T("log.api.failed"), slog.String("error", err.Error()))
+				}
+			}
+			if j.Type != protocol.JobRollback || j.Params[protocol.ParamRollbackMode] == protocol.RollbackApply {
+				s.o.Store.Emit(store.LevelInfo, "job_started", map[string]string{"hostname": req.Host.Hostname, "id": strconv.FormatInt(j.ID, 10), "job_type": j.Type},
+					"/jobs/"+strconv.FormatInt(j.ID, 10))
+			}
+		}
+	}
 	writeJSON(w, protocol.CheckinResponse{
 		Jobs:                   jobs,
 		ReportRequested:        reportDue,
@@ -285,9 +306,13 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request, hostID int64) {
 	if len(rep.Errors) > 20 {
 		rep.Errors = rep.Errors[:20]
 	}
+	prev, _ := s.o.Store.HostByID(r.Context(), hostID)
 	if err := s.o.Store.SaveReport(r.Context(), hostID, rep, ecosystemString(rep.Host)); err != nil {
 		s.internal(w, err)
 		return
+	}
+	if rep.RebootRequired && !prev.RebootRequired {
+		s.o.Store.Emit(store.LevelWarning, "reboot_required", map[string]string{"hostname": rep.Host.Hostname}, "/servers/"+strconv.FormatInt(hostID, 10))
 	}
 	// Schedules with the reboot option restart hosts that still need it
 	// after their update job, within the maintenance window.
@@ -298,6 +323,7 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request, hostID int64) {
 			s.o.Logger.Info(s.o.L.T("log.schedule.reboot_queued"), slog.Int64("host_id", hostID), slog.String("hostname", rep.Host.Hostname), slog.Int64("job_id", id))
 		}
 	}
+	s.syncSoftware(r.Context(), hostID, rep)
 	s.o.Logger.Info(s.o.L.T("log.api.report"), slog.Int64("host_id", hostID), slog.String("hostname", rep.Host.Hostname),
 		slog.Int("packages", len(rep.Packages)), slog.Int("updates", len(rep.Updates)))
 	s.o.Scanner.Trigger()
@@ -324,10 +350,17 @@ func (s *Server) jobResult(w http.ResponseWriter, r *http.Request, hostID int64)
 		s.internal(w, err)
 		return
 	}
+	if err := s.o.Store.RecordHealth(r.Context(), hostID, jobID, job.Data.Health); err != nil {
+		s.o.Logger.Warn(s.o.L.T("log.api.failed"), slog.String("error", err.Error()))
+	}
 	s.o.Logger.Info(s.o.L.T("log.api.job_result"), slog.Int64("job_id", jobID), slog.String("hostname", job.Hostname),
 		slog.String("status", job.Status), slog.Int("exit_code", job.ExitCode))
 	// Run notification work without blocking the agent.
-	go s.o.Notifier.JobFinished(context.WithoutCancel(r.Context()), job)
+	s.afterRollback(r.Context(), job)
+	go func(ctx context.Context) {
+		s.o.Notifier.JobFinished(ctx, job)
+		s.o.Notifier.HealthResult(ctx, job)
+	}(context.WithoutCancel(r.Context()))
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -410,4 +443,103 @@ func (s *Server) attachExcludes(ctx context.Context, hostID int64, cfg settings.
 		jobs[i].Params[protocol.ParamExclude] = strings.Join(list, ",")
 	}
 	return nil
+}
+
+// syncSoftware detects the catalog's products in the report and records
+// what changed since the last one.
+func (s *Server) syncSoftware(ctx context.Context, hostID int64, rep protocol.Report) {
+	services, known := rep.Services, rep.Services != nil
+	if !known && rep.Host.Supports(protocol.CapServices) {
+		// The agent could not read its services this time: use the last list.
+		services, known, _ = s.o.Store.HostServices(ctx, hostID)
+	}
+	found := software.Detect(rep.Host.PackageManager, rep.Packages, services, known)
+	items := make([]store.SoftwareItem, len(found))
+	for i, f := range found {
+		items[i] = store.SoftwareItem{Software: f.Software, Cycle: f.Cycle, Version: f.Version, Package: f.Package,
+			PackageVersion: f.PackageVersion, Running: f.Running, Service: f.Service}
+	}
+	events, err := s.o.Store.SyncSoftware(ctx, hostID, rep.Host.PackageManager, items)
+	if err != nil {
+		s.o.Logger.Warn(s.o.L.T("log.api.failed"), slog.String("error", err.Error()))
+		return
+	}
+	if len(events) > 0 {
+		go s.o.Notifier.SoftwareChanged(context.WithoutCancel(ctx), hostID, rep.Host.Hostname, events)
+	}
+}
+
+// attachHealth passes the applicable health checks to agents that run them:
+// package jobs get the checks marked for updates (before and after), and
+// health_check jobs every enabled check of the host.
+func (s *Server) attachHealth(ctx context.Context, hostID int64, info protocol.HostInfo, cfg settings.Values, jobs []protocol.Job) error {
+	if !info.Supports(protocol.CapHealth) {
+		return nil
+	}
+	var forUpdates, all []protocol.HealthCheck
+	loaded := map[bool]bool{}
+	for i := range jobs {
+		withUpdates := true
+		switch jobs[i].Type {
+		case protocol.JobUpgradeAll, protocol.JobUpgradeSecurity, protocol.JobUpgradePackages:
+			if jobs[i].Params[store.ParamNoHealth] == "1" {
+				continue
+			}
+		case protocol.JobHealthCheck:
+			withUpdates = false
+		default:
+			continue
+		}
+		if !loaded[withUpdates] {
+			list, err := s.o.Store.ChecksForHost(ctx, hostID, withUpdates)
+			if err != nil {
+				return err
+			}
+			if withUpdates {
+				forUpdates = list
+			} else {
+				all = list
+			}
+			loaded[withUpdates] = true
+		}
+		checks := forUpdates
+		if !withUpdates {
+			checks = all
+		}
+		if len(checks) == 0 {
+			continue
+		}
+		b, _ := json.Marshal(checks)
+		if jobs[i].Params == nil {
+			jobs[i].Params = map[string]string{}
+		}
+		jobs[i].Params[protocol.ParamHealth] = string(b)
+		jobs[i].Params[protocol.ParamHealthDelay] = strconv.Itoa(cfg.HealthDelay)
+		if cfg.HealthContinue {
+			jobs[i].Params[protocol.ParamHealthPolicy] = "continue"
+		}
+	}
+	return nil
+}
+
+// afterRollback keeps rolled-back packages from being upgraded again when
+// the operator asked for it (job parameter "hold").
+func (s *Server) afterRollback(ctx context.Context, job store.Job) {
+	if job.Type != protocol.JobRollback || job.Params[protocol.ParamRollbackMode] != protocol.RollbackApply || job.Params[store.ParamRollbackHold] != "1" {
+		return
+	}
+	var names []string
+	for _, it := range job.Data.Rollback {
+		if it.Status == protocol.RollbackDone {
+			names = append(names, it.Name)
+		}
+	}
+	if len(names) == 0 {
+		return
+	}
+	if err := s.o.Store.AddHostExcludes(ctx, job.HostID, names); err != nil {
+		s.o.Logger.Warn(s.o.L.T("log.api.failed"), slog.String("error", err.Error()))
+		return
+	}
+	_ = s.o.Store.Audit(ctx, store.AuditEntry{Action: "host.exclude", Target: job.Hostname, Details: "rollback_job=" + strconv.FormatInt(job.ID, 10) + " add=" + strings.Join(names, ",")})
 }

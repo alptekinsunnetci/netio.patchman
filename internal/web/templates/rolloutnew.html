@@ -1,0 +1,81 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$f := $d.Form}}{{$root := .}}
+<nav class="breadcrumb"><a href="/rollouts">{{t "nav.rollouts"}}</a> / <span>{{t "rollout.new"}}</span></nav>
+<header class="pagehead"><div><h1 class="pagehead__title">{{t "rollout.new"}}</h1><p class="pagehead__sub">{{t "rollout.new_hint"}}</p></div></header>
+
+<form class="form" method="post" action="/rollouts">
+  {{template "csrf" $root}}
+  <section class="panel">
+    <h2 class="panel__title">{{t "rollout.section.what"}}</h2>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "rollout.field.name"}}</span>
+        <input class="field__input" type="text" name="name" value="{{$f.Name}}" maxlength="100" required></label>
+      <label class="field"><span class="field__label">{{t "job.field.type"}}</span>
+        <select class="field__input" name="job_type">{{range $d.JobTypes}}<option value="{{.}}"{{if eq . $f.JobType}} selected{{end}}>{{jobType .}}</option>{{end}}</select></label>
+    </div>
+    <label class="field"><span class="field__label">{{t "job.field.packages"}}</span>
+      <textarea class="field__input mono" name="packages" rows="2" maxlength="4000">{{$f.Packages}}</textarea>
+      <span class="field__hint">{{t "rollout.packages_hint"}}</span></label>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">{{t "rollout.section.hosts"}}</h2>
+    <fieldset class="fieldset">
+      <legend>{{t "rollout.field.strategy"}}</legend>
+      <label class="check-label"><input type="radio" name="strategy" value="batches"{{if ne $f.Strategy "groups"}} checked{{end}}> {{t "rollout.strategy.batches"}}</label>
+      <div class="form-grid">
+        <label class="field"><span class="field__label">{{t "rollout.field.target"}}</span>
+          <select class="field__input" name="target">
+            <option value="all"{{if eq $f.Target "all"}} selected{{end}}>{{t "rollout.target.all"}}</option>
+            <option value="group"{{if eq $f.Target "group"}} selected{{end}}>{{t "rollout.target.group"}}</option>
+            <option value="hosts"{{if eq $f.Target "hosts"}} selected{{end}}>{{t "rollout.target.hosts"}}</option>
+          </select></label>
+        <label class="field"><span class="field__label">{{t "host.field.groups"}}</span>
+          <select class="field__input" name="group_id"><option value="0">{{t "common.empty"}}</option>{{range $d.Groups}}<option value="{{.ID}}"{{if eq .ID $f.GroupID}} selected{{end}}>{{.Name}}</option>{{end}}</select></label>
+        <label class="field"><span class="field__label">{{t "rollout.field.batch"}}</span>
+          <input class="field__input" type="number" name="batch" min="0" max="1000" value="{{$f.Batch}}">
+          <span class="field__hint">{{t "rollout.batch_hint"}}</span></label>
+      </div>
+      {{if $d.Hosts}}<details class="details"><summary>{{t "rollout.pick_hosts"}}</summary>
+        <div class="checklist">{{range $d.Hosts}}<label class="check-label"><input type="checkbox" name="host_ids" value="{{.ID}}"{{if index $f.HostIDs .ID}} checked{{end}}> {{.Hostname}}</label>{{end}}</div>
+      </details>{{end}}
+      <label class="check-label"><input type="radio" name="strategy" value="groups"{{if eq $f.Strategy "groups"}} checked{{end}}> {{t "rollout.strategy.groups"}}</label>
+      <div class="form-grid">
+        {{range $i, $sel := $f.StageGroups}}
+        <label class="field"><span class="field__label">{{t "rollout.stage_n" "n" (add $i 1)}}</span>
+          <select class="field__input" name="stage_group_{{$i}}"><option value="0">{{t "common.empty"}}</option>{{range $d.Groups}}<option value="{{.ID}}"{{if eq .ID $sel}} selected{{end}}>{{.Name}}</option>{{end}}</select></label>
+        {{end}}
+      </div>
+    </fieldset>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "rollout.field.order"}}</span>
+        <select class="field__input" name="order">{{range $d.Orders}}<option value="{{.}}"{{if eq . $f.Order}} selected{{end}}>{{t (printf "rollout.order.%s" .)}}</option>{{end}}</select></label>
+      <label class="field"><span class="field__label">{{t "rollout.field.canary"}}</span>
+        <input class="field__input" type="number" name="canary" min="0" max="100" value="{{$f.Canary}}">
+        <span class="field__hint">{{t "rollout.canary_hint"}}</span></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="pause_after_canary" value="1"{{if $f.PauseAfterCanary}} checked{{end}}> {{t "rollout.field.pause_after_canary"}}</label>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">{{t "rollout.section.safety"}}</h2>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "rollout.field.max_parallel"}}</span>
+        <input class="field__input" type="number" name="max_parallel" min="1" max="500" value="{{$f.MaxParallel}}"></label>
+      <label class="field"><span class="field__label">{{t "rollout.field.wait"}}</span>
+        <input class="field__input" type="number" name="wait_minutes" min="0" max="1440" value="{{$f.WaitMinutes}}"></label>
+      <label class="field"><span class="field__label">{{t "rollout.field.max_failure"}}</span>
+        <input class="field__input" type="number" name="max_failure_pct" min="0" max="100" value="{{$f.MaxFailurePct}}">
+        <span class="field__hint">{{t "rollout.max_failure_hint"}}</span></label>
+      <label class="field"><span class="field__label">{{t "rollout.field.job_timeout"}}</span>
+        <input class="field__input" type="number" name="job_timeout_minutes" min="10" max="1440" value="{{$f.JobTimeoutMinutes}}">
+        <span class="field__hint">{{t "rollout.job_timeout_hint"}}</span></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="require_health" value="1"{{if $f.RequireHealth}} checked{{end}}> {{t "rollout.field.require_health"}}</label>
+    <p class="field__hint">{{t "rollout.require_health_hint"}}</p>
+  </section>
+  <div><button class="button button--primary" type="submit" data-confirm="{{t "rollout.start_confirm"}}">{{template "icon" "play"}}{{t "rollout.start"}}</button></div>
+</form>
+{{end}}

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"netio.patchman/internal/protocol"
+	"netio.patchman/internal/score"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/vuln"
 )
@@ -47,7 +48,42 @@ const (
 	KeySLALowDays           = "sla.low_days"
 	KeyEmailSLAOverdue      = "email.sla_overdue"
 	KeyEPSSUpdatedAt        = "epss.updated_at"
+	KeySoftwareNotify       = "software.notify_changes"
+	KeyEOLWarnDays          = "eol.warn_days"
+	KeyEOLNotify            = "eol.notify"
+	KeyEOLUpdatedAt         = "eol.updated_at"
+	KeyScoreAlertBelow      = "score.alert_below"
+	KeyHealthPolicy         = "health.policy"
+	KeyHealthDelay          = "health.delay_seconds"
+	KeyRequirePreview       = "updates.require_preview"
 )
+
+// ScoreWeight is one adjustable weight of the security score.
+type ScoreWeight struct {
+	Key   string // settings key and form field (dots replaced)
+	Label string // catalog key
+	Max   float64
+	Field func(*score.Weights) *float64
+}
+
+// ScoreWeights lists the adjustable weights in form order.
+var ScoreWeights = []ScoreWeight{
+	{"score.critical", "score.weight.critical", 100, func(w *score.Weights) *float64 { return &w.Critical }},
+	{"score.high", "score.weight.high", 100, func(w *score.Weights) *float64 { return &w.High }},
+	{"score.medium", "score.weight.medium", 100, func(w *score.Weights) *float64 { return &w.Medium }},
+	{"score.low", "score.weight.low", 100, func(w *score.Weights) *float64 { return &w.Low }},
+	{"score.unknown", "score.weight.unknown", 100, func(w *score.Weights) *float64 { return &w.Unknown }},
+	{"score.kev", "score.weight.kev", 100, func(w *score.Weights) *float64 { return &w.KEV }},
+	{"score.epss", "score.weight.epss", 100, func(w *score.Weights) *float64 { return &w.EPSS }},
+	{"score.overdue", "score.weight.overdue", 100, func(w *score.Weights) *float64 { return &w.Overdue }},
+	{"score.vuln_cap", "score.weight.vuln_cap", 100, func(w *score.Weights) *float64 { return &w.VulnCap }},
+	{"score.os_eol", "score.weight.os_eol", 100, func(w *score.Weights) *float64 { return &w.OSEOL }},
+	{"score.os_soon", "score.weight.os_soon", 100, func(w *score.Weights) *float64 { return &w.OSSoon }},
+	{"score.software_eol", "score.weight.software_eol", 100, func(w *score.Weights) *float64 { return &w.SoftwareEOL }},
+	{"score.software_eol_cap", "score.weight.software_eol_cap", 100, func(w *score.Weights) *float64 { return &w.SoftwareEOLCap }},
+	{"score.security_update", "score.weight.security_update", 100, func(w *score.Weights) *float64 { return &w.SecurityUpdate }},
+	{"score.security_update_cap", "score.weight.security_update_cap", 100, func(w *score.Weights) *float64 { return &w.SecurityUpdateCap }},
+}
 
 // Values is a typed snapshot of all settings.
 type Values struct {
@@ -86,7 +122,30 @@ type Values struct {
 	SLACriticalDays, SLAHighDays, SLAMediumDays, SLALowDays int
 	EmailSLAOverdue                                         bool
 	EPSSUpdatedAt                                           time.Time
+	// SoftwareNotify adds a notification when software is installed, removed
+	// or changes version on a host.
+	SoftwareNotify bool
+	// EOLWarnDays is how long before the end of support a release counts as
+	// ending soon; EOLNotify sends a notification once per release.
+	EOLWarnDays  int
+	EOLNotify    bool
+	EOLUpdatedAt time.Time
+	// ScoreWeights are the security score weights; ScoreAlertBelow notifies
+	// when a host's score drops under it (0 = off).
+	ScoreWeights    score.Weights
+	ScoreAlertBelow int
+	// HealthContinue runs an update even when a health check fails before
+	// it (default: the update is skipped); HealthDelay is the wait between
+	// the update and the checks after it.
+	HealthContinue bool
+	HealthDelay    int
+	// RequirePreview: an update started on a server page first runs a dry
+	// run; the update starts only after the plan is approved.
+	RequirePreview bool
 }
+
+// EOLWarn is the end-of-support warning period.
+func (v Values) EOLWarn() time.Duration { return time.Duration(v.EOLWarnDays) * 24 * time.Hour }
 
 // OfflineAfter is the duration after which an agent counts as offline.
 func (v Values) OfflineAfter() time.Duration {
@@ -121,6 +180,12 @@ func Defaults() Values {
 		SLAMediumDays:        90,
 		SLALowDays:           180,
 		EmailSLAOverdue:      true,
+		SoftwareNotify:       true,
+		EOLWarnDays:          90,
+		EOLNotify:            true,
+		ScoreWeights:         score.DefaultWeights(),
+		HealthDelay:          15,
+		RequirePreview:       true,
 	}
 }
 
@@ -193,6 +258,21 @@ func FromMap(raw map[string]string) Values {
 	i(KeySLALowDays, &v.SLALowDays, 0, 3650)
 	b(KeyEmailSLAOverdue, &v.EmailSLAOverdue)
 	t(KeyEPSSUpdatedAt, &v.EPSSUpdatedAt)
+	b(KeySoftwareNotify, &v.SoftwareNotify)
+	i(KeyEOLWarnDays, &v.EOLWarnDays, 0, 730)
+	b(KeyEOLNotify, &v.EOLNotify)
+	t(KeyEOLUpdatedAt, &v.EOLUpdatedAt)
+	for _, sw := range ScoreWeights {
+		if s, ok := raw[sw.Key]; ok {
+			if p, err := strconv.ParseFloat(s, 64); err == nil && p >= 0 && p <= sw.Max {
+				*sw.Field(&v.ScoreWeights) = p
+			}
+		}
+	}
+	i(KeyScoreAlertBelow, &v.ScoreAlertBelow, 0, 100)
+	v.HealthContinue = raw[KeyHealthPolicy] == "continue"
+	i(KeyHealthDelay, &v.HealthDelay, 0, 600)
+	b(KeyRequirePreview, &v.RequirePreview)
 	return v
 }
 

@@ -26,13 +26,19 @@ import (
 	"netio.patchman/internal/auth"
 	"netio.patchman/internal/backup"
 	"netio.patchman/internal/brand"
+	"netio.patchman/internal/eol"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify"
+	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/release"
+	"netio.patchman/internal/rollout"
 	"netio.patchman/internal/scanner"
 	"netio.patchman/internal/schedule"
+	"netio.patchman/internal/score"
+	"netio.patchman/internal/scoring"
 	"netio.patchman/internal/selfupdate"
 	"netio.patchman/internal/settings"
+	"netio.patchman/internal/software"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
 	"netio.patchman/internal/updatecheck"
@@ -68,6 +74,13 @@ type Options struct {
 	Channels *notify.Dispatcher
 	// SelfUpdate talks to the optional updater container (optional).
 	SelfUpdate *selfupdate.Manager
+	// EOL supplies the support calendars (optional; nil uses the built-in snapshot).
+	EOL *eol.Source
+	// Scores recomputes security scores after a weight change (optional).
+	Scores *scoring.Engine
+	// Rollouts pauses, resumes and cancels rolling updates (optional; nil
+	// uses one without notifications).
+	Rollouts *rollout.Runner
 }
 
 // Server is the dashboard in one language. New returns the default-language
@@ -112,8 +125,11 @@ var navigation = []navItem{
 	{"groups", "/groups", "tag"},
 	{"vulnerabilities", "/vulnerabilities", "shield"},
 	{"packages", "/packages", "package"},
+	{"software", "/software", "layers"},
 	{"reports", "/reports", "report"},
 	{"jobs", "/jobs", "jobs"},
+	{"rollouts", "/rollouts", "rollout"},
+	{"standards", "/standards", "check"},
 	{"schedules", "/schedules", "calendar"},
 	{"agents", "/agents", "agent"},
 	{"notifications", "/notifications", "bell"},
@@ -124,7 +140,7 @@ var navigation = []navItem{
 var pageNames = []string{
 	"login", "loginmfa", "setup", "error", "dashboard", "servers", "server", "vulnerabilities", "vulnerability",
 	"packages", "package", "jobs", "job", "schedules", "schedule", "agents", "notifications", "users", "user", "profile", "settings", "audit", "system",
-	"groups", "group", "report", "channels",
+	"groups", "group", "report", "channels", "software", "softwareitem", "hostscore", "scoresettings", "healthchecks", "rollouts", "rolloutnew", "rollout", "standards", "standard", "channel",
 }
 
 // New parses templates and returns the Server for the default language
@@ -302,6 +318,31 @@ func (s *Server) funcs() template.FuncMap {
 		"levelLabel":    func(level string) string { return l.T("level." + level) },
 		"has":           func(m map[int64]bool, id int64) bool { return m[id] },
 		"watching":      func(m map[string]bool, name string) bool { return m[name] },
+		"scoreBand":     score.Band,
+		"neg":           func(n int64) int64 { return -n },
+		"revertible":    revertible,
+		"previewLists": func(p *protocol.Preview) []previewList {
+			return []previewList{{"upgrades", p.Upgrades}, {"installs", p.Installs}, {"removals", p.Removals}, {"downgrades", p.Downgrades}}
+		},
+		"eolDays": func(r eol.Release) int { return r.DaysLeft(timeutil.Now()) },
+		"eolItem": func(m map[string]eol.Item, sw, cycle string) *eol.Item {
+			if it, ok := m[sw+" "+cycle]; ok {
+				return &it
+			}
+			return nil
+		},
+		"swName": func(id string) string {
+			if d, ok := software.ByID(id); ok {
+				return d.Name
+			}
+			return id
+		},
+		"swCategory": func(id string) string {
+			if d, ok := software.ByID(id); ok {
+				return d.Category
+			}
+			return ""
+		},
 		"star": func(d pageData, name string, on bool) starArgs {
 			return starArgs{Name: name, On: on, CSRF: d.CSRF, Back: d.Path}
 		},
@@ -404,7 +445,9 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("GET /servers.csv", view(s.serversCSV))
 	mux.Handle("POST /servers/bulk-jobs", operate(s.serversBulkJob))
 	mux.Handle("GET /servers/{id}", view(s.server))
+	mux.Handle("GET /servers/{id}/score", view(s.hostScore))
 	mux.Handle("POST /servers/{id}/jobs", operate(s.serverCreateJob))
+	mux.Handle("POST /servers/{id}/preview", operate(s.serverPreview))
 	mux.Handle("POST /servers/{id}/rescan", operate(s.serverRescan))
 	mux.Handle("POST /servers/{id}/notes", operate(s.serverNotes))
 	mux.Handle("POST /servers/{id}/exclude", operate(s.serverExclude))
@@ -431,12 +474,28 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("POST /packages/{name}/upgrade", operate(s.packageUpgrade))
 	mux.Handle("POST /packages/security-all", operate(s.packagesSecurityAll))
 	mux.Handle("POST /watched", view(s.watchToggle))
+	mux.Handle("GET /software", view(s.softwarePage))
+	mux.Handle("GET /software/{id}", view(s.softwareDetail))
 
 	mux.Handle("GET /jobs", view(s.jobs))
 	mux.Handle("GET /jobs/{id}", view(s.job))
 	mux.Handle("POST /jobs/{id}/cancel", operate(s.jobCancel))
 	mux.Handle("POST /jobs/{id}/retry", operate(s.jobRetry))
+	mux.Handle("POST /jobs/{id}/approve", operate(s.jobApprove))
+	mux.Handle("POST /jobs/{id}/rollback-check", operate(s.jobRollbackCheck))
+	mux.Handle("POST /jobs/{id}/rollback-apply", operate(s.jobRollbackApply))
 
+	mux.Handle("GET /rollouts", view(s.rollouts))
+	mux.Handle("GET /rollouts/new", operate(s.rolloutNew))
+	mux.Handle("POST /rollouts", operate(s.rolloutCreate))
+	mux.Handle("GET /rollouts/{id}", view(s.rolloutDetail))
+	mux.Handle("POST /rollouts/{id}/{action}", operate(s.rolloutAction))
+	mux.Handle("GET /standards", view(s.standards))
+	mux.Handle("GET /standards/new", admin(s.standardNew))
+	mux.Handle("POST /standards", admin(s.standardSave))
+	mux.Handle("GET /standards/{id}", admin(s.standardEdit))
+	mux.Handle("POST /standards/{id}", admin(s.standardSave))
+	mux.Handle("POST /standards/{id}/delete", admin(s.standardDelete))
 	mux.Handle("GET /schedules", view(s.schedules))
 	mux.Handle("GET /schedules/new", admin(s.scheduleNew))
 	mux.Handle("POST /schedules", admin(s.scheduleCreate))
@@ -482,8 +541,18 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("GET /settings/system/self-update/status", admin(s.selfUpdateStatus))
 	mux.Handle("POST /settings/backups/run", admin(s.backupRun))
 	mux.Handle("GET /settings/backups/{name}", admin(s.backupDownload))
+	mux.Handle("GET /settings/health", admin(s.healthChecks))
+	mux.Handle("POST /settings/health", admin(s.healthCheckCreate))
+	mux.Handle("GET /settings/health/{id}", admin(s.healthCheckEdit))
+	mux.Handle("POST /settings/health/{id}", admin(s.healthCheckUpdate))
+	mux.Handle("POST /settings/health/{id}/delete", admin(s.healthCheckDelete))
+	mux.Handle("GET /settings/score", admin(s.scoreSettings))
+	mux.Handle("POST /settings/score", admin(s.scoreSettingsSave))
 	mux.Handle("GET /settings/channels", admin(s.channels))
 	mux.Handle("POST /settings/channels", admin(s.channelCreate))
+	mux.Handle("GET /settings/channels/{id}", admin(s.channelDetail))
+	mux.Handle("POST /settings/channels/{id}/filter", admin(s.channelFilter))
+	mux.Handle("POST /settings/channels/{id}/deliveries/{delivery}/resend", admin(s.channelResend))
 	mux.Handle("POST /settings/channels/{id}/test", admin(s.channelTest))
 	mux.Handle("POST /settings/channels/{id}/toggle", admin(s.channelToggle))
 	mux.Handle("POST /settings/channels/{id}/delete", admin(s.channelDelete))
@@ -495,6 +564,12 @@ func (s *Server) mux() http.Handler {
 	mux.Handle("GET /api/v1/hosts/{id}", s.apiAuth(false, s.apiHost))
 	mux.Handle("GET /api/v1/hosts/{id}/findings", s.apiAuth(false, s.apiHostFindings))
 	mux.Handle("GET /api/v1/hosts/{id}/updates", s.apiAuth(false, s.apiHostUpdates))
+	mux.Handle("GET /api/v1/hosts/{id}/software", s.apiAuth(false, s.apiHostSoftware))
+	mux.Handle("GET /api/v1/software", s.apiAuth(false, s.apiSoftwareList))
+	mux.Handle("GET /api/v1/eol", s.apiAuth(false, s.apiEOL))
+	mux.Handle("GET /api/v1/hosts/{id}/score", s.apiAuth(false, s.apiHostScore))
+	mux.Handle("GET /api/v1/drift", s.apiAuth(false, s.apiDrift))
+	mux.Handle("GET /api/v1/rollouts", s.apiAuth(false, s.apiRollouts))
 	mux.Handle("POST /api/v1/hosts/{id}/jobs", s.apiAuth(true, s.apiCreateJob))
 	mux.Handle("GET /api/v1/vulnerabilities", s.apiAuth(false, s.apiVulnerabilities))
 	mux.Handle("GET /api/v1/vulnerabilities/{id}", s.apiAuth(false, s.apiVulnerability))

@@ -13,13 +13,14 @@
   {{if $d.Groups}}
   <div class="table-wrap">
   <table class="table">
-    <thead><tr><th>{{t "group.field.name"}}</th><th>{{t "group.field.description"}}</th><th class="num">{{t "group.field.hosts"}}</th><th>{{t "group.field.created_at"}}</th></tr></thead>
+    <thead><tr><th>{{t "group.field.name"}}</th><th>{{t "group.field.description"}}</th><th class="num">{{t "group.field.hosts"}}</th><th class="num">{{t "score.avg"}}</th><th class="num">{{t "score.min"}}</th><th>{{t "group.field.created_at"}}</th></tr></thead>
     <tbody>
     {{range $d.Groups}}
     <tr>
       <td><a href="/groups/{{.ID}}"><strong>{{.Name}}</strong></a></td>
       <td>{{if .Description}}{{.Description}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
       <td class="num"><a href="/servers?group={{.ID}}">{{.HostCount}}</a></td>
+      {{$sc := index $d.Scores .ID}}{{if $sc.Hosts}}<td class="num">{{template "score" $sc.Avg}}</td><td class="num">{{template "score" $sc.Min}}</td>{{else}}<td class="num">{{template "score" -1}}</td><td class="num">{{template "score" -1}}</td>{{end}}
       <td>{{date .CreatedAt}}</td>
     </tr>
     {{end}}

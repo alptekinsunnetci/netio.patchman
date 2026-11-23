@@ -168,6 +168,9 @@ func (r *Runner) Tick(ctx context.Context, now time.Time) {
 		r.Logger.Warn(r.L.T("log.schedule.failed"), slog.String("error", err.Error()))
 	}
 	for _, g := range groups {
+		if g.ScheduleID == 0 {
+			continue // rollout jobs: the rollout reports them
+		}
 		link := "/jobs?status=" + store.JobExpired
 		if g.ScheduleID != 0 {
 			link = "/schedules/" + strconv.FormatInt(g.ScheduleID, 10)

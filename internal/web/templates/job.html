@@ -40,6 +40,140 @@
   </dl>
 </section>
 
+{{with .Data.PreviewJob}}<p class="alert alert--info">{{t "preview.from_preview"}} <a href="/jobs/{{.}}">#{{.}}</a></p>{{end}}
+{{with .Data.Job.Data.Preview}}
+<section class="panel">
+  <div class="panel__head">
+    <h2 class="panel__title">{{if eq $root.Data.Job.Type "rollback"}}{{t "rollback.plan_title"}}{{else}}{{t "preview.title"}} · {{jobType (param $root.Data.Job.Params "preview_type")}}{{end}}</h2>
+    {{if and $root.User.CanOperate $root.Data.CanApprove}}
+    <form method="post" action="/jobs/{{$root.Data.Job.ID}}/approve" data-confirm="{{t "preview.approve_confirm"}}">{{template "csrf" $root}}
+      <button class="button button--primary" type="submit">{{template "icon" "play"}}{{t "preview.approve"}}</button></form>
+    {{end}}
+  </div>
+  {{if $root.Data.PreviewStale}}<p class="alert alert--warning">{{t "preview.stale"}}</p>{{end}}
+  {{if and (not $root.Data.CanApprove) $root.Data.ApproveBlocked}}<p class="alert alert--warning">{{$root.Data.ApproveBlocked}}</p>{{end}}
+  <div class="chips">
+    <span class="chip">{{t "preview.upgrades"}} <span>{{len .Upgrades}}</span></span>
+    <span class="chip">{{t "preview.installs"}} <span>{{len .Installs}}</span></span>
+    <span class="chip{{if .Removals}} chip--high{{end}}">{{t "preview.removals"}} <span>{{len .Removals}}</span></span>
+    {{if .Downgrades}}<span class="chip chip--high">{{t "preview.downgrades"}} <span>{{len .Downgrades}}</span></span>{{end}}
+    {{if .Kernel}}<span class="pill pill--warning">{{t "preview.kernel"}}</span>{{end}}
+    {{if .Reboot}}<span class="pill pill--warning">{{t "preview.reboot"}}</span>{{else}}<span class="pill pill--muted">{{t "preview.no_reboot"}}</span>{{end}}
+  </div>
+  <dl class="dl">
+    <dt>{{t "preview.download"}}</dt><dd>{{if ge .DownloadBytes 0}}{{size .DownloadBytes}}{{else}}<span class="muted">{{t "preview.unknown"}}</span>{{end}}</dd>
+    <dt>{{t "preview.disk"}}</dt><dd>{{if lt .DiskBytes -1}}{{t "preview.disk_freed" "size" (size (neg .DiskBytes))}}{{else if ge .DiskBytes 0}}{{t "preview.disk_used" "size" (size .DiskBytes)}}{{else}}<span class="muted">{{t "preview.unknown"}}</span>{{end}}</dd>
+    <dt>{{t "preview.free"}}</dt><dd>{{if ge .FreeBytes 0}}{{size .FreeBytes}}{{else}}<span class="muted">{{t "preview.unknown"}}</span>{{end}}</dd>
+    <dt>{{t "host.field.package_manager"}}</dt><dd class="mono">{{.PackageManager}}</dd>
+  </dl>
+  {{if .Conflicts}}<div class="alert alert--error"><strong>{{t "preview.conflicts"}}</strong><ul class="plain-list mono">{{range .Conflicts}}<li>{{.}}</li>{{end}}</ul></div>{{end}}
+</section>
+{{range (previewLists .)}}{{if .List}}{{$list := .List}}
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{t (printf "preview.%s" .Kind)}} <span class="muted">({{len $list}})</span></h2></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{t "package.field.name"}}</th><th>{{t "package.field.arch"}}</th><th>{{t "package.field.current"}}</th><th>{{t "preview.target"}}</th></tr></thead>
+    <tbody>{{range $list}}<tr><td class="mono">{{.Name}}</td><td class="mono cell-sub">{{.Arch}}</td><td class="mono">{{if .From}}{{.From}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td><td class="mono">{{if .To}}{{.To}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td></tr>{{end}}</tbody>
+  </table>
+  </div>
+</section>
+{{end}}{{end}}
+{{with .Plan}}<details class="details panel"><summary>{{t "preview.plan_output"}}</summary><pre class="output">{{.}}</pre></details>{{end}}
+{{end}}
+
+{{with .Data.Job.Data.Health}}
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "health.job_title"}}</h2>
+    {{with $root.Data.HealthOutcome}}<span class="pill {{if eq . "passed"}}pill--online{{else if eq . "regressed"}}pill--danger{{else}}pill--warning{{end}}">{{t (printf "health.outcome.%s" .)}}</span>{{end}}
+  </div>
+  {{if .Checks}}
+  <table class="table">
+    <thead><tr><th>{{t "health.field.name"}}</th><th>{{t "health.field.result"}}</th><th>{{t "health.field.value"}}</th></tr></thead>
+    <tbody>{{range .Checks}}<tr><td>{{.Name}} <span class="muted">{{t (printf "health.type.%s" .Type)}}</span></td><td>{{template "healthpill" .OK}}</td><td class="mono cell-sub">{{.Value}}{{with .Message}}<div>{{.}}</div>{{end}}</td></tr>{{end}}</tbody>
+  </table>
+  {{else}}
+  <table class="table">
+    <thead><tr><th>{{t "health.field.name"}}</th><th>{{t "health.before"}}</th><th>{{t "health.after"}}</th></tr></thead>
+    <tbody>{{range $root.Data.HealthRows}}<tr><td>{{.Name}}</td>
+      <td>{{with .Before}}{{template "healthpill" .OK}}<div class="mono cell-sub">{{.Value}}{{with .Message}} · {{.}}{{end}}</div>{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td>{{with .After}}{{template "healthpill" .OK}}<div class="mono cell-sub">{{.Value}}{{with .Message}} · {{.}}{{end}}</div>{{else}}<span class="muted">{{if $root.Data.Job.Data.Health.Aborted}}{{t "health.not_run"}}{{else}}{{t "common.empty"}}{{end}}</span>{{end}}</td></tr>{{end}}</tbody>
+  </table>
+  {{end}}
+</section>
+{{end}}
+
+{{with .Data.RollbackOf}}<p class="alert alert--info">{{t "rollback.of_job"}} <a href="/jobs/{{.}}">#{{.}}</a>{{with $root.Data.RollbackCheck}} · {{t "rollback.from_check"}} <a href="/jobs/{{.}}">#{{.}}</a>{{end}}</p>{{end}}
+{{with .Data.Job.Data.Rollback}}{{$j := $root.Data.Job}}{{$check := eq (param $j.Params "mode") "check"}}
+<form method="post" action="/jobs/{{$j.ID}}/rollback-apply" data-confirm="{{t "rollback.apply_confirm"}}">
+{{template "csrf" $root}}
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">{{if $check}}{{t "rollback.check_title"}}{{else}}{{t "rollback.apply_title"}}{{end}}</h2></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr>{{if $check}}<th class="check"></th>{{end}}<th>{{t "package.field.name"}}</th><th>{{t "rollback.field.installed"}}</th><th>{{t "rollback.field.target"}}</th><th>{{t "rollback.field.status"}}</th></tr></thead>
+    <tbody>
+    {{range $i, $it := .}}
+    <tr>
+      {{if $check}}<td class="check">{{if eq $it.Status "available"}}<input type="checkbox" name="pkg" value="{{$i}}" checked aria-label="{{$it.Name}}">{{end}}</td>{{end}}
+      <td class="mono">{{$it.Name}}{{with $it.Arch}} <span class="muted">{{.}}</span>{{end}}</td>
+      <td class="mono">{{$it.From}}</td>
+      <td class="mono">{{$it.To}}</td>
+      <td><span class="pill {{if or (eq $it.Status "available") (eq $it.Status "done")}}pill--online{{else if eq $it.Status "current"}}pill--muted{{else}}pill--danger{{end}}">{{t (printf "rollback.status.%s" $it.Status)}}</span>{{with $it.Message}}<div class="cell-sub">{{.}}</div>{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{if $check}}
+  <div class="panel__foot">
+    {{if $root.Data.RollbackApplied}}<p class="muted">{{t "rollback.already_applied"}} <a href="/jobs/{{$root.Data.RollbackApplied}}">#{{$root.Data.RollbackApplied}}</a></p>
+    {{else if $root.Data.RollbackBlocked}}<p class="muted">{{$root.Data.RollbackBlocked}}</p>
+    {{else if and $root.User.CanOperate (eq $j.Status "succeeded")}}
+    {{if and $j.Data.Preview $j.Data.Preview.Conflicts}}<p class="alert alert--error">{{t "preview.error.conflicts"}}</p>{{else}}
+    <label class="check-label"><input type="checkbox" name="hold" value="1" checked> {{t "rollback.hold"}}</label>
+    <div class="button-row"><button class="button button--primary" type="submit">{{template "icon" "refresh"}}{{t "rollback.apply"}}</button></div>
+    {{end}}{{end}}
+  </div>
+  {{end}}
+</section>
+</form>
+{{end}}
+
+{{with .Data.Changes}}{{$j := $root.Data.Job}}{{$canRB := and $root.User.CanOperate (not $root.Data.RollbackBlocked) (not $j.Active) (ne $j.Type "rollback")}}
+<form method="post" action="/jobs/{{$j.ID}}/rollback-check">
+{{template "csrf" $root}}
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">{{t "rollback.changes_title"}} <span class="muted">({{len .}})</span></h2>
+    <span class="pill pill--muted" title="{{t (printf "rollback.source_hint.%s" $root.Data.ChangesSource)}}">{{t (printf "rollback.source.%s" $root.Data.ChangesSource)}}</span>
+  </div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr>{{if $canRB}}<th class="check"><input type="checkbox" data-check-all="pkg" aria-label="{{t "common.select_all"}}"></th>{{end}}<th>{{t "package.field.name"}}</th><th>{{t "rollback.field.before"}}</th><th>{{t "rollback.field.after"}}</th><th>{{t "rollback.field.change"}}</th></tr></thead>
+    <tbody>
+    {{range $i, $c := .}}
+    <tr>
+      {{if $canRB}}<td class="check">{{if revertible $c}}<input type="checkbox" name="pkg" value="{{$i}}" aria-label="{{$c.Name}}">{{end}}</td>{{end}}
+      <td class="mono">{{$c.Name}}{{with $c.Arch}} <span class="muted">{{.}}</span>{{end}}</td>
+      <td class="mono">{{if $c.From}}{{$c.From}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td class="mono">{{if $c.To}}{{$c.To}}{{else}}<span class="muted">{{t "common.empty"}}</span>{{end}}</td>
+      <td class="cell-sub">{{if not $c.From}}{{t "rollback.kind.new"}}{{else if not $c.To}}{{t "rollback.kind.removed"}}{{else}}{{t "rollback.kind.changed"}}{{end}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  <div class="panel__foot">
+    {{if $canRB}}<div class="button-row"><button class="button" type="submit">{{template "icon" "refresh"}}{{t "rollback.check"}}</button></div>
+    <p class="field__hint">{{t "rollback.check_hint"}}</p>
+    {{else if and (ne $j.Type "rollback") $root.Data.RollbackBlocked}}<p class="muted">{{$root.Data.RollbackBlocked}}</p>{{end}}
+  </div>
+</section>
+</form>
+{{end}}
+
 <section class="panel">
   <h2 class="panel__title">{{t "job.field.output"}}</h2>
   {{if $j.Output}}<pre class="output">{{$j.Output}}</pre>

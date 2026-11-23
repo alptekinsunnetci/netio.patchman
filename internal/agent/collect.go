@@ -67,6 +67,8 @@ type Inventory struct {
 	Errors   []string
 	// KernelPatch is the live kernel patching service, nil when none.
 	KernelPatch *protocol.KernelPatch
+	// ServiceList is every service with its state; nil when unreadable.
+	ServiceList []protocol.Service
 }
 
 // Collect gathers packages, pending updates, the reboot flag and services
@@ -85,7 +87,11 @@ func (c Collector) Collect(ctx context.Context) Inventory {
 		kernelCareCovers(kp.EffectiveKernel, newestKernel(ctx, pkgs)) {
 		reboot = rpmNonKernelReboot(ctx)
 	}
-	return Inventory{Packages: pkgs, Updates: updates, Reboot: reboot || kernelPending, Services: services, Errors: errs, KernelPatch: kp}
+	list, err := ListServices(ctx)
+	if err != nil {
+		errs = append(errs, "services: "+err.Error())
+	}
+	return Inventory{Packages: pkgs, Updates: updates, Reboot: reboot || kernelPending, Services: services, Errors: errs, KernelPatch: kp, ServiceList: list}
 }
 
 // PendingUpdates lists pending updates without refreshing the package lists.

@@ -1,0 +1,39 @@
+{{define "body"}}{{template "shell" .}}{{end}}
+
+{{define "content"}}
+{{$d := .Data}}{{$root := .}}
+<nav class="breadcrumb"><a href="/settings">{{t "nav.settings"}}</a> / <span>{{t "score.settings_title"}}</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">{{t "score.settings_title"}}</h1>
+    <p class="pagehead__sub">{{t "score.settings_subtitle"}}</p>
+  </div>
+</header>
+
+<form class="form" method="post" action="/settings/score">
+  {{template "csrf" $root}}
+  <section class="panel">
+    <h2 class="panel__title">{{t "score.weights"}}</h2>
+    <p class="field__hint">{{t "score.how_body"}}</p>
+    <div class="form-grid">
+      {{range $d.Rows}}
+      <label class="field"><span class="field__label">{{t .Label}}</span>
+        <input class="field__input" type="number" name="{{.Field}}" min="0" max="{{printf "%g" .Max}}" step="0.1" value="{{printf "%g" .Value}}" required>
+        <span class="field__hint">{{t "score.default_value" "n" (printf "%g" .Default)}}</span></label>
+      {{end}}
+    </div>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">{{t "score.alert_title"}}</h2>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">{{t "score.alert_below"}}</span>
+        <input class="field__input" type="number" name="alert_below" min="0" max="100" value="{{$d.AlertBelow}}" required>
+        <span class="field__hint">{{t "score.alert_below_hint"}}</span></label>
+    </div>
+  </section>
+  <div class="button-row">
+    <button class="button button--primary" type="submit">{{t "common.save"}}</button>
+    <button class="button button--ghost" type="submit" name="reset" value="1" formnovalidate data-confirm="{{t "score.reset_confirm"}}">{{t "score.reset"}}</button>
+  </div>
+</form>
+{{end}}
