@@ -15,6 +15,10 @@ netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve
 > [!WARNING]
 > **Kullanım riski tamamen kullanıcıya aittir.** netio.patchman sunucularınızda paket güncelleyen, servisleri ve sunucuyu yeniden başlatan bir yazılımdır. "Olduğu gibi" sunulur ve hiçbir garanti verilmez. Kullanımdan doğabilecek veri kaybı, hizmet kesintisi, başarısız güncelleme, güvenlik açığı ve benzeri her türlü zarardan yazılımı kuran ve kullanan kişi ya da kurum sorumludur. Ayrıntılar: [Sorumluluk reddi](#sorumluluk-reddi).
 
+[![netio.patchman tanıtım videosu (1 dakika)](docs/images/video.png)](https://alptekinsunnetci.github.io/netio.patchman/)
+
+▶ **[Tanıtım videosunu izleyin](https://alptekinsunnetci.github.io/netio.patchman/)** (1 dakika) · [MP4 olarak indirin](docs/media/netio-patchman-tanitim.mp4)
+
 ![Gösterge paneli](docs/images/dashboard.png)
 
 ## İçindekiler

@@ -13,6 +13,10 @@ netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstell
 > [!WARNING]
 > **Die Nutzung erfolgt vollständig auf eigenes Risiko.** netio.patchman aktualisiert Pakete und startet Dienste und Server auf Ihren Maschinen neu. Die Software wird „wie besehen“ und ohne jede Gewährleistung bereitgestellt. Für alle Schäden aus der Nutzung, einschließlich Datenverlust, Dienstausfällen, fehlgeschlagener Updates und Sicherheitslücken, ist die Person oder Organisation verantwortlich, die die Software installiert und nutzt. Details: [Haftungsausschluss](#haftungsausschluss).
 
+[![netio.patchman Produktvideo (1 Minute)](docs/images/video.png)](https://alptekinsunnetci.github.io/netio.patchman/)
+
+▶ **[Produktvideo ansehen](https://alptekinsunnetci.github.io/netio.patchman/)** (1 Minute, auf Türkisch) · [MP4 herunterladen](docs/media/netio-patchman-tanitim.mp4)
+
 ![Dashboard](docs/images/dashboard.png)
 
 ## Inhalt
