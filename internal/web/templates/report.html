@@ -6,7 +6,7 @@
   <div>
     <h1 class="pagehead__title">{{t "report.title"}}{{with $d.Group}} · {{.Name}}{{end}}</h1>
     <p class="pagehead__sub">{{t "report.period" "from" $d.FromLabel "to" $d.ToLabel}} · {{if $d.Group}}{{t "report.scope_group" "count" (len $d.Hosts)}}{{else}}{{t "report.scope_all" "count" (len $d.Hosts)}}{{end}}</p>
-    <p class="report__meta">{{t "report.generated" "time" (long $d.GeneratedAt) "user" .User.Name}} · {{.Product}} {{.Version}}</p>
+    <p class="report__meta">{{t "report.generated" "time" (long $d.GeneratedAt) "user" .User.Name}} · {{.Product}} {{versionName .Version}}</p>
   </div>
   <div class="pagehead__actions">
     <button class="button button--primary" type="button" data-print>{{template "icon" "print"}}{{t "report.print"}}</button>

@@ -18,7 +18,7 @@
     <div class="sidebar__foot">
       <a class="navlink{{if eq $.Active "profile"}} is-active{{end}}" href="/profile">{{template "icon" "user"}}<span class="navlink__user"><span>{{.User.Name}}</span><small>{{roleLabel .User.Role}}</small></span></a>
       <form method="post" action="/logout">{{template "csrf" .}}<button class="navlink navlink--button" type="submit">{{template "icon" "logout"}}<span>{{t "nav.logout"}}</span></button></form>
-      <p class="sidebar__version">{{.Product}} {{.Version}}{{with .Update}} <a class="pill pill--warning" href="/settings/system#updates">{{t "update.sidebar" "latest" .Latest}}</a>{{end}}</p>
+      <p class="sidebar__version">{{.Product}} {{versionName .Version}}{{with .Update}} <a class="pill pill--warning" href="/settings/system#updates">{{t "update.sidebar" "latest" .Latest}}</a>{{end}}</p>
     </div>
   </aside>
   <main class="main" id="main">

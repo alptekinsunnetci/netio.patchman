@@ -297,6 +297,7 @@ docker compose up -d --build
 
 - The database schema is updated automatically at startup; still, take a backup first.
 - The version is read from the `VERSION` file in the repository.
+- The 1.x releases are code-named **gökalp**; the panel shows the name next to the version.
 - If **Settings → Agents → Update agents automatically** is on (the default), agents switch to the new version by themselves.
 
 ### 0.8.0: moving to PostgreSQL

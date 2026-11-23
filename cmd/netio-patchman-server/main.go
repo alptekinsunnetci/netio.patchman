@@ -69,7 +69,7 @@ func main() {
 	emailAddr := fs.String("email", "", boot.T("flag.email"))
 	_ = fs.Parse(args)
 	if *showVersion {
-		fmt.Printf("%s %s (%s)\n", brand.ServerBinary, version.Version, brand.Name)
+		fmt.Printf("%s %s %q (%s)\n", brand.ServerBinary, version.Version, version.CurrentCodename(), brand.Name)
 		return
 	}
 

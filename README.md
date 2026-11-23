@@ -295,7 +295,7 @@ docker compose up -d --build
 ```
 
 - Veritabanı şeması açılışta otomatik olarak güncellenir; yine de öncesinde yedek alın.
-- Sürüm, depodaki `VERSION` dosyasından okunur.
+- Sürüm, depodaki `VERSION` dosyasından okunur. 1.x sürümlerinin kod adı **gökalp**'tir; panelde sürüm numarasının yanında görünür.
 - **Sistem Ayarları → Ajanlar → Ajanları otomatik olarak güncelle** seçeneği açıksa (varsayılan) ajanlar yeni sürüme kendiliğinden geçer.
 
 ### 0.8.0: PostgreSQL'e geçiş

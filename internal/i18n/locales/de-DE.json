@@ -1977,5 +1977,6 @@
   "settings.section.inventory": "Inventar und EOL",
   "settings.section.backup": "Sicherung",
   "software.system_tools": "Systemwerkzeuge ({n})",
-  "host.security_updates_short": "{n} Sicherheit"
+  "host.security_updates_short": "{n} Sicherheit",
+  "version.with_codename": "{version} „{codename}“"
 }

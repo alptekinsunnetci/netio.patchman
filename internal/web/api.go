@@ -548,7 +548,7 @@ func (s *Server) metrics(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(&b, "%s%s %v\n", name, labels, v)
 	}
 	gauge("netio_patchman_info", "Server version.")
-	val("netio_patchman_info", `version="`+promLabel(version.Version)+`"`, 1)
+	val("netio_patchman_info", `version="`+promLabel(version.Version)+`",codename="`+promLabel(version.CurrentCodename())+`"`, 1)
 	gauge("netio_patchman_hosts", "Managed hosts by agent state.")
 	val("netio_patchman_hosts", `state="online"`, stats.Online)
 	val("netio_patchman_hosts", `state="offline"`, stats.Offline)

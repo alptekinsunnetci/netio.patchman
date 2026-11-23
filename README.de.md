@@ -297,6 +297,7 @@ docker compose up -d --build
 
 - Das Datenbankschema wird beim Start automatisch aktualisiert; erstellen Sie trotzdem vorher eine Sicherung.
 - Die Version wird aus der Datei `VERSION` im Repository gelesen.
+- Die 1.x-Versionen tragen den Codenamen **gökalp**; das Panel zeigt ihn neben der Versionsnummer.
 - Ist **Einstellungen → Agenten → Agenten automatisch aktualisieren** eingeschaltet (Standard), wechseln die Agenten selbst auf die neue Version.
 
 ### 0.8.0: Umstieg auf PostgreSQL

@@ -18,7 +18,7 @@
       <p class="auth__hint"><a href="/login">{{t "mfa.login.back"}}</a></p>
     </form>
     {{template "langlinks" .}}
-    <p class="auth__foot">{{.Product}} {{.Version}}</p>
+    <p class="auth__foot">{{.Product}} {{versionName .Version}}</p>
   </div>
 </div>
 {{end}}

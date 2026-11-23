@@ -34,5 +34,6 @@ func New(w io.Writer, component string, level slog.Leveler, format string) *slog
 		slog.String("app", brand.Name),
 		slog.String("component", component),
 		slog.String("version", version.Version),
+		slog.String("codename", version.CurrentCodename()),
 	)
 }

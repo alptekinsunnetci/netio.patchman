@@ -109,7 +109,7 @@ docker compose up -d --build</pre></div>
   {{else if .Latest}}<p class="alert alert--success">{{t "system.update.up_to_date"}}</p>{{end}}
   {{with .Error}}<p class="alert alert--error">{{t "system.update.last_error" "error" .}}</p>{{end}}
   <dl class="dl">
-    <dt>{{t "system.update.current"}}</dt><dd class="mono">{{.Current}}</dd>
+    <dt>{{t "system.update.current"}}</dt><dd class="mono">{{versionName .Current}}</dd>
     <dt>{{t "system.update.latest"}}</dt><dd class="mono">{{if .Latest}}{{.Latest}}{{else}}—{{end}}</dd>
     <dt>{{t "system.update.checked_at"}}</dt><dd>{{if .CheckedAt.IsZero}}{{t "system.update.never"}}{{else}}{{datetime .CheckedAt}}{{end}}</dd>
   </dl>

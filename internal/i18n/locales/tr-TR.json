@@ -2034,5 +2034,6 @@
   "settings.section.inventory": "Envanter ve EOL",
   "settings.section.backup": "Yedekleme",
   "software.system_tools": "Sistem araçları ({n})",
-  "host.security_updates_short": "{n} güvenlik"
+  "host.security_updates_short": "{n} güvenlik",
+  "version.with_codename": "{version} “{codename}”"
 }

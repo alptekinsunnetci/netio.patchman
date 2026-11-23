@@ -37,7 +37,7 @@ func agentMain(ctx context.Context, logOut io.Writer) int {
 	_ = fs.Parse(os.Args[1:])
 
 	if *showVersion {
-		fmt.Printf("%s %s (%s)\n", brand.AgentBinary, version.Version, brand.Name)
+		fmt.Printf("%s %s %q (%s)\n", brand.AgentBinary, version.Version, version.CurrentCodename(), brand.Name)
 		return 0
 	}
 

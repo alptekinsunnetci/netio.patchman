@@ -125,7 +125,7 @@ scrape_configs:
 
 | Metrik | Etiketler | Açıklama |
 |---|---|---|
-| `netio_patchman_info` | `version` | Sunucu sürümü (değer 1) |
+| `netio_patchman_info` | `version`, `codename` | Sunucu sürümü ve ana sürümün kod adı (değer 1) |
 | `netio_patchman_hosts` | `state` (`online`, `offline`, `never_seen`) | Sunucu sayısı |
 | `netio_patchman_hosts_reboot_required` | — | Yeniden başlatma bekleyen sunucular |
 | `netio_patchman_vulnerabilities` | `severity` | Açık bulgusu olan farklı CVE sayısı |

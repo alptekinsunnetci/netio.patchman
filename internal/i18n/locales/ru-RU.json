@@ -1977,5 +1977,6 @@
   "settings.section.inventory": "Инвентаризация и EOL",
   "settings.section.backup": "Резервное копирование",
   "software.system_tools": "Системные инструменты: {n}",
-  "host.security_updates_short": "безопасности: {n}"
+  "host.security_updates_short": "безопасности: {n}",
+  "version.with_codename": "{version} «{codename}»"
 }

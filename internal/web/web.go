@@ -362,6 +362,13 @@ func (s *Server) funcs() template.FuncMap {
 			return id
 		},
 		"swCatalogSize": func() int { return len(software.Catalog) },
+		// versionName is a version with its release name: 1.0.5 “gökalp”.
+		"versionName": func(v string) string {
+			if c := version.Codename(v); c != "" {
+				return l.T("version.with_codename", "version", v, "codename", c)
+			}
+			return v
+		},
 		// swRow passes a host software row to the "swrow" template.
 		"swRow": func(r store.HostSoftwareRow, hostID int64, eol map[string]eol.Item) map[string]any {
 			return map[string]any{"R": r, "HostID": hostID, "EOL": eol}
