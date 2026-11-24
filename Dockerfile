@@ -4,7 +4,7 @@
 # değiştirilebilir. İmaj, sunucunun yanında amd64 ve arm64 Linux ile amd64
 # Windows ajan dosyalarını da içerir; ajanlar /downloads/agent/ adresinden indirilir.
 
-FROM golang:1.26-alpine AS build
+FROM golang:1.27-alpine AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
