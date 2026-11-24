@@ -1,5 +1,7 @@
 # netio.patchman Kurulum ve İşletim Kılavuzu
 
+🇹🇷 **Türkçe** · 🇬🇧 [English](installation.md) · ⏱️ Okuma süresi: yaklaşık 20 dakika
+
 Bu belge, netio.patchman sunucusunun üretim ortamına kurulmasını, ajanların dağıtılmasını, yedekleme ve sürüm yükseltme işlemlerini anlatır.
 
 ## 1. Sistem gereksinimleri

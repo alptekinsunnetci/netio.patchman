@@ -2,9 +2,11 @@
 
 **Централизованное управление безопасностью, обновлениями и мониторингом серверов Linux и Windows**
 
+[![CI](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/ci.yml/badge.svg)](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/ci.yml) [![Security](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/security.yml/badge.svg)](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/security.yml) [![Release](https://img.shields.io/github/v/release/alptekinsunnetci/netio.patchman)](https://github.com/alptekinsunnetci/netio.patchman/releases/latest)
+
 🇬🇧 [English](README.md) · 🇹🇷 [Türkçe](README.tr.md) · 🇩🇪 [Deutsch](README.de.md) · 🇷🇺 **Русский**
 
-📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Архитектура и модель безопасности (на английском)](docs/architecture-and-security.md) · ⏱️ Время чтения: около 25 мин.
+📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Архитектура и модель безопасности (на английском)](docs/architecture-and-security.md) · 🧪 [Демо](https://alptekinsunnetci.github.io/netio.patchman/demo/en/dashboard.html) · 🤝 [Участие в разработке (на английском)](CONTRIBUTING.md) · ⏱️ Время чтения: около 25 мин.
 
 netio.patchman — самостоятельно размещаемая (self-hosted) платформа для мониторинга и управления уязвимостями и обновлениями пакетов сотен серверов Linux и Windows из одной панели.
 
@@ -78,7 +80,7 @@ netio.patchman — самостоятельно размещаемая (self-hos
 - **Доступ по группам:** операторов и наблюдателей можно ограничить серверами определённых групп (команды или клиенты).
 - **Перезагрузка в расписаниях (по выбору):** серверы, которым после обновления нужна перезагрузка, перезагружаются, пока открыто окно обслуживания (для каждого правила, по умолчанию выключено).
 - **Сторонние программы Windows:** на серверах с winget показываются и устанавливаются обновления программ вроде Chrome, 7-Zip или Git.
-- **REST API и Prometheus:** API-ключи читают серверы, уязвимости, обновления и задания и запускают задания обновления; `/metrics` отдаёт метрики для Grafana/Prometheus. См. [docs/api.md](docs/api.md).
+- **REST API и Prometheus:** API-ключи читают серверы, уязвимости, обновления и задания и запускают задания обновления; `/metrics` отдаёт метрики для Grafana/Prometheus. См. [docs/api.en.md](docs/api.en.md) (на английском).
 
 ### Поддерживаемые системы
 
@@ -171,7 +173,7 @@ CloudLinux 8 и 9 собираются из исходников AlmaLinux и с
 
 - Сервер Linux с Docker Engine 24 или новее и Docker Compose v2.24 или новее.
 - `git`.
-- **Доступ в интернет:** при первой сборке загружаются образы Docker и модули Go. Для данных об уязвимостях также нужен доступ по HTTPS к `api.osv.dev` и `www.cisa.gov`. Для сред без доступа в интернет см. [docs/kurulum.md](docs/kurulum.md#8-internet-erişimi-olmayan-ortamlar) (на турецком).
+- **Доступ в интернет:** при первой сборке загружаются образы Docker и модули Go. Для данных об уязвимостях также нужен доступ по HTTPS к `api.osv.dev` и `www.cisa.gov`. Для сред без доступа в интернет см. [docs/installation.md](docs/installation.md#8-networks-without-internet-access).
 - **Рекомендуемые ресурсы:** до 100 серверов: 1 ядро CPU, 1 ГБ ОЗУ и 5 ГБ диска.
 
 Если Docker не установлен, его можно установить официальным сценарием Docker:
@@ -227,7 +229,7 @@ docker compose logs -f server     # журналы (выход — Ctrl+C)
 
 ### HTTPS
 
-Агенты и браузеры должны подключаться к серверу по HTTPS. Рекомендуется поставить перед сервером обратный прокси, например nginx, Caddy или HAProxy. В этом случае включите в панели параметр **Доверять заголовкам X-Forwarded-For и X-Forwarded-Proto обратного прокси**. Примеры конфигураций и завершение TLS на самом сервере: см. [docs/kurulum.md](docs/kurulum.md#3-tls-ve-ters-vekil) (на турецком).
+Агенты и браузеры должны подключаться к серверу по HTTPS. Рекомендуется поставить перед сервером обратный прокси, например nginx, Caddy или HAProxy. В этом случае включите в панели параметр **Доверять заголовкам X-Forwarded-For и X-Forwarded-Proto обратного прокси**. Примеры конфигураций и завершение TLS на самом сервере: см. [docs/installation.md](docs/installation.md#3-tls-and-reverse-proxy).
 
 **Смена порта:** укажите `PATCHMAN_PUBLISH_PORT=8899` в `.env` и снова выполните `docker compose up -d`. Если обратный прокси работает на той же машине, используйте `PATCHMAN_PUBLISH_PORT=127.0.0.1:8899`, чтобы панель не была доступна снаружи по незашифрованному HTTP. Не меняйте порт через `PATCHMAN_HTTP_ADDR`: этот параметр предназначен для установок без Docker и игнорируется Docker Compose.
 
@@ -272,7 +274,7 @@ systemctl status netio-patchman-agent
 journalctl -u netio-patchman-agent -f
 ```
 
-Массовое развёртывание (Ansible и др.), установка без интернета, параметры агента и удаление: см. [docs/kurulum.md](docs/kurulum.md#4-ajan-kurulumu) (на турецком).
+Массовое развёртывание (Ansible и др.), установка без интернета, параметры агента и удаление: см. [docs/installation.md](docs/installation.md#4-installing-agents).
 
 ### Серверы Windows
 
@@ -318,7 +320,7 @@ docker compose up -d --build
 
 - **Остаться на SQLite:** добавьте в `.env` строку `PATCHMAN_DATABASE_URL=sqlite`. Контейнер PostgreSQL продолжит работать, но не используется.
 - **Внешний PostgreSQL:** добавьте в `.env` `PATCHMAN_DATABASE_URL=postgres://пользователь:пароль@сервер:5432/база?sslmode=require`. Если эта база пуста, данные SQLite будут перенесены туда.
-- **Возврат:** запустите с `PATCHMAN_DATABASE_URL=sqlite` и восстановите свежую резервную копию командой `restore`; шаги описаны в [docs/kurulum.md](docs/kurulum.md#22-veritabanı) (на турецком).
+- **Возврат:** запустите с `PATCHMAN_DATABASE_URL=sqlite` и восстановите свежую резервную копию командой `restore`; шаги описаны в [docs/installation.md](docs/installation.md#22-database).
 
 ### Обновление из панели (необязательно)
 
@@ -337,7 +339,7 @@ docker compose up -d --build
 
 ### Резервное копирование и восстановление
 
-**Автоматическое резервное копирование** включено по умолчанию: база данных ежедневно в 02:30 копируется в `/data/backups/`, хранятся 7 последних копий. Время, количество копий и включение находятся в разделе **Настройки → Автоматическое резервное копирование**; там же кнопка **Создать копию сейчас** и ссылки для скачивания. По умолчанию копии лежат в том же томе Docker, что и база данных; регулярно копируйте их в другое место или записывайте на отдельный диск через `PATCHMAN_BACKUP_DIR` (см. [docs/kurulum.md](docs/kurulum.md), раздел 5.1, на турецком).
+**Автоматическое резервное копирование** включено по умолчанию: база данных ежедневно в 02:30 копируется в `/data/backups/`, хранятся 7 последних копий. Время, количество копий и включение находятся в разделе **Настройки → Автоматическое резервное копирование**; там же кнопка **Создать копию сейчас** и ссылки для скачивания. По умолчанию копии лежат в том же томе Docker, что и база данных; регулярно копируйте их в другое место или записывайте на отдельный диск через `PATCHMAN_BACKUP_DIR` (см. [docs/installation.md](docs/installation.md#51-automatic-backups), на английском).
 
 Согласованную копию можно создать и вручную:
 
@@ -419,7 +421,7 @@ docker compose down -v     # удаляет контейнер и базу да�
 
 ## REST API и Prometheus
 
-Создайте ключ в разделе **Профиль → API-ключи**. Ключ действует с ролью и доступом к серверам создавшего его пользователя; ключи только для чтения ничего не изменяют. Конечные точки, поля и примеры: [docs/api.md](docs/api.md) (на турецком).
+Создайте ключ в разделе **Профиль → API-ключи**. Ключ действует с ролью и доступом к серверам создавшего его пользователя; ключи только для чтения ничего не изменяют. Конечные точки, поля и примеры: [docs/api.en.md](docs/api.en.md) (на английском).
 
 ```sh
 curl -H "Authorization: Bearer npat_..." https://patchman.your-domain/api/v1/hosts
@@ -450,7 +452,7 @@ scrape_configs:
 | Сканирование ничего не находит | Есть ли у центрального сервера доступ к `api.osv.dev`? Ищите ошибки OSV в журналах. |
 | Письма не приходят | Отправьте тестовое письмо со страницы **Конфигурация сервера**; ошибка будет показана в панели. |
 
-Подробнее (на турецком): [docs/kurulum.md](docs/kurulum.md) (установка и эксплуатация), [docs/kullanim.md](docs/kullanim.md) (работа с панелью).
+Подробнее (на английском): [docs/installation.md](docs/installation.md) (установка и эксплуатация), [docs/usage.md](docs/usage.md) (работа с панелью), [docs/api.en.md](docs/api.en.md) (REST API и Prometheus). Турецкие версии: [kurulum.md](docs/kurulum.md), [kullanim.md](docs/kullanim.md), [api.md](docs/api.md).
 
 ## Язык и локализация
 
@@ -472,6 +474,8 @@ scrape_configs:
 - Границы доверия, модель угроз и рекомендации по усилению защиты: [Архитектура и модель безопасности](docs/architecture-and-security.md) (на английском, [на турецком](docs/mimari-ve-guvenlik.md)).
 
 ## Разработка
+
+Настройка окружения, запуск тестов и правила проекта описаны в [CONTRIBUTING.md](CONTRIBUTING.md) (на английском). Задачи для начинающих отмечены меткой [good first issue](https://github.com/alptekinsunnetci/netio.patchman/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
 Требование: Go 1.26 или новее.
 

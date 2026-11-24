@@ -1,0 +1,63 @@
+name: Feature request
+description: Suggest a new feature or an improvement (Türkçe de yazabilirsiniz).
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Please check the [open issues](https://github.com/alptekinsunnetci/netio.patchman/issues) and the [wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) first.
+        Bu formu Türkçe de doldurabilirsiniz.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what makes it hard today? Describe the situation, not the solution.
+      placeholder: "Every month I have to export ... by hand because ..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like netio.patchman to behave? Screens, settings, API fields, agent behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - Web interface
+        - Agent (Linux)
+        - Agent (Windows)
+        - Vulnerability scanning
+        - Updates, schedules, rollouts
+        - Compliance & audit
+        - Notifications and integrations
+        - REST API and metrics
+        - Installation and operations
+        - Translations
+        - Documentation
+    validations:
+      required: true
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Would you like to work on it?
+      options:
+        - "Yes, I would like to send a pull request"
+        - "Maybe, with some guidance"
+        - "No"
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched the existing issues and did not find this request.
+          required: true

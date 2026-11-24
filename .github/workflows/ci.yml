@@ -1,0 +1,216 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GOTOOLCHAIN: local
+  # Latest patch release of the go.mod language version (standard library fixes).
+  GO_VERSION: "1.26.x"
+
+jobs:
+  lint:
+    name: Format, vet, modules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+      - name: gofmt
+        run: |
+          out="$(gofmt -l cmd internal deploy)"
+          if [ -n "$out" ]; then echo "::error::Run gofmt -w on:"; echo "$out"; exit 1; fi
+      - name: go vet (Linux and Windows)
+        run: |
+          go vet ./...
+          GOOS=windows go vet ./...
+      - name: go.mod and go.sum are tidy
+        run: go mod tidy -diff
+      - name: Module checksums
+        run: go mod verify
+      - name: Shell scripts and unit files use LF line endings
+        run: |
+          bad="$(grep -lI $'\r' deploy/agent/*.sh deploy/agent/*.service deploy/agent/*.openrc deploy/updater/*.sh scripts/*.sh scripts/ci/*.sh || true)"
+          if [ -n "$bad" ]; then echo "::error::CRLF line endings in:"; echo "$bad"; exit 1; fi
+
+  test-sqlite:
+    name: Tests (SQLite, race detector)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+      - name: go test -race
+        env:
+          CGO_ENABLED: "1"
+        run: go test -race -count=1 -timeout 30m ./...
+
+  test-postgres:
+    name: Tests (PostgreSQL 17)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: np
+          POSTGRES_PASSWORD: np-ci
+          POSTGRES_DB: np
+          POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U np" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+      - name: go test (every test gets its own schema)
+        env:
+          PATCHMAN_TEST_DATABASE_URL: postgres://np:np-ci@127.0.0.1:5432/np?sslmode=disable
+        run: go test -count=1 -timeout 30m ./...
+
+  test-windows:
+    name: Tests (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+      - name: go test
+        run: go test -count=1 -timeout 30m ./...
+
+  build:
+    name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { goos: linux, goarch: amd64, ext: "" }
+          - { goos: linux, goarch: arm64, ext: "" }
+          - { goos: windows, goarch: amd64, ext: ".exe" }
+    env:
+      CGO_ENABLED: "0"
+      GOOS: ${{ matrix.goos }}
+      GOARCH: ${{ matrix.goarch }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+      - name: Build every package
+        run: go build ./...
+      - name: Build the agent and the server
+        run: |
+          version="$(tr -d ' \r\n' < VERSION)-ci.${GITHUB_SHA::7}"
+          flags="-s -w -X netio.patchman/internal/version.Version=${version}"
+          mkdir -p out
+          go build -trimpath -ldflags "$flags" -o "out/netio-patchman-agent-${GOOS}-${GOARCH}${{ matrix.ext }}" ./cmd/netio-patchman-agent
+          go build -trimpath -ldflags "$flags" -o "out/netio-patchman-server-${GOOS}-${GOARCH}${{ matrix.ext }}" ./cmd/netio-patchman-server
+          (cd out && sha256sum * | tee SHA256SUMS)
+      - name: The agent runs (native target only)
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
+        run: out/netio-patchman-agent-linux-amd64 -version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: out/
+          retention-days: 7
+
+  docker:
+    name: Docker image and Compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the server image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: netio-patchman-server:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: The image contains the server and the agents
+        run: |
+          docker run --rm --entrypoint /usr/local/bin/netio-patchman-server netio-patchman-server:latest -version
+          docker create --name probe netio-patchman-server:latest >/dev/null
+          docker cp probe:/usr/share/netio-patchman/agent ./agent-dist
+          docker rm probe >/dev/null
+          ls -l agent-dist
+          test -s agent-dist/netio-patchman-agent-linux-amd64
+          test -s agent-dist/netio-patchman-agent-linux-arm64
+          test -s agent-dist/netio-patchman-agent-windows-amd64.exe
+          (cd agent-dist && sha256sum -c *.sha256)
+      - name: Compose configuration is valid (default and updater profile)
+        run: |
+          docker compose config --quiet
+          docker compose --profile updater config --quiet
+          docker compose --profile updater build updater
+      - name: Compose stack starts and becomes healthy
+        env:
+          PATCHMAN_PUBLISH_PORT: "18080"
+          PATCHMAN_UPDATE_CHECK_URL: "off"
+        run: |
+          docker compose up -d --no-build
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:18080/healthz | tee /tmp/health.json | grep -q '"status":"ok"'; then break; fi
+            sleep 3
+          done
+          cat /tmp/health.json; echo
+          grep -q '"status":"ok"' /tmp/health.json
+          curl -fsS -o /dev/null -w 'setup page: %{http_code}\n' http://127.0.0.1:18080/setup
+          docker compose ps
+      - name: Compose logs
+        if: always()
+        run: docker compose logs --no-color --tail 200
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v
+
+  upgrade-restore:
+    name: Upgrade, migration and restore
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: np
+          POSTGRES_PASSWORD: np-ci
+          POSTGRES_DB: np
+          POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U np" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+      - name: Upgrade from earlier releases, back up and restore
+        env:
+          PGHOST: 127.0.0.1
+          PGUSER: np
+          PGPASSWORD: np-ci
+        run: bash scripts/ci/upgrade-restore.sh

@@ -2,9 +2,11 @@
 
 **Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi**
 
+[![CI](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/ci.yml/badge.svg)](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/ci.yml) [![Security](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/security.yml/badge.svg)](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/security.yml) [![Release](https://img.shields.io/github/v/release/alptekinsunnetci/netio.patchman)](https://github.com/alptekinsunnetci/netio.patchman/releases/latest)
+
 🇬🇧 [English](README.md) · 🇹🇷 **Türkçe** · 🇩🇪 [Deutsch](README.de.md) · 🇷🇺 [Русский](README.ru.md)
 
-📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Mimari ve güvenlik modeli](docs/mimari-ve-guvenlik.md) · ⏱️ Okuma süresi: yaklaşık 23 dakika
+📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Mimari ve güvenlik modeli](docs/mimari-ve-guvenlik.md) · 🧪 [Canlı demo](https://alptekinsunnetci.github.io/netio.patchman/demo/tr/dashboard.html) · 🤝 [Katkı rehberi](CONTRIBUTING.tr.md) · ⏱️ Okuma süresi: yaklaşık 23 dakika
 
 netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve paket güncellemelerini tek bir panelden izlemenizi ve yönetmenizi sağlayan, kendi altyapınızda çalışan (self-hosted) bir platformdur.
 
@@ -447,7 +449,7 @@ scrape_configs:
 | Açık taraması sonuç vermiyor | Merkezi sunucunun `api.osv.dev` adresine erişimi var mı? Günlüklerde OSV hatası arayın. |
 | E-posta gelmiyor | **Sunucu yapılandırması** sayfasından deneme e-postası gönderin; hata mesajı panelde gösterilir. |
 
-Ayrıntılı bilgi: [docs/kurulum.md](docs/kurulum.md) (kurulum ve işletim), [docs/kullanim.md](docs/kullanim.md) (panel kullanımı).
+Ayrıntılı bilgi: [docs/kurulum.md](docs/kurulum.md) (kurulum ve işletim), [docs/kullanim.md](docs/kullanim.md) (panel kullanımı), [docs/api.md](docs/api.md) (REST API ve Prometheus). İngilizce sürümleri: [installation.md](docs/installation.md), [usage.md](docs/usage.md), [api.en.md](docs/api.en.md).
 
 ## Dil ve yerelleştirme
 
@@ -468,6 +470,8 @@ Ayrıntılı bilgi: [docs/kurulum.md](docs/kurulum.md) (kurulum ve işletim), [d
 - Bileşenlerin birbirine nasıl güvendiği, tehdit modeli ve sıkılaştırma listesi: [Mimari ve güvenlik modeli](docs/mimari-ve-guvenlik.md).
 
 ## Geliştirme
+
+Geliştirme ortamının kurulumu, testlerin çalıştırılması ve proje kuralları [CONTRIBUTING.tr.md](CONTRIBUTING.tr.md) içindedir. Başlangıç için uygun konular [good first issue](https://github.com/alptekinsunnetci/netio.patchman/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) etiketini taşır.
 
 Gereksinim: Go 1.26 veya üzeri.
 

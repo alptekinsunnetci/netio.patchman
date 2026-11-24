@@ -1,0 +1,51 @@
+name: Bug report
+description: Something does not work as documented (Türkçe de yazabilirsiniz).
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Security issues:** do not report them here; see [Reporting a vulnerability](https://github.com/alptekinsunnetci/netio.patchman/blob/main/docs/architecture-and-security.md#12-reporting-a-vulnerability).
+        Please remove host names, IP addresses, tokens and other private data from logs before posting. Bu formu Türkçe de doldurabilirsiniz.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: netio.patchman version
+      description: Shown at the bottom of the sidebar, or `netio-patchman-server -version`.
+      placeholder: 1.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      options: [PostgreSQL (Docker Compose default), External PostgreSQL, SQLite]
+  - type: input
+    id: agent
+    attributes:
+      label: Affected agents (if any)
+      description: Operating system, version and agent version, e.g. "Ubuntu 24.04, agent 1.1.0" or "Windows Server 2022, agent 1.0.5".
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "Server: `docker compose logs server`. Agent: `journalctl -u netio-patchman-agent` or `C:\\ProgramData\\netio-patchman\\agent.log`."
+      render: text

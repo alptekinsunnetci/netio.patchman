@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation and wiki
+    url: https://github.com/alptekinsunnetci/netio.patchman/wiki
+    about: Installation, agents, updates, troubleshooting and FAQ.
+  - name: Live demo
+    url: https://alptekinsunnetci.github.io/netio.patchman/demo/
+    about: Click through the panel with sample data before asking how something looks.
+  - name: Security issues
+    url: https://github.com/alptekinsunnetci/netio.patchman/blob/main/docs/architecture-and-security.md#12-reporting-a-vulnerability
+    about: Report vulnerabilities privately, never in a public issue.

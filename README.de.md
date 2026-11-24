@@ -2,9 +2,11 @@
 
 **Zentrale Sicherheits-, Update- und Überwachungsverwaltung für Linux- und Windows-Server**
 
+[![CI](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/ci.yml/badge.svg)](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/ci.yml) [![Security](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/security.yml/badge.svg)](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/security.yml) [![Release](https://img.shields.io/github/v/release/alptekinsunnetci/netio.patchman)](https://github.com/alptekinsunnetci/netio.patchman/releases/latest)
+
 🇬🇧 [English](README.md) · 🇹🇷 [Türkçe](README.tr.md) · 🇩🇪 **Deutsch** · 🇷🇺 [Русский](README.ru.md)
 
-📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Architektur & Sicherheitsmodell (Englisch)](docs/architecture-and-security.md) · ⏱️ Lesezeit: etwa 26 Minuten
+📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Architektur & Sicherheitsmodell (Englisch)](docs/architecture-and-security.md) · 🧪 [Live-Demo](https://alptekinsunnetci.github.io/netio.patchman/demo/en/dashboard.html) · 🤝 [Mitwirken (Englisch)](CONTRIBUTING.md) · ⏱️ Lesezeit: etwa 26 Minuten
 
 netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstellen und Paketupdates von Hunderten Linux- und Windows-Servern über ein einziges Dashboard überwachen und verwalten.
 
@@ -78,7 +80,7 @@ netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstell
 - **Gruppenbasierter Zugriff:** Operatoren und Betrachter lassen sich auf die Server bestimmter Gruppen beschränken (Teams oder Kunden).
 - **Optionaler Neustart in Zeitplänen:** Server, die nach dem Update einen Neustart brauchen, können bei offenem Wartungsfenster neu gestartet werden (je Regel, standardmäßig aus).
 - **Windows-Programme von Drittanbietern:** Auf Servern mit winget werden Updates von Programmen wie Chrome, 7-Zip oder Git angezeigt und installiert.
-- **REST-API und Prometheus:** API-Schlüssel lesen Server, Schwachstellen, Updates und Aufträge und starten Update-Aufträge; `/metrics` liefert Metriken für Grafana/Prometheus. Siehe [docs/api.md](docs/api.md).
+- **REST-API und Prometheus:** API-Schlüssel lesen Server, Schwachstellen, Updates und Aufträge und starten Update-Aufträge; `/metrics` liefert Metriken für Grafana/Prometheus. Siehe [docs/api.en.md](docs/api.en.md) (Englisch).
 
 ### Unterstützte Systeme
 
@@ -171,7 +173,7 @@ Auf verwalteten Servern müssen keine eingehenden Ports geöffnet werden.
 
 - Ein Linux-Server mit Docker Engine 24 oder neuer und Docker Compose v2.24 oder neuer.
 - `git`.
-- **Internetzugang:** Der erste Build lädt Docker-Images und Go-Module herunter. Für Schwachstellendaten ist außerdem HTTPS-Zugriff auf `api.osv.dev` und `www.cisa.gov` nötig. Für Umgebungen ohne Internetzugang siehe [docs/kurulum.md](docs/kurulum.md#8-internet-erişimi-olmayan-ortamlar) (Türkisch).
+- **Internetzugang:** Der erste Build lädt Docker-Images und Go-Module herunter. Für Schwachstellendaten ist außerdem HTTPS-Zugriff auf `api.osv.dev` und `www.cisa.gov` nötig. Für Umgebungen ohne Internetzugang siehe [docs/installation.md](docs/installation.md#8-networks-without-internet-access).
 - **Empfohlene Ressourcen:** bis 100 Server: 1 CPU-Kern, 1 GB RAM und 5 GB Festplatte.
 
 Ist Docker nicht installiert, können Sie es mit dem offiziellen Skript von Docker installieren:
@@ -227,7 +229,7 @@ Die Installation ist abgeschlossen. Als Nächstes installieren Sie den Agenten a
 
 ### HTTPS
 
-Agenten und Browser sollten sich per HTTPS mit dem Server verbinden. Empfohlen ist ein Reverse-Proxy wie nginx, Caddy oder HAProxy vor dem Server. Schalten Sie in diesem Fall im Dashboard **Den Headern X-Forwarded-For und X-Forwarded-Proto eines Reverse-Proxys vertrauen** ein. Beispielkonfigurationen und TLS direkt im Server: siehe [docs/kurulum.md](docs/kurulum.md#3-tls-ve-ters-vekil) (Türkisch).
+Agenten und Browser sollten sich per HTTPS mit dem Server verbinden. Empfohlen ist ein Reverse-Proxy wie nginx, Caddy oder HAProxy vor dem Server. Schalten Sie in diesem Fall im Dashboard **Den Headern X-Forwarded-For und X-Forwarded-Proto eines Reverse-Proxys vertrauen** ein. Beispielkonfigurationen und TLS direkt im Server: siehe [docs/installation.md](docs/installation.md#3-tls-and-reverse-proxy).
 
 **Port ändern:** Setzen Sie `PATCHMAN_PUBLISH_PORT=8899` in `.env` und führen Sie `docker compose up -d` erneut aus. Läuft der Reverse-Proxy auf derselben Maschine, verwenden Sie `PATCHMAN_PUBLISH_PORT=127.0.0.1:8899`, damit das Dashboard nicht unverschlüsselt per HTTP erreichbar ist. Ändern Sie den Port nicht mit `PATCHMAN_HTTP_ADDR`; diese Einstellung ist für Installationen ohne Docker gedacht und wird von Docker Compose ignoriert.
 
@@ -272,7 +274,7 @@ systemctl status netio-patchman-agent
 journalctl -u netio-patchman-agent -f
 ```
 
-Massenverteilung (Ansible usw.), Offline-Installation, Agentenoptionen und Entfernung: siehe [docs/kurulum.md](docs/kurulum.md#4-ajan-kurulumu) (Türkisch).
+Massenverteilung (Ansible usw.), Offline-Installation, Agentenoptionen und Entfernung: siehe [docs/installation.md](docs/installation.md#4-installing-agents).
 
 ### Windows-Server
 
@@ -318,7 +320,7 @@ Schlägt ein Schritt fehl, bleibt PostgreSQL leer, die SQLite-Datei unverändert
 
 - **Bei SQLite bleiben:** `PATCHMAN_DATABASE_URL=sqlite` in `.env` eintragen. Der PostgreSQL-Container läuft weiter, wird aber nicht verwendet.
 - **Externes PostgreSQL:** `PATCHMAN_DATABASE_URL=postgres://benutzer:passwort@host:5432/datenbank?sslmode=require` in `.env` eintragen. Ist diese Datenbank leer, werden die SQLite-Daten dorthin übertragen.
-- **Zurück:** mit `PATCHMAN_DATABASE_URL=sqlite` starten und eine aktuelle Sicherung mit dem Befehl `restore` wiederherstellen; die Schritte stehen in [docs/kurulum.md](docs/kurulum.md#22-veritabanı) (Türkisch).
+- **Zurück:** mit `PATCHMAN_DATABASE_URL=sqlite` starten und eine aktuelle Sicherung mit dem Befehl `restore` wiederherstellen; die Schritte stehen in [docs/installation.md](docs/installation.md#22-database).
 
 ### Aktualisierung aus dem Dashboard (optional)
 
@@ -337,7 +339,7 @@ Der Updater führt dann `git pull --ff-only`, eine Datenbanksicherung (`/data/be
 
 ### Sicherung und Wiederherstellung
 
-**Automatische Sicherungen** sind standardmäßig eingeschaltet: Die Datenbank wird täglich um 02:30 nach `/data/backups/` gesichert, die neuesten 7 Sicherungen bleiben erhalten. Uhrzeit, Anzahl und Ein/Aus finden Sie unter **Einstellungen → Automatische Sicherung**, dort auch **Jetzt sichern** und Download-Links. Standardmäßig liegen die Sicherungen im selben Docker-Volume wie die Datenbank; kopieren Sie sie regelmäßig an einen anderen Ort oder schreiben Sie sie mit `PATCHMAN_BACKUP_DIR` auf eine separate Festplatte (siehe [docs/kurulum.md](docs/kurulum.md), Abschnitt 5.1, Türkisch).
+**Automatische Sicherungen** sind standardmäßig eingeschaltet: Die Datenbank wird täglich um 02:30 nach `/data/backups/` gesichert, die neuesten 7 Sicherungen bleiben erhalten. Uhrzeit, Anzahl und Ein/Aus finden Sie unter **Einstellungen → Automatische Sicherung**, dort auch **Jetzt sichern** und Download-Links. Standardmäßig liegen die Sicherungen im selben Docker-Volume wie die Datenbank; kopieren Sie sie regelmäßig an einen anderen Ort oder schreiben Sie sie mit `PATCHMAN_BACKUP_DIR` auf eine separate Festplatte (siehe [docs/installation.md](docs/installation.md#51-automatic-backups), Englisch).
 
 Sie können auch manuell eine konsistente Sicherung erstellen:
 
@@ -419,7 +421,7 @@ Hat eine Umgebungsvariable einen ungültigen Wert, startet der Server nicht und 
 
 ## REST-API und Prometheus
 
-Erstellen Sie einen Schlüssel unter **Profil → API-Schlüssel**. Ein Schlüssel arbeitet mit Rolle und Serverzugriff des erstellenden Benutzers; schreibgeschützte Schlüssel können nichts ändern. Endpunkte, Felder und Beispiele: [docs/api.md](docs/api.md) (Türkisch).
+Erstellen Sie einen Schlüssel unter **Profil → API-Schlüssel**. Ein Schlüssel arbeitet mit Rolle und Serverzugriff des erstellenden Benutzers; schreibgeschützte Schlüssel können nichts ändern. Endpunkte, Felder und Beispiele: [docs/api.en.md](docs/api.en.md) (Englisch).
 
 ```sh
 curl -H "Authorization: Bearer npat_..." https://patchman.your-domain/api/v1/hosts
@@ -450,7 +452,7 @@ scrape_configs:
 | Der Schwachstellenscan findet nichts | Erreicht der zentrale Server `api.osv.dev`? Suchen Sie in den Protokollen nach OSV-Fehlern. |
 | Es kommen keine E-Mails an | Senden Sie auf der Seite **Serverkonfiguration** eine Test-E-Mail; der Fehler wird im Dashboard angezeigt. |
 
-Weitere Informationen (Türkisch): [docs/kurulum.md](docs/kurulum.md) (Installation und Betrieb), [docs/kullanim.md](docs/kullanim.md) (Bedienung des Dashboards).
+Weitere Informationen (Englisch): [docs/installation.md](docs/installation.md) (Installation und Betrieb), [docs/usage.md](docs/usage.md) (Bedienung des Dashboards), [docs/api.en.md](docs/api.en.md) (REST-API und Prometheus). Türkische Fassungen: [kurulum.md](docs/kurulum.md), [kullanim.md](docs/kullanim.md), [api.md](docs/api.md).
 
 ## Sprache und Lokalisierung
 
@@ -472,6 +474,8 @@ Weitere Informationen (Türkisch): [docs/kurulum.md](docs/kurulum.md) (Installat
 - Vertrauensgrenzen, Bedrohungsmodell und Härtungs-Checkliste: [Architektur & Sicherheitsmodell](docs/architecture-and-security.md) (Englisch, [Türkisch](docs/mimari-ve-guvenlik.md)).
 
 ## Entwicklung
+
+Entwicklungsumgebung, Tests und Projektregeln beschreibt [CONTRIBUTING.md](CONTRIBUTING.md) (Englisch). Einstiegsaufgaben tragen das Label [good first issue](https://github.com/alptekinsunnetci/netio.patchman/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
 Voraussetzung: Go 1.26 oder neuer.
 

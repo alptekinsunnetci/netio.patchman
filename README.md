@@ -2,9 +2,11 @@
 
 **Central security, update and monitoring management for Linux and Windows servers**
 
+[![CI](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/ci.yml/badge.svg)](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/ci.yml) [![Security](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/security.yml/badge.svg)](https://github.com/alptekinsunnetci/netio.patchman/actions/workflows/security.yml) [![Release](https://img.shields.io/github/v/release/alptekinsunnetci/netio.patchman)](https://github.com/alptekinsunnetci/netio.patchman/releases/latest)
+
 🇬🇧 **English** · 🇹🇷 [Türkçe](README.tr.md) · 🇩🇪 [Deutsch](README.de.md) · 🇷🇺 [Русский](README.ru.md)
 
-📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Architecture & security model](docs/architecture-and-security.md) · ⏱️ Reading time: about 28 minutes
+📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Architecture & security model](docs/architecture-and-security.md) · 🧪 [Live demo](https://alptekinsunnetci.github.io/netio.patchman/demo/en/dashboard.html) · 🤝 [Contributing](CONTRIBUTING.md) · ⏱️ Reading time: about 28 minutes
 
 netio.patchman is a self-hosted platform for monitoring and managing the vulnerabilities and package updates of hundreds of Linux and Windows servers from a single dashboard.
 
@@ -78,7 +80,7 @@ netio.patchman is a self-hosted platform for monitoring and managing the vulnera
 - **Group-based access:** Operators and viewers can be limited to the servers of some groups (separate teams or customers).
 - **Optional restart in schedules:** Servers that need a restart after the update can be restarted while the maintenance window is open (per rule, off by default).
 - **Third-party Windows programs:** On servers with winget, updates of programs such as Chrome, 7-Zip or Git are listed and installed.
-- **REST API and Prometheus:** API keys read servers, vulnerabilities, updates and jobs and start update jobs; `/metrics` serves metrics for Grafana/Prometheus. See [docs/api.md](docs/api.md).
+- **REST API and Prometheus:** API keys read servers, vulnerabilities, updates and jobs and start update jobs; `/metrics` serves metrics for Grafana/Prometheus. See [docs/api.en.md](docs/api.en.md).
 
 ### Supported systems
 
@@ -171,7 +173,7 @@ No inbound ports need to be opened on managed servers.
 
 - A Linux server with Docker Engine 24 or later and Docker Compose v2.24 or later.
 - `git`.
-- **Internet access:** The first build downloads Docker images and Go modules. Vulnerability data also requires HTTPS access to `api.osv.dev` and `www.cisa.gov`. For environments without internet access, see [docs/kurulum.md](docs/kurulum.md#8-internet-erişimi-olmayan-ortamlar) (Turkish).
+- **Internet access:** The first build downloads Docker images and Go modules. Vulnerability data also requires HTTPS access to `api.osv.dev` and `www.cisa.gov`. For environments without internet access, see [docs/installation.md](docs/installation.md#8-networks-without-internet-access).
 - **Recommended resources:** up to 100 servers: 1 CPU core, 1 GB RAM and 5 GB disk.
 
 If Docker is not installed, you can install it with Docker's official script:
@@ -227,7 +229,7 @@ Installation is complete. The next step is installing the agent on your servers.
 
 ### HTTPS
 
-Agents and browsers should connect to the server over HTTPS. The recommended way is to put the server behind a reverse proxy such as nginx, Caddy or HAProxy. In that case, turn on **Trust the X-Forwarded-For and X-Forwarded-Proto headers of a reverse proxy** in the dashboard. For example configurations and for letting the server terminate TLS itself, see [docs/kurulum.md](docs/kurulum.md#3-tls-ve-ters-vekil) (Turkish).
+Agents and browsers should connect to the server over HTTPS. The recommended way is to put the server behind a reverse proxy such as nginx, Caddy or HAProxy. In that case, turn on **Trust the X-Forwarded-For and X-Forwarded-Proto headers of a reverse proxy** in the dashboard. For example configurations and for letting the server terminate TLS itself, see [docs/installation.md](docs/installation.md#3-tls-and-reverse-proxy).
 
 **Changing the port:** Set `PATCHMAN_PUBLISH_PORT=8899` in `.env` and run `docker compose up -d` again. If the reverse proxy runs on the same machine, use `PATCHMAN_PUBLISH_PORT=127.0.0.1:8899` so that the dashboard is not exposed over plain HTTP. Do not change the port with `PATCHMAN_HTTP_ADDR`; that setting is for installations without Docker and is ignored by Docker Compose.
 
@@ -272,7 +274,7 @@ systemctl status netio-patchman-agent
 journalctl -u netio-patchman-agent -f
 ```
 
-For bulk deployment (Ansible etc.), offline installation, agent options and removal, see [docs/kurulum.md](docs/kurulum.md#4-ajan-kurulumu) (Turkish).
+For bulk deployment (Ansible etc.), offline installation, agent options and removal, see [docs/installation.md](docs/installation.md#4-installing-agents).
 
 ### Windows servers
 
@@ -318,7 +320,7 @@ If any step fails, PostgreSQL is left empty, the SQLite file is not changed and 
 
 - **Staying on SQLite:** add `PATCHMAN_DATABASE_URL=sqlite` to `.env`. The PostgreSQL container still runs but is not used.
 - **External PostgreSQL:** add `PATCHMAN_DATABASE_URL=postgres://user:password@host:5432/database?sslmode=require` to `.env`. If that database is empty, the SQLite data is moved there.
-- **Going back:** start with `PATCHMAN_DATABASE_URL=sqlite` and restore a current backup with the `restore` command; the steps are in [docs/kurulum.md](docs/kurulum.md#22-veritabanı) (Turkish).
+- **Going back:** start with `PATCHMAN_DATABASE_URL=sqlite` and restore a current backup with the `restore` command; the steps are in [docs/installation.md](docs/installation.md#22-database).
 
 ### Updating from the dashboard (optional)
 
@@ -337,7 +339,7 @@ The updater then runs `git pull --ff-only`, a database backup (`/data/before-upd
 
 ### Backup and restore
 
-**Automatic backups** are on by default: the database is backed up every day at 02:30 to `/data/backups/` and the newest 7 backups are kept. The time, the number of backups to keep and the on/off switch are under **Settings → Automatic backup**. The same place has a **Back up now** button and download links. By default the backups live in the same Docker volume as the database; copy them elsewhere regularly or write them to a separate disk with `PATCHMAN_BACKUP_DIR` (see [docs/kurulum.md](docs/kurulum.md), section 5.1, Turkish).
+**Automatic backups** are on by default: the database is backed up every day at 02:30 to `/data/backups/` and the newest 7 backups are kept. The time, the number of backups to keep and the on/off switch are under **Settings → Automatic backup**. The same place has a **Back up now** button and download links. By default the backups live in the same Docker volume as the database; copy them elsewhere regularly or write them to a separate disk with `PATCHMAN_BACKUP_DIR` (see [docs/installation.md](docs/installation.md#51-automatic-backups)).
 
 You can also take a consistent backup manually:
 
@@ -419,7 +421,7 @@ If an environment variable has an invalid value, the server does not start and l
 
 ## REST API and Prometheus
 
-Create a key under **Profile → API keys**. A key works with the role and server access of the user who created it; read-only keys cannot change anything. Endpoints, fields and examples: [docs/api.md](docs/api.md) (Turkish).
+Create a key under **Profile → API keys**. A key works with the role and server access of the user who created it; read-only keys cannot change anything. Endpoints, fields and examples: [docs/api.en.md](docs/api.en.md).
 
 ```sh
 curl -H "Authorization: Bearer npat_..." https://patchman.your-domain/api/v1/hosts
@@ -450,7 +452,7 @@ scrape_configs:
 | Vulnerability scanning finds nothing | Can the central server reach `api.osv.dev`? Look for OSV errors in the logs. |
 | No emails arrive | Send a test email from the **Server configuration** page; the error is shown in the dashboard. |
 
-More information (in Turkish): [docs/kurulum.md](docs/kurulum.md) (installation and operation), [docs/kullanim.md](docs/kullanim.md) (using the dashboard).
+More information: [docs/installation.md](docs/installation.md) (installation and operation), [docs/usage.md](docs/usage.md) (using the dashboard), [docs/api.en.md](docs/api.en.md) (REST API and Prometheus). Turkish versions: [kurulum.md](docs/kurulum.md), [kullanim.md](docs/kullanim.md), [api.md](docs/api.md).
 
 ## Language and localization
 
@@ -472,6 +474,8 @@ More information (in Turkish): [docs/kurulum.md](docs/kurulum.md) (installation 
 - How the parts trust each other, the threat model and a hardening checklist: [Architecture & security model](docs/architecture-and-security.md).
 
 ## Development
+
+Setting up the environment, running the tests and the project rules are described in [CONTRIBUTING.md](CONTRIBUTING.md). Starter tasks carry the [good first issue](https://github.com/alptekinsunnetci/netio.patchman/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) label.
 
 Requirement: Go 1.26 or later.
 

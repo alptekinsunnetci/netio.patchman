@@ -1,5 +1,7 @@
 # netio.patchman Kullanım Kılavuzu
 
+🇹🇷 **Türkçe** · 🇬🇧 [English](usage.md) · ⏱️ Okuma süresi: yaklaşık 40 dakika
+
 Bu belge, yönetim panelinin günlük kullanımını anlatır.
 
 ## Roller

@@ -1,5 +1,7 @@
 # netio.patchman REST API ve Prometheus
 
+🇹🇷 **Türkçe** · 🇬🇧 [English](api.en.md) · ⏱️ Okuma süresi: yaklaşık 9 dakika
+
 netio.patchman'deki sunucu, güvenlik açığı, güncelleme ve iş verilerini betiklerden, Ansible'dan veya izleme sistemlerinden okumak ve güncelleme işi başlatmak için kullanılır.
 
 ## Kimlik doğrulama
