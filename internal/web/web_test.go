@@ -105,7 +105,9 @@ func fakeOSV(t *testing.T) *httptest.Server {
 		_, _ = io.WriteString(w, `{"value":[{"cveNumber":"CVE-2026-0002","cveTitle":"Windows TCP/IP Remote Code Execution Vulnerability","releaseDate":"2026-11-10T08:00:00-08:00"}]}`)
 	})
 	mux.HandleFunc("GET /kev.json", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = io.WriteString(w, `{"vulnerabilities":[{"cveID":"CVE-2026-0001","dateAdded":"2026-11-02","dueDate":"2026-11-23","knownRansomwareCampaignUse":"Unknown"}]}`)
+		// The due date moves with the clock, so the entry is open but never overdue.
+		due := time.Now().UTC().AddDate(0, 0, 30).Format("2006-01-02")
+		_, _ = io.WriteString(w, `{"vulnerabilities":[{"cveID":"CVE-2026-0001","dateAdded":"2026-11-02","dueDate":"`+due+`","knownRansomwareCampaignUse":"Unknown"}]}`)
 	})
 	srv := httptest.NewServer(mux)
 	t.Cleanup(srv.Close)

@@ -128,9 +128,9 @@ func TestComplianceAudit(t *testing.T) {
 	if o := outcome(content, "general", "GEN-04").Outcome; o != compliance.OutcomeSufficient {
 		t.Errorf("GEN-04 (update success): %s", o)
 	}
-	// The KEV entry of the fake catalog is due today: open, not yet overdue.
+	// The KEV entry of the fake catalog is due in 30 days: open, not overdue.
 	if o := outcome(content, "general", "GEN-02").Outcome; o != compliance.OutcomeSufficient {
-		t.Errorf("GEN-02 (KEV due today): %s", o)
+		t.Errorf("GEN-02 (KEV not yet due): %s", o)
 	}
 	if k := content.Vulnerabilities.KEVOpen; len(k) != 1 || k[0].CVE != "CVE-2026-0001" || k[0].Hosts != 1 {
 		t.Errorf("open KEV: %+v", k)
