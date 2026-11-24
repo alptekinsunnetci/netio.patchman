@@ -2,7 +2,9 @@
 
 **Zentrale Sicherheits-, Update- und Überwachungsverwaltung für Linux- und Windows-Server**
 
-[Türkçe](README.md) · [English](README.en.md) · **Deutsch** · [Русский](README.ru.md)
+🇬🇧 [English](README.md) · 🇹🇷 [Türkçe](README.tr.md) · 🇩🇪 **Deutsch** · 🇷🇺 [Русский](README.ru.md)
+
+📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Architektur & Sicherheitsmodell (Englisch)](docs/architecture-and-security.md) · ⏱️ Lesezeit: etwa 26 Minuten
 
 netio.patchman ist eine selbst gehostete Plattform, mit der Sie die Schwachstellen und Paketupdates von Hunderten Linux- und Windows-Servern über ein einziges Dashboard überwachen und verwalten.
 
@@ -467,6 +469,7 @@ Weitere Informationen (Türkisch): [docs/kurulum.md](docs/kurulum.md) (Installat
 - Der Agent öffnet keine Ports und nimmt keine eingehenden Verbindungen an. Er führt nur vordefinierte Paketmanager-Befehle ohne Shell aus; Paketnamen werden auf beiden Seiten geprüft. Unter Windows wird Windows Update über ein im Agenten eingebettetes, festes PowerShell-Skript (Windows Update Agent API) verwendet; auch KB-Namen werden geprüft.
 - Um Remote-Updates auf einem Server vollständig abzuschalten, setzen Sie `PATCHMAN_REMOTE_UPDATES=false` in dessen `/etc/netio-patchman/agent.env`. Unter Windows steht dieselbe Einstellung in `C:\ProgramData\netio-patchman\agent.env`.
 - Das Dashboard wird mit einer strengen Content-Security-Policy ausgeliefert und nutzt keine externen Ressourcen (CDNs, Schriftarten); es funktioniert auch in Netzen ohne Internetzugang.
+- Vertrauensgrenzen, Bedrohungsmodell und Härtungs-Checkliste: [Architektur & Sicherheitsmodell](docs/architecture-and-security.md) (Englisch, [Türkisch](docs/mimari-ve-guvenlik.md)).
 
 ## Entwicklung
 

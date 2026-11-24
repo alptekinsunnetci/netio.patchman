@@ -2,7 +2,9 @@
 
 **Централизованное управление безопасностью, обновлениями и мониторингом серверов Linux и Windows**
 
-[Türkçe](README.md) · [English](README.en.md) · [Deutsch](README.de.md) · **Русский**
+🇬🇧 [English](README.md) · 🇹🇷 [Türkçe](README.tr.md) · 🇩🇪 [Deutsch](README.de.md) · 🇷🇺 **Русский**
+
+📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Архитектура и модель безопасности (на английском)](docs/architecture-and-security.md) · ⏱️ Время чтения: около 25 мин.
 
 netio.patchman — самостоятельно размещаемая (self-hosted) платформа для мониторинга и управления уязвимостями и обновлениями пакетов сотен серверов Linux и Windows из одной панели.
 
@@ -467,6 +469,7 @@ scrape_configs:
 - Агент не открывает портов и не принимает входящих соединений. Он выполняет только заранее определённые команды менеджера пакетов без командной оболочки; имена пакетов проверяются на обеих сторонах. В Windows Windows Update используется через встроенный в агент фиксированный сценарий PowerShell (Windows Update Agent API); имена KB тоже проверяются.
 - Чтобы полностью отключить удалённые обновления на сервере, укажите `PATCHMAN_REMOTE_UPDATES=false` в его `/etc/netio-patchman/agent.env`. В Windows та же настройка находится в `C:\ProgramData\netio-patchman\agent.env`.
 - Панель отдаётся со строгой политикой Content-Security-Policy и не использует внешние ресурсы (CDN, шрифты); она работает и в сетях без доступа в интернет.
+- Границы доверия, модель угроз и рекомендации по усилению защиты: [Архитектура и модель безопасности](docs/architecture-and-security.md) (на английском, [на турецком](docs/mimari-ve-guvenlik.md)).
 
 ## Разработка
 

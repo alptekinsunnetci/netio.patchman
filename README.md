@@ -1,236 +1,237 @@
 # netio.patchman
 
-**Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi**
+**Central security, update and monitoring management for Linux and Windows servers**
 
-**Türkçe** · [English](README.en.md) · [Deutsch](README.de.md) · [Русский](README.ru.md)
+🇬🇧 **English** · 🇹🇷 [Türkçe](README.tr.md) · 🇩🇪 [Deutsch](README.de.md) · 🇷🇺 [Русский](README.ru.md)
 
-netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve paket güncellemelerini tek bir panelden izlemenizi ve yönetmenizi sağlayan, kendi altyapınızda çalışan (self-hosted) bir platformdur.
+📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Architecture & security model](docs/architecture-and-security.md) · ⏱️ Reading time: about 28 minutes
 
-- Merkezi sunucu Docker Compose ile çalışır: uygulama konteyneri ve PostgreSQL veritabanı. Önceki sürümlerin SQLite veritabanı ilk açılışta kendiliğinden PostgreSQL'e aktarılır. Kuyruk ya da önbellek servisi gerekmez.
-- Yönetilen her sunucuya küçük bir ajan kurulur. Ajan port açmaz; merkezi sunucuya kendisi bağlanır.
-- Arayüz Türkçe, İngilizce, Almanca ve Rusçadır; her kullanıcı kendi dilini seçer. E-postalar ve belgeler Türkçedir. CVE verileri kaynağındaki haliyle, çevrilmeden gösterilir.
+netio.patchman is a self-hosted platform for monitoring and managing the vulnerabilities and package updates of hundreds of Linux and Windows servers from a single dashboard.
 
-> **English:** netio.patchman is a self-hosted platform for centralized Linux and Windows vulnerability and update management, with an English web interface. Read the English documentation in [README.en.md](README.en.md). · Deutsch: [README.de.md](README.de.md) · Русский: [README.ru.md](README.ru.md)
+- The central server runs with Docker Compose: the application container and a PostgreSQL database. The SQLite database of earlier versions is moved into PostgreSQL automatically on the first start. No queue or cache service is needed.
+- A small agent is installed on each managed server. The agent opens no ports; it connects to the central server itself.
+- The web interface is available in Turkish, English, German and Russian, and each user picks their own language. CVE data is shown exactly as published by its source, never translated.
 
 > [!WARNING]
-> **Kullanım riski tamamen kullanıcıya aittir.** netio.patchman sunucularınızda paket güncelleyen, servisleri ve sunucuyu yeniden başlatan bir yazılımdır. "Olduğu gibi" sunulur ve hiçbir garanti verilmez. Kullanımdan doğabilecek veri kaybı, hizmet kesintisi, başarısız güncelleme, güvenlik açığı ve benzeri her türlü zarardan yazılımı kuran ve kullanan kişi ya da kurum sorumludur. Ayrıntılar: [Sorumluluk reddi](#sorumluluk-reddi).
+> **You use this software entirely at your own risk.** netio.patchman updates packages and restarts services and servers on your machines. It is provided "as is", without any warranty. The person or organization that installs and uses the software is responsible for any damage resulting from its use, including data loss, service outages, failed updates and security vulnerabilities. Details: [Disclaimer](#disclaimer).
 
-[![netio.patchman tanıtım videosu (1 dakika)](docs/images/video.png)](https://alptekinsunnetci.github.io/netio.patchman/)
+[![netio.patchman product tour (1 minute)](docs/images/video.png)](https://alptekinsunnetci.github.io/netio.patchman/)
 
-▶ **[Tanıtım videosunu izleyin](https://alptekinsunnetci.github.io/netio.patchman/)** (1 dakika) · [MP4 olarak indirin](docs/media/netio-patchman-tanitim.mp4)
+▶ **[Watch the product tour](https://alptekinsunnetci.github.io/netio.patchman/)** (1 minute, in Turkish) · [Download the MP4](docs/media/netio-patchman-tanitim.mp4)
 
-![Gösterge paneli](docs/images/dashboard.png)
+![Dashboard](docs/images/dashboard.png)
 
-## İçindekiler
+## Contents
 
-- [Özellikler](#özellikler)
-- [Ekran görüntüleri](#ekran-görüntüleri)
-- [Nasıl çalışır](#nasıl-çalışır)
-- [Kurulum (Docker)](#kurulum-docker)
-- [Sunuculara ajan kurulumu](#sunuculara-ajan-kurulumu)
-- [Güncelleme, yedekleme ve kaldırma](#güncelleme-yedekleme-ve-kaldırma)
-- [Yapılandırma](#yapılandırma)
-- [REST API ve Prometheus](#rest-api-ve-prometheus)
-- [Sorun giderme](#sorun-giderme)
-- [Güvenlik](#güvenlik)
-- [Geliştirme](#geliştirme)
-- [Sorumluluk reddi](#sorumluluk-reddi)
-- [Lisans](#lisans)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [How it works](#how-it-works)
+- [Installation (Docker)](#installation-docker)
+- [Installing the agent on servers](#installing-the-agent-on-servers)
+- [Updating, backup and removal](#updating-backup-and-removal)
+- [Configuration](#configuration)
+- [REST API and Prometheus](#rest-api-and-prometheus)
+- [Troubleshooting](#troubleshooting)
+- [Language and localization](#language-and-localization)
+- [Security](#security)
+- [Development](#development)
+- [Disclaimer](#disclaimer)
+- [License](#license)
 
-## Özellikler
+## Features
 
-- **Sunucu envanteri:** İşletim sistemi, çekirdek, IP adresleri, kurulu paketler, bekleyen güncellemeler, yeniden başlatma ihtiyacı ve eski kodu çalıştıran servisler.
-- **Takip edilen paketler:** nginx, mariadb gibi önemli paketler yıldızla takibe alınır. Gösterge panelinde her birinin kaç sunucuda kurulu olduğu, kaç farklı sürümün çalıştığı, bekleyen güncellemeleri ve açık güvenlik açıkları; sunucu sayfasında da o sunucudaki durumu görünür. Liste her kullanıcıya özeldir.
-- **Güvenlik açığı taraması:** Kurulu paket sürümleri [OSV.dev](https://osv.dev) üzerinden dağıtımların resmî güvenlik verileriyle eşleştirilir. CVSS puanı, önem derecesi, düzeltilmiş sürüm ve üretici güvenlik duyuruları gösterilir.
-- **Aktif istismar bilgisi:** CISA Known Exploited Vulnerabilities (KEV) kataloğundaki açıklar ayrıca işaretlenir ve önceliklendirilir.
-- **Windows sunucuları:** Windows Server 2016, 2019, 2022, 2025 ile Windows 10 ve 11 aynı panelden yönetilir. Ajan bir Windows hizmeti olarak çalışır; kurulu programları ve Windows Update'te bekleyen güncellemeleri (KB numarası, başlık, Microsoft önem derecesi, sınıflandırma) bildirir. Bekleyen her KB'nin düzelttiği CVE'ler Microsoft Security Update Guide'dan (MSRC) alınır. Sunucu birkaç ay geride kalmışsa, yerini aldığı eski toplu güncellemelerin CVE'leri de sunucunun Windows derlemesiyle karşılaştırılarak eklenir. Güvenlik güncellemeleri, tüm güncellemeler veya seçili KB'ler panelden kurulur, kurulum doğrulanır; sunucu panelden yeniden başlatılabilir.
-- **Merkezi güncelleme:** Panelden tek bir sunucuda, seçilen sunucularda veya tümünde güvenlik güncellemeleri, tüm güncellemeler ya da seçili paketler kurulabilir. Bir CVE için **Düzeltmeyi uygula** ile etkilenen tüm sunucularda ilgili paketler güncellenir. Ajan her işten sonra paketlerin gerçekten güncellendiğini doğrular; güncellenemeyenler listelenir ve tek tıkla yeniden denenebilir.
-- **Servis ve sunucu yeniden başlatma:** Güncellenen kütüphaneleri hâlâ eski sürümle kullanan servisler tespit edilir ve panelden yeniden başlatılabilir; sunucu panelden yeniden başlatılabilir.
-- **Zamanlanmış güncellemeler:** "Her pazar 03:00'te Ubuntu sunucularında güvenlik güncellemelerini uygula" gibi bakım pencereleri. Zamanlamalar sunucuları kendiliğinden yeniden başlatmaz.
-- **Ön izleme ve onay:** Sunucu sayfasından başlatılan güncelleme önce paket yöneticisinin simülasyon kipiyle (APT, DNF, YUM, Zypper) çalışır. Güncellenecek, kurulacak, kaldırılacak ve sürümü düşecek paketler, indirme boyutu ve yeniden başlatma ihtiyacı gösterilir; güncelleme onaydan sonra başlar.
-- **Kaynak izleme ve sağlık kontrolleri:** Ajanlar belirli aralıkla (varsayılan 5 dakika) işlemci, bellek, takas alanı ve disk kullanımını bildirir. Sunucu sayfasında güncel değerler ve 24 saat / 7 gün / 30 gün grafikleri, sunucu listesinde CPU/RAM/disk sütunu bulunur. Disk %90, bellek %95, işlemci %90 sınırları hiçbir tanım gerekmeden uyarır; art arda iki ölçümde bildirim, düzelince ayrıca bildirim gönderilir. İsteğe bağlı ek kontroller (HTTP/HTTPS, TCP, servis, yerel betik) aynı aralıkla ve güncellemelerden önce ve sonra çalışır; önceden başarısız kontrolde güncelleme yapılmaz.
-- **Kademeli güncellemeler:** Canary sunucular, aşamalar, eşzamanlı iş sınırı, aşamalar arası bekleme ve hata oranı politikası. Hata oranı aşılınca dağıtım kendiliğinden durur; duraklatma, devam ettirme ve iptal elle yapılır ve denetime yazılır.
-- **Geri dönüş (snapshot olmadan):** Her işten önceki ve sonraki paket sürümleri saklanır. Eski sürümlerin depoda bulunup bulunmadığı önce kontrol edilir, onaydan sonra paket yöneticisiyle geri dönülür ve sonuç doğrulanır; geri dönmeyen paketler başarı gibi gösterilmez.
-- **Yazılım ve servis envanteri:** 399 sunucu yazılımı tanınır: çalışma ortamları (Python, Java, .NET, PHP, Node.js, Go, Rust…), web ve uygulama sunucuları, veritabanları, mesaj kuyrukları, e-posta, DNS ve ağ servisleri, VPN, kimlik, izleme ve günlük, güvenlik araçları, konteyner ve sanallaştırma, depolama ve yedekleme, CI/CD, cPanel/Plesk/DirectAdmin gibi barındırma panelleri ve sistem araçları. Linux dağıtımlarının paketleri (cPanel EasyApache ve CloudLinux PHP sürümleri dahil) ve Windows programları eşlenir; paket yöneticisi dışında kurulanları ajan kendisi tespit eder. Kurulu ve çalışan servisler ayrılır, iki sunucu karşılaştırılır, değişiklik geçmişi tutulur.
-- **Destek bitişi (EOL) takibi:** İşletim sistemleri ve yazılımlar için endoflife.date takvimi (çevrimdışı yerleşik takvimle). Dağıtımın kendisi sürdürdüğü paketler ayrıca işaretlenir; yaklaşan ve geçen tarihler bildirilir.
-- **Güvenlik puanı:** Her sunucu, grup ve tüm filo için 0-100 puan, günlük geçmiş, ayarlanabilir ağırlıklar ve eşik bildirimi. Bir CVE birden çok ölçüte uysa da yalnızca bir kez düşülür.
-- **Sunucu standartları ve sapma:** “PHP yalnızca 8.2 veya 8.3”, “telnetd kurulu olmamalı”, “nginx çalışmalı” gibi kurallar. Sürüm kuralları dağıtımın sürüm numarasıyla karşılaştırılır (backport'lar yanlış sapma üretmez), yeni sapmalar bildirilir, uygun güncelleme önerilir.
-- **Otomatik ajan güncellemesi:** Merkezi sunucu yeni sürüme geçince ajanlar yeni sürümü indirir, SHA-256 özetini doğrular ve kendini günceller.
-- **Yeni sürüm bildirimi:** Panel, GitHub'da yeni bir netio.patchman sürümü yayımlandığında yöneticileri uyarır ve güncelleme komutlarını gösterir. İnternet erişimi olmayan kurulumlarda kapatılabilir. İsteğe bağlı güncelleyici konteyneriyle sürüm yükseltmesi panelden tek tıkla yapılır (git pull, yedek, derleme, yeniden başlatma).
-- **Bulgu yönetimi:** Açık, İşlemde, Risk Kabul Edildi, Hatalı Tespit durumları. Paket güncellenince bulgu otomatik olarak "Çözüldü" olur. Risk kabulü süreli verilir (30, 90, 180, 365 gün; en uzun süre ayarlardan sınırlanır). Süre dolunca bulgu yeniden açılır, bildirim ve e-posta gönderilir.
-- **Sunucu grupları:** Sunucular "Üretim", "Test", "Veritabanı" gibi gruplara ayrılır. Bir sunucu birden fazla gruba üye olabilir. Listeler gruba göre süzülür, zamanlanmış güncellemeler bir grubu hedefleyebilir, raporlar grup için alınabilir.
-- **Platform bilgisi:** Ajan, sunucunun VMware, Hyper-V, KVM, Xen veya VirtualBox sanal makinesi, Docker/LXC konteyneri ya da fiziksel sunucu olduğunu bildirir. Sunucu listesi platforma göre süzülebilir.
-- **Yeniden başlatma takibi:** Yeni çekirdek kurulmuş ama sunucu yeniden başlatılmamışsa bu durum ne zamandan beri sürdüğüyle birlikte gösterilir. Gösterge panelinde ayrı bir kart ve süzgeç vardır. Debian'da (`/var/run/reboot-required` dosyası olmayan dağıtımlarda) ve Alpine'de de çekirdek karşılaştırmasıyla tespit edilir.
-- **Eğilim grafikleri:** Sunucu her gün filonun durumunu kaydeder. Gösterge panelinde son 30 günün kritik ve yüksek açık sayısı, aktif olarak istismar edilen açıklar, açık bulgular ve bekleyen güvenlik güncellemeleri grafik ve tablo olarak gösterilir.
-- **Uyum ve Denetim:** Denetime giren kuruluşlar için tek alanda, tek raporlama motoru ve ortak kanıt deposu. Bilgi güvenliği yönetimi, BT temel koruma, BT hizmet yönetimi ve genel güvenlik/yama uyumu çerçevelerinden biri veya birkaçı seçilerek tek, birleşik rapor oluşturulur; her çerçeve kendi kontrolleriyle ayrı değerlendirilir. Kanıtlar (Linux ve Windows güncellemeleri, giderilen açıklar, değişiklikler, denetim kayıtları, yedekler, günlük envanter) hash zinciriyle korunur ve saklama süresinden bağımsız tutulur. Rapor sürümleri saklanır, manuel inceleme otomatik sonuçtan ayrı kaydedilir, kesinleşen sürüm değişmez; PDF, CSV ve JSON dışa aktarılır. Raporlar sertifika veya uygunluk beyanı değildir.
-- **İki adımlı doğrulama:** Google Authenticator, Microsoft Authenticator gibi uygulamalarla TOTP kodu ve tek kullanımlık yedek kodlar. Yönetici, iki adımlı doğrulamayı tüm kullanıcılar için zorunlu kılabilir; kaybolan bir telefon için kullanıcının doğrulamasını sıfırlayabilir.
-- **Bildirimler:** Bildirim merkezi ve e-posta bildirimleri: yeni açıklar, bağlantısı kesilen ajanlar, başarısız veya kısmen tamamlanan güncelleme işleri.
-- **Bildirim kanalları ve entegrasyonlar:** Slack, Microsoft Teams, Telegram, HMAC-SHA256 imzalı (zaman damgalı) JSON webhook, Jira, ServiceNow ve GLPI kayıt açma ile Zabbix trapper. Her kanal seviyeye veya olaylara (kritik CVE, KEV, EOL, güncelleme başladı/başarılı/başarısız, geri dönüş, yeniden başlatma, sağlık kontrolü, SLA, puan, çevrimdışı sunucu, sapma…) abone olur. Başarısız gönderimler yeniden denenir; teslimat geçmişi tutulur ve başarısız bir teslimat tekrar gönderilebilir.
-- **Otomatik yedekleme:** Veritabanı her gün belirlenen saatte yedeklenir, en yeni N yedek saklanır. Yedekler panelden indirilebilir; başarısız yedekleme bildirilir.
-- **Çok dilli arayüz:** Türkçe, İngilizce, Almanca ve Rusça. Her kullanıcı arayüz dilini seçer; tarih, ondalık ayracı ve CSV biçimi dile uyar.
-- **Kullanıcılar ve yetkiler:** Yönetici, Operatör ve İzleyici rolleri; denetim kayıtları.
-- **Paneldense yapılandırma:** SMTP, sunucu adresi, saat dilimi, veri kaynakları ve tüm işletim ayarları panelden değiştirilir. Değişiklikler yeniden başlatma gerektirmez.
-- **Dışa aktarma:** Sunucu ve güvenlik açığı listeleri Excel uyumlu CSV olarak indirilebilir.
-- **Canlı çekirdek yaması:** KernelCare (CloudLinux, AlmaLinux, Rocky, RHEL) ve Canonical Livepatch (Ubuntu) algılanır. KernelCare'in yamaladığı çekirdek sürümü çekirdek bulgularında kullanılır, Livepatch'in kapattığı CVE'ler açık sayılmaz; KernelCare'in kapsadığı çekirdek güncellemesi için sunucu gereksiz yere "yeniden başlatma gerekli" olarak işaretlenmez.
-- **Güncellenmeyecek paketler:** Tüm sunucular, bir grup veya tek bir sunucu için `kernel*`, `mysql-*`, `KB5034439` gibi desenler. Bu paketler panelden, zamanlamalardan ve API'den gelen tüm güncelleme işlerinde atlanır.
-- **EPSS önceliklendirmesi:** FIRST EPSS puanı (önümüzdeki 30 günde istismar edilme olasılığı) her açıkta gösterilir; açık listesi KEV ve EPSS'e göre sıralanabilir.
-- **Düzeltme süreleri (SLA):** Önem derecesine göre gün sayısı (varsayılan kritik 15, yüksek 30, orta 90, düşük 180). Süresi geçen bulgular işaretlenir, gösterge panelinde ve raporda yer alır, bildirim ve e-posta gönderilir.
-- **Grup bazlı yetki:** Operatör ve izleyiciler yalnızca belirli gruplardaki sunucuları görecek ve yönetecek şekilde sınırlandırılabilir (ekip veya müşteri ayrımı).
-- **Zamanlamada isteğe bağlı yeniden başlatma:** Güncellemeden sonra yeniden başlatma gerektiren sunucular, bakım penceresi açıkken yeniden başlatılabilir (kural bazında, varsayılan kapalı).
-- **Windows üçüncü taraf programlar:** winget kurulu sunucularda Chrome, 7-Zip, Git gibi programların güncellemeleri listelenir ve kurulur.
-- **REST API ve Prometheus:** API anahtarlarıyla sunucu, açık, güncelleme ve iş verileri okunur, güncelleme işi başlatılır; `/metrics` Grafana/Prometheus için metrik verir. Bkz. [docs/api.md](docs/api.md).
+- **Server inventory:** Operating system, kernel, IP addresses, installed packages, pending updates, reboot status and services still running old code.
+- **Vulnerability scanning:** Installed package versions are matched against the distributions' official security data through [OSV.dev](https://osv.dev). CVSS score, severity, fixed version and vendor advisories are shown.
+- **Known exploited vulnerabilities:** Vulnerabilities in the CISA Known Exploited Vulnerabilities (KEV) catalog are flagged and prioritized.
+- **Windows servers:** Windows Server 2016, 2019, 2022, 2025 and Windows 10 and 11 are managed from the same dashboard. The agent runs as a Windows service and reports installed programs and the updates pending in Windows Update (KB number, title, Microsoft severity, classification). The CVEs each pending KB fixes come from the Microsoft Security Update Guide (MSRC). When a server is several months behind, the CVEs of the older cumulative updates it supersedes are added too, compared against the server's Windows build. Security updates, all updates or selected KBs are installed from the dashboard and verified; the server can be restarted from the dashboard.
+- **Central updates:** Install security updates, all updates or selected packages on one server, on selected servers or on all of them from the dashboard. **Apply fix** on a CVE updates the related packages on every affected server. After each job the agent verifies that the packages were really updated; packages that were not updated are listed and can be retried with one click.
+- **Service and server restarts:** Services still using old versions of updated libraries are detected and can be restarted from the dashboard; servers can be rebooted from the dashboard.
+- **Scheduled updates:** Maintenance windows such as "apply security updates to Ubuntu servers every Sunday at 03:00". Schedules never reboot servers by themselves.
+- **Preview and approval:** An update started on a server page first runs in the package manager's simulation mode (APT, DNF, YUM, Zypper). Packages to upgrade, install, remove or downgrade, the download size and whether a reboot will be needed are shown; the update starts after approval.
+- **Resource monitoring and health checks:** Agents report CPU, memory, swap and disk usage at an interval (5 minutes by default). The server page shows current values and 24-hour / 7-day / 30-day charts, the server list a CPU/RAM/disk column. Disk 90%, memory 95% and CPU 90% limits warn without any setup; two measurements in a row are notified, and so is the recovery. Optional extra checks (HTTP/HTTPS, TCP, service, local script) run at the same interval and before and after updates; a failing check before skips the update.
+- **Rolling updates:** Canary hosts, stages, a parallel job limit, a wait between stages and a failure-rate policy. The rollout stops on its own when the rate is exceeded; pause, resume and cancel are manual and audited.
+- **Rollback without snapshots:** Package versions before and after every job are kept. Whether the old versions are still in the repositories is checked first; after approval the package manager goes back and the result is verified, and packages that did not go back are never shown as a success.
+- **Software and service inventory:** 399 server products are recognized: runtimes (Python, Java, .NET, PHP, Node.js, Go, Rust…), web and application servers, databases, message queues, mail, DNS and network services, VPN, identity, monitoring and logging, security tools, containers and virtualization, storage and backup, CI/CD, hosting panels such as cPanel, Plesk and DirectAdmin, and system tools. Linux distribution packages (including cPanel EasyApache and CloudLinux PHP builds) and Windows programs are matched; the agent detects products installed outside the package manager. Installed and running services are told apart, two servers can be compared, and changes are kept as history.
+- **End-of-life (EOL) tracking:** endoflife.date calendars for operating systems and software (with a built-in calendar offline). Packages the distribution still maintains are marked; approaching and past dates are notified.
+- **Security score:** A 0-100 score per server, group and fleet with daily history, adjustable weights and a threshold notification. A CVE matching several criteria is deducted only once.
+- **Server standards and drift:** Rules such as "PHP only 8.2 or 8.3", "telnetd must not be installed", "nginx must be running". Version rules compare distribution version numbers (backports cause no false drift), new deviations are notified and a fitting update is suggested.
+- **Automatic agent updates:** When the central server moves to a new version, agents download it, verify its SHA-256 digest and update themselves.
+- **New version notice:** The dashboard tells administrators when a new netio.patchman version is released on GitHub and shows the update commands. It can be turned off for installations without internet access. With the optional updater container, the upgrade runs from the dashboard with one click (git pull, backup, build, restart).
+- **Finding management:** Open, In Progress, Risk Accepted and False Positive statuses. When a package is updated, its finding becomes "Resolved" automatically. Risks are accepted for a limited term (30, 90, 180 or 365 days; the maximum is set in Settings). When the term ends, the finding reopens and a notification and email are sent.
+- **Server groups:** Divide servers into groups such as "Production", "Test" or "Database". A server can belong to several groups. Lists can be filtered by group, scheduled updates can target a group and reports can be created for a group.
+- **Platform information:** The agent reports whether the server is a VMware, Hyper-V, KVM, Xen or VirtualBox virtual machine, a Docker/LXC container or a physical server. The server list can be filtered by platform.
+- **Reboot tracking:** If a new kernel is installed but the server has not been rebooted, this is shown together with how long it has been pending. The dashboard has a separate card and filter for it. It is also detected on Debian (no `/var/run/reboot-required` file) and Alpine by comparing kernels.
+- **Trend charts:** The server records the fleet status every day. The dashboard shows the last 30 days of critical and high vulnerabilities, actively exploited vulnerabilities, open findings and pending security updates as charts and a table.
+- **Compliance & Audit:** One area for organizations facing audits, with one reporting engine and one evidence repository. Choose one or more frameworks (information security management, IT baseline protection, IT service management, general security and patch compliance) for a single combined report in which every framework is assessed with its own controls. Evidence (Linux and Windows updates, resolved vulnerabilities, changes, audit logs, backups, daily inventory) is protected by a hash chain and kept independently of the retention period. Report versions are kept, manual reviews are stored apart from the automated outcome, final versions never change; exports as PDF, CSV and JSON. Reports are not a certification or a statement of conformity.
+- **Two-factor authentication:** TOTP codes from apps such as Google Authenticator or Microsoft Authenticator, plus single-use recovery codes. Administrators can require two-factor authentication for all users and reset it for a user who lost their phone.
+- **Notifications:** Notification center and email notifications for new vulnerabilities, disconnected agents and failed or partially completed update jobs.
+- **Notification channels and integrations:** Slack, Microsoft Teams, Telegram, HMAC-SHA256 signed (timestamped) JSON webhooks, Jira, ServiceNow and GLPI tickets and Zabbix trapper items. Each channel subscribes by level or by event (critical CVE, KEV, EOL, update started/succeeded/failed, rollback, reboot, health check, SLA, score, offline server, drift…). Failed deliveries are retried; a delivery history is kept and a failed delivery can be sent again.
+- **Automatic backups:** The database is backed up every day at a set time and the newest N backups are kept. Backups can be downloaded from the dashboard; failed backups are reported.
+- **Multilingual interface:** Turkish, English, German and Russian. Each user picks the interface language; dates, decimal separators and CSV format follow the language.
+- **Users and roles:** Administrator, Operator and Viewer roles; audit log.
+- **Configuration from the dashboard:** SMTP, server address, time zone, data sources and all operational settings are changed in the dashboard. Changes apply without a restart.
+- **Export:** Server and vulnerability lists can be downloaded as Excel-compatible CSV files.
+- **Live kernel patching:** KernelCare (CloudLinux, AlmaLinux, Rocky, RHEL) and Canonical Livepatch (Ubuntu) are detected. The kernel version KernelCare patched up to is used for kernel findings, CVEs fixed by Livepatch do not count as open, and a kernel update covered by KernelCare does not mark the server as needing a restart.
+- **Packages not to update:** Patterns such as `kernel*`, `mysql-*` or `KB5034439` for all servers, a group or one server. Every update job from the dashboard, schedules or the API skips these packages.
+- **EPSS prioritization:** The FIRST EPSS score (probability of exploitation in the next 30 days) is shown for each vulnerability; the list can be sorted by KEV and EPSS.
+- **Remediation targets (SLA):** Days per severity (default critical 15, high 30, medium 90, low 180). Overdue findings are marked, appear on the dashboard and in the report, and trigger a notification and email.
+- **Group-based access:** Operators and viewers can be limited to the servers of some groups (separate teams or customers).
+- **Optional restart in schedules:** Servers that need a restart after the update can be restarted while the maintenance window is open (per rule, off by default).
+- **Third-party Windows programs:** On servers with winget, updates of programs such as Chrome, 7-Zip or Git are listed and installed.
+- **REST API and Prometheus:** API keys read servers, vulnerabilities, updates and jobs and start update jobs; `/metrics` serves metrics for Grafana/Prometheus. See [docs/api.md](docs/api.md).
 
-### Desteklenen sistemler
+### Supported systems
 
-| Sistem | Envanter ve güncelleme | Güvenlik açığı taraması |
+| System | Inventory and updates | Vulnerability scanning |
 |---|---|---|
 | Debian, Ubuntu | apt | ✓ |
 | AlmaLinux, Rocky Linux, Red Hat Enterprise Linux | dnf / yum | ✓ |
-| CloudLinux 8, 9 | dnf | ✓ (AlmaLinux güvenlik verileriyle) |
-| CentOS 7, CloudLinux 7, Oracle Linux 7 | yum | ✓ (Red Hat 7 ve TuxCare ELS verileriyle) |
-| Oracle Linux 8, 9; CentOS Linux 8 | dnf | ✓ (AlmaLinux verileriyle) |
+| CloudLinux 8, 9 | dnf | ✓ (with AlmaLinux security data) |
+| CentOS 7, CloudLinux 7, Oracle Linux 7 | yum | ✓ (with Red Hat 7 and TuxCare ELS data) |
+| Oracle Linux 8, 9; CentOS Linux 8 | dnf | ✓ (with AlmaLinux data) |
 | Mageia, openEuler | dnf | ✓ |
-| Linux Mint, Pop!_OS, Zorin OS, elementary OS, LMDE, Raspberry Pi OS | apt | ✓ (dayandıkları Ubuntu/Debian sürümünün verileriyle) |
+| Linux Mint, Pop!_OS, Zorin OS, elementary OS, LMDE, Raspberry Pi OS | apt | ✓ (with the data of their Ubuntu/Debian release) |
 | SUSE Linux Enterprise, openSUSE Leap | zypper | ✓ |
 | Alpine Linux | apk | ✓ |
-| CentOS Stream, Amazon Linux, Fedora ve diğer dağıtımlar (dnf, yum, zypper, apt veya apk kullanan) | ✓ | — |
-| Windows Server 2016, 2019, 2022, 2025; Windows 10, 11 (x64) | Windows Update | ✓ (bekleyen Microsoft güncellemeleri) |
+| CentOS Stream, Amazon Linux, Fedora and other distributions (using dnf, yum, zypper, apt or apk) | ✓ | — |
+| Windows Server 2016, 2019, 2022, 2025; Windows 10, 11 (x64) | Windows Update | ✓ (pending Microsoft updates) |
 
-Ajan amd64 ve arm64 mimarilerinde çalışır. Hizmet yöneticisi olarak systemd veya OpenRC (Alpine) gerekir. Sunucunun fiziksel, sanal (VMware, Hyper-V, KVM/Proxmox) veya bulutta olması fark etmez.
+The agent runs on amd64 and arm64. It requires systemd or OpenRC (Alpine) as the service manager. Physical, virtual (VMware, Hyper-V, KVM/Proxmox) and cloud servers are all supported.
 
-Windows'ta ajan x64 sistemlerde Windows hizmeti olarak çalışır ve Windows Update Agent'ı kullanır; WSUS'a bağlı sunucularda WSUS'ta onaylanan güncellemeler görünür. Windows'ta güvenlik açığı taraması Microsoft güncellemeleriyle sınırlıdır: üçüncü taraf programlar (tarayıcılar, 7-Zip vb.) envanterde listelenir ancak taranmaz. Microsoft'un CVE eşlemesi yayımlamadığı güncellemeler (bazı .NET toplu güncellemeleri gibi) Windows Update'in bildirdiği önem derecesiyle güvenlik güncellemesi olarak gösterilir.
+On Windows the agent runs as a Windows service on x64 systems and uses the Windows Update Agent; servers attached to WSUS see the updates approved in WSUS. Vulnerability scanning on Windows is limited to Microsoft updates: third-party programs (browsers, 7-Zip and so on) are listed in the inventory but not scanned. Updates for which Microsoft publishes no CVE mapping (some .NET rollups, for example) are shown as security updates with the severity Windows Update reports.
 
-CloudLinux 8 ve 9 AlmaLinux kaynaklarından derlendiği için AlmaLinux güvenlik verileriyle taranır. CloudLinux'a özgü paketler (LVE araçları, alt-php vb.) AlmaLinux verisinde bulunmadığından taranmaz; LVE çekirdeği AlmaLinux çekirdeğinin aynı sürümüyle karşılaştırılır. CloudLinux 7 için güvenlik açığı verisi yoktur.
+CloudLinux 8 and 9 are built from AlmaLinux sources and are scanned with AlmaLinux security data. CloudLinux-specific packages (LVE tools, alt-php and so on) are not in the AlmaLinux data and are not scanned; the LVE kernel is compared with the same AlmaLinux kernel version. There is no vulnerability data for CloudLinux 7.
 
-## Ekran görüntüleri
+## Screenshots
 
-Görüntüler altı Ubuntu 24.04 demo sunucusundan alınmıştır. Paket sürümleri gerçek Ubuntu sürümleridir (bir kısmı güncellenmemiş haliyle); güvenlik açıkları OSV.dev'den gelen gerçek verilerdir.
+The screenshots show the Turkish interface; the other languages have the same layout. They were taken with six Ubuntu 24.04 demo servers. The package versions are real Ubuntu versions (some left unpatched); the vulnerabilities are real data from OSV.dev.
 
-**Sunucu envanteri:** Tüm sunucular, açık sayıları önem derecesine göre, bekleyen güncellemeler ve ajan durumu. Seçili sunucularda toplu güncelleme başlatılabilir.
+**Server inventory:** All servers with their vulnerabilities by severity, pending updates and agent status. Bulk updates can be started on selected servers.
 
-![Sunucu envanteri](docs/images/servers.png)
+![Server inventory](docs/images/servers.png)
 
-**Sunucu ayrıntısı:** Sunucudaki açıklar CVSS puanı, etkilenen paket, kurulu ve düzeltilmiş sürümle listelenir. Güvenlik güncellemeleri, tüm güncellemeler ve yeniden başlatma tek tıkla başlatılır.
+**Server details:** The server's vulnerabilities with CVSS score, affected package, installed and fixed version. Security updates, all updates and reboots are started with one click.
 
-![Sunucu ayrıntısı](docs/images/server.png)
+![Server details](docs/images/server.png)
 
-**Kaynak kullanımı:** Ajanın bildirdiği işlemci, bellek, takas alanı ve disk kullanımı; son 24 saat, 7 gün ve 30 gün grafikleri ile otomatik uyarı sınırları.
+**Resource usage:** CPU, memory, swap and disk usage reported by the agent, with 24-hour, 7-day and 30-day charts and the built-in warning limits.
 
-![Kaynak kullanımı](docs/images/health.png)
+![Resource usage](docs/images/health.png)
 
-**Yazılım envanteri:** Paketlerden tanınan sunucu yazılımları, kaç sunucuda ve hangi sürüm serileriyle kurulu oldukları, çalışan servisler ve açıklar.
+**Software inventory:** Server software recognized from packages, on how many servers and in which release series it is installed, running services and vulnerabilities.
 
-![Yazılım envanteri](docs/images/software.png)
+![Software inventory](docs/images/software.png)
 
-**Güvenlik açıkları:** Filoda tespit edilen tüm açıklar; önem derecesine, istismar durumuna ve düzeltme olup olmadığına göre süzülebilir.
+**Vulnerabilities:** All vulnerabilities found across the fleet, filterable by severity, exploitation and fix availability.
 
-![Güvenlik açıkları](docs/images/vulnerabilities.png)
+![Vulnerabilities](docs/images/vulnerabilities.png)
 
-**Açık ayrıntısı:** Orijinal açıklama (çevrilmeden), CVSS vektörü, etkilenen sunucular ve çözüm durumu.
+**Vulnerability details:** The original (untranslated) description, CVSS vector, affected servers and status.
 
-![Açık ayrıntısı](docs/images/vulnerability.png)
+![Vulnerability details](docs/images/vulnerability.png)
 
-**Güncelleme işi:** Ajan komut çıktısını gönderir ve işten sonra paketlerin gerçekten güncellendiğini doğrular.
+**Update job:** The agent sends the command output and verifies after the job that the packages were really updated.
 
-![Güncelleme işi](docs/images/job.png)
+![Update job](docs/images/job.png)
 
-**Zamanlanmış güncellemeler:** Bakım penceresi; gün, saat, süre ve hedef sunucular (tümü, işletim sistemi veya seçili sunucular).
+**Scheduled updates:** Maintenance window with days, time, duration and target servers (all, an operating system, a group or selected servers).
 
-![Zamanlanmış güncelleme](docs/images/schedule.png)
+![Scheduled update](docs/images/schedule.png)
 
-**Ajan kurulumu:** Dağıtım seçilir, kurulum komutu buna göre oluşur (curl veya wget, root veya sudo).
+**Agent installation:** Pick the distribution and the install command is built for it (curl or wget, root or sudo).
 
-![Ajan yönetimi](docs/images/agents.png)
+![Agents](docs/images/agents.png)
 
-**Karanlık tema:** Panel, işletim sisteminin açık ya da koyu tema ayarını izler.
+**Dark theme:** The dashboard follows the operating system's light or dark theme setting.
 
-![Gösterge paneli, karanlık tema](docs/images/dashboard-dark.png)
+![Dashboard, dark theme](docs/images/dashboard-dark.png)
 
-## Nasıl çalışır
+## How it works
 
 ```
- Yönetilen sunucular                     Merkezi sunucu (Docker)                 Dış kaynaklar
+ Managed servers                         Central server (Docker)                 External sources
 ┌──────────────────────┐   HTTPS   ┌──────────────────────────────┐   HTTPS   ┌──────────────┐
 │ netio-patchman-agent │ ────────▶ │ netio.patchman               │ ────────▶ │ api.osv.dev  │
-│  envanter, işler     │  (giden)  │  panel + API + PostgreSQL    │           │ CISA KEV     │
+│  inventory, jobs     │ (outbound)│  dashboard + API + PostgreSQL│           │ CISA KEV     │
 │  (Linux, Windows)    │           │                              │           │ MSRC         │
 └──────────────────────┘           └──────────────────────────────┘           └──────────────┘
                                                  ▲
-                                    Tarayıcı ────┘  (yönetim paneli)
+                                     Browser ────┘  (dashboard)
 ```
 
-1. Ajan, belirli aralıklarla merkezi sunucuya bağlanır. Kurulu paketleri ve bekleyen güncellemeleri bildirir, sırada bir iş varsa alır.
-2. Merkezi sunucu paket sürümlerini OSV.dev'deki dağıtım güvenlik verileriyle eşleştirir ve bulguları panelde gösterir. Windows sunucularında bekleyen KB'lerin düzelttiği CVE'ler Microsoft Security Update Guide'dan alınır.
-3. Paneldeki güncelleme işleri ajanın bir sonraki bağlantısında ajana iletilir. Ajan işi sabit paket yöneticisi komutlarıyla çalıştırır ve sonucu bildirir.
+1. The agent connects to the central server at regular intervals. It reports installed packages and pending updates, and picks up a job if one is queued.
+2. The central server matches package versions against the distributions' security data on OSV.dev and shows the findings in the dashboard. For Windows servers, the CVEs fixed by the pending KBs come from the Microsoft Security Update Guide.
+3. Update jobs from the dashboard are handed to the agent on its next connection. The agent runs them with fixed package manager commands and reports the result.
 
-Yönetilen sunucularda gelen bağlantı için port açmanız gerekmez.
+No inbound ports need to be opened on managed servers.
 
-## Kurulum (Docker)
+## Installation (Docker)
 
-### Gereksinimler
+### Requirements
 
-- Docker Engine 24 veya üzeri ve Docker Compose v2.24 veya üzeri yüklü bir Linux sunucu.
+- A Linux server with Docker Engine 24 or later and Docker Compose v2.24 or later.
 - `git`.
-- **İnternet erişimi:** İlk derlemede Docker imajları ve Go modülleri indirilir. Güvenlik açığı verileri için de `api.osv.dev` ve `www.cisa.gov` adreslerine HTTPS erişimi gerekir. İnternet erişimi olmayan ortamlar için bkz. [docs/kurulum.md](docs/kurulum.md#8-internet-erişimi-olmayan-ortamlar).
-- **Önerilen kaynaklar:** 100 sunucuya kadar 1 çekirdek, 1 GB bellek ve 5 GB disk.
+- **Internet access:** The first build downloads Docker images and Go modules. Vulnerability data also requires HTTPS access to `api.osv.dev` and `www.cisa.gov`. For environments without internet access, see [docs/kurulum.md](docs/kurulum.md#8-internet-erişimi-olmayan-ortamlar) (Turkish).
+- **Recommended resources:** up to 100 servers: 1 CPU core, 1 GB RAM and 5 GB disk.
 
-Docker yüklü değilse, Docker'ın resmî betiğiyle kurabilirsiniz:
+If Docker is not installed, you can install it with Docker's official script:
 
 ```sh
 curl -fsSL https://get.docker.com | sudo sh
 ```
 
-### 1. Depoyu indirin
+### 1. Download the repository
 
 ```sh
 git clone https://github.com/alptekinsunnetci/netio.patchman.git
 cd netio.patchman
 ```
 
-### 2. (İsteğe bağlı) Sunucu adresini belirleyin
+### 2. (Optional) Set the server address and language
 
-Ajanların ve kullanıcıların merkezi sunucuya ulaşacağı adresi `.env` dosyasına yazabilirsiniz:
+You can write the address that agents and users will use to reach the central server in the `.env` file. To make English the default language (for new users, emails, chat messages and logs), also set `PATCHMAN_LOCALE`:
 
 ```sh
 cp .env.example .env
 nano .env        # PATCHMAN_BASE_URL=https://patchman.your-domain
+                 # PATCHMAN_LOCALE=en-US
 ```
 
-Bu adımı atlarsanız adres `http://localhost:8080` olarak başlar. Kurulumdan sonra panelde **Sistem Ayarları → Sunucu yapılandırması** sayfasından değiştirebilirsiniz. Ajanları kurmadan önce adresin doğru olduğundan emin olun, çünkü kurulum komutu bu adresi kullanır.
+If you skip this step, the address starts as `http://localhost:8080`. You can change it after installation under **Settings → Server configuration**. Make sure the address is correct before installing agents, because the install command uses it.
 
-### 3. Başlatın
+### 3. Start
 
 ```sh
 docker compose up -d --build
 ```
 
-İlk derleme internet hızına bağlı olarak birkaç dakika sürer. Durumu kontrol edin:
+The first build takes a few minutes depending on your connection. Check the status:
 
 ```sh
-docker compose ps                 # STATUS sütununda "healthy" görünmeli
-docker compose logs -f server     # günlük kayıtları (çıkmak için Ctrl+C)
+docker compose ps                 # the STATUS column should show "healthy"
+docker compose logs -f server     # logs (Ctrl+C to exit)
 ```
 
-### 4. İlk yönetici hesabını oluşturun
+### 4. Create the first administrator account
 
-Tarayıcıda `http://<sunucu-adresi>:8080` adresini açın. Veritabanı boş olduğu için **İlk Kurulum** sayfası açılır. Burada yönetici hesabını oluşturun. Bu sayfa yalnızca hiç kullanıcı yokken açılır.
+Open `http://<server-address>:8080` in a browser. Because the database is empty, the **Initial Setup** page opens. Use the **English** link at the bottom of the page to switch the language, then create the administrator account. This page is only available while there are no users.
 
-### 5. Temel ayarları yapın
+### 5. Basic settings
 
-Panelde **Sistem Ayarları → Sunucu yapılandırması** sayfasında:
+In the dashboard, under **Settings → Server configuration**:
 
-- **Sunucu adresi:** Ajanların erişeceği dış adres, örneğin `https://patchman.your-domain`.
-- **E-posta sunucusu (SMTP):** E-posta bildirimleri için. Aynı sayfadan deneme e-postası gönderebilirsiniz.
+- **Server address:** The external address agents will use, for example `https://patchman.your-domain`.
+- **Email server (SMTP):** For email notifications. You can send a test email from the same page.
 
-Kurulum tamamlandı. Sıradaki adım sunuculara ajan kurmak.
+Installation is complete. The next step is installing the agent on your servers.
 
 ### HTTPS
 
-Ajanlar ve tarayıcılar sunucuya HTTPS ile bağlanmalıdır. Önerilen yöntem, sunucuyu nginx, Caddy veya HAProxy gibi bir ters vekilin arkasına koymaktır. Bu durumda panelde **Ters vekil başlıklarına güven** seçeneğini açın. Örnek yapılandırmalar ve sunucunun TLS'i kendisinin sonlandırması için bkz. [docs/kurulum.md](docs/kurulum.md#3-tls-ve-ters-vekil).
+Agents and browsers should connect to the server over HTTPS. The recommended way is to put the server behind a reverse proxy such as nginx, Caddy or HAProxy. In that case, turn on **Trust the X-Forwarded-For and X-Forwarded-Proto headers of a reverse proxy** in the dashboard. For example configurations and for letting the server terminate TLS itself, see [docs/kurulum.md](docs/kurulum.md#3-tls-ve-ters-vekil) (Turkish).
 
-**Port değiştirme:** `.env` dosyasına `PATCHMAN_PUBLISH_PORT=8899` yazın ve `docker compose up -d` komutunu yeniden çalıştırın. Ters vekil aynı makinedeyse `PATCHMAN_PUBLISH_PORT=127.0.0.1:8899` kullanın; panel böylece dışarıya şifresiz HTTP ile açılmaz. Portu `PATCHMAN_HTTP_ADDR` ile değiştirmeyin; o ayar Docker dışı kurulumlar içindir ve Docker Compose'da yok sayılır.
+**Changing the port:** Set `PATCHMAN_PUBLISH_PORT=8899` in `.env` and run `docker compose up -d` again. If the reverse proxy runs on the same machine, use `PATCHMAN_PUBLISH_PORT=127.0.0.1:8899` so that the dashboard is not exposed over plain HTTP. Do not change the port with `PATCHMAN_HTTP_ADDR`; that setting is for installations without Docker and is ignored by Docker Compose.
 
-**Plesk:** Alan adının **Apache ve nginx Ayarları → Ek nginx yönergeleri** alanına şunu ekleyin. Plesk'in kendi `location /` bloğuyla çakışmaması için düzenli ifade biçimi kullanılır:
+**Plesk:** Add the following to the domain's **Apache & nginx Settings → Additional nginx directives**. The regular expression form avoids a conflict with Plesk's own `location /` block:
 
 ```nginx
 location ~ ^/ {
@@ -242,55 +243,57 @@ location ~ ^/ {
 }
 ```
 
-Ardından panelde **Ters vekil başlıklarına güven** seçeneğini açın (veya `.env` içinde `PATCHMAN_TRUST_PROXY=true`).
+Then turn on the reverse proxy option in the dashboard (or set `PATCHMAN_TRUST_PROXY=true` in `.env`).
 
-## Sunuculara ajan kurulumu
+## Installing the agent on servers
 
-1. Panelde **Ajan Yönetimi** sayfasından bir **kayıt anahtarı** oluşturun. Anahtar yalnızca bir kez gösterilir. Süre ve kullanım sınırı verebilirsiniz.
-2. Sayfada sunucunun dağıtımını seçin. Komut buna göre oluşur: Debian ve Alpine'de `wget`, diğerlerinde `curl` kullanılır. root olarak bağlanıyorsanız **sudo ile çalıştır** kutusunu boş bırakın (sudo, CentOS, Debian ve Alpine'de çoğu zaman kurulu değildir). Komutu yönetilecek sunucuda çalıştırın. Örnek (root olarak, RHEL/CentOS):
+1. Create an **enrollment token** on the **Agents** page. The token is shown only once. You can set a validity period and a use limit.
+2. Select the server's distribution on the page. The command is built for it: `wget` on Debian and Alpine, `curl` on the others. If you connect as root, leave **Run with sudo** unchecked (sudo is often not installed on CentOS, Debian and Alpine). When the dashboard is in English, the command includes `--locale en-US` so the agent's messages are in English too. Run the command on the server to be managed. Example (as root, RHEL/CentOS):
 
    ```sh
    curl -fsSL https://patchman.your-domain/downloads/install-agent.sh | \
-     sh -s -- --server-url https://patchman.your-domain --token <KAYIT-ANAHTARI>
+     sh -s -- --server-url https://patchman.your-domain --token <ENROLLMENT-TOKEN> --locale en-US
    ```
 
-3. Sunucu birkaç saniye içinde **Sunucu Envanteri** sayfasında görünür ve ilk güvenlik taraması otomatik olarak başlar.
+3. The server appears on the **Server Inventory** page within seconds and the first vulnerability scan starts automatically.
 
-Kurulum betiği şunları yapar:
+The install script:
 
-- Ajanı `/usr/local/bin/netio-patchman-agent` konumuna kurar.
-- Yapılandırmayı `/etc/netio-patchman/agent.env` dosyasına yazar.
-- Hizmeti başlatır: systemd'de `netio-patchman-agent.service`, OpenRC'de (Alpine) `/etc/init.d/netio-patchman-agent`.
+- installs the agent as `/usr/local/bin/netio-patchman-agent`,
+- writes the configuration to `/etc/netio-patchman/agent.env`,
+- starts the service: `netio-patchman-agent.service` with systemd, `/etc/init.d/netio-patchman-agent` with OpenRC (Alpine).
 
-Ajanın durumunu ve kayıtlarını şu komutlarla görebilirsiniz:
+The output of the install script is in Turkish.
+
+To see the agent's status and logs:
 
 ```sh
 systemctl status netio-patchman-agent
 journalctl -u netio-patchman-agent -f
 ```
 
-Toplu dağıtım (Ansible vb.), çevrimdışı kurulum, ajan seçenekleri ve kaldırma adımları için bkz. [docs/kurulum.md](docs/kurulum.md#4-ajan-kurulumu).
+For bulk deployment (Ansible etc.), offline installation, agent options and removal, see [docs/kurulum.md](docs/kurulum.md#4-ajan-kurulumu) (Turkish).
 
-### Windows sunucuları
+### Windows servers
 
-Ajan Yönetimi sayfasında **Windows / Windows Server (PowerShell)** seçeneğini seçin ve oluşan komutu sunucuda **yönetici olarak** açılan PowerShell veya komut isteminde çalıştırın:
+On the Agents page choose **Windows / Windows Server (PowerShell)** and run the generated command on the server in PowerShell or a command prompt opened **as administrator**:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; & ([scriptblock]::Create((irm 'https://patchman.your-domain/downloads/install-agent.ps1').TrimStart([char]65279))) -ServerUrl 'https://patchman.your-domain' -Token '<KAYIT-ANAHTARI>'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; & ([scriptblock]::Create((irm 'https://patchman.your-domain/downloads/install-agent.ps1').TrimStart([char]65279))) -ServerUrl 'https://patchman.your-domain' -Token '<ENROLLMENT-TOKEN>'"
 ```
 
-Kurulum betiği ajanı `C:\Program Files\netio-patchman\netio-patchman-agent.exe` konumuna kurar, yapılandırmayı yalnızca SYSTEM ve Administrators'ın erişebildiği `C:\ProgramData\netio-patchman\agent.env` dosyasına yazar ve `netio-patchman-agent` Windows hizmetini (otomatik başlatma, hata durumunda yeniden başlatma) oluşturup başlatır. Kayıtlar `C:\ProgramData\netio-patchman\agent.log` dosyasındadır:
+The install script puts the agent in `C:\Program Files\netio-patchman\netio-patchman-agent.exe`, writes the configuration to `C:\ProgramData\netio-patchman\agent.env` (readable only by SYSTEM and Administrators), and creates and starts the `netio-patchman-agent` Windows service (automatic start, restart on failure). The log is `C:\ProgramData\netio-patchman\agent.log`:
 
 ```powershell
 Get-Service netio-patchman-agent
 Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50 -Wait
 ```
 
-İnternet erişimi olmayan sunucularda `install-agent.ps1` ve `netio-patchman-agent-windows-amd64.exe` dosyalarını aynı klasöre kopyalayıp `-Binary` seçeneğini kullanın. Kaldırmak için: `.\install-agent.ps1 -Uninstall`. Ajan Windows Update hizmetine en fazla 6 saatte bir çevrim içi sorar; arada Windows'un kendi son taramasının sonucunu okur.
+For servers without internet access, copy `install-agent.ps1` and `netio-patchman-agent-windows-amd64.exe` to one folder and use the `-Binary` option. To remove the agent: `.\install-agent.ps1 -Uninstall`. The agent asks the Windows Update service online at most every 6 hours; in between it reads the result of Windows' own last scan.
 
-## Güncelleme, yedekleme ve kaldırma
+## Updating, backup and removal
 
-### Yeni sürüme geçme
+### Moving to a new version
 
 ```sh
 cd netio.patchman
@@ -298,27 +301,28 @@ git pull
 docker compose up -d --build
 ```
 
-- Veritabanı şeması açılışta otomatik olarak güncellenir; yine de öncesinde yedek alın.
-- Sürüm, depodaki `VERSION` dosyasından okunur. 1.x sürümlerinin kod adı **gökalp**'tir; panelde sürüm numarasının yanında görünür.
-- **Sistem Ayarları → Ajanlar → Ajanları otomatik olarak güncelle** seçeneği açıksa (varsayılan) ajanlar yeni sürüme kendiliğinden geçer.
+- The database schema is updated automatically at startup; still, take a backup first.
+- The version is read from the `VERSION` file in the repository.
+- The 1.x releases are code-named **gökalp**; the panel shows the name next to the version.
+- If **Settings → Agents → Update agents automatically** is on (the default), agents switch to the new version by themselves.
 
-### 0.8.0: PostgreSQL'e geçiş
+### 0.8.0: moving to PostgreSQL
 
-0.8.0 sürümüyle veritabanı SQLite'tan PostgreSQL'e taşındı. Compose dosyası artık uygulamanın yanında bir PostgreSQL 17 konteyneri (`postgres`, birim `netio-patchman-db`) çalıştırır. Geçiş için ayrıca bir şey yapmanız gerekmez; her zamanki gibi `git pull && docker compose up -d --build` (ya da panelden **Şimdi güncelle**) yeterlidir:
+Version 0.8.0 moves the database from SQLite to PostgreSQL. The Compose file now runs a PostgreSQL 17 container next to the application (`postgres`, volume `netio-patchman-db`). Nothing extra is needed for the move; the usual `git pull && docker compose up -d --build` (or **Update now** in the dashboard) is enough:
 
-1. PostgreSQL konteyneri ilk kez başlar. Parolası rastgele üretilir ve veritabanı biriminde saklanır, dışarıya port açılmaz.
-2. Sunucu, PostgreSQL boşsa ve `/data/netio-patchman.db` dosyası varsa bütün tabloları tek bir işlemde (transaction) PostgreSQL'e kopyalar ve her tablonun satır sayısını kaynakla karşılaştırır. Kopyalama tamamlanmadan panel açılmaz. 1,3 milyon satırlık bir veritabanı yaklaşık 15 saniyede aktarılır.
-3. Aktarım bitince eski dosyanın adı `netio-patchman.db.imported-<zaman>` olarak değiştirilir (silinmez). Bildirim merkezine bir bilgi notu düşer, işlem denetim kayıtlarına yazılır.
+1. The PostgreSQL container starts for the first time. Its password is generated randomly and kept in the database volume; no port is published.
+2. If PostgreSQL is empty and `/data/netio-patchman.db` exists, the server copies all tables into PostgreSQL in one transaction and compares the row count of every table with the source. The dashboard opens only after the copy. A database with 1.3 million rows is moved in about 15 seconds.
+3. Afterwards the old file is renamed to `netio-patchman.db.imported-<time>` (not deleted), an information notice appears in the notification center and the move is written to the audit log.
 
-Herhangi bir adım başarısız olursa PostgreSQL boş bırakılır, SQLite dosyası değiştirilmez ve sunucu başlamaz. Hata `docker compose logs server` çıktısında görünür. Sorunu çözdükten sonra `docker compose up -d` aktarımı yeniden başlatır.
+If any step fails, PostgreSQL is left empty, the SQLite file is not changed and the server does not start. The error is shown by `docker compose logs server`. After fixing the cause, `docker compose up -d` starts the move again.
 
-- **SQLite'ta kalmak:** `.env` dosyasına `PATCHMAN_DATABASE_URL=sqlite` yazın. PostgreSQL konteyneri yine çalışır ama kullanılmaz.
-- **Dış bir PostgreSQL kullanmak:** `.env` dosyasına `PATCHMAN_DATABASE_URL=postgres://kullanıcı:parola@sunucu:5432/veritabanı?sslmode=require` yazın. Veritabanı boşsa SQLite verisi oraya aktarılır.
-- **Geri dönmek:** `PATCHMAN_DATABASE_URL=sqlite` ile başlatıp güncel bir yedeği `restore` komutuyla geri yükleyin. Adımlar [docs/kurulum.md](docs/kurulum.md#22-veritabanı) içinde.
+- **Staying on SQLite:** add `PATCHMAN_DATABASE_URL=sqlite` to `.env`. The PostgreSQL container still runs but is not used.
+- **External PostgreSQL:** add `PATCHMAN_DATABASE_URL=postgres://user:password@host:5432/database?sslmode=require` to `.env`. If that database is empty, the SQLite data is moved there.
+- **Going back:** start with `PATCHMAN_DATABASE_URL=sqlite` and restore a current backup with the `restore` command; the steps are in [docs/kurulum.md](docs/kurulum.md#22-veritabanı) (Turkish).
 
-### Panelden güncelleme (isteğe bağlı)
+### Updating from the dashboard (optional)
 
-Sürüm yükseltmesi **Sistem Ayarları → Sunucu yapılandırması → Ürün sürümü → Şimdi güncelle** düğmesiyle de yapılabilir. Bunun için Compose dosyasındaki `updater` konteynerini bir kez etkinleştirin:
+The upgrade can also be started with **Settings → Server configuration → Product version → Update now**. Turn on the `updater` container from the Compose file once:
 
 ```sh
 cd netio.patchman
@@ -326,23 +330,23 @@ echo "COMPOSE_PROFILES=updater" >> .env
 docker compose up -d --build
 ```
 
-Düğmeye basıldığında güncelleyici sırasıyla `git pull --ff-only`, veritabanı yedeği (`/data/before-update-<sürüm>-<zaman>.db`), sunucu imajının derlenmesi, sunucunun yeniden başlatılması ve sağlık denetimini yapar. İlerleme ve komut çıktısı panelde görünür; sayfa bitince kendiliğinden yenilenir, sonuç bildirim merkezine düşer. Panel birkaç saniye erişilemez, ajanlar etkilenmez. Bir adım başarısız olursa sunucu çalışan sürümle devam eder.
+The updater then runs `git pull --ff-only`, a database backup (`/data/before-update-<version>-<time>.db`), the image build, the restart and a health check. Progress and command output appear in the dashboard; the page reloads when it is over and the result goes to the notification center. The dashboard is unavailable for a few seconds; agents are not affected. If a step fails, the server keeps running the current version.
 
 > [!WARNING]
-> Güncelleyici Docker soketine (`/var/run/docker.sock`) erişir; bu, sunucu üzerinde root yetkisine eşdeğerdir. Güncelleyici dışarıya port açmaz, yalnızca panelin veri birimine yazdığı istek dosyasını bekler ve sabit adımları çalıştırır; istekten parametre almaz. Yine de bu özelliği yalnızca ihtiyaç varsa açın ve yönetici hesaplarını iki adımlı doğrulamayla koruyun. Depoda yerel değişiklik varsa `git pull --ff-only` durur ve güncelleme yapılmaz.
+> The updater has access to the Docker socket (`/var/run/docker.sock`), which equals root access on the server. It opens no port, only waits for the request file the dashboard writes into the data volume and runs fixed steps; it takes no parameters from the request. Still, turn it on only if you need it and protect administrator accounts with two-factor authentication. If the repository has local changes, `git pull --ff-only` stops and nothing is updated.
 
-### Yedekleme ve geri yükleme
+### Backup and restore
 
-**Otomatik yedekleme** varsayılan olarak açıktır: veritabanı her gün 02:30'da `/data/backups/` dizinine yedeklenir ve en yeni 7 yedek saklanır. Saat, saklanacak yedek sayısı ve kapatma **Sistem Ayarları → Otomatik yedekleme** bölümündedir. Aynı yerde **Şimdi yedek al** düğmesi ve yedekleri indirme bağlantıları bulunur. Yedekler varsayılan olarak veritabanıyla aynı Docker biriminde durur; diskin kaybına karşı onları düzenli olarak başka bir yere kopyalayın ya da `PATCHMAN_BACKUP_DIR` ile ayrı bir diske yazdırın (bkz. [docs/kurulum.md](docs/kurulum.md)).
+**Automatic backups** are on by default: the database is backed up every day at 02:30 to `/data/backups/` and the newest 7 backups are kept. The time, the number of backups to keep and the on/off switch are under **Settings → Automatic backup**. The same place has a **Back up now** button and download links. By default the backups live in the same Docker volume as the database; copy them elsewhere regularly or write them to a separate disk with `PATCHMAN_BACKUP_DIR` (see [docs/kurulum.md](docs/kurulum.md), section 5.1, Turkish).
 
-Elle de tutarlı bir yedek alabilirsiniz:
+You can also take a consistent backup manually:
 
 ```sh
-docker compose exec server netio-patchman-server backup -out /data/yedek.db
-docker compose cp server:/data/yedek.db ./yedek-$(date +%Y%m%d).db
+docker compose exec server netio-patchman-server backup -out /data/backup.db
+docker compose cp server:/data/backup.db ./backup-$(date +%Y%m%d).db
 ```
 
-Yedekten geri yükleme (yedekler hangi veritabanı kullanılırsa kullanılsın SQLite dosyasıdır):
+Restoring from a backup (backups are SQLite files whichever database is in use):
 
 ```sh
 docker compose stop server
@@ -350,72 +354,72 @@ docker compose run --rm --no-deps server restore -in /data/backups/netio-patchma
 docker compose start server
 ```
 
-Sunucu dışındaki bir yedeği önce birime kopyalayın: `docker compose cp ./yedek-20261120.db server:/data/yedek.db`, ardından `-in /data/yedek.db` ile geri yükleyin. Geri yükleme tek bir işlemde yapılır: başarısız olursa veritabanı değişmez.
+Copy a backup from outside into the volume first: `docker compose cp ./backup-20261120.db server:/data/backup.db`, then restore it with `-in /data/backup.db`. The restore runs in one transaction: if it fails, the database is not changed.
 
-Veriler PostgreSQL'in `netio-patchman-db` biriminde, yedekler `netio-patchman-data` biriminde (`/data/backups`) tutulur. Yedeklerde SMTP parolası da bulunur; yedekleri buna göre koruyun.
+The data is kept in the PostgreSQL volume `netio-patchman-db`, backups in the volume `netio-patchman-data` (`/data/backups`). Backups also contain the SMTP password; protect them accordingly.
 
-### Yönetici parolasını sıfırlama
-
-```sh
-docker compose exec server netio-patchman-server reset-password -email yonetici@your-domain
-```
-
-Komut yeni bir parola üretip ekrana yazar.
-
-Telefonunu kaybeden bir kullanıcının iki adımlı doğrulamasını panelden (**Kullanıcı Yönetimi → kullanıcı → İki adımlı doğrulamayı sıfırla**) ya da komut satırından kaldırabilirsiniz:
+### Resetting an administrator password
 
 ```sh
-docker compose exec server netio-patchman-server reset-mfa -email yonetici@your-domain
+docker compose exec server netio-patchman-server reset-password -email admin@your-domain
 ```
 
-### Kaldırma veya sıfırdan başlama
+The command generates a new password and prints it.
+
+The two-factor authentication of a user who lost their phone can be removed in the dashboard (**Users → user → Reset two-factor authentication**) or on the command line:
 
 ```sh
-docker compose down        # konteyneri durdurur, veriler korunur
-docker compose down -v     # konteyneri ve veritabanını siler (geri alınamaz)
+docker compose exec server netio-patchman-server reset-mfa -email admin@your-domain
 ```
 
-`down -v` sonrasında `docker compose up -d` ile sistem boş bir veritabanıyla, **İlk Kurulum** adımından başlar.
+### Removal or starting over
 
-## Yapılandırma
+```sh
+docker compose down        # stops the container, data is kept
+docker compose down -v     # deletes the container and the database (cannot be undone)
+```
 
-Yapılandırmanın tamamı yönetim panelinden yapılabilir:
+After `down -v`, `docker compose up -d` starts with an empty database at the **Initial Setup** step.
 
-- **Sistem Ayarları:** Bildirim eşikleri ve alıcıları, ajan bağlantı aralıkları, otomatik ajan güncellemesi, tarama, kayıt saklama süresi, güvenlik (iki adımlı doğrulama, risk kabulü süresi) ve otomatik yedekleme.
-- **Sistem Ayarları → Bildirim kanalları:** Slack, Microsoft Teams, Telegram, webhook, Jira, ServiceNow, GLPI ve Zabbix kanalları, olay süzgeçleri ve teslimat geçmişi.
-- **Sistem Ayarları → Sağlık kontrolleri, Güvenlik puanı:** Güncelleme öncesi/sonrası kontroller, puan ağırlıkları ve eşik.
-- **Sistem Ayarları → Sunucu yapılandırması:** Sunucu adresi, ters vekil, saat dilimi, günlük seviyesi, SMTP ve veri kaynakları (OSV, CISA KEV, Microsoft Security Update Guide).
+## Configuration
 
-`.env` dosyasındaki `PATCHMAN_` önekli değişkenler yalnızca ilk değerleri verir; panelde kaydedilen değer bunların yerine geçer. Aşağıdaki tabloda "Panelden" sütununda "—" ile işaretli değerler sunucu başlarken gerektiği için yalnızca `.env` ile değiştirilebilir ve yeniden başlatma gerektirir. Tüm seçenekler açıklamalarıyla [.env.example](.env.example) dosyasındadır.
+All configuration can be done in the dashboard:
 
-| Değişken | Varsayılan | Açıklama | Panelden |
+- **Settings:** Notification thresholds and recipients, agent connection intervals, automatic agent updates, scanning, retention, security (two-factor authentication, risk acceptance term) and automatic backups.
+- **Settings → Notification channels:** Slack, Microsoft Teams, Telegram, webhook, Jira, ServiceNow, GLPI and Zabbix channels, event filters and delivery history.
+- **Settings → Health checks, Security score:** Checks before and after updates, score weights and threshold.
+- **Settings → Server configuration:** Server address, reverse proxy, time zone, log level, SMTP and data sources (OSV, CISA KEV, Microsoft Security Update Guide).
+
+The `PATCHMAN_`-prefixed variables in `.env` only provide the initial values; a value saved in the dashboard replaces them. Values marked "—" in the "Dashboard" column are needed when the server starts, so they can only be changed in `.env` and require a restart. All options are described in [.env.example](.env.example) (comments in Turkish).
+
+| Variable | Default | Description | Dashboard |
 |---|---|---|---|
-| `PATCHMAN_BASE_URL` | `http://localhost:8080` | Panelin ve ajanların kullandığı dış adres | evet |
-| `PATCHMAN_PUBLISH_PORT` | `8080` | Docker'ın sunucuda yayınladığı port; `127.0.0.1:8899` biçimi yalnızca yerel arabirimde yayınlar | — |
-| `PATCHMAN_HTTP_ADDR` | `:8080` | Yalnızca Docker dışı kurulumlarda dinleme adresi; Docker Compose'da sabit `:8080` | — |
-| `PATCHMAN_TRUST_PROXY` | `false` | Ters vekil arkasında istemci IP'sini `X-Forwarded-For` başlığından al | evet |
-| `PATCHMAN_TLS_CERT_FILE`, `PATCHMAN_TLS_KEY_FILE` | — | Sunucunun TLS'i kendisinin sonlandırması için sertifika ve anahtar | — |
-| `PATCHMAN_TIMEZONE` | `Europe/Istanbul` | Tarih ve saatlerin gösterildiği saat dilimi | evet |
-| `PATCHMAN_LOCALE` | `tr-TR` | Varsayılan dil (`tr-TR`, `en-US`, `de-DE` veya `ru-RU`): yeni kullanıcıların arayüzü, e-postalar ve günlükler. Her kullanıcı kendi arayüz dilini ayrıca seçebilir | — |
-| `PATCHMAN_DATABASE_URL` | Compose'daki PostgreSQL | PostgreSQL adresi (`postgres://kullanıcı@sunucu:5432/veritabanı`). `sqlite` yazılırsa `/data/netio-patchman.db` SQLite dosyası kullanılır | — |
-| `PATCHMAN_DATABASE_PASSWORD_FILE` | Compose'daki parola dosyası | Adreste parola yoksa parolanın okunduğu dosya | — |
-| `PATCHMAN_BACKUP_DIR` | `/data/backups` | Otomatik yedeklerin yazıldığı dizin | — |
-| `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API adresi (iç ağ yansısı kullanılabilir) | evet |
-| `PATCHMAN_KEV_URL` | CISA KEV adresi | KEV kataloğu adresi; `off` ile kapatılır | evet |
-| `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Windows sunucularının CVE eşlemesi için Microsoft Security Update Guide adresi; `off` ile kapatılır | evet |
-| `PATCHMAN_EPSS_URL` | `https://epss.empiricalsecurity.com/epss_scores-current.csv.gz` | Günlük EPSS puan dosyası; `off` ile kapatılır | evet |
-| `PATCHMAN_EOL_URL` | `https://endoflife.date/api` | İşletim sistemi ve yazılım destek bitiş takvimleri; `off` ile kapatılır (yerleşik takvim kullanılır) | evet |
-| `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | E-posta sunucusu | evet |
-| `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP kimlik bilgileri | evet |
-| `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Gönderen adı ve adresi | evet |
-| `PATCHMAN_LOG_LEVEL`, `PATCHMAN_LOG_FORMAT` | `info`, `json` | Günlük seviyesi ve biçimi | seviye: evet, biçim: — |
-| `PATCHMAN_VERSION` | `VERSION` dosyası | Derlenen sunucu ve ajan sürümü | — |
+| `PATCHMAN_BASE_URL` | `http://localhost:8080` | External address used by the dashboard and agents | yes |
+| `PATCHMAN_PUBLISH_PORT` | `8080` | Port Docker publishes on the host; the `127.0.0.1:8899` form publishes on the local interface only | — |
+| `PATCHMAN_HTTP_ADDR` | `:8080` | Listen address for installations without Docker only; fixed at `:8080` in Docker Compose | — |
+| `PATCHMAN_TRUST_PROXY` | `false` | Take the client IP from the `X-Forwarded-For` header behind a reverse proxy | yes |
+| `PATCHMAN_TLS_CERT_FILE`, `PATCHMAN_TLS_KEY_FILE` | — | Certificate and key for letting the server terminate TLS itself | — |
+| `PATCHMAN_TIMEZONE` | `Europe/Istanbul` | Time zone in which dates and times are shown | yes |
+| `PATCHMAN_LOCALE` | `tr-TR` | Default language (`tr-TR`, `en-US`, `de-DE` or `ru-RU`): interface of new users, emails and logs. Each user can choose their own interface language | — |
+| `PATCHMAN_DATABASE_URL` | PostgreSQL from Compose | PostgreSQL address (`postgres://user@host:5432/database`); `sqlite` uses the SQLite file `/data/netio-patchman.db` | — |
+| `PATCHMAN_DATABASE_PASSWORD_FILE` | password file from Compose | File the password is read from when the address has none | — |
+| `PATCHMAN_BACKUP_DIR` | `/data/backups` | Directory for automatic backups | — |
+| `PATCHMAN_OSV_URL` | `https://api.osv.dev` | OSV API address (an internal mirror can be used) | yes |
+| `PATCHMAN_KEV_URL` | CISA KEV address | KEV catalog address; `off` turns it off | yes |
+| `PATCHMAN_MSRC_URL` | `https://api.msrc.microsoft.com/sug/v2.0/en-US` | Microsoft Security Update Guide address for the CVE mapping of Windows servers; `off` turns it off | yes |
+| `PATCHMAN_EPSS_URL` | `https://epss.empiricalsecurity.com/epss_scores-current.csv.gz` | Daily EPSS score file; `off` turns it off | yes |
+| `PATCHMAN_EOL_URL` | `https://endoflife.date/api` | End-of-life calendars of operating systems and software; `off` turns it off (the built-in calendar is used) | yes |
+| `PATCHMAN_SMTP_HOST`, `PATCHMAN_SMTP_PORT` | —, `587` | Email server | yes |
+| `PATCHMAN_SMTP_USERNAME`, `PATCHMAN_SMTP_PASSWORD` | — | SMTP credentials | yes |
+| `PATCHMAN_SMTP_FROM_NAME`, `PATCHMAN_SMTP_FROM_ADDRESS` | `netio.patchman`, — | Sender name and address | yes |
+| `PATCHMAN_LOG_LEVEL`, `PATCHMAN_LOG_FORMAT` | `info`, `json` | Log level and format | level: yes, format: — |
+| `PATCHMAN_VERSION` | `VERSION` file | Server and agent version to build | — |
 
-Ortam değişkenlerinde hatalı bir değer varsa sunucu başlamaz ve hataları Türkçe olarak listeler.
+If an environment variable has an invalid value, the server does not start and lists the errors in the default language.
 
-## REST API ve Prometheus
+## REST API and Prometheus
 
-**Profilim → API anahtarları** bölümünden anahtar oluşturun. Anahtar, oluşturan kullanıcının rolü ve sunucu erişimiyle çalışır; salt okunur anahtarlar hiçbir şeyi değiştiremez. Uç noktalar, alanlar ve örnekler: [docs/api.md](docs/api.md).
+Create a key under **Profile → API keys**. A key works with the role and server access of the user who created it; read-only keys cannot change anything. Endpoints, fields and examples: [docs/api.md](docs/api.md) (Turkish).
 
 ```sh
 curl -H "Authorization: Bearer npat_..." https://patchman.your-domain/api/v1/hosts
@@ -433,92 +437,94 @@ scrape_configs:
     static_configs: [{ targets: ["patchman.your-domain"] }]
 ```
 
-## Sorun giderme
+## Troubleshooting
 
-| Belirti | Kontrol |
+| Symptom | Check |
 |---|---|
-| Güncellemeden sonra sunucu başlamıyor, günlükte "SQLite veritabanı PostgreSQL'e aktarılamadı" yazıyor | Hata ayrıntısı aynı satırdadır; SQLite dosyası değişmemiştir. `docker compose ps` ile `postgres` konteynerinin "healthy" olduğunu ve diskte yer olduğunu kontrol edin, ardından `docker compose up -d`. Geçici olarak SQLite'a dönmek için `.env` dosyasına `PATCHMAN_DATABASE_URL=sqlite` yazın. |
-| Panel açılmıyor | `docker compose ps` çıktısının PORTS sütununda `0.0.0.0:<port>->8080/tcp` görünmeli. `docker compose logs server` ile hataları görün. Güvenlik duvarında `PATCHMAN_PUBLISH_PORT` portu açık mı? |
-| Kurulum komutu `localhost` adresini gösteriyor | **Sunucu yapılandırması** sayfasında sunucu adresini ajanların erişebileceği adresle değiştirin. |
-| Ajan kaydolmuyor | Ajanın bulunduğu sunucudan `curl -I https://patchman.your-domain/healthz` çalışıyor mu? `journalctl -u netio-patchman-agent -n 50` |
-| Windows ajanı kaydolmuyor veya güncelleme göstermiyor | `Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50`. Windows Update hizmeti (`wuauserv`) devre dışı mı? Sunucu WSUS'a bağlıysa güncellemeler WSUS'ta onaylanmış mı? |
-| Windows sunucusunda CVE görünmüyor | Merkezi sunucu `api.msrc.microsoft.com` adresine erişebiliyor mu? **Sunucu yapılandırması** sayfasında Microsoft Security Update Guide açık mı? |
-| Açık taraması sonuç vermiyor | Merkezi sunucunun `api.osv.dev` adresine erişimi var mı? Günlüklerde OSV hatası arayın. |
-| E-posta gelmiyor | **Sunucu yapılandırması** sayfasından deneme e-postası gönderin; hata mesajı panelde gösterilir. |
+| After an update the server does not start and the log says the SQLite database could not be copied to PostgreSQL | The details are in the same log entry; the SQLite file is unchanged. Check with `docker compose ps` that `postgres` is "healthy" and that there is free disk space, then run `docker compose up -d`. To go back to SQLite for now, add `PATCHMAN_DATABASE_URL=sqlite` to `.env`. |
+| The dashboard does not open | `docker compose ps` should show `0.0.0.0:<port>->8080/tcp` in the PORTS column. See errors with `docker compose logs server`. Is the `PATCHMAN_PUBLISH_PORT` port open in the firewall? |
+| The install command shows `localhost` | Change the server address on the **Server configuration** page to an address the agents can reach. |
+| The agent does not enroll | Does `curl -I https://patchman.your-domain/healthz` work from the agent's server? `journalctl -u netio-patchman-agent -n 50` |
+| The Windows agent does not enroll or shows no updates | `Get-Content C:\ProgramData\netio-patchman\agent.log -Tail 50`. Is the Windows Update service (`wuauserv`) disabled? If the server uses WSUS, are the updates approved there? |
+| No CVEs on a Windows server | Can the central server reach `api.msrc.microsoft.com`? Is the Microsoft Security Update Guide turned on in **Server configuration**? |
+| Vulnerability scanning finds nothing | Can the central server reach `api.osv.dev`? Look for OSV errors in the logs. |
+| No emails arrive | Send a test email from the **Server configuration** page; the error is shown in the dashboard. |
 
-Ayrıntılı bilgi: [docs/kurulum.md](docs/kurulum.md) (kurulum ve işletim), [docs/kullanim.md](docs/kullanim.md) (panel kullanımı).
+More information (in Turkish): [docs/kurulum.md](docs/kurulum.md) (installation and operation), [docs/kullanim.md](docs/kullanim.md) (using the dashboard).
 
-## Dil ve yerelleştirme
+## Language and localization
 
-- Varsayılan dil Türkçedir (`tr-TR`). Arayüz İngilizce (`en-US`), Almanca (`de-DE`) ve Rusça (`ru-RU`) olarak da kullanılabilir: giriş ekranındaki dil bağlantıları veya **Profilim → Arayüz dili**. Seçim kullanıcıya kaydedilir ve diğer cihazlarda da geçerli olur.
-- E-postalar, sohbet kanalı mesajları ve sistem günlükleri sunucunun varsayılan dilindedir (`PATCHMAN_LOCALE`). Ajan mesajlarının dili ajan kurulurken `--locale` ile seçilir (ör. `--locale de-DE`); panel Türkçe dışındaki bir dildeyken kurulum komutu bu seçeneği kendisi ekler.
-- Tarihler Türkçe, Almanca ve Rusçada `21.11.2026`, İngilizcede `2026-11-21` biçimindedir. CSV dosyaları İngilizcede `,`, diğer dillerde `;` ile ayrılır.
-- **Güvenlik açığı verileri çevrilmez.** CVE numaraları, resmî başlıklar, açıklamalar, CVSS değerleri, paket adları ve üretici duyuruları kaynağında yayımlandığı haliyle gösterilir.
-- Zaman bilgileri UTC olarak saklanır ve seçilen saat diliminde (varsayılan `Europe/Istanbul`) gösterilir.
-- Arayüz metinleri `internal/i18n/locales/` altındadır. Yeni bir dil, aynı anahtarlarla yeni bir dosya eklenerek desteklenir.
+- The default language is Turkish (`tr-TR`). The interface is also available in English (`en-US`), German (`de-DE`) and Russian (`ru-RU`): the language links on the sign-in page or **My Profile → Interface language**. The choice is saved for the user and applies on other devices too.
+- Emails, chat channel messages and system logs use the server's default language (`PATCHMAN_LOCALE`). The language of agent messages is set with `--locale` when installing the agent (e.g. `--locale en-US`); the dashboard adds this option to the install command when it is not in Turkish.
+- Dates are shown as `21.11.2026` in Turkish, German and Russian and as `2026-11-21` in English. CSV files are separated by `,` in English and `;` in the other languages.
+- **Vulnerability data is never translated.** CVE IDs, official titles, descriptions, CVSS values, package names and vendor advisories are shown exactly as published by their source.
+- Times are stored in UTC and shown in the chosen time zone (default `Europe/Istanbul`).
+- Interface texts are in `internal/i18n/locales/`. A new language is added as a new file with the same keys; a test checks that every catalog has all keys and placeholders.
+- The documentation in `docs/` is in Turkish.
 
-## Güvenlik
+## Security
 
-- Parolalar PBKDF2-SHA256 (600.000 tekrar) ile saklanır. Oturum, kayıt anahtarı ve ajan kimlikleri veritabanında yalnızca SHA-256 özeti olarak tutulur.
-- Tüm form işlemleri CSRF korumalıdır. Başarısız girişler IP ve hesap bazında sınırlandırılır.
-- Ajan port açmaz ve dışarıdan bağlantı kabul etmez. Yalnızca önceden tanımlı paket yöneticisi komutlarını, kabuk kullanmadan çalıştırır; paket adları her iki tarafta doğrulanır. Windows'ta Windows Update, ajana gömülü sabit bir PowerShell betiğiyle (Windows Update Agent API) kullanılır; KB adları da doğrulanır.
-- Bir sunucuda uzaktan güncellemeyi tamamen kapatmak için o sunucunun `/etc/netio-patchman/agent.env` dosyasına `PATCHMAN_REMOTE_UPDATES=false` yazın. Windows'ta aynı ayar `C:\ProgramData\netio-patchman\agent.env` dosyasındadır.
-- Panel katı bir Content-Security-Policy ile sunulur ve dış kaynak (CDN, yazı tipi) kullanmaz; internet erişimi olmayan ağlarda da çalışır.
+- Passwords are stored with PBKDF2-SHA256 (600,000 iterations). Sessions, enrollment tokens and agent credentials are stored in the database only as SHA-256 hashes.
+- All form actions are protected against CSRF. Failed sign-ins are rate-limited per IP and per account. Two-factor authentication (TOTP) is available and can be made mandatory.
+- The agent opens no ports and accepts no inbound connections. It only runs predefined package manager commands, without a shell; package names are validated on both sides. On Windows, Windows Update is used through a fixed PowerShell script embedded in the agent (Windows Update Agent API); KB names are validated too.
+- To turn off remote updates completely on a server, set `PATCHMAN_REMOTE_UPDATES=false` in that server's `/etc/netio-patchman/agent.env`. On Windows the same setting is in `C:\ProgramData\netio-patchman\agent.env`.
+- The dashboard is served with a strict Content-Security-Policy and uses no external resources (CDNs, fonts); it also works in networks without internet access.
+- How the parts trust each other, the threat model and a hardening checklist: [Architecture & security model](docs/architecture-and-security.md).
 
-## Geliştirme
+## Development
 
-Gereksinim: Go 1.26 veya üzeri.
+Requirement: Go 1.26 or later.
 
 ```sh
-go test ./...                                   # birim ve uçtan uca testler (SQLite)
-# Aynı testler PostgreSQL üzerinde (her test kendi şemasını kullanır):
-PATCHMAN_TEST_DATABASE_URL=postgres://patchman:parola@127.0.0.1:5432/patchman go test ./...
+go test ./...                                   # unit and end-to-end tests (SQLite)
+# The same tests on PostgreSQL (each test uses its own schema):
+PATCHMAN_TEST_DATABASE_URL=postgres://patchman:password@127.0.0.1:5432/patchman go test ./...
 go vet ./...
 PATCHMAN_DATA_DIR=./data go run ./cmd/netio-patchman-server
 
-# Ajan dosyalarını sunucunun dağıtım biçiminde dist/agent/ altına derleme
+# Build the agent binaries into dist/agent/ in the server's distribution layout
 scripts/build-agent.sh                                    # Linux / macOS
 powershell -File scripts\build-agent.ps1                  # Windows
 
-# OSV.dev ve Microsoft Security Update Guide'a karşı canlı tarama testi (internet erişimi gerekir)
+# Live scan test against OSV.dev and the Microsoft Security Update Guide (requires internet access)
 go test -tags live -run Live -v ./internal/scanner/
 
-# Windows'ta gerçek Windows Update taraması (yalnızca arar, bir şey kurmaz)
+# Real Windows Update search on Windows (searches only, installs nothing)
 go test -tags live -run LiveWindows -v ./internal/agent/
 ```
 
-Ürün gereksinimleri [docs/spec/](docs/spec/) dizinindedir.
+Product requirements are in the [docs/spec/](docs/spec/) directory.
 
-## Sorumluluk reddi
+## Disclaimer
 
-netio.patchman "olduğu gibi" (AS IS) sunulur. Açık ya da örtülü hiçbir garanti verilmez: ticari elverişlilik, belirli bir amaca uygunluk, hatasız ya da kesintisiz çalışma ve güvenlik açıklarının eksiksiz tespiti dahil.
+netio.patchman is provided "AS IS". No warranty of any kind is given, express or implied, including merchantability, fitness for a particular purpose, error-free or uninterrupted operation, and complete detection of vulnerabilities.
 
-**Yazılımın kurulmasından ve kullanılmasından doğabilecek tüm riskler ve sonuçlar, yazılımı kuran ve kullanan kişi ya da kuruma aittir.** Geliştirici, yürürlükteki hukukun izin verdiği en geniş ölçüde, doğrudan ya da dolaylı hiçbir zarardan sorumlu tutulamaz. Bu zararlar şunları kapsar:
+**All risks and consequences of installing and using the software lie with the person or organization that installs and uses it.** To the fullest extent permitted by applicable law, the developer cannot be held liable for any direct or indirect damage, including:
 
-- Paket güncellemesi, servis veya sunucu yeniden başlatma sırasında ya da sonrasında oluşan hizmet kesintileri, uyumsuzluklar ve veri kaybı.
-- Başarısız, yarım kalan veya beklenmeyen sonuç veren güncelleme işleri ve zamanlanmış güncellemeler.
-- Tespit edilemeyen, yanlış tespit edilen veya önem derecesi hatalı gösterilen güvenlik açıkları. Güvenlik verileri üçüncü taraf kaynaklardan (OSV.dev, CISA KEV, Microsoft Security Update Guide, dağıtım duyuruları) gelir; doğrulukları bu kaynaklara bağlıdır.
-- Yazılımın, ajanların veya merkezi sunucunun yanlış yapılandırılması, yetkisiz erişime açık bırakılması ya da kötüye kullanılması.
+- Service outages, incompatibilities and data loss during or after package updates, service restarts or server reboots.
+- Failed, incomplete or unexpected update jobs and scheduled updates.
+- Vulnerabilities that are not detected, detected incorrectly or shown with a wrong severity. Security data comes from third-party sources (OSV.dev, CISA KEV, Microsoft Security Update Guide, distribution advisories); its accuracy depends on those sources.
+- Misconfiguration of the software, the agents or the central server, leaving them open to unauthorized access, or misuse.
 
-Kullanmadan önce:
+Before using it:
 
-- Yazılımı önce üretim dışı bir ortamda deneyin.
-- Güncellemelerden önce sunucularınızın ve netio.patchman veritabanının yedeğini alın.
-- Kritik sunucularda güncellemeleri bakım pencerelerinde ve kontrollü olarak uygulayın.
-- Merkezi sunucuyu yalnızca HTTPS ile ve güvenilir ağlardan erişilebilir şekilde yayınlayın.
+- Try the software in a non-production environment first.
+- Back up your servers and the netio.patchman database before updates.
+- Apply updates to critical servers in maintenance windows and in a controlled way.
+- Publish the central server only over HTTPS and only to trusted networks.
 
-Bu yazılımı kurmanız ve kullanmanız, bu koşulları kabul ettiğiniz anlamına gelir.
+By installing and using this software you accept these terms.
 
-## Lisans
+## License
 
-Geliştirici: **Alptekin Sünnetci**. Copyright © 2026 Alptekin Sünnetci.
+Developer: **Alptekin Sünnetci**. Copyright © 2026 Alptekin Sünnetci.
 
-netio.patchman, [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) ve **Commons Clause** koşulu ile lisanslanmıştır. Tam metin: [LICENSE](LICENSE).
+netio.patchman is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) with the **Commons Clause** condition. Full text: [LICENSE](LICENSE).
 
-- **İzin verilenler:** Yazılımı ücretsiz kullanmak (kendi altyapınızda, kurum içinde de), incelemek, değiştirmek ve ücretsiz olarak dağıtmak.
-- **İzin verilmeyen:** Yazılımı ya da değerinin tamamı veya önemli bir kısmı bu yazılımdan gelen bir ürün veya hizmeti üçüncü kişilere ücret karşılığı sunmak. Satış, ücretli barındırma ve ücretli danışmanlık/destek hizmeti buna dahildir.
-- Dağıttığınız kopyalarda LICENSE dosyası ve telif bildirimi korunmalıdır.
+- **Allowed:** Using the software free of charge (on your own infrastructure, including inside your organization), studying it, modifying it and distributing it free of charge.
+- **Not allowed:** Selling the software, or a product or service whose value derives entirely or substantially from it, to third parties. This includes sale, paid hosting and paid consulting/support services.
+- Copies you distribute must keep the LICENSE file and the copyright notice.
 
-Ticari kullanım için geliştiriciyle iletişime geçin.
+Contact the developer for commercial use.
 
-Lisans metninin bağlayıcı hali İngilizce olan [LICENSE](LICENSE) dosyasıdır; bu bölüm yalnızca özet niteliğindedir.
+The binding text of the license is the [LICENSE](LICENSE) file; this section is only a summary.
