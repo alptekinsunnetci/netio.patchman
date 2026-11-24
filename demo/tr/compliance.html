@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Uyum ve Denetim · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink is-active" href="compliance.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Uyum ve Denetim</h1>
+    <p class="pagehead__sub">Tek raporlama motoru, ortak kanıt deposu ve çerçeve başına ayrı kontrol değerlendirmeleri.</p>
+  </div>
+  <div class="pagehead__actions"><a class="button button--primary" href="compliance-reports.html#new"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-plus"></use></svg>Yeni rapor</a></div>
+</header>
+
+<p class="alert alert--info">Bu rapor netio.patchman&#39;in otomatik olarak topladığı teknik kanıtlara dayanır. Bir belgelendirme, sertifika veya uygunluk beyanı değildir. Bir kanıtın birden fazla çerçevede kullanılması, o çerçevelerin gereksinimlerinin karşılandığı anlamına gelmez. Değerlendirme ve karar yetkili denetçiye aittir.</p>
+
+<section class="stats stats--compact">
+  <div class="stat"><p class="stat__label">Rapor</p><p class="stat__value">1</p><p class="stat__meta">0 kesinleşmiş sürüm</p></div>
+  
+  <div class="stat"><p class="stat__label">Kanıt kaydı</p><p class="stat__value">26</p><p class="stat__meta">23.11.2026 tarihinden beri</p></div>
+  
+  <div class="stat"><p class="stat__label">Etkin çerçeve</p><p class="stat__value">4</p><p class="stat__meta"><a href="compliance-policies.html">Uyum Politikaları</a></p></div>
+</section>
+
+<div class="grid-2 grid-2--wide-left">
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">Son raporlar</h2><a href="compliance-reports.html">Tüm raporlar</a></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Başlık</th><th>Değerlendirme dönemi</th><th>Sürüm</th><th>Kontrol sonuçları</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td><a href="compliance-reports-1.html">2026 yıllık bilgi güvenliği denetimi</a><div class="cell-sub">Bilgi Güvenliği Yönetimi Denetimleri, BT Temel Koruma Denetimleri, BT Hizmet Yönetimi Değerlendirmeleri, Genel Güvenlik ve Yama Uyumu · Tüm sunucular</div></td>
+      <td>26.08.2026 – 23.11.2026</td>
+      <td>v1 <span class="pill">Taslak</span></td>
+      <td><span class="pill pill--failed" title="Sapma">Sapma: 7</span> <span class="pill pill--warning" title="Kanıt eksik">Kanıt eksik: 5</span> <span class="pill pill--partial" title="Kısmi">Kısmi: 2</span> <span class="pill pill--queued" title="Manuel kanıt gerekli">Manuel kanıt gerekli: 1</span> <span class="pill pill--in_progress" title="Manuel kanıt mevcut">Manuel kanıt mevcut: 2</span> <span class="pill pill--succeeded" title="Kanıt yeterli">Kanıt yeterli: 25</span> <span class="pill pill--expired" title="Uygulanamaz">Uygulanamaz: 2</span> </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">Değerlendirme çerçeveleri</h2>
+  
+  <ul class="plain-list">
+    <li><strong>Bilgi Güvenliği Yönetimi Denetimleri</strong> <span class="muted mono">isms@1</span><div class="cell-sub">Bilgi güvenliği yönetim sistemi denetimlerinde istenen teknik kanıtlar: varlık envanteri, açıklık yönetimi, değişiklik, kayıt, yedekleme ve erişim.</div></li><li><strong>BT Temel Koruma Denetimleri</strong> <span class="muted mono">baseline@1</span><div class="cell-sub">Temel koruma yaklaşımıyla yapılan değerlendirmeler için modül bazlı teknik kanıtlar: yama ve değişiklik yönetimi, Linux ve Windows sunucular, Windows istemciler, kayıt ve yedekleme.</div></li><li><strong>BT Hizmet Yönetimi Değerlendirmeleri</strong> <span class="muted mono">itsm@1</span><div class="cell-sub">BT hizmet yönetimi uygulamalarını destekleyen kanıtlar: değişiklik etkinleştirme, sürüm ve dağıtım, yapılandırma ve varlık yönetimi, izleme ve hizmet seviyeleri.</div></li><li><strong>Genel Güvenlik ve Yama Uyumu</strong> <span class="muted mono">general@1</span><div class="cell-sub">netio.patchman&#39;in ölçülebilir hedeflerle tanımladığı temel güvenlik ve güncelleme kontrolleri.</div></li>
+  </ul>
+  
+  
+  <h2 class="panel__title">Kanıt deposu</h2>
+  <dl class="dl">
+    <dt><a href="#demo-unavailable">Güncelleme işi</a></dt><dd>0</dd><dt><a href="#demo-unavailable">Değişiklik işi</a></dt><dd>1</dd><dt><a href="#demo-unavailable">Giderilen açık</a></dt><dd>0</dd><dt><a href="#demo-unavailable">Denetim kaydı</a></dt><dd>21</dd><dt><a href="#demo-unavailable">Standart sapması</a></dt><dd>0</dd><dt><a href="#demo-unavailable">Yedekleme</a></dt><dd>2</dd><dt><a href="#demo-unavailable">Günlük envanter</a></dt><dd>1</dd><dt><a href="#demo-unavailable">Manuel kanıt</a></dt><dd>1</dd>
+  </dl>
+  
+</section>
+</div>
+<p class="footnote">Kanıtlar sunucu çalıştıkça dakikada bir toplanır ve hash zinciriyle korunur. Kontrol kimlikleri ve açıklamaları netio.patchman&#39;e aittir; hiçbir standardın metni kopyalanmamıştır.</p>
+
+  </main>
+</div>
+
+</body>
+</html>

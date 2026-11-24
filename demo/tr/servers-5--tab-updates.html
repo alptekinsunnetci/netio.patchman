@@ -1,0 +1,1669 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>mail-01 · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink is-active" href="servers.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="servers.html">Sunucu Envanteri</a> / <span>mail-01</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">mail-01 <span class="pill pill--offline">Çevrimdışı</span> </h1>
+    <p class="pagehead__sub">Ubuntu 24.04.4 LTS · <span class="mono">6.8.0-71-generic</span> · Fiziksel sunucu · son bağlantı 12 sa önce</p>
+    
+  </div>
+  
+  <div class="pagehead__actions">
+    <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="refresh">
+      <button class="button" type="submit" title="Ajandan paket listesini hemen yeniden göndermesini ister."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-refresh"></use></svg>Envanteri yenile</button></form>
+    
+    <form method="post" action="#" data-confirm="mail-01 sunucusunda tüm güvenlik güncellemeleri kurulacak. Devam edilsin mi?"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="upgrade_security">
+      <button class="button button--primary" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg>Güvenlik güncellemelerini uygula (117)</button></form>
+    <form method="post" action="#" data-confirm="mail-01 sunucusunda bekleyen tüm güncellemeler kurulacak. Devam edilsin mi?"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="upgrade_all">
+      <button class="button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg>Tüm güncellemeleri uygula (155)</button></form>
+    
+    
+    <form method="post" action="#" data-confirm="mail-01 sunucusu 1 dakika içinde yeniden başlatılacak ve bu sürede hizmet veremeyecek. Devam edilsin mi?"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="reboot">
+      <button class="button" type="submit" title="Sunucuyu 1 dakika sonra yeniden başlatır. Ajan açılışta yeni envanter gönderir."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-power"></use></svg>Yeniden başlat</button></form>
+    
+    
+  </div>
+  
+</header>
+
+
+
+
+
+
+<section class="stats stats--compact stats--5">
+  <a class="stat" href="servers-5-score.html"><p class="stat__label">Güvenlik skoru</p><p class="stat__value"><span class="score score--critical">20</span></p><p class="stat__meta">Kritik</p></a>
+  <div class="stat"><p class="stat__label">Güvenlik Açıkları</p><p class="stat__value">5323</p><p class="stat__meta"><span class="sevcounts"><span class="sevcount sevcount--critical" title="Kritik">339</span><span class="sevcount sevcount--high" title="Yüksek">2083</span><span class="sevcount sevcount--medium" title="Orta">1578</span><span class="sevcount sevcount--low" title="Düşük">1266</span><span class="sevcount sevcount--unknown" title="Bilinmiyor">57</span></span></p></div>
+  <div class="stat"><p class="stat__label">Güvenlik Güncellemesi</p><p class="stat__value">117</p><p class="stat__meta">Toplam 155 güncelleme</p></div>
+  <div class="stat"><p class="stat__label">Kurulu Paket</p><p class="stat__value">636</p><p class="stat__meta">apt</p></div>
+  <div class="stat"><p class="stat__label">Son Tarama</p><p class="stat__value stat__value--sm">12 sa önce</p><p class="stat__meta">Son Envanter: 12 sa önce</p></div>
+</section>
+
+<nav class="tabs" aria-label="Sunucu ayrıntıları">
+  <a class="tab" href="servers-5.html">Güvenlik Açıkları</a>
+  <a class="tab is-active" href="servers-5--tab-updates.html">Bekleyen Güncellemeler <span class="tab__count">155</span></a>
+  <a class="tab" href="servers-5--tab-packages.html">Kurulu Paketler <span class="tab__count">636</span></a>
+  <a class="tab" href="servers-5--tab-watched.html">Takip Edilenler <span class="tab__count">0</span></a>
+  <a class="tab" href="servers-5--tab-software.html">Yazılımlar</a>
+  <a class="tab" href="servers-5--tab-health.html">Sağlık</a>
+  <a class="tab" href="servers-5--tab-jobs.html">İşlem Geçmişi</a>
+  <a class="tab" href="servers-5--tab-info.html">Sistem Bilgisi</a>
+</nav>
+
+
+
+<div class="inline-actions">
+  <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="upgrade_security"><button class="button button--sm" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-list"></use></svg>Güvenlik güncellemelerini önizle</button></form>
+  <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="upgrade_all"><button class="button button--sm" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-list"></use></svg>Tüm güncellemeleri önizle</button></form>
+</div>
+
+<form class="filters" method="get" action="#">
+  <input type="hidden" name="tab" value="updates">
+  <input class="field__input" type="search" name="q" value="" placeholder="Paket adı" aria-label="Ara">
+  <button class="button" type="submit">Ara</button>
+  
+</form>
+<section class="panel panel--flush">
+  
+  
+  <form method="post" action="#" data-confirm="Seçili paketler güncellenecek. Devam edilsin mi?">
+    <input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="upgrade_packages"><input type="hidden" name="back_tab" value="updates">
+    <div class="table-wrap">
+    
+    <table class="table">
+      <thead><tr><th class="check"><input type="checkbox" data-check-all="packages" aria-label="Tümünü seç"></th><th>Paket</th><th>Kurulu Sürüm</th><th>Yeni Sürüm</th><th>Depo</th><th>Tür</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="binutils" aria-label="binutils"></td>
+        <td class="mono"><a href="#demo-unavailable">binutils</a></td>
+        <td class="mono">2.42-4ubuntu2</td>
+        <td class="mono">2.42-4ubuntu2.10</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="binutils-x86-64-linux-gnu" aria-label="binutils-x86-64-linux-gnu"></td>
+        <td class="mono"><a href="packages-binutils-x86-64-linux-gnu.html">binutils-x86-64-linux-gnu</a></td>
+        <td class="mono">2.42-4ubuntu2</td>
+        <td class="mono">2.42-4ubuntu2.10</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="bsdextrautils" aria-label="bsdextrautils"></td>
+        <td class="mono"><a href="packages-bsdextrautils.html">bsdextrautils</a></td>
+        <td class="mono">2.39.3-9ubuntu6</td>
+        <td class="mono">2.39.3-9ubuntu6.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="bzip2" aria-label="bzip2"></td>
+        <td class="mono"><a href="#demo-unavailable">bzip2</a></td>
+        <td class="mono">1.0.8-5.1</td>
+        <td class="mono">1.0.8-5.1ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="ca-certificates" aria-label="ca-certificates"></td>
+        <td class="mono"><a href="#demo-unavailable">ca-certificates</a></td>
+        <td class="mono">20240203</td>
+        <td class="mono">20260601~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="cpp-13" aria-label="cpp-13"></td>
+        <td class="mono"><a href="#demo-unavailable">cpp-13</a></td>
+        <td class="mono">13.2.0-23ubuntu4</td>
+        <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="diffutils" aria-label="diffutils"></td>
+        <td class="mono"><a href="packages-diffutils.html">diffutils</a></td>
+        <td class="mono">1:3.10-1build1</td>
+        <td class="mono">1:3.10-1ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="dirmngr" aria-label="dirmngr"></td>
+        <td class="mono"><a href="packages-dirmngr.html">dirmngr</a></td>
+        <td class="mono">2.4.4-2ubuntu17</td>
+        <td class="mono">2.4.4-2ubuntu17.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="distro-info-data" aria-label="distro-info-data"></td>
+        <td class="mono"><a href="packages-distro-info-data.html">distro-info-data</a></td>
+        <td class="mono">0.60</td>
+        <td class="mono">0.72-0ubuntu0.24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="dpkg" aria-label="dpkg"></td>
+        <td class="mono"><a href="#demo-unavailable">dpkg</a></td>
+        <td class="mono">1.22.6ubuntu6</td>
+        <td class="mono">1.22.6ubuntu6.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="g&#43;&#43;-13" aria-label="g&#43;&#43;-13"></td>
+        <td class="mono"><a href="packages-g__-13-404d91.html">g&#43;&#43;-13</a></td>
+        <td class="mono">13.2.0-23ubuntu4</td>
+        <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="g&#43;&#43;-13-x86-64-linux-gnu" aria-label="g&#43;&#43;-13-x86-64-linux-gnu"></td>
+        <td class="mono"><a href="packages-g__-13-x86-64-linux-gnu-1eddc4.html">g&#43;&#43;-13-x86-64-linux-gnu</a></td>
+        <td class="mono">13.2.0-23ubuntu4</td>
+        <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="gcc-13" aria-label="gcc-13"></td>
+        <td class="mono"><a href="packages-gcc-13.html">gcc-13</a></td>
+        <td class="mono">13.2.0-23ubuntu4</td>
+        <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="gcc-13-base" aria-label="gcc-13-base"></td>
+        <td class="mono"><a href="#demo-unavailable">gcc-13-base</a></td>
+        <td class="mono">13.2.0-23ubuntu4</td>
+        <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="git-man" aria-label="git-man"></td>
+        <td class="mono"><a href="packages-git-man.html">git-man</a></td>
+        <td class="mono">1:2.43.0-1ubuntu7</td>
+        <td class="mono">1:2.43.0-1ubuntu7.3</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="gnupg-l10n" aria-label="gnupg-l10n"></td>
+        <td class="mono"><a href="packages-gnupg-l10n.html">gnupg-l10n</a></td>
+        <td class="mono">2.4.4-2ubuntu17</td>
+        <td class="mono">2.4.4-2ubuntu17.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="gpgconf" aria-label="gpgconf"></td>
+        <td class="mono"><a href="#demo-unavailable">gpgconf</a></td>
+        <td class="mono">2.4.4-2ubuntu17</td>
+        <td class="mono">2.4.4-2ubuntu17.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="gpgv" aria-label="gpgv"></td>
+        <td class="mono"><a href="#demo-unavailable">gpgv</a></td>
+        <td class="mono">2.4.4-2ubuntu17</td>
+        <td class="mono">2.4.4-2ubuntu17.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="kmod" aria-label="kmod"></td>
+        <td class="mono"><a href="#demo-unavailable">kmod</a></td>
+        <td class="mono">31&#43;20240202-2ubuntu7</td>
+        <td class="mono">31&#43;20240202-2ubuntu7.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="krb5-locales" aria-label="krb5-locales"></td>
+        <td class="mono"><a href="#demo-unavailable">krb5-locales</a></td>
+        <td class="mono">1.20.1-6ubuntu2</td>
+        <td class="mono">1.20.1-6ubuntu2.10</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="less" aria-label="less"></td>
+        <td class="mono"><a href="#demo-unavailable">less</a></td>
+        <td class="mono">590-2ubuntu2</td>
+        <td class="mono">590-2ubuntu2.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libasan8" aria-label="libasan8"></td>
+        <td class="mono"><a href="#demo-unavailable">libasan8</a></td>
+        <td class="mono">14-20240412-0ubuntu1</td>
+        <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libatomic1" aria-label="libatomic1"></td>
+        <td class="mono"><a href="#demo-unavailable">libatomic1</a></td>
+        <td class="mono">14-20240412-0ubuntu1</td>
+        <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libattr1" aria-label="libattr1"></td>
+        <td class="mono"><a href="#demo-unavailable">libattr1</a></td>
+        <td class="mono">1:2.5.2-1build1</td>
+        <td class="mono">1:2.5.2-1ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libavahi-client3" aria-label="libavahi-client3"></td>
+        <td class="mono"><a href="#demo-unavailable">libavahi-client3</a></td>
+        <td class="mono">0.8-13ubuntu6</td>
+        <td class="mono">0.8-13ubuntu6.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libavahi-common3" aria-label="libavahi-common3"></td>
+        <td class="mono"><a href="#demo-unavailable">libavahi-common3</a></td>
+        <td class="mono">0.8-13ubuntu6</td>
+        <td class="mono">0.8-13ubuntu6.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libbinutils" aria-label="libbinutils"></td>
+        <td class="mono"><a href="#demo-unavailable">libbinutils</a></td>
+        <td class="mono">2.42-4ubuntu2</td>
+        <td class="mono">2.42-4ubuntu2.10</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libblkid1" aria-label="libblkid1"></td>
+        <td class="mono"><a href="#demo-unavailable">libblkid1</a></td>
+        <td class="mono">2.39.3-9ubuntu6</td>
+        <td class="mono">2.39.3-9ubuntu6.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libc-devtools" aria-label="libc-devtools"></td>
+        <td class="mono"><a href="#demo-unavailable">libc-devtools</a></td>
+        <td class="mono">2.39-0ubuntu8</td>
+        <td class="mono">2.39-0ubuntu8.9</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libc6" aria-label="libc6"></td>
+        <td class="mono"><a href="#demo-unavailable">libc6</a></td>
+        <td class="mono">2.39-0ubuntu8</td>
+        <td class="mono">2.39-0ubuntu8.9</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libcap2-bin" aria-label="libcap2-bin"></td>
+        <td class="mono"><a href="#demo-unavailable">libcap2-bin</a></td>
+        <td class="mono">1:2.66-5ubuntu2</td>
+        <td class="mono">1:2.66-5ubuntu2.4</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libctf-nobfd0" aria-label="libctf-nobfd0"></td>
+        <td class="mono"><a href="#demo-unavailable">libctf-nobfd0</a></td>
+        <td class="mono">2.42-4ubuntu2</td>
+        <td class="mono">2.42-4ubuntu2.10</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libdrm-common" aria-label="libdrm-common"></td>
+        <td class="mono"><a href="#demo-unavailable">libdrm-common</a></td>
+        <td class="mono">2.4.120-2build1</td>
+        <td class="mono">2.4.125-1ubuntu0.1~24.04.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libdrm-intel1" aria-label="libdrm-intel1"></td>
+        <td class="mono"><a href="#demo-unavailable">libdrm-intel1</a></td>
+        <td class="mono">2.4.120-2build1</td>
+        <td class="mono">2.4.125-1ubuntu0.1~24.04.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libegl1-mesa-dev" aria-label="libegl1-mesa-dev"></td>
+        <td class="mono"><a href="#demo-unavailable">libegl1-mesa-dev</a></td>
+        <td class="mono">24.0.5-1ubuntu1</td>
+        <td class="mono">25.2.8-0ubuntu0.24.04.4</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libevent-core-2.1-7t64" aria-label="libevent-core-2.1-7t64"></td>
+        <td class="mono"><a href="#demo-unavailable">libevent-core-2.1-7t64</a></td>
+        <td class="mono">2.1.12-stable-9ubuntu2</td>
+        <td class="mono">2.1.12-stable-9ubuntu2.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libexpat1" aria-label="libexpat1"></td>
+        <td class="mono"><a href="#demo-unavailable">libexpat1</a></td>
+        <td class="mono">2.6.1-2build1</td>
+        <td class="mono">2.6.1-2ubuntu0.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libfdisk1" aria-label="libfdisk1"></td>
+        <td class="mono"><a href="#demo-unavailable">libfdisk1</a></td>
+        <td class="mono">2.39.3-9ubuntu6</td>
+        <td class="mono">2.39.3-9ubuntu6.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libfreetype6" aria-label="libfreetype6"></td>
+        <td class="mono"><a href="#demo-unavailable">libfreetype6</a></td>
+        <td class="mono">2.13.2&#43;dfsg-1build3</td>
+        <td class="mono">2.13.2&#43;dfsg-1ubuntu0.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libgcc-13-dev" aria-label="libgcc-13-dev"></td>
+        <td class="mono"><a href="#demo-unavailable">libgcc-13-dev</a></td>
+        <td class="mono">13.2.0-23ubuntu4</td>
+        <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libgcc-s1" aria-label="libgcc-s1"></td>
+        <td class="mono"><a href="#demo-unavailable">libgcc-s1</a></td>
+        <td class="mono">14-20240412-0ubuntu1</td>
+        <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libgl1-mesa-dri" aria-label="libgl1-mesa-dri"></td>
+        <td class="mono"><a href="#demo-unavailable">libgl1-mesa-dri</a></td>
+        <td class="mono">24.0.5-1ubuntu1</td>
+        <td class="mono">25.2.8-0ubuntu0.24.04.4</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libgles2-mesa-dev" aria-label="libgles2-mesa-dev"></td>
+        <td class="mono"><a href="#demo-unavailable">libgles2-mesa-dev</a></td>
+        <td class="mono">24.0.5-1ubuntu1</td>
+        <td class="mono">25.2.8-0ubuntu0.24.04.4</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libgnutls30t64" aria-label="libgnutls30t64"></td>
+        <td class="mono"><a href="#demo-unavailable">libgnutls30t64</a></td>
+        <td class="mono">3.8.3-1.1ubuntu3</td>
+        <td class="mono">3.8.3-1.1ubuntu3.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libgomp1" aria-label="libgomp1"></td>
+        <td class="mono"><a href="#demo-unavailable">libgomp1</a></td>
+        <td class="mono">14-20240412-0ubuntu1</td>
+        <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libgraphite2-3" aria-label="libgraphite2-3"></td>
+        <td class="mono"><a href="#demo-unavailable">libgraphite2-3</a></td>
+        <td class="mono">1.3.14-2build1</td>
+        <td class="mono">1.3.14-2ubuntu0.24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libgssapi-krb5-2" aria-label="libgssapi-krb5-2"></td>
+        <td class="mono"><a href="#demo-unavailable">libgssapi-krb5-2</a></td>
+        <td class="mono">1.20.1-6ubuntu2</td>
+        <td class="mono">1.20.1-6ubuntu2.10</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libgstreamer1.0-0" aria-label="libgstreamer1.0-0"></td>
+        <td class="mono"><a href="#demo-unavailable">libgstreamer1.0-0</a></td>
+        <td class="mono">1.24.2-1</td>
+        <td class="mono">1.24.2-1ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libgtk-3-0t64" aria-label="libgtk-3-0t64"></td>
+        <td class="mono"><a href="#demo-unavailable">libgtk-3-0t64</a></td>
+        <td class="mono">3.24.41-4ubuntu1</td>
+        <td class="mono">3.24.41-4ubuntu1.3</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libheif-plugin-aomdec" aria-label="libheif-plugin-aomdec"></td>
+        <td class="mono"><a href="#demo-unavailable">libheif-plugin-aomdec</a></td>
+        <td class="mono">1.17.6-1ubuntu4</td>
+        <td class="mono">1.17.6-1ubuntu4.9</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libkmod2" aria-label="libkmod2"></td>
+        <td class="mono"><a href="#demo-unavailable">libkmod2</a></td>
+        <td class="mono">31&#43;20240202-2ubuntu7</td>
+        <td class="mono">31&#43;20240202-2ubuntu7.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="liblcms2-2" aria-label="liblcms2-2"></td>
+        <td class="mono"><a href="#demo-unavailable">liblcms2-2</a></td>
+        <td class="mono">2.14-2build1</td>
+        <td class="mono">2.14-2ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="liblsan0" aria-label="liblsan0"></td>
+        <td class="mono"><a href="#demo-unavailable">liblsan0</a></td>
+        <td class="mono">14-20240412-0ubuntu1</td>
+        <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libmount1" aria-label="libmount1"></td>
+        <td class="mono"><a href="#demo-unavailable">libmount1</a></td>
+        <td class="mono">2.39.3-9ubuntu6</td>
+        <td class="mono">2.39.3-9ubuntu6.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libncursesw6" aria-label="libncursesw6"></td>
+        <td class="mono"><a href="#demo-unavailable">libncursesw6</a></td>
+        <td class="mono">6.4&#43;20240113-1ubuntu2</td>
+        <td class="mono">6.4&#43;20240113-1ubuntu2.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libnss-systemd" aria-label="libnss-systemd"></td>
+        <td class="mono"><a href="#demo-unavailable">libnss-systemd</a></td>
+        <td class="mono">255.4-1ubuntu8</td>
+        <td class="mono">255.4-1ubuntu8.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libpackagekit-glib2-18" aria-label="libpackagekit-glib2-18"></td>
+        <td class="mono"><a href="#demo-unavailable">libpackagekit-glib2-18</a></td>
+        <td class="mono">1.2.8-2build3</td>
+        <td class="mono">1.2.8-2ubuntu1.5</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libpam-modules-bin" aria-label="libpam-modules-bin"></td>
+        <td class="mono"><a href="#demo-unavailable">libpam-modules-bin</a></td>
+        <td class="mono">1.5.3-5ubuntu5</td>
+        <td class="mono">1.5.3-5ubuntu5.7</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libpam0g" aria-label="libpam0g"></td>
+        <td class="mono"><a href="#demo-unavailable">libpam0g</a></td>
+        <td class="mono">1.5.3-5ubuntu5</td>
+        <td class="mono">1.5.3-5ubuntu5.7</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libperl5.38t64" aria-label="libperl5.38t64"></td>
+        <td class="mono"><a href="#demo-unavailable">libperl5.38t64</a></td>
+        <td class="mono">5.38.2-3.2build2</td>
+        <td class="mono">5.38.2-3.2ubuntu0.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libpolkit-gobject-1-0" aria-label="libpolkit-gobject-1-0"></td>
+        <td class="mono"><a href="#demo-unavailable">libpolkit-gobject-1-0</a></td>
+        <td class="mono">124-2ubuntu1</td>
+        <td class="mono">124-2ubuntu1.24.04.4</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libpython3.12t64" aria-label="libpython3.12t64"></td>
+        <td class="mono"><a href="#demo-unavailable">libpython3.12t64</a></td>
+        <td class="mono">3.12.3-1</td>
+        <td class="mono">3.12.3-1ubuntu0.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="librsvg2-2" aria-label="librsvg2-2"></td>
+        <td class="mono"><a href="#demo-unavailable">librsvg2-2</a></td>
+        <td class="mono">2.58.0&#43;dfsg-1build1</td>
+        <td class="mono">2.58.0&#43;dfsg-1ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="librsvg2-common" aria-label="librsvg2-common"></td>
+        <td class="mono"><a href="#demo-unavailable">librsvg2-common</a></td>
+        <td class="mono">2.58.0&#43;dfsg-1build1</td>
+        <td class="mono">2.58.0&#43;dfsg-1ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libsodium23" aria-label="libsodium23"></td>
+        <td class="mono"><a href="#demo-unavailable">libsodium23</a></td>
+        <td class="mono">1.0.18-1build3</td>
+        <td class="mono">1.0.18-1ubuntu0.24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libssh-4" aria-label="libssh-4"></td>
+        <td class="mono"><a href="#demo-unavailable">libssh-4</a></td>
+        <td class="mono">0.10.6-2build2</td>
+        <td class="mono">0.10.6-2ubuntu0.5</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libssl3t64" aria-label="libssl3t64"></td>
+        <td class="mono"><a href="packages-libssl3t64.html">libssl3t64</a></td>
+        <td class="mono">3.0.13-0ubuntu3</td>
+        <td class="mono">3.0.13-0ubuntu3.16</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libstdc&#43;&#43;6" aria-label="libstdc&#43;&#43;6"></td>
+        <td class="mono"><a href="#demo-unavailable">libstdc&#43;&#43;6</a></td>
+        <td class="mono">14-20240412-0ubuntu1</td>
+        <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libsystemd-shared" aria-label="libsystemd-shared"></td>
+        <td class="mono"><a href="#demo-unavailable">libsystemd-shared</a></td>
+        <td class="mono">255.4-1ubuntu8</td>
+        <td class="mono">255.4-1ubuntu8.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libsystemd0" aria-label="libsystemd0"></td>
+        <td class="mono"><a href="#demo-unavailable">libsystemd0</a></td>
+        <td class="mono">255.4-1ubuntu8</td>
+        <td class="mono">255.4-1ubuntu8.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libtasn1-6" aria-label="libtasn1-6"></td>
+        <td class="mono"><a href="#demo-unavailable">libtasn1-6</a></td>
+        <td class="mono">4.19.0-3build1</td>
+        <td class="mono">4.19.0-3ubuntu0.24.04.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libtiff6" aria-label="libtiff6"></td>
+        <td class="mono"><a href="#demo-unavailable">libtiff6</a></td>
+        <td class="mono">4.5.1&#43;git230720-4ubuntu2</td>
+        <td class="mono">4.5.1&#43;git230720-4ubuntu2.5</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libubsan1" aria-label="libubsan1"></td>
+        <td class="mono"><a href="#demo-unavailable">libubsan1</a></td>
+        <td class="mono">14-20240412-0ubuntu1</td>
+        <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libxfont2" aria-label="libxfont2"></td>
+        <td class="mono"><a href="#demo-unavailable">libxfont2</a></td>
+        <td class="mono">1:2.0.6-1build1</td>
+        <td class="mono">1:2.0.6-1&#43;deb13u1build0.24.04.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libxml2" aria-label="libxml2"></td>
+        <td class="mono"><a href="#demo-unavailable">libxml2</a></td>
+        <td class="mono">2.9.14&#43;dfsg-1.3ubuntu3</td>
+        <td class="mono">2.9.14&#43;dfsg-1.3ubuntu3.9</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="locales" aria-label="locales"></td>
+        <td class="mono"><a href="packages-locales.html">locales</a></td>
+        <td class="mono">2.39-0ubuntu8</td>
+        <td class="mono">2.39-0ubuntu8.9</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="mesa-vulkan-drivers" aria-label="mesa-vulkan-drivers"></td>
+        <td class="mono"><a href="#demo-unavailable">mesa-vulkan-drivers</a></td>
+        <td class="mono">24.0.5-1ubuntu1</td>
+        <td class="mono">25.2.8-0ubuntu0.24.04.4</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="mount" aria-label="mount"></td>
+        <td class="mono"><a href="#demo-unavailable">mount</a></td>
+        <td class="mono">2.39.3-9ubuntu6</td>
+        <td class="mono">2.39.3-9ubuntu6.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="ncurses-base" aria-label="ncurses-base"></td>
+        <td class="mono"><a href="#demo-unavailable">ncurses-base</a></td>
+        <td class="mono">6.4&#43;20240113-1ubuntu2</td>
+        <td class="mono">6.4&#43;20240113-1ubuntu2.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="netplan.io" aria-label="netplan.io"></td>
+        <td class="mono"><a href="#demo-unavailable">netplan.io</a></td>
+        <td class="mono">1.0-2ubuntu1</td>
+        <td class="mono">1.1.2-8ubuntu1~24.04.3</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="openssl" aria-label="openssl"></td>
+        <td class="mono"><a href="packages-openssl.html">openssl</a></td>
+        <td class="mono">3.0.13-0ubuntu3</td>
+        <td class="mono">3.0.13-0ubuntu3.16</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="packagekit-tools" aria-label="packagekit-tools"></td>
+        <td class="mono"><a href="#demo-unavailable">packagekit-tools</a></td>
+        <td class="mono">1.2.8-2build3</td>
+        <td class="mono">1.2.8-2ubuntu1.5</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="perl" aria-label="perl"></td>
+        <td class="mono"><a href="#demo-unavailable">perl</a></td>
+        <td class="mono">5.38.2-3.2build2</td>
+        <td class="mono">5.38.2-3.2ubuntu0.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="perl-modules-5.38" aria-label="perl-modules-5.38"></td>
+        <td class="mono"><a href="#demo-unavailable">perl-modules-5.38</a></td>
+        <td class="mono">5.38.2-3.2build2</td>
+        <td class="mono">5.38.2-3.2ubuntu0.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="postfix" aria-label="postfix"></td>
+        <td class="mono"><a href="#demo-unavailable">postfix</a></td>
+        <td class="mono">3.8.6-1build2</td>
+        <td class="mono">3.8.6-1ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3" aria-label="python3"></td>
+        <td class="mono"><a href="#demo-unavailable">python3</a></td>
+        <td class="mono">3.12.3-0ubuntu1</td>
+        <td class="mono">3.12.3-0ubuntu2.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-apport" aria-label="python3-apport"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-apport</a></td>
+        <td class="mono">2.28.1-0ubuntu2</td>
+        <td class="mono">2.28.3-0ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-apt" aria-label="python3-apt"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-apt</a></td>
+        <td class="mono">2.7.7ubuntu1</td>
+        <td class="mono">2.7.7ubuntu5.3</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-cryptography" aria-label="python3-cryptography"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-cryptography</a></td>
+        <td class="mono">41.0.7-4build3</td>
+        <td class="mono">41.0.7-4ubuntu0.4</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-httplib2" aria-label="python3-httplib2"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-httplib2</a></td>
+        <td class="mono">0.20.4-3</td>
+        <td class="mono">0.20.4-3ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-idna" aria-label="python3-idna"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-idna</a></td>
+        <td class="mono">3.6-2</td>
+        <td class="mono">3.6-2ubuntu0.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-jinja2" aria-label="python3-jinja2"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-jinja2</a></td>
+        <td class="mono">3.1.2-1ubuntu1</td>
+        <td class="mono">3.1.2-1ubuntu1.3</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-minimal" aria-label="python3-minimal"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-minimal</a></td>
+        <td class="mono">3.12.3-0ubuntu1</td>
+        <td class="mono">3.12.3-0ubuntu2.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-netplan" aria-label="python3-netplan"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-netplan</a></td>
+        <td class="mono">1.0-2ubuntu1</td>
+        <td class="mono">1.1.2-8ubuntu1~24.04.3</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-problem-report" aria-label="python3-problem-report"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-problem-report</a></td>
+        <td class="mono">2.28.1-0ubuntu2</td>
+        <td class="mono">2.28.3-0ubuntu0.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-pyasn1" aria-label="python3-pyasn1"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-pyasn1</a></td>
+        <td class="mono">0.4.8-4</td>
+        <td class="mono">0.4.8-4ubuntu0.3</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-requests" aria-label="python3-requests"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-requests</a></td>
+        <td class="mono">2.31.0&#43;dfsg-1ubuntu1</td>
+        <td class="mono">2.31.0&#43;dfsg-1ubuntu1.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3.12" aria-label="python3.12"></td>
+        <td class="mono"><a href="#demo-unavailable">python3.12</a></td>
+        <td class="mono">3.12.3-1</td>
+        <td class="mono">3.12.3-1ubuntu0.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3.12-minimal" aria-label="python3.12-minimal"></td>
+        <td class="mono"><a href="#demo-unavailable">python3.12-minimal</a></td>
+        <td class="mono">3.12.3-1</td>
+        <td class="mono">3.12.3-1ubuntu0.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="rsync" aria-label="rsync"></td>
+        <td class="mono"><a href="#demo-unavailable">rsync</a></td>
+        <td class="mono">3.2.7-1ubuntu1</td>
+        <td class="mono">3.2.7-1ubuntu1.5</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="rsyslog" aria-label="rsyslog"></td>
+        <td class="mono"><a href="#demo-unavailable">rsyslog</a></td>
+        <td class="mono">8.2312.0-3ubuntu9</td>
+        <td class="mono">8.2312.0-3ubuntu9.4</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="sed" aria-label="sed"></td>
+        <td class="mono"><a href="#demo-unavailable">sed</a></td>
+        <td class="mono">4.9-2build1</td>
+        <td class="mono">4.9-2ubuntu0.24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="systemd-dev" aria-label="systemd-dev"></td>
+        <td class="mono"><a href="#demo-unavailable">systemd-dev</a></td>
+        <td class="mono">255.4-1ubuntu8</td>
+        <td class="mono">255.4-1ubuntu8.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="systemd-resolved" aria-label="systemd-resolved"></td>
+        <td class="mono"><a href="#demo-unavailable">systemd-resolved</a></td>
+        <td class="mono">255.4-1ubuntu8</td>
+        <td class="mono">255.4-1ubuntu8.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="systemd-sysv" aria-label="systemd-sysv"></td>
+        <td class="mono"><a href="#demo-unavailable">systemd-sysv</a></td>
+        <td class="mono">255.4-1ubuntu8</td>
+        <td class="mono">255.4-1ubuntu8.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="systemd-timesyncd" aria-label="systemd-timesyncd"></td>
+        <td class="mono"><a href="#demo-unavailable">systemd-timesyncd</a></td>
+        <td class="mono">255.4-1ubuntu8</td>
+        <td class="mono">255.4-1ubuntu8.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="tar" aria-label="tar"></td>
+        <td class="mono"><a href="#demo-unavailable">tar</a></td>
+        <td class="mono">1.35&#43;dfsg-3build1</td>
+        <td class="mono">1.35&#43;dfsg-3ubuntu0.4</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="tzdata" aria-label="tzdata"></td>
+        <td class="mono"><a href="#demo-unavailable">tzdata</a></td>
+        <td class="mono">2024a-2ubuntu1</td>
+        <td class="mono">2026c-0ubuntu0.24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="ubuntu-pro-client" aria-label="ubuntu-pro-client"></td>
+        <td class="mono"><a href="#demo-unavailable">ubuntu-pro-client</a></td>
+        <td class="mono">31.2.3</td>
+        <td class="mono">37.2ubuntu~24.04.1</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="udev" aria-label="udev"></td>
+        <td class="mono"><a href="#demo-unavailable">udev</a></td>
+        <td class="mono">255.4-1ubuntu8</td>
+        <td class="mono">255.4-1ubuntu8.17</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="util-linux" aria-label="util-linux"></td>
+        <td class="mono"><a href="#demo-unavailable">util-linux</a></td>
+        <td class="mono">2.39.3-9ubuntu6</td>
+        <td class="mono">2.39.3-9ubuntu6.6</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="vim-common" aria-label="vim-common"></td>
+        <td class="mono"><a href="#demo-unavailable">vim-common</a></td>
+        <td class="mono">2:9.1.0016-1ubuntu7</td>
+        <td class="mono">2:9.1.0016-1ubuntu7.20</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="vim-tiny" aria-label="vim-tiny"></td>
+        <td class="mono"><a href="#demo-unavailable">vim-tiny</a></td>
+        <td class="mono">2:9.1.0016-1ubuntu7</td>
+        <td class="mono">2:9.1.0016-1ubuntu7.20</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="wget" aria-label="wget"></td>
+        <td class="mono"><a href="#demo-unavailable">wget</a></td>
+        <td class="mono">1.21.4-1ubuntu4</td>
+        <td class="mono">1.21.4-1ubuntu4.5</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="wsl-pro-service" aria-label="wsl-pro-service"></td>
+        <td class="mono"><a href="#demo-unavailable">wsl-pro-service</a></td>
+        <td class="mono">0.1.4</td>
+        <td class="mono">0.1.18~24.04.4</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="xxd" aria-label="xxd"></td>
+        <td class="mono"><a href="#demo-unavailable">xxd</a></td>
+        <td class="mono">2:9.1.0016-1ubuntu7</td>
+        <td class="mono">2:9.1.0016-1ubuntu7.20</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="zlib1g" aria-label="zlib1g"></td>
+        <td class="mono"><a href="#demo-unavailable">zlib1g</a></td>
+        <td class="mono">1:1.3.dfsg-3.1ubuntu2</td>
+        <td class="mono">1:1.3.dfsg-3.1ubuntu2.2</td>
+        <td class="mono cell-sub">noble-security</td>
+        <td><span class="pill pill--danger">Güvenlik</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="apparmor" aria-label="apparmor"></td>
+        <td class="mono"><a href="#demo-unavailable">apparmor</a></td>
+        <td class="mono">4.0.0-beta3-0ubuntu3</td>
+        <td class="mono">4.0.1really4.0.1-0ubuntu0.24.04.8</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="base-files" aria-label="base-files"></td>
+        <td class="mono"><a href="#demo-unavailable">base-files</a></td>
+        <td class="mono">13ubuntu10</td>
+        <td class="mono">13ubuntu10.5</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="console-setup" aria-label="console-setup"></td>
+        <td class="mono"><a href="#demo-unavailable">console-setup</a></td>
+        <td class="mono">1.226ubuntu1</td>
+        <td class="mono">1.226ubuntu1.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="console-setup-linux" aria-label="console-setup-linux"></td>
+        <td class="mono"><a href="#demo-unavailable">console-setup-linux</a></td>
+        <td class="mono">1.226ubuntu1</td>
+        <td class="mono">1.226ubuntu1.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="dbus" aria-label="dbus"></td>
+        <td class="mono"><a href="#demo-unavailable">dbus</a></td>
+        <td class="mono">1.14.10-4ubuntu4</td>
+        <td class="mono">1.14.10-4ubuntu4.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="dbus-daemon" aria-label="dbus-daemon"></td>
+        <td class="mono"><a href="#demo-unavailable">dbus-daemon</a></td>
+        <td class="mono">1.14.10-4ubuntu4</td>
+        <td class="mono">1.14.10-4ubuntu4.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="dconf-service" aria-label="dconf-service"></td>
+        <td class="mono"><a href="#demo-unavailable">dconf-service</a></td>
+        <td class="mono">0.40.0-4build2</td>
+        <td class="mono">0.40.0-4ubuntu0.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="dhcpcd-base" aria-label="dhcpcd-base"></td>
+        <td class="mono"><a href="#demo-unavailable">dhcpcd-base</a></td>
+        <td class="mono">1:10.0.6-1ubuntu3</td>
+        <td class="mono">1:10.0.6-1ubuntu3.2</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="dmsetup" aria-label="dmsetup"></td>
+        <td class="mono"><a href="#demo-unavailable">dmsetup</a></td>
+        <td class="mono">2:1.02.185-3ubuntu3</td>
+        <td class="mono">2:1.02.185-3ubuntu3.2</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="e2fsprogs" aria-label="e2fsprogs"></td>
+        <td class="mono"><a href="#demo-unavailable">e2fsprogs</a></td>
+        <td class="mono">1.47.0-2.4~exp1ubuntu4</td>
+        <td class="mono">1.47.0-2.4~exp1ubuntu4.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="e2fsprogs-l10n" aria-label="e2fsprogs-l10n"></td>
+        <td class="mono"><a href="#demo-unavailable">e2fsprogs-l10n</a></td>
+        <td class="mono">1.47.0-2.4~exp1ubuntu4</td>
+        <td class="mono">1.47.0-2.4~exp1ubuntu4.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="gsettings-desktop-schemas" aria-label="gsettings-desktop-schemas"></td>
+        <td class="mono"><a href="#demo-unavailable">gsettings-desktop-schemas</a></td>
+        <td class="mono">46.0-1ubuntu2</td>
+        <td class="mono">46.1-0ubuntu1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="landscape-client" aria-label="landscape-client"></td>
+        <td class="mono"><a href="#demo-unavailable">landscape-client</a></td>
+        <td class="mono">24.02-0ubuntu5</td>
+        <td class="mono">24.02-0ubuntu5.7</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="landscape-common" aria-label="landscape-common"></td>
+        <td class="mono"><a href="#demo-unavailable">landscape-common</a></td>
+        <td class="mono">24.02-0ubuntu5</td>
+        <td class="mono">24.02-0ubuntu5.7</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libacl1" aria-label="libacl1"></td>
+        <td class="mono"><a href="#demo-unavailable">libacl1</a></td>
+        <td class="mono">2.3.2-1build1</td>
+        <td class="mono">2.3.2-1build1.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libapparmor1" aria-label="libapparmor1"></td>
+        <td class="mono"><a href="#demo-unavailable">libapparmor1</a></td>
+        <td class="mono">4.0.0-beta3-0ubuntu3</td>
+        <td class="mono">4.0.1really4.0.1-0ubuntu0.24.04.8</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libapt-pkg6.0t64" aria-label="libapt-pkg6.0t64"></td>
+        <td class="mono"><a href="#demo-unavailable">libapt-pkg6.0t64</a></td>
+        <td class="mono">2.7.14build2</td>
+        <td class="mono">2.8.3</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libdconf1" aria-label="libdconf1"></td>
+        <td class="mono"><a href="#demo-unavailable">libdconf1</a></td>
+        <td class="mono">0.40.0-4build2</td>
+        <td class="mono">0.40.0-4ubuntu0.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libext2fs2t64" aria-label="libext2fs2t64"></td>
+        <td class="mono"><a href="#demo-unavailable">libext2fs2t64</a></td>
+        <td class="mono">1.47.0-2.4~exp1ubuntu4</td>
+        <td class="mono">1.47.0-2.4~exp1ubuntu4.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libhogweed6t64" aria-label="libhogweed6t64"></td>
+        <td class="mono"><a href="#demo-unavailable">libhogweed6t64</a></td>
+        <td class="mono">3.9.1-2.2build1</td>
+        <td class="mono">3.9.1-2.2build1.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="liblz4-1" aria-label="liblz4-1"></td>
+        <td class="mono"><a href="#demo-unavailable">liblz4-1</a></td>
+        <td class="mono">1.9.4-1build1</td>
+        <td class="mono">1.9.4-1build1.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libmpc3" aria-label="libmpc3"></td>
+        <td class="mono"><a href="#demo-unavailable">libmpc3</a></td>
+        <td class="mono">1.3.1-1build1</td>
+        <td class="mono">1.3.1-1build1.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libmpfr6" aria-label="libmpfr6"></td>
+        <td class="mono"><a href="#demo-unavailable">libmpfr6</a></td>
+        <td class="mono">4.2.1-1build1</td>
+        <td class="mono">4.2.1-1build1.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libpcre2-8-0" aria-label="libpcre2-8-0"></td>
+        <td class="mono"><a href="#demo-unavailable">libpcre2-8-0</a></td>
+        <td class="mono">10.42-4ubuntu2</td>
+        <td class="mono">10.42-4ubuntu2.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libproc2-0" aria-label="libproc2-0"></td>
+        <td class="mono"><a href="#demo-unavailable">libproc2-0</a></td>
+        <td class="mono">2:4.0.4-4ubuntu3</td>
+        <td class="mono">2:4.0.4-4ubuntu3.3</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libsasl2-modules" aria-label="libsasl2-modules"></td>
+        <td class="mono"><a href="#demo-unavailable">libsasl2-modules</a></td>
+        <td class="mono">2.1.28&#43;dfsg1-5ubuntu3</td>
+        <td class="mono">2.1.28&#43;dfsg1-5ubuntu3.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libss2" aria-label="libss2"></td>
+        <td class="mono"><a href="#demo-unavailable">libss2</a></td>
+        <td class="mono">1.47.0-2.4~exp1ubuntu4</td>
+        <td class="mono">1.47.0-2.4~exp1ubuntu4.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="libxmlb2" aria-label="libxmlb2"></td>
+        <td class="mono"><a href="#demo-unavailable">libxmlb2</a></td>
+        <td class="mono">0.3.18-1</td>
+        <td class="mono">0.3.24-1~ubuntu0.24.04.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="lshw" aria-label="lshw"></td>
+        <td class="mono"><a href="#demo-unavailable">lshw</a></td>
+        <td class="mono">02.19.git.2021.06.19.996aaad9c7-2build3</td>
+        <td class="mono">02.19.git.2021.06.19.996aaad9c7-2ubuntu0.24.04.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="motd-news-config" aria-label="motd-news-config"></td>
+        <td class="mono"><a href="#demo-unavailable">motd-news-config</a></td>
+        <td class="mono">13ubuntu10</td>
+        <td class="mono">13ubuntu10.5</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="passwd" aria-label="passwd"></td>
+        <td class="mono"><a href="#demo-unavailable">passwd</a></td>
+        <td class="mono">1:4.13&#43;dfsg1-4ubuntu3</td>
+        <td class="mono">1:4.13&#43;dfsg1-4ubuntu3.2</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="pci.ids" aria-label="pci.ids"></td>
+        <td class="mono"><a href="#demo-unavailable">pci.ids</a></td>
+        <td class="mono">0.0~2024.03.31-1</td>
+        <td class="mono">0.0~2024.03.31-1ubuntu0.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-distupgrade" aria-label="python3-distupgrade"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-distupgrade</a></td>
+        <td class="mono">1:24.04.16</td>
+        <td class="mono">1:24.04.29</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="python3-update-manager" aria-label="python3-update-manager"></td>
+        <td class="mono"><a href="#demo-unavailable">python3-update-manager</a></td>
+        <td class="mono">1:24.04.6</td>
+        <td class="mono">1:24.04.12</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="software-properties-common" aria-label="software-properties-common"></td>
+        <td class="mono"><a href="#demo-unavailable">software-properties-common</a></td>
+        <td class="mono">0.99.48</td>
+        <td class="mono">0.99.49.4</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="tmux" aria-label="tmux"></td>
+        <td class="mono"><a href="#demo-unavailable">tmux</a></td>
+        <td class="mono">3.4-1build1</td>
+        <td class="mono">3.4-1ubuntu0.1</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="ubuntu-release-upgrader-core" aria-label="ubuntu-release-upgrader-core"></td>
+        <td class="mono"><a href="#demo-unavailable">ubuntu-release-upgrader-core</a></td>
+        <td class="mono">1:24.04.16</td>
+        <td class="mono">1:24.04.29</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      <tr>
+        <td class="check"><input type="checkbox" name="packages" value="wsl-setup" aria-label="wsl-setup"></td>
+        <td class="mono"><a href="#demo-unavailable">wsl-setup</a></td>
+        <td class="mono">0.5.2build1</td>
+        <td class="mono">0.5.10~24.04.2</td>
+        <td class="mono cell-sub">noble-updates</td>
+        <td><span class="pill pill--muted">Standart</span></td>
+      </tr>
+      
+      </tbody>
+    </table>
+    
+    </div>
+    <div class="panel__foot button-row"><button class="button button--primary" type="submit">Seçili paketleri güncelle</button><button class="button" type="submit" formaction="#" data-confirm=""><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-list"></use></svg>Seçilenleri önizle</button></div>
+  </form>
+  
+</section>
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

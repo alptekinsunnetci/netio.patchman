@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Packages · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="packages.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Packages</h1>
+    <p class="pagehead__sub">Pending updates and installed packages across your servers</p>
+  </div>
+  
+  <div class="pagehead__actions">
+    <form method="post" action="#" data-confirm="All pending security updates will be installed on 4 servers. Continue?">
+      <input type="hidden" name="_csrf" value="demo">
+      <button class="button button--primary" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg>Apply all security updates (4 servers)</button>
+    </form>
+  </div>
+  
+</header>
+
+<nav class="tabs">
+  <a class="tab is-active" href="packages.html">Pending Updates</a>
+  <a class="tab" href="packages--tab-installed.html">Find Installed Package</a>
+</nav>
+
+
+<form class="filters" method="get" action="#">
+  <input class="field__input" type="search" name="q" value="" placeholder="Package name" aria-label="Search">
+  <label class="check-label"><input type="checkbox" name="security" value="1"> Security updates only</label>
+  <button class="button" type="submit">Filter</button>
+</form>
+<section class="panel panel--flush">
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Package</th><th>Type</th><th class="num">Affected Servers</th><th>Installed Version</th><th>New Version</th><th></th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libssl3t64"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libssl3t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-libssl3t64.html">libssl3t64</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">4</td>
+      <td class="mono cell-sub">3.0.13-0ubuntu3</td>
+      <td class="mono">3.0.13-0ubuntu3.16</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libssl3t64 package will be updated on 4 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="locales"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: locales"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-locales.html">locales</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">4</td>
+      <td class="mono cell-sub">2.39-0ubuntu8</td>
+      <td class="mono">2.39-0ubuntu8.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The locales package will be updated on 4 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="openssl"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: openssl"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-openssl.html">openssl</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">4</td>
+      <td class="mono cell-sub">3.0.13-0ubuntu3</td>
+      <td class="mono">3.0.13-0ubuntu3.16</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The openssl package will be updated on 4 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="binutils-x86-64-linux-gnu"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: binutils-x86-64-linux-gnu"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-binutils-x86-64-linux-gnu.html">binutils-x86-64-linux-gnu</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.42-4ubuntu2</td>
+      <td class="mono">2.42-4ubuntu2.10</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The binutils-x86-64-linux-gnu package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="bsdextrautils"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: bsdextrautils"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-bsdextrautils.html">bsdextrautils</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39.3-9ubuntu6</td>
+      <td class="mono">2.39.3-9ubuntu6.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The bsdextrautils package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="diffutils"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: diffutils"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-diffutils.html">diffutils</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1:3.10-1build1</td>
+      <td class="mono">1:3.10-1ubuntu0.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The diffutils package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="dirmngr"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: dirmngr"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-dirmngr.html">dirmngr</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.4.4-2ubuntu17</td>
+      <td class="mono">2.4.4-2ubuntu17.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The dirmngr package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="distro-info-data"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: distro-info-data"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-distro-info-data.html">distro-info-data</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">0.60</td>
+      <td class="mono">0.72-0ubuntu0.24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The distro-info-data package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="g&#43;&#43;-13"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: g&#43;&#43;-13"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-g__-13-404d91.html">g&#43;&#43;-13</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">13.2.0-23ubuntu4</td>
+      <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The g&#43;&#43;-13 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="g&#43;&#43;-13-x86-64-linux-gnu"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: g&#43;&#43;-13-x86-64-linux-gnu"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-g__-13-x86-64-linux-gnu-1eddc4.html">g&#43;&#43;-13-x86-64-linux-gnu</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">13.2.0-23ubuntu4</td>
+      <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The g&#43;&#43;-13-x86-64-linux-gnu package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="gcc-13"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: gcc-13"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-gcc-13.html">gcc-13</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">13.2.0-23ubuntu4</td>
+      <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The gcc-13 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="git-man"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: git-man"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-git-man.html">git-man</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1:2.43.0-1ubuntu7</td>
+      <td class="mono">1:2.43.0-1ubuntu7.3</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The git-man package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="gnupg-l10n"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: gnupg-l10n"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-gnupg-l10n.html">gnupg-l10n</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.4.4-2ubuntu17</td>
+      <td class="mono">2.4.4-2ubuntu17.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The gnupg-l10n package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="gpgconf"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: gpgconf"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">gpgconf</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.4.4-2ubuntu17</td>
+      <td class="mono">2.4.4-2ubuntu17.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The gpgconf package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libasan8"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libasan8"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libasan8</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">14-20240412-0ubuntu1</td>
+      <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libasan8 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libatomic1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libatomic1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libatomic1</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">14-20240412-0ubuntu1</td>
+      <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libatomic1 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libattr1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libattr1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libattr1</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1:2.5.2-1build1</td>
+      <td class="mono">1:2.5.2-1ubuntu0.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libattr1 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libavahi-client3"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libavahi-client3"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libavahi-client3</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">0.8-13ubuntu6</td>
+      <td class="mono">0.8-13ubuntu6.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libavahi-client3 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libavahi-common3"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libavahi-common3"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libavahi-common3</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">0.8-13ubuntu6</td>
+      <td class="mono">0.8-13ubuntu6.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libavahi-common3 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libbinutils"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libbinutils"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libbinutils</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.42-4ubuntu2</td>
+      <td class="mono">2.42-4ubuntu2.10</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libbinutils package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libblkid1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libblkid1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libblkid1</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39.3-9ubuntu6</td>
+      <td class="mono">2.39.3-9ubuntu6.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libblkid1 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libc-dev-bin"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libc-dev-bin"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libc-dev-bin</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39-0ubuntu8</td>
+      <td class="mono">2.39-0ubuntu8.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libc-dev-bin package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libc-devtools"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libc-devtools"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libc-devtools</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39-0ubuntu8</td>
+      <td class="mono">2.39-0ubuntu8.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libc-devtools package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libc6"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libc6"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libc6</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39-0ubuntu8</td>
+      <td class="mono">2.39-0ubuntu8.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libc6 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libc6-dev"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libc6-dev"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libc6-dev</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39-0ubuntu8</td>
+      <td class="mono">2.39-0ubuntu8.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libc6-dev package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libcap2-bin"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libcap2-bin"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libcap2-bin</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1:2.66-5ubuntu2</td>
+      <td class="mono">1:2.66-5ubuntu2.4</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libcap2-bin package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libctf-nobfd0"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libctf-nobfd0"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libctf-nobfd0</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.42-4ubuntu2</td>
+      <td class="mono">2.42-4ubuntu2.10</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libctf-nobfd0 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libcurl3t64-gnutls"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libcurl3t64-gnutls"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libcurl3t64-gnutls</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">8.5.0-2ubuntu10</td>
+      <td class="mono">8.5.0-2ubuntu10.15</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libcurl3t64-gnutls package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libcurl4t64"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libcurl4t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libcurl4t64</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">8.5.0-2ubuntu10</td>
+      <td class="mono">8.5.0-2ubuntu10.15</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libcurl4t64 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libdrm-common"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libdrm-common"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libdrm-common</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.4.120-2build1</td>
+      <td class="mono">2.4.125-1ubuntu0.1~24.04.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libdrm-common package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libegl1-mesa-dev"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libegl1-mesa-dev"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libegl1-mesa-dev</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">24.0.5-1ubuntu1</td>
+      <td class="mono">25.2.8-0ubuntu0.24.04.4</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libegl1-mesa-dev package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libevent-core-2.1-7t64"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libevent-core-2.1-7t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libevent-core-2.1-7t64</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.1.12-stable-9ubuntu2</td>
+      <td class="mono">2.1.12-stable-9ubuntu2.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libevent-core-2.1-7t64 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libexpat1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libexpat1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libexpat1</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.6.1-2build1</td>
+      <td class="mono">2.6.1-2ubuntu0.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libexpat1 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libfdisk1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libfdisk1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libfdisk1</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39.3-9ubuntu6</td>
+      <td class="mono">2.39.3-9ubuntu6.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libfdisk1 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libfreetype6"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libfreetype6"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libfreetype6</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.13.2&#43;dfsg-1build3</td>
+      <td class="mono">2.13.2&#43;dfsg-1ubuntu0.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libfreetype6 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgcc-13-dev"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libgcc-13-dev"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgcc-13-dev</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">13.2.0-23ubuntu4</td>
+      <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libgcc-13-dev package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgcc-s1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libgcc-s1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgcc-s1</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">14-20240412-0ubuntu1</td>
+      <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libgcc-s1 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgl1-mesa-dri"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libgl1-mesa-dri"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgl1-mesa-dri</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">24.0.5-1ubuntu1</td>
+      <td class="mono">25.2.8-0ubuntu0.24.04.4</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libgl1-mesa-dri package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgles2-mesa-dev"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libgles2-mesa-dev"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgles2-mesa-dev</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">24.0.5-1ubuntu1</td>
+      <td class="mono">25.2.8-0ubuntu0.24.04.4</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libgles2-mesa-dev package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgnutls30t64"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libgnutls30t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgnutls30t64</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">3.8.3-1.1ubuntu3</td>
+      <td class="mono">3.8.3-1.1ubuntu3.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libgnutls30t64 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgomp1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libgomp1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgomp1</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">14-20240412-0ubuntu1</td>
+      <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libgomp1 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgraphite2-3"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libgraphite2-3"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgraphite2-3</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1.3.14-2build1</td>
+      <td class="mono">1.3.14-2ubuntu0.24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libgraphite2-3 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgssapi-krb5-2"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libgssapi-krb5-2"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgssapi-krb5-2</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1.20.1-6ubuntu2</td>
+      <td class="mono">1.20.1-6ubuntu2.10</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libgssapi-krb5-2 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgstreamer1.0-0"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libgstreamer1.0-0"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgstreamer1.0-0</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1.24.2-1</td>
+      <td class="mono">1.24.2-1ubuntu0.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libgstreamer1.0-0 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgtk-3-0t64"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libgtk-3-0t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgtk-3-0t64</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">3.24.41-4ubuntu1</td>
+      <td class="mono">3.24.41-4ubuntu1.3</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libgtk-3-0t64 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libheif-plugin-aomdec"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libheif-plugin-aomdec"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libheif-plugin-aomdec</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1.17.6-1ubuntu4</td>
+      <td class="mono">1.17.6-1ubuntu4.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libheif-plugin-aomdec package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="liblcms2-2"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: liblcms2-2"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">liblcms2-2</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.14-2build1</td>
+      <td class="mono">2.14-2ubuntu0.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The liblcms2-2 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="liblsan0"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: liblsan0"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">liblsan0</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">14-20240412-0ubuntu1</td>
+      <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The liblsan0 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libncursesw6"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libncursesw6"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libncursesw6</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">6.4&#43;20240113-1ubuntu2</td>
+      <td class="mono">6.4&#43;20240113-1ubuntu2.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libncursesw6 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libpackagekit-glib2-18"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libpackagekit-glib2-18"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libpackagekit-glib2-18</a></td>
+      <td><span class="pill pill--danger">Security</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1.2.8-2build3</td>
+      <td class="mono">1.2.8-2ubuntu1.5</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="The libpackagekit-glib2-18 package will be updated on 3 servers. Continue?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Update on all servers</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+<nav class="pager" aria-label="Pagination">
+  <span class="pager__info">1–50 of 323</span>
+  <span class="pager__links">
+    <span class="button button--sm is-disabled">Previous</span>
+    <span class="pager__page">Page 1 of 7</span>
+    <a class="button button--sm" href="#demo-unavailable">Next</a>
+  </span>
+</nav>
+
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

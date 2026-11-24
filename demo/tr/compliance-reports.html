@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Uyum Raporları · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-reports.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Uyum Raporları</h1>
+    <p class="pagehead__sub">Seçilen çerçeveler için aynı kanıtlardan tek, birleşik ve sürümlü rapor.</p>
+  </div>
+</header>
+
+<section class="panel panel--flush">
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Başlık</th><th>Değerlendirme çerçeveleri</th><th>Değerlendirme dönemi</th><th>Kapsam</th><th>Sürüm</th><th>Kontrol sonuçları</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td><a href="compliance-reports-1.html">2026 yıllık bilgi güvenliği denetimi</a><div class="cell-sub">admin@example.test · 23.11.2026 21:38</div></td>
+      <td>Bilgi Güvenliği Yönetimi Denetimleri, BT Temel Koruma Denetimleri, BT Hizmet Yönetimi Değerlendirmeleri, Genel Güvenlik ve Yama Uyumu</td>
+      <td>26.08.2026 – 23.11.2026</td>
+      <td>Tüm sunucular</td>
+      <td>v1 <span class="pill">Taslak</span></td>
+      <td><span class="pill pill--failed">Sapma: 7</span> <span class="pill pill--warning">Kanıt eksik: 5</span> <span class="pill pill--partial">Kısmi: 2</span> <span class="pill pill--queued">Manuel kanıt gerekli: 1</span> <span class="pill pill--in_progress">Manuel kanıt mevcut: 2</span> <span class="pill pill--succeeded">Kanıt yeterli: 25</span> <span class="pill pill--expired">Uygulanamaz: 2</span> </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+
+<form class="form" method="post" action="#" id="new">
+  <input type="hidden" name="_csrf" value="demo">
+  <section class="panel">
+    <h2 class="panel__title">Yeni rapor</h2>
+    <p class="muted">Bir veya birden fazla değerlendirme çerçevesi seçin. Aynı teknik veriler ve kanıtlar tek bir raporda, her çerçeve kendi kontrolleriyle değerlendirilir.</p>
+    <label class="field"><span class="field__label">Rapor başlığı</span>
+      <input class="field__input" type="text" name="title" maxlength="200" required placeholder="Örn. 2026 yıllık bilgi güvenliği denetimi"></label>
+
+    <div class="field"><span class="field__label">Değerlendirme çerçeveleri</span>
+      
+      <div class="plain-list">
+        <label class="check-label"><input type="checkbox" name="profiles" value="isms@1" checked> <strong>Bilgi Güvenliği Yönetimi Denetimleri</strong> <span class="muted">Bilgi güvenliği yönetim sistemi denetimlerinde istenen teknik kanıtlar: varlık envanteri, açıklık yönetimi, değişiklik, kayıt, yedekleme ve erişim.</span></label><label class="check-label"><input type="checkbox" name="profiles" value="baseline@1" checked> <strong>BT Temel Koruma Denetimleri</strong> <span class="muted">Temel koruma yaklaşımıyla yapılan değerlendirmeler için modül bazlı teknik kanıtlar: yama ve değişiklik yönetimi, Linux ve Windows sunucular, Windows istemciler, kayıt ve yedekleme.</span></label><label class="check-label"><input type="checkbox" name="profiles" value="itsm@1" checked> <strong>BT Hizmet Yönetimi Değerlendirmeleri</strong> <span class="muted">BT hizmet yönetimi uygulamalarını destekleyen kanıtlar: değişiklik etkinleştirme, sürüm ve dağıtım, yapılandırma ve varlık yönetimi, izleme ve hizmet seviyeleri.</span></label><label class="check-label"><input type="checkbox" name="profiles" value="general@1" checked> <strong>Genel Güvenlik ve Yama Uyumu</strong> <span class="muted">netio.patchman&#39;in ölçülebilir hedeflerle tanımladığı temel güvenlik ve güncelleme kontrolleri.</span></label>
+      </div>
+      <span class="field__hint">Çerçeveleri Uyum Politikaları&#39;nda açıp kapatabilirsiniz.</span>
+      
+    </div>
+
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Denetim dönemi</span>
+        <select class="field__input" name="preset">
+          <option value="30d">Son 30 gün</option><option value="90d" selected>Son 90 gün</option><option value="quarter">Geçen çeyrek</option><option value="12m">Son 12 ay</option><option value="year">Geçen takvim yılı</option><option value="custom">Özel (aşağıdaki tarihler)</option>
+        </select>
+        <span class="field__hint">“Özel” seçildiğinde aşağıdaki tarihler kullanılır (en fazla 731 gün).</span></label>
+      <label class="field"><span class="field__label">Başlangıç</span>
+        <input class="field__input" type="date" name="from" value="2026-08-27"></label>
+      <label class="field"><span class="field__label">Bitiş</span>
+        <input class="field__input" type="date" name="to" value="2026-11-24"></label>
+    </div>
+
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Kapsam</span>
+        <select class="field__input" name="group">
+          <option value="">Tüm sunucular</option>
+          <option value="2">Veritabanı</option><option value="1">Web</option>
+        </select></label>
+    </div>
+    <div class="field"><span class="field__label">Platformlar</span>
+      <div class="daypicker"><label class="check-label"><input type="checkbox" name="platforms" value="linux"> Linux</label><label class="check-label"><input type="checkbox" name="platforms" value="windows_server"> Windows Server</label><label class="check-label"><input type="checkbox" name="platforms" value="windows_10"> Windows 10</label><label class="check-label"><input type="checkbox" name="platforms" value="windows_11"> Windows 11</label><label class="check-label"><input type="checkbox" name="platforms" value="windows_other"> Diğer Windows</label></div>
+      <span class="field__hint">Hiçbiri seçilmezse tüm platformlar raporlanır.</span>
+    </div>
+    <label class="field"><span class="field__label">Not (isteğe bağlı)</span>
+      <textarea class="field__input" name="note" rows="3" maxlength="2000"></textarea></label>
+  </section>
+  <div class="form-actions"><button class="button button--primary" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg>Raporu oluştur</button></div>
+</form>
+
+
+  </main>
+</div>
+
+</body>
+</html>

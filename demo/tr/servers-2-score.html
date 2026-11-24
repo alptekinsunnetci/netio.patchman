@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>web-02 · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink is-active" href="servers.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="servers.html">Sunucu Envanteri</a> / <a href="servers-2.html">web-02</a> / <span>Güvenlik skoru</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Güvenlik skoru · web-02</h1>
+    <p class="pagehead__sub">0-100 arası; yüksek değer daha güvenli demektir. Düşülen her puanın nedeni aşağıda gösterilir.</p>
+  </div>
+  <div class="pagehead__actions"><a class="button" href="settings-score.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg>Güvenlik skoru ağırlıkları</a></div>
+</header>
+
+
+<section class="panel">
+  <div class="score-head">
+    <span class="score score-big score--critical">20</span>
+    <div>
+      <p><strong>Kritik</strong></p>
+      <p class="muted">Toplam düşülen: 80.0 puan</p>
+    </div>
+  </div>
+</section>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">Skoru etkileyenler</h2></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Ölçüt</th><th class="num">Adet</th><th class="num">Puan</th><th>En çok etkileyenler</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td>Açık güvenlik açıkları<div class="cell-sub">En fazla 70 puan · <strong>üst sınıra ulaştı</strong></div></td>
+      <td class="num">11531</td>
+      <td class="num mono">−70.0</td>
+      <td>
+        
+        <ul class="plain-list score-items">
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2024-53150.html">CVE-2024-53150</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2025-48384.html">CVE-2025-48384</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2024-36971.html">CVE-2024-36971</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2025-39682.html">CVE-2025-39682</a> <span class="badge badge--critical">Kritik</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2026-53362.html">CVE-2026-53362</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2025-32463.html">CVE-2025-32463</a> <span class="badge badge--critical">Kritik</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2024-53197.html">CVE-2024-53197</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2026-109618.html">CVE-2026-109618</a> <span class="badge badge--critical">Kritik</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2025-39964.html">CVE-2025-39964</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2024-53104.html">CVE-2024-53104</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2026-46300.html">CVE-2026-46300</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2026-31431.html">CVE-2026-31431</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2024-50302.html">CVE-2024-50302</a> <span class="badge badge--medium">Orta</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2026-111497.html">CVE-2026-111497</a> <span class="badge badge--critical">Kritik</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2026-53266.html">CVE-2026-53266</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2026-109619.html">CVE-2026-109619</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="vulnerabilities-CVE-2025-38352.html">CVE-2025-38352</a> <span class="badge badge--high">Yüksek</span> <span class="muted">aktif istismar (CISA KEV)</span> <span class="mono muted">−25.0</span></li>
+          
+          <li><a class="mono" href="#demo-unavailable">CVE-2026-43284</a> <span class="badge badge--high">Yüksek</span> <span class="muted">istismar olasılığı (EPSS)</span> <span class="mono muted">−19.8</span></li>
+          
+          <li><a class="mono" href="#demo-unavailable">CVE-2026-43500</a> <span class="badge badge--high">Yüksek</span> <span class="muted">istismar olasılığı (EPSS)</span> <span class="mono muted">−18.8</span></li>
+          
+          <li><a class="mono" href="#demo-unavailable">CVE-2024-2961</a> <span class="badge badge--high">Yüksek</span> <span class="muted">istismar olasılığı (EPSS)</span> <span class="mono muted">−17.7</span></li>
+          
+          <li><a class="mono" href="#demo-unavailable">CVE-2026-98432</a> <span class="badge badge--critical">Kritik</span> <span class="muted">istismar olasılığı (EPSS)</span> <span class="mono muted">−16.4</span></li>
+          
+          <li><a class="mono" href="#demo-unavailable">CVE-2025-15467</a> <span class="badge badge--high">Yüksek</span> <span class="muted">istismar olasılığı (EPSS)</span> <span class="mono muted">−15.0</span></li>
+          
+          <li><a class="mono" href="#demo-unavailable">CVE-2026-115560</a> <span class="badge badge--medium">Orta</span> <span class="muted">istismar olasılığı (EPSS)</span> <span class="mono muted">−14.6</span></li>
+          
+          <li><a class="mono" href="#demo-unavailable">CVE-2024-12084</a> <span class="badge badge--critical">Kritik</span> <span class="muted">istismar olasılığı (EPSS)</span> <span class="mono muted">−14.5</span></li>
+          
+          <li><a class="mono" href="#demo-unavailable">CVE-2025-22037</a> <span class="badge badge--high">Yüksek</span> <span class="muted">istismar olasılığı (EPSS)</span> <span class="mono muted">−13.9</span></li>
+          
+        </ul>
+        <p class="cell-sub">Toplam 11531; en büyük 25 tanesi gösteriliyor.</p>
+        
+      </td>
+    </tr>
+    
+    <tr>
+      <td>İşletim sistemi desteği</td>
+      <td class="num">0</td>
+      <td class="num mono">0</td>
+      <td>
+        <span class="muted">—</span>
+      </td>
+    </tr>
+    
+    <tr>
+      <td>Destek dışı yazılım<div class="cell-sub">En fazla 15 puan</div></td>
+      <td class="num">0</td>
+      <td class="num mono">0</td>
+      <td>
+        <span class="muted">—</span>
+      </td>
+    </tr>
+    
+    <tr>
+      <td>Bekleyen güvenlik güncellemeleri<div class="cell-sub">En fazla 10 puan · <strong>üst sınıra ulaştı</strong></div></td>
+      <td class="num">17</td>
+      <td class="num mono">−10.0</td>
+      <td>
+        
+        <ul class="plain-list score-items">
+          
+          <li>Açık bulgusu olmayan 17 güvenlik güncellemesi <span class="mono muted">−17.0</span></li>
+          
+        </ul>
+        <p class="cell-sub">Toplam 17; en büyük 25 tanesi gösteriliyor.</p>
+        
+      </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+
+
+<section class="panel" aria-labelledby="trend-title">
+  <div class="panel__head">
+    <h2 class="panel__title" id="trend-title">Günlük eğilim</h2>
+    <span class="panel__link muted">27.08.2026 – 24.11.2026</span>
+  </div>
+  
+  
+  <div class="trends trends--single">
+    
+    <figure class="trend" data-trend>
+      <figcaption class="trend__head"><span class="trend__title">Ortalama güvenlik skoru</span><span class="trend__last">20</span></figcaption>
+      <div class="trend__plot" data-values=",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,20,20" data-labels="27.08.2026|28.08.2026|29.08.2026|30.08.2026|31.08.2026|01.09.2026|02.09.2026|03.09.2026|04.09.2026|05.09.2026|06.09.2026|07.09.2026|08.09.2026|09.09.2026|10.09.2026|11.09.2026|12.09.2026|13.09.2026|14.09.2026|15.09.2026|16.09.2026|17.09.2026|18.09.2026|19.09.2026|20.09.2026|21.09.2026|22.09.2026|23.09.2026|24.09.2026|25.09.2026|26.09.2026|27.09.2026|28.09.2026|29.09.2026|30.09.2026|01.10.2026|02.10.2026|03.10.2026|04.10.2026|05.10.2026|06.10.2026|07.10.2026|08.10.2026|09.10.2026|10.10.2026|11.10.2026|12.10.2026|13.10.2026|14.10.2026|15.10.2026|16.10.2026|17.10.2026|18.10.2026|19.10.2026|20.10.2026|21.10.2026|22.10.2026|23.10.2026|24.10.2026|25.10.2026|26.10.2026|27.10.2026|28.10.2026|29.10.2026|30.10.2026|31.10.2026|01.11.2026|02.11.2026|03.11.2026|04.11.2026|05.11.2026|06.11.2026|07.11.2026|08.11.2026|09.11.2026|10.11.2026|11.11.2026|12.11.2026|13.11.2026|14.11.2026|15.11.2026|16.11.2026|17.11.2026|18.11.2026|19.11.2026|20.11.2026|21.11.2026|22.11.2026|23.11.2026|24.11.2026" data-name="Ortalama güvenlik skoru" role="img" aria-label="Ortalama güvenlik skoru: dönem başında 20, şu anda 20">
+        <span class="trend__tick trend__tick--max">100</span><span class="trend__tick trend__tick--min">0</span>
+        <svg class="trend__svg" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <line class="trend__grid" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="trend__grid" x1="0" y1="20" x2="100" y2="20"></line>
+          <line class="trend__base" x1="0" y1="40" x2="100" y2="40"></line>
+          <path class="trend__area" d="M98.88 40 L98.88 32 L100 32 L100 40 Z"></path>
+          <path class="trend__line" d="M98.88 32 L100 32"></path>
+          <line class="trend__cross" x1="0" y1="0" x2="0" y2="40" hidden></line>
+        </svg>
+        <span class="trend__dot" hidden></span>
+        <span class="trend__tip" role="status" hidden></span>
+      </div>
+    </figure>
+    
+  </div>
+
+  <details class="details">
+    <summary>Günlük değerleri tablo olarak göster</summary>
+    <div class="table-wrap">
+    
+    <table class="table">
+      <thead><tr><th>Gün</th><th class="num">Ortalama güvenlik skoru</th></tr></thead>
+      <tbody><tr><td>23.11.2026</td><td class="num">20</td></tr><tr><td>24.11.2026</td><td class="num">20</td></tr></tbody>
+    </table>
+    
+    </div>
+  </details>
+  
+</section>
+
+
+<section class="panel">
+  <h2 class="panel__title">Skor nasıl hesaplanır?</h2>
+  <p>Skor 100&#39;den başlar ve aşağıdaki puanlar düşülür (en düşük 0). Her CVE bir sunucuda yalnızca bir kez, kendisine uyan ölçütlerden en yükseğiyle cezalandırılır; ölçütler toplanmaz. Bekleyen bir güvenlik güncellemesi, paketi için açık bir bulgu varsa ayrıca sayılmaz. Dağıtımın bakımını sürdürdüğü yazılımlar destek dışı sayılmaz.</p>
+  
+  <ul class="plain-list">
+    <li>CVE başına: kritik 10, yüksek 5, orta 2, düşük 0.5; CISA KEV 25; EPSS × 20; süresi geçmiş 12 puan. Tüm açıklar en fazla 70 puan düşürür.</li>
+    <li>Destek dışı işletim sistemi 25, desteği yakında biten 5 puan; destek dışı her yazılım sürümü 5 puan (en fazla 15).</li>
+    <li>Açık bulgusu olmayan her bekleyen güvenlik güncellemesi 1 puan (en fazla 10).</li>
+  </ul>
+  
+</section>
+
+  </main>
+</div>
+
+</body>
+</html>

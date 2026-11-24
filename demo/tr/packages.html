@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Paket Yönetimi · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="packages.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Paket Yönetimi</h1>
+    <p class="pagehead__sub">Sunucularda bekleyen güncellemeler ve kurulu paketler</p>
+  </div>
+  
+  <div class="pagehead__actions">
+    <form method="post" action="#" data-confirm="4 sunucuda bekleyen tüm güvenlik güncellemeleri kurulacak. Devam edilsin mi?">
+      <input type="hidden" name="_csrf" value="demo">
+      <button class="button button--primary" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg>Tüm güvenlik güncellemelerini uygula (4 sunucu)</button>
+    </form>
+  </div>
+  
+</header>
+
+<nav class="tabs">
+  <a class="tab is-active" href="packages.html">Bekleyen Güncellemeler</a>
+  <a class="tab" href="packages--tab-installed.html">Kurulu Paket Ara</a>
+</nav>
+
+
+<form class="filters" method="get" action="#">
+  <input class="field__input" type="search" name="q" value="" placeholder="Paket adı" aria-label="Ara">
+  <label class="check-label"><input type="checkbox" name="security" value="1"> Yalnızca güvenlik güncellemeleri</label>
+  <button class="button" type="submit">Filtrele</button>
+</form>
+<section class="panel panel--flush">
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Paket</th><th>Tür</th><th class="num">Etkilenen Sunucular</th><th>Kurulu Sürüm</th><th>Yeni Sürüm</th><th></th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libssl3t64"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libssl3t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-libssl3t64.html">libssl3t64</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">4</td>
+      <td class="mono cell-sub">3.0.13-0ubuntu3</td>
+      <td class="mono">3.0.13-0ubuntu3.16</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libssl3t64 paketi 4 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="locales"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: locales"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-locales.html">locales</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">4</td>
+      <td class="mono cell-sub">2.39-0ubuntu8</td>
+      <td class="mono">2.39-0ubuntu8.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="locales paketi 4 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="openssl"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: openssl"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-openssl.html">openssl</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">4</td>
+      <td class="mono cell-sub">3.0.13-0ubuntu3</td>
+      <td class="mono">3.0.13-0ubuntu3.16</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="openssl paketi 4 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="binutils-x86-64-linux-gnu"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: binutils-x86-64-linux-gnu"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-binutils-x86-64-linux-gnu.html">binutils-x86-64-linux-gnu</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.42-4ubuntu2</td>
+      <td class="mono">2.42-4ubuntu2.10</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="binutils-x86-64-linux-gnu paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="bsdextrautils"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: bsdextrautils"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-bsdextrautils.html">bsdextrautils</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39.3-9ubuntu6</td>
+      <td class="mono">2.39.3-9ubuntu6.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="bsdextrautils paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="diffutils"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: diffutils"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-diffutils.html">diffutils</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1:3.10-1build1</td>
+      <td class="mono">1:3.10-1ubuntu0.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="diffutils paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="dirmngr"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: dirmngr"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-dirmngr.html">dirmngr</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.4.4-2ubuntu17</td>
+      <td class="mono">2.4.4-2ubuntu17.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="dirmngr paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="distro-info-data"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: distro-info-data"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-distro-info-data.html">distro-info-data</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">0.60</td>
+      <td class="mono">0.72-0ubuntu0.24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="distro-info-data paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="g&#43;&#43;-13"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: g&#43;&#43;-13"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-g__-13-404d91.html">g&#43;&#43;-13</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">13.2.0-23ubuntu4</td>
+      <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="g&#43;&#43;-13 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="g&#43;&#43;-13-x86-64-linux-gnu"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: g&#43;&#43;-13-x86-64-linux-gnu"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-g__-13-x86-64-linux-gnu-1eddc4.html">g&#43;&#43;-13-x86-64-linux-gnu</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">13.2.0-23ubuntu4</td>
+      <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="g&#43;&#43;-13-x86-64-linux-gnu paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="gcc-13"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: gcc-13"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-gcc-13.html">gcc-13</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">13.2.0-23ubuntu4</td>
+      <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="gcc-13 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="git-man"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: git-man"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-git-man.html">git-man</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1:2.43.0-1ubuntu7</td>
+      <td class="mono">1:2.43.0-1ubuntu7.3</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="git-man paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="gnupg-l10n"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: gnupg-l10n"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="packages-gnupg-l10n.html">gnupg-l10n</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.4.4-2ubuntu17</td>
+      <td class="mono">2.4.4-2ubuntu17.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="gnupg-l10n paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="gpgconf"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: gpgconf"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">gpgconf</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.4.4-2ubuntu17</td>
+      <td class="mono">2.4.4-2ubuntu17.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="gpgconf paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libasan8"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libasan8"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libasan8</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">14-20240412-0ubuntu1</td>
+      <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libasan8 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libatomic1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libatomic1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libatomic1</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">14-20240412-0ubuntu1</td>
+      <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libatomic1 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libattr1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libattr1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libattr1</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1:2.5.2-1build1</td>
+      <td class="mono">1:2.5.2-1ubuntu0.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libattr1 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libavahi-client3"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libavahi-client3"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libavahi-client3</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">0.8-13ubuntu6</td>
+      <td class="mono">0.8-13ubuntu6.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libavahi-client3 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libavahi-common3"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libavahi-common3"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libavahi-common3</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">0.8-13ubuntu6</td>
+      <td class="mono">0.8-13ubuntu6.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libavahi-common3 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libbinutils"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libbinutils"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libbinutils</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.42-4ubuntu2</td>
+      <td class="mono">2.42-4ubuntu2.10</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libbinutils paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libblkid1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libblkid1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libblkid1</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39.3-9ubuntu6</td>
+      <td class="mono">2.39.3-9ubuntu6.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libblkid1 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libc-dev-bin"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libc-dev-bin"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libc-dev-bin</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39-0ubuntu8</td>
+      <td class="mono">2.39-0ubuntu8.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libc-dev-bin paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libc-devtools"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libc-devtools"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libc-devtools</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39-0ubuntu8</td>
+      <td class="mono">2.39-0ubuntu8.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libc-devtools paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libc6"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libc6"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libc6</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39-0ubuntu8</td>
+      <td class="mono">2.39-0ubuntu8.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libc6 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libc6-dev"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libc6-dev"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libc6-dev</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39-0ubuntu8</td>
+      <td class="mono">2.39-0ubuntu8.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libc6-dev paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libcap2-bin"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libcap2-bin"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libcap2-bin</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1:2.66-5ubuntu2</td>
+      <td class="mono">1:2.66-5ubuntu2.4</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libcap2-bin paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libctf-nobfd0"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libctf-nobfd0"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libctf-nobfd0</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.42-4ubuntu2</td>
+      <td class="mono">2.42-4ubuntu2.10</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libctf-nobfd0 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libcurl3t64-gnutls"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libcurl3t64-gnutls"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libcurl3t64-gnutls</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">8.5.0-2ubuntu10</td>
+      <td class="mono">8.5.0-2ubuntu10.15</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libcurl3t64-gnutls paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libcurl4t64"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libcurl4t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libcurl4t64</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">8.5.0-2ubuntu10</td>
+      <td class="mono">8.5.0-2ubuntu10.15</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libcurl4t64 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libdrm-common"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libdrm-common"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libdrm-common</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.4.120-2build1</td>
+      <td class="mono">2.4.125-1ubuntu0.1~24.04.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libdrm-common paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libegl1-mesa-dev"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libegl1-mesa-dev"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libegl1-mesa-dev</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">24.0.5-1ubuntu1</td>
+      <td class="mono">25.2.8-0ubuntu0.24.04.4</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libegl1-mesa-dev paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libevent-core-2.1-7t64"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libevent-core-2.1-7t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libevent-core-2.1-7t64</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.1.12-stable-9ubuntu2</td>
+      <td class="mono">2.1.12-stable-9ubuntu2.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libevent-core-2.1-7t64 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libexpat1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libexpat1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libexpat1</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.6.1-2build1</td>
+      <td class="mono">2.6.1-2ubuntu0.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libexpat1 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libfdisk1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libfdisk1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libfdisk1</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.39.3-9ubuntu6</td>
+      <td class="mono">2.39.3-9ubuntu6.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libfdisk1 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libfreetype6"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libfreetype6"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libfreetype6</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.13.2&#43;dfsg-1build3</td>
+      <td class="mono">2.13.2&#43;dfsg-1ubuntu0.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libfreetype6 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgcc-13-dev"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libgcc-13-dev"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgcc-13-dev</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">13.2.0-23ubuntu4</td>
+      <td class="mono">13.3.0-6ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libgcc-13-dev paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgcc-s1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libgcc-s1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgcc-s1</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">14-20240412-0ubuntu1</td>
+      <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libgcc-s1 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgl1-mesa-dri"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libgl1-mesa-dri"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgl1-mesa-dri</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">24.0.5-1ubuntu1</td>
+      <td class="mono">25.2.8-0ubuntu0.24.04.4</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libgl1-mesa-dri paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgles2-mesa-dev"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libgles2-mesa-dev"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgles2-mesa-dev</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">24.0.5-1ubuntu1</td>
+      <td class="mono">25.2.8-0ubuntu0.24.04.4</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libgles2-mesa-dev paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgnutls30t64"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libgnutls30t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgnutls30t64</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">3.8.3-1.1ubuntu3</td>
+      <td class="mono">3.8.3-1.1ubuntu3.6</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libgnutls30t64 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgomp1"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libgomp1"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgomp1</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">14-20240412-0ubuntu1</td>
+      <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libgomp1 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgraphite2-3"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libgraphite2-3"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgraphite2-3</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1.3.14-2build1</td>
+      <td class="mono">1.3.14-2ubuntu0.24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libgraphite2-3 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgssapi-krb5-2"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libgssapi-krb5-2"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgssapi-krb5-2</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1.20.1-6ubuntu2</td>
+      <td class="mono">1.20.1-6ubuntu2.10</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libgssapi-krb5-2 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgstreamer1.0-0"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libgstreamer1.0-0"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgstreamer1.0-0</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1.24.2-1</td>
+      <td class="mono">1.24.2-1ubuntu0.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libgstreamer1.0-0 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libgtk-3-0t64"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libgtk-3-0t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libgtk-3-0t64</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">3.24.41-4ubuntu1</td>
+      <td class="mono">3.24.41-4ubuntu1.3</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libgtk-3-0t64 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libheif-plugin-aomdec"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libheif-plugin-aomdec"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libheif-plugin-aomdec</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1.17.6-1ubuntu4</td>
+      <td class="mono">1.17.6-1ubuntu4.9</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libheif-plugin-aomdec paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="liblcms2-2"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: liblcms2-2"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">liblcms2-2</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">2.14-2build1</td>
+      <td class="mono">2.14-2ubuntu0.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="liblcms2-2 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="liblsan0"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: liblsan0"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">liblsan0</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">14-20240412-0ubuntu1</td>
+      <td class="mono">14.2.0-4ubuntu2~24.04.1</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="liblsan0 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libncursesw6"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libncursesw6"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libncursesw6</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">6.4&#43;20240113-1ubuntu2</td>
+      <td class="mono">6.4&#43;20240113-1ubuntu2.2</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libncursesw6 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    <tr>
+      <td class="mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libpackagekit-glib2-18"><input type="hidden" name="back" value="/packages"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Takip et" aria-label="Takip et: libpackagekit-glib2-18"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> <a href="#demo-unavailable">libpackagekit-glib2-18</a></td>
+      <td><span class="pill pill--danger">Güvenlik</span></td>
+      <td class="num">3</td>
+      <td class="mono cell-sub">1.2.8-2build3</td>
+      <td class="mono">1.2.8-2ubuntu1.5</td>
+      
+      <td class="actions">
+        <form method="post" action="#" data-confirm="libpackagekit-glib2-18 paketi 3 sunucuda güncellenecek. Devam edilsin mi?">
+          <input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit">Tüm sunucularda güncelle</button>
+        </form>
+      </td>
+      
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+<nav class="pager" aria-label="Sayfalama">
+  <span class="pager__info">323 kayıttan 1–50 arası</span>
+  <span class="pager__links">
+    <span class="button button--sm is-disabled">Önceki</span>
+    <span class="pager__page">Sayfa 1 / 7</span>
+    <a class="button button--sm" href="#demo-unavailable">Sonraki</a>
+  </span>
+</nav>
+
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

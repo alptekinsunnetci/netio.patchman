@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Agents · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink is-active" href="agents.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Agents</h1>
+    <p class="pagehead__sub">Agent installation, enrollment tokens and agent status</p>
+  </div>
+</header>
+
+
+
+<section class="panel">
+  <div class="panel__head">
+    <h2 class="panel__title">Agent updates</h2>
+    
+  </div>
+  
+  <dl class="dl">
+    <dt>Distributed version</dt><dd class="mono">1.0.3 <span class="muted">(linux/amd64, linux/arm64, windows/amd64)</span></dd>
+    <dt>Automatic updates</dt><dd><span class="pill pill--online">On</span> <span class="muted">Outdated agents update themselves on their next connection.</span></dd>
+    <dt>Outdated agents</dt><dd>0</dd>
+  </dl>
+  
+</section>
+
+<div class="grid-2 grid-2--wide-left">
+  <section class="panel">
+    <h2 class="panel__title">Agent installation</h2>
+    <ol class="steps">
+      <li>Create an enrollment token with the form on the right. The token is shown only once.</li>
+      <li>Choose the server&#39;s operating system and run the generated command on the server to be managed:
+        
+<div class="installcmd" data-installcmd="example-command">
+  <div class="installcmd__opts" hidden>
+    <label class="field field--inline"><span class="field__label">Operating system</span>
+      <select class="field__input" data-installcmd-os>
+        <option value="ubuntu" data-root="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US" data-sudo="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US" data-default-sudo>Ubuntu</option><option value="debian" data-root="wget -qO- https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US" data-sudo="wget -qO- https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US">Debian</option><option value="rhel" data-root="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US" data-sudo="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US">RHEL / CentOS / AlmaLinux / Rocky / Oracle Linux</option><option value="fedora" data-root="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US" data-sudo="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US" data-default-sudo>Fedora</option><option value="suse" data-root="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US" data-sudo="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US">SUSE / openSUSE</option><option value="alpine" data-root="wget -qO- https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US" data-sudo="wget -qO- https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US">Alpine (OpenRC)</option><option value="windows" data-root="powershell -NoProfile -ExecutionPolicy Bypass -Command &#34;[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; &amp; ([scriptblock]::Create((irm &#39;https://patchman.example.test/downloads/install-agent.ps1&#39;).TrimStart([char]65279))) -ServerUrl &#39;https://patchman.example.test&#39; -Token &#39;&lt;ENROLLMENT-TOKEN&gt;&#39; -Locale en-US&#34;" data-sudo="powershell -NoProfile -ExecutionPolicy Bypass -Command &#34;[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; &amp; ([scriptblock]::Create((irm &#39;https://patchman.example.test/downloads/install-agent.ps1&#39;).TrimStart([char]65279))) -ServerUrl &#39;https://patchman.example.test&#39; -Token &#39;&lt;ENROLLMENT-TOKEN&gt;&#39; -Locale en-US&#34;" data-nosudo>Windows / Windows Server (PowerShell)</option>
+      </select></label>
+    <label class="check-label"><input type="checkbox" data-installcmd-sudo checked>Run with sudo</label>
+  </div>
+  <span class="copy"><textarea class="field__input field__input--area mono" rows="3" readonly id="example-command">curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --locale en-US</textarea><button class="button button--sm" type="button" data-copy="example-command">Copy</button></span>
+  <span class="field__hint">Installation requires root. sudo is not needed in a root session; if sudo is not installed (common on CentOS, Debian and Alpine), leave the box unchecked. The Debian and Alpine commands use wget instead of curl. Run the Windows command in PowerShell or a command prompt opened as administrator.</span>
+</div>
+
+      </li>
+      <li>The agent registers with the server, sends its inventory and appears on the Server Inventory page within a few minutes.</li>
+    </ol>
+    <details class="details">
+      <summary>Servers without internet access</summary>
+      <p>Download the files from these addresses, copy them to the server and run the install script with the --binary option:</p>
+      <pre class="code">https://patchman.example.test/downloads/agent/netio-patchman-agent-linux-amd64
+https://patchman.example.test/downloads/agent/netio-patchman-agent-linux-arm64
+https://patchman.example.test/downloads/netio-patchman-agent.service
+https://patchman.example.test/downloads/netio-patchman-agent.openrc
+https://patchman.example.test/downloads/install-agent.sh</pre>
+      <pre class="code">sh install-agent.sh --server-url https://patchman.example.test --token &lt;ENROLLMENT-TOKEN&gt; --binary ./netio-patchman-agent-linux-amd64</pre>
+      <p>Windows: copy the files to one folder and run this in PowerShell opened as administrator:</p>
+      <pre class="code">https://patchman.example.test/downloads/agent/netio-patchman-agent-windows-amd64.exe
+https://patchman.example.test/downloads/install-agent.ps1</pre>
+      <pre class="code">.\install-agent.ps1 -ServerUrl https://patchman.example.test -Token &lt;ENROLLMENT-TOKEN&gt; -Binary .\netio-patchman-agent-windows-amd64.exe</pre>
+    </details>
+    <details class="details">
+      <summary>Supported systems</summary>
+      <p>Inventory and updates: every distribution using apt (Debian, Ubuntu), dnf/yum (RHEL, AlmaLinux, Rocky Linux), zypper (SUSE, openSUSE) or apk (Alpine) with systemd or OpenRC (including CentOS, Oracle Linux and Fedora), and Windows 10, Windows 11 and Windows Server 2016 / 2019 / 2022 / 2025 (x64, Windows Update). Physical server, VMware, Hyper-V, KVM/Proxmox or cloud makes no difference. Vulnerability scanning: Debian, Ubuntu, AlmaLinux, Rocky Linux, Red Hat Enterprise Linux, CloudLinux 8/9 (with AlmaLinux data), SUSE Linux Enterprise, openSUSE Leap, Alpine and Windows (CVEs of pending Microsoft updates; third-party Windows programs are not scanned).</p>
+    </details>
+  </section>
+
+  
+  <section class="panel">
+    <h2 class="panel__title">New enrollment token</h2>
+    <form class="form" method="post" action="#">
+      <input type="hidden" name="_csrf" value="demo">
+      <label class="field"><span class="field__label">Token name</span>
+        <input class="field__input" type="text" name="name" required maxlength="100" placeholder="For example: Production web servers"></label>
+      <label class="field"><span class="field__label">Valid for (days)</span>
+        <input class="field__input" type="number" name="valid_days" min="0" max="3650" value="7">
+        <span class="field__hint">0 means it never expires.</span></label>
+      <label class="field"><span class="field__label">Maximum uses</span>
+        <input class="field__input" type="number" name="max_uses" min="0" max="100000" value="0">
+        <span class="field__hint">0 allows an unlimited number of servers to enroll.</span></label>
+      <div><button class="button button--primary" type="submit">Create token</button></div>
+    </form>
+  </section>
+  
+</div>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">Enrollment tokens</h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Token name</th><th>Token</th><th>Created By</th><th>Created</th><th>Expires</th><th class="num">Uses</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td>Demo kurulum</td>
+      <td class="mono">npe_ELxN_x…</td>
+      <td>Demo Yönetici</td>
+      <td>2026-11-23 21:09</td>
+      <td>2026-12-23 21:09</td>
+      <td class="num">6</td>
+      <td><span class="pill pill--online">Valid</span></td>
+      <td class="actions"><form method="post" action="#" data-confirm="The token will be revoked. Enrolled agents keep working, but no new servers can enroll with it. Continue?"><input type="hidden" name="_csrf" value="demo"><button class="button button--sm button--ghost" type="submit">Revoke</button></form></td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">Agents</h2>
+    <form class="filters filters--inline" method="get" action="#">
+      <select class="field__input" name="status" aria-label="Status">
+        <option value="">All statuses</option>
+        <option value="online">Online</option>
+        <option value="offline">Offline</option>
+      </select>
+      <button class="button button--sm" type="submit">Filter</button>
+    </form>
+  </div>
+  <p class="panel__note">Agent versions: <span class="mono">1.0.3</span> (6)</p>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Server Name</th><th>Status</th><th>Agent Version</th><th>Automatic Agent Updates</th><th>Remote Updates</th><th>Enrolled</th><th>Last Seen</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td><a href="servers-6.html">backup-01</a></td>
+      <td><span class="pill pill--offline">Offline</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Current</span></td>
+      <td>On</td>
+      <td>On</td>
+      <td>2026-11-23</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="2026-11-23 21:09">13 h ago</time></td>
+    </tr>
+    
+    <tr>
+      <td><a href="servers-3.html">db-01</a></td>
+      <td><span class="pill pill--offline">Offline</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Current</span></td>
+      <td>On</td>
+      <td>On</td>
+      <td>2026-11-23</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="2026-11-23 21:09">13 h ago</time></td>
+    </tr>
+    
+    <tr>
+      <td><a href="servers-4.html">db-02</a></td>
+      <td><span class="pill pill--offline">Offline</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Current</span></td>
+      <td>On</td>
+      <td>On</td>
+      <td>2026-11-23</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="2026-11-23 21:09">13 h ago</time></td>
+    </tr>
+    
+    <tr>
+      <td><a href="servers-5.html">mail-01</a></td>
+      <td><span class="pill pill--offline">Offline</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Current</span></td>
+      <td>On</td>
+      <td>On</td>
+      <td>2026-11-23</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="2026-11-23 21:09">13 h ago</time></td>
+    </tr>
+    
+    <tr>
+      <td><a href="servers-1.html">web-01</a></td>
+      <td><span class="pill pill--offline">Offline</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Current</span></td>
+      <td>On</td>
+      <td>On</td>
+      <td>2026-11-23</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="2026-11-23 21:09">13 h ago</time></td>
+    </tr>
+    
+    <tr>
+      <td><a href="servers-2.html">web-02</a></td>
+      <td><span class="pill pill--offline">Offline</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Current</span></td>
+      <td>On</td>
+      <td>On</td>
+      <td>2026-11-23</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="2026-11-23 21:09">13 h ago</time></td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+<p class="pager__info pager__info--single">6 records</p>
+
+  </main>
+</div>
+
+</body>
+</html>

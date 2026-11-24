@@ -1,0 +1,1617 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>2026 yıllık bilgi güvenliği denetimi · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-reports.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb no-print"><a href="compliance-reports.html">Compliance Reports</a> / <span>2026 yıllık bilgi güvenliği denetimi</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">2026 yıllık bilgi güvenliği denetimi</h1>
+    <p class="pagehead__sub">Assessment period: 2026-08-26 – 2026-11-23 · All hosts</p>
+    <p class="report__meta">v1 <span class="pill">Draft</span>
+      · Generated: 2026-11-23 21:38 · admin@example.test · SHA-256 <span class="mono" title="589a7ae66f8c2c323aacc65c44530cde212ee55606a2158b5a750f7352420a33">589a7ae66f8c</span>
+      </p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="button" href="../files/compliance-report-v1-en.pdf"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-download"></use></svg>PDF</a>
+    <a class="button" href="../files/compliance-report-v1-en.zip"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-download"></use></svg>CSV</a>
+    <a class="button" href="../files/compliance-report-v1-en.json"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-download"></use></svg>JSON</a>
+    <button class="button" type="button" data-print><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-print"></use></svg>Print</button>
+  </div>
+</header>
+
+<div class="no-print">
+
+<div class="filters">
+  <form class="filters" method="get" action="#">
+    <label class="field field--inline"><span class="field__label">Version</span>
+      <select class="field__input" name="v"><option value="1" selected>v1 · 2026-11-23 21:38 · Draft</option></select></label>
+    <button class="button" type="submit">Show</button>
+  </form>
+  
+  <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+    <button class="button" type="submit" title="Re-assesses with the current evidence; earlier versions are kept unchanged. Reviews of controls whose automated outcome did not change carry over."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-refresh"></use></svg>Generate new version</button></form>
+  
+  
+  <form method="post" action="#" data-confirm="A final version and its reviews can never change again. Continue?"><input type="hidden" name="_csrf" value="demo">
+    <button class="button button--primary" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg>Finalize version</button></form>
+  
+  
+  <form method="post" action="#" data-confirm="Delete the report and all its draft versions?"><input type="hidden" name="_csrf" value="demo">
+    <button class="button button--danger" type="submit">Delete report</button></form>
+  
+</div>
+</div>
+
+<p class="alert alert--info">This report is based on technical evidence that netio.patchman collects automatically. It is not a certification or a statement of conformity. Using the same evidence in several frameworks does not mean their requirements are met. The assessment and the decision belong to the responsible auditor.</p>
+<p class="alert alert--warning">Evidence collection began on 2026-11-23 21:10; evidence for the part of the period before then may be missing.</p>
+
+
+<section class="panel report__section">
+  <h2 class="panel__title">1. Executive summary</h2>
+  <p>Hosts in scope: 6. <span class="pill">Linux: 6</span> </p>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Framework</th><th>Controls</th><th>Control outcomes</th></tr></thead>
+    <tbody>
+    <tr><td><a href="#p-isms">Information security management audits</a> <span class="muted mono">isms@1</span></td><td>12</td>
+      <td><span class="pill pill--failed">Deviation: 2</span> <span class="pill pill--warning">Evidence missing: 1</span> <span class="pill pill--in_progress">Manual evidence present: 1</span> <span class="pill pill--succeeded">Evidence sufficient: 8</span> </td></tr><tr><td><a href="#p-baseline">IT baseline protection audits</a> <span class="muted mono">baseline@1</span></td><td>12</td>
+      <td><span class="pill pill--failed">Deviation: 2</span> <span class="pill pill--warning">Evidence missing: 2</span> <span class="pill pill--partial">Partial: 1</span> <span class="pill pill--in_progress">Manual evidence present: 1</span> <span class="pill pill--succeeded">Evidence sufficient: 4</span> <span class="pill pill--expired">Not applicable: 2</span> </td></tr><tr><td><a href="#p-itsm">IT service management assessments</a> <span class="muted mono">itsm@1</span></td><td>8</td>
+      <td><span class="pill pill--failed">Deviation: 1</span> <span class="pill pill--warning">Evidence missing: 1</span> <span class="pill pill--queued">Manual evidence required: 1</span> <span class="pill pill--succeeded">Evidence sufficient: 5</span> </td></tr><tr><td><a href="#p-general">General security &amp; patch compliance</a> <span class="muted mono">general@1</span></td><td>12</td>
+      <td><span class="pill pill--failed">Deviation: 2</span> <span class="pill pill--warning">Evidence missing: 1</span> <span class="pill pill--partial">Partial: 1</span> <span class="pill pill--succeeded">Evidence sufficient: 8</span> </td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="footnote">The numbers are control outcomes, not a verdict of conformity. Each framework is assessed separately with its own controls.</p>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">2. Scope and assessment period</h2>
+  <dl class="dl">
+    <dt>Assessment period</dt><dd>2026-08-26 – 2026-11-23</dd>
+    <dt>Scope</dt><dd>All hosts</dd>
+    <dt>Assessment frameworks</dt><dd><div>Information security management audits <span class="muted mono">isms@1</span><div class="cell-sub">Technical evidence asked for in information security management system audits: asset inventory, vulnerability management, change, logging, backup and access.</div></div><div>IT baseline protection audits <span class="muted mono">baseline@1</span><div class="cell-sub">Module-oriented technical evidence for baseline protection assessments: patch and change management, Linux and Windows servers, Windows clients, logging and backup.</div></div><div>IT service management assessments <span class="muted mono">itsm@1</span><div class="cell-sub">Evidence supporting IT service management practices: change enablement, release and deployment, configuration and asset management, monitoring and service levels.</div></div><div>General security &amp; patch compliance <span class="muted mono">general@1</span><div class="cell-sub">netio.patchman&#39;s own baseline security and update controls with measurable targets.</div></div></dd>
+    <dt>Evidence collection began</dt><dd>2026-11-23 21:10</dd>
+    <dt>Assessment engine</dt><dd class="mono">1 · netio.patchman 1.0.3</dd>
+    <dt>SHA-256</dt><dd class="mono break">589a7ae66f8c2c323aacc65c44530cde212ee55606a2158b5a750f7352420a33</dd>
+    
+  </dl>
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">3. Managed asset inventory <span class="muted">(6)</span></h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Host</th><th>Platform</th><th>Operating system</th><th>Agent</th><th>Last seen</th><th>Groups</th><th>Support status</th></tr></thead>
+    <tbody>
+    
+    <tr><td><a href="servers-6.html">backup-01</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>2026-11-23 21:09</td><td class="cell-sub"></td>
+      <td>Supported</td></tr>
+    
+    <tr><td><a href="servers-3.html">db-01</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>2026-11-23 21:09</td><td class="cell-sub">Veritabanı</td>
+      <td>Supported</td></tr>
+    
+    <tr><td><a href="servers-4.html">db-02</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>2026-11-23 21:09</td><td class="cell-sub">Veritabanı</td>
+      <td>Supported</td></tr>
+    
+    <tr><td><a href="servers-5.html">mail-01</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>2026-11-23 21:09</td><td class="cell-sub"></td>
+      <td>Supported</td></tr>
+    
+    <tr><td><a href="servers-1.html">web-01</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>2026-11-23 21:09</td><td class="cell-sub">Web</td>
+      <td>Supported</td></tr>
+    
+    <tr><td><a href="servers-2.html">web-02</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>2026-11-23 21:09</td><td class="cell-sub">Web</td>
+      <td>Supported</td></tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+  
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">4. Linux and Windows update status</h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Platform</th><th>Hosts</th><th>With security updates</th><th>Security updates</th><th>All updates</th><th>Reboot pending</th><th>Update jobs succeeded</th><th>Update jobs failed</th></tr></thead>
+    <tbody>
+    <tr><td>Linux</td><td>6</td><td>4</td><td>522</td><td>710</td><td>1</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+
+<section class="panel report__section">
+  <h2 class="panel__title">5. Vulnerability management</h2>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th></th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>KEV</th></tr></thead>
+    <tbody>
+      <tr><td>Open at period start</td><td>2608</td><td>17739</td><td>14952</td><td>7811</td><td>44</td></tr>
+      <tr><td>Open at period end</td><td>2608</td><td>17739</td><td>14952</td><td>7811</td><td>44</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Findings resolved in the period: 0 · mean time to resolve: 0.0 days · actively exploited ones resolved: 0.</p>
+  
+  <h3 class="panel__title">Actively exploited vulnerabilities still open (at generation)</h3>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>CVE</th><th>Title</th><th>CISA due date</th><th>Hosts</th></tr></thead>
+    <tbody><tr><td><a class="mono" href="vulnerabilities-CVE-2024-36971.html">CVE-2024-36971</a></td><td lang="en">net: fix __dst_negative_advice() race</td><td class="mono">2024-08-28</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2024-53104.html">CVE-2024-53104</a></td><td lang="en">media: uvcvideo: Skip parsing frames of type UVC_VS_UNDEFINED in uvc_parse_format</td><td class="mono">2025-02-26</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2024-50302.html">CVE-2024-50302</a></td><td lang="en">HID: core: zero-initialize the report buffer</td><td class="mono">2025-03-25</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2024-53150.html">CVE-2024-53150</a></td><td lang="en">ALSA: usb-audio: Fix out of bounds reads when finding clock sources</td><td class="mono">2025-04-30</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2024-53197.html">CVE-2024-53197</a></td><td lang="en">ALSA: usb-audio: Fix potential out-of-bound accesses for Extigy and Mbox devices</td><td class="mono">2025-04-30</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2025-48384.html">CVE-2025-48384</a></td><td lang="en">Git allows arbitrary code execution through broken config quoting</td><td class="mono">2025-09-15</td><td>3</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2025-38352.html">CVE-2025-38352</a></td><td lang="en">posix-cpu-timers: fix race between handle_posix_cpu_timers() and posix_cpu_timer_del()</td><td class="mono">2025-09-25</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2025-32463.html">CVE-2025-32463</a></td><td lang="en"></td><td class="mono">2025-10-20</td><td>3</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-31431.html">CVE-2026-31431</a></td><td lang="en">crypto: algif_aead - Revert to operating out-of-place</td><td class="mono">2026-05-15</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-53362.html">CVE-2026-53362</a></td><td lang="en">ipv6: account for fraggap on the paged allocation path</td><td class="mono">2026-08-30</td><td>6</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2025-39682.html">CVE-2025-39682</a></td><td lang="en">tls: fix handling of zero-length records on the rx_list</td><td class="mono">2026-09-21</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2025-39964.html">CVE-2025-39964</a></td><td lang="en">crypto: af_alg - Disallow concurrent writes in af_alg_sendmsg</td><td class="mono">2026-09-21</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-53266.html">CVE-2026-53266</a></td><td lang="en">netfilter: bridge: make ebt_snat ARP rewrite writable</td><td class="mono">2026-09-21</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-109618.html">CVE-2026-109618</a></td><td lang="en">RCE via OOM corruption</td><td class="mono">2026-10-29</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-109619.html">CVE-2026-109619</a></td><td lang="en">RCE via stale global state</td><td class="mono">2026-10-29</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-46300.html">CVE-2026-46300</a></td><td lang="en">net: skbuff: preserve shared-frag marker during coalescing</td><td class="mono">2026-10-31</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-111497.html">CVE-2026-111497</a></td><td lang="en">Out-of-Bounds Write in Google Brotli Decoder</td><td class="mono">2026-11-10</td><td>6</td></tr></tbody>
+  </table>
+  </div>
+  
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">6. Patch compliance</h2>
+  <p>0 update jobs in the period: 0 succeeded, 0 partial, 0 failed; 0 packages updated by the successful ones.</p>
+  <p>At the end of the period 2 of 6 hosts had no pending security update.</p>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">7. Security update SLA</h2>
+  
+  <p>Targets: critical 15, high 30, medium 90, low 180 days (0 = none).</p>
+  <p>Of 0 findings resolved in the period, 0 were resolved in time and 0 late. Overdue findings still open at the end: 0.</p>
+  
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">8. End-of-life systems</h2></div>
+  <div class="empty"><p class="empty__body">No operating system is out of or near the end of support.</p></div>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">9. Change management</h2>
+  <p>Changes recorded in the period: 1 · approvals after a preview: 0.</p>
+  <div class="grid-2">
+    <dl class="dl"><dt>Update preview</dt><dd>1</dd></dl>
+    <dl class="dl"><dt>User</dt><dd>1</dd></dl>
+  </div>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">10. Audit logs</h2>
+  <p>Audit log entries in the period: 15. Evidence chain verified (18 items).</p>
+  <details><summary>By action</summary><dl class="dl"><dt>Agent enrolled</dt><dd>6</dd><dt>Group created</dt><dd>2</dd><dt>Servers added to group</dt><dd>2</dd><dt>Enrollment token created</dt><dd>1</dd><dt>First administrator created</dt><dd>1</dd><dt>Schedule created</dt><dd>1</dd><dt>Signed in</dt><dd>1</dd><dt>Update job started</dt><dd>1</dd></dl></details>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">11. Control assessments by framework</h2>
+  <p class="footnote">The automated outcome comes from the primary checks only; supporting checks add evidence but never improve it. The manual review is stored separately next to it.</p>
+</section>
+
+<section class="panel panel--flush report__section" id="p-isms">
+  <div class="panel__head"><h3 class="panel__title">Information security management audits <span class="muted mono">isms@1</span></h3>
+    <span><span class="pill pill--failed">Deviation: 2</span> <span class="pill pill--warning">Evidence missing: 1</span> <span class="pill pill--in_progress">Manual evidence present: 1</span> <span class="pill pill--succeeded">Evidence sufficient: 8</span> </span></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Control</th><th>Automated outcome</th><th>Checks</th><th>Evidence</th><th>Manual review</th></tr></thead>
+    <tbody>
+    
+    <tr id="c-isms-ISMS-01">
+      <td><strong class="mono">ISMS-01</strong> Asset inventory<div class="cell-sub">A current, complete inventory of managed servers and clients that report regularly.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Inventory completeness <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Agent reach <span class="muted">· Supporting</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-01">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-02">
+      <td><strong class="mono">ISMS-02</strong> Technical vulnerability management<div class="cell-sub">Vulnerabilities are detected, resolved within targets and actively exploited ones come first.</div></td>
+      <td><span class="pill pill--failed">Deviation</span></td>
+      <td><div>Remediation target (SLA) <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Actively exploited vulnerabilities <span class="muted">· Primary</span> <span class="pill pill--failed">Deviation</span></div><div>Update jobs <span class="muted">· Supporting</span> <span class="pill pill--warning">Evidence missing</span></div><div>Security update currency <span class="muted">· Supporting</span> <span class="pill pill--partial">Partial</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-02">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-03">
+      <td><strong class="mono">ISMS-03</strong> Configuration management<div class="cell-sub">Servers follow defined standards and deviations are tracked.</div></td>
+      <td><span class="pill pill--warning">Evidence missing</span></td>
+      <td><div>Configuration standards <span class="muted">· Primary</span> <span class="pill pill--warning">Evidence missing</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-03">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-04">
+      <td><strong class="mono">ISMS-04</strong> Software changes on operational systems<div class="cell-sub">Installations and updates on systems are recorded and approved.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Change records <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Change approval <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td><a href="#demo-unavailable">3</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-04">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-05">
+      <td><strong class="mono">ISMS-05</strong> Change management<div class="cell-sub">Changes are planned, approved, carried out and their results followed up.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Change records <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Change approval <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Update jobs <span class="muted">· Supporting</span> <span class="pill pill--warning">Evidence missing</span></div>
+        <div class="cell-sub">Process document: 0 items</div></td>
+      <td><a href="#demo-unavailable">3</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-05">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-06">
+      <td><strong class="mono">ISMS-06</strong> Logging<div class="cell-sub">User and system actions are recorded in a tamper-evident way.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Log integrity <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td><a href="#demo-unavailable">15</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-06">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-07">
+      <td><strong class="mono">ISMS-07</strong> Monitoring activities<div class="cell-sub">Resource and health state of systems is monitored continuously.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Continuous monitoring <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Agent reach <span class="muted">· Supporting</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-07">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-08">
+      <td><strong class="mono">ISMS-08</strong> Information backup<div class="cell-sub">Management data is backed up regularly and successfully.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Backup <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td><a href="#demo-unavailable">1</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-08">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-09">
+      <td><strong class="mono">ISMS-09</strong> Secure authentication and privileged access<div class="cell-sub">Administrator accounts use multi-factor authentication; access changes are tracked.</div></td>
+      <td><span class="pill pill--failed">Deviation</span></td>
+      <td><div>Multi-factor authentication <span class="muted">· Primary</span> <span class="pill pill--failed">Deviation</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-09">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-10">
+      <td><strong class="mono">ISMS-10</strong> System lifecycle<div class="cell-sub">Operating systems out of support are identified and replaced.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>End-of-life systems <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-10">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-11">
+      <td><strong class="mono">ISMS-11</strong> Risk treatment<div class="cell-sub">Accepted risks have a reason, an end date and can be traced.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Accepted risks <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-11">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-12">
+      <td><strong class="mono">ISMS-12</strong> Policies and procedures<div class="cell-sub">The information security policy and procedures are documented (manual evidence).</div></td>
+      <td><span class="pill pill--in_progress">Manual evidence present</span></td>
+      <td>
+        <div class="cell-sub">Policy document: 1 items</div></td>
+      <td><a href="#demo-unavailable">1</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-12">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel panel--flush report__section" id="p-baseline">
+  <div class="panel__head"><h3 class="panel__title">IT baseline protection audits <span class="muted mono">baseline@1</span></h3>
+    <span><span class="pill pill--failed">Deviation: 2</span> <span class="pill pill--warning">Evidence missing: 2</span> <span class="pill pill--partial">Partial: 1</span> <span class="pill pill--in_progress">Manual evidence present: 1</span> <span class="pill pill--succeeded">Evidence sufficient: 4</span> <span class="pill pill--expired">Not applicable: 2</span> </span></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Control</th><th>Automated outcome</th><th>Checks</th><th>Evidence</th><th>Manual review</th></tr></thead>
+    <tbody>
+    
+    <tr id="c-baseline-BASE-01">
+      <td><strong class="mono">BASE-01</strong> Patch and change management<div class="cell-sub">Updates are applied through a process and every change is recorded.</div></td>
+      <td><span class="pill pill--warning">Evidence missing</span></td>
+      <td><div>Update jobs <span class="muted">· Primary</span> <span class="pill pill--warning">Evidence missing</span></div><div>Change records <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        <div class="cell-sub">Process document: 0 items</div></td>
+      <td><a href="#demo-unavailable">3</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-01">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-02">
+      <td><strong class="mono">BASE-02</strong> Timely security updates<div class="cell-sub">Security updates are applied within targets, actively exploited vulnerabilities first.</div></td>
+      <td><span class="pill pill--failed">Deviation</span></td>
+      <td><div>Remediation target (SLA) <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Actively exploited vulnerabilities <span class="muted">· Primary</span> <span class="pill pill--failed">Deviation</span></div><div>Security update currency <span class="muted">· Supporting</span> <span class="pill pill--partial">Partial</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-02">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-03">
+      <td><strong class="mono">BASE-03</strong> Linux servers<div class="cell-sub">Linux servers: current security patches, supported releases and pending reboots.</div></td>
+      <td><span class="pill pill--partial">Partial</span></td>
+      <td><div>Security update currency (Linux) <span class="muted">· Primary</span> <span class="pill pill--partial">Partial</span></div><div>End-of-life systems (Linux) <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Pending reboots (Linux) <span class="muted">· Supporting</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-03">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-04">
+      <td><strong class="mono">BASE-04</strong> Windows servers<div class="cell-sub">Windows Server systems: current security updates, supported releases and pending reboots.</div></td>
+      <td><span class="pill pill--expired">Not applicable</span></td>
+      <td><div>Security update currency (Windows Server) <span class="muted">· Primary</span> <span class="pill pill--expired">Not applicable</span></div><div>End-of-life systems (Windows Server) <span class="muted">· Primary</span> <span class="pill pill--expired">Not applicable</span></div><div>Pending reboots (Windows Server) <span class="muted">· Supporting</span> <span class="pill pill--expired">Not applicable</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-04">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-05">
+      <td><strong class="mono">BASE-05</strong> Windows clients<div class="cell-sub">Windows 10 and Windows 11 clients: current security updates, supported releases and pending reboots.</div></td>
+      <td><span class="pill pill--expired">Not applicable</span></td>
+      <td><div>Security update currency (Windows 10, Windows 11, Other Windows) <span class="muted">· Primary</span> <span class="pill pill--expired">Not applicable</span></div><div>End-of-life systems (Windows 10, Windows 11, Other Windows) <span class="muted">· Primary</span> <span class="pill pill--expired">Not applicable</span></div><div>Pending reboots (Windows 10, Windows 11, Other Windows) <span class="muted">· Supporting</span> <span class="pill pill--expired">Not applicable</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-05">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-06">
+      <td><strong class="mono">BASE-06</strong> Orderly IT administration and inventory<div class="cell-sub">All systems are in the inventory and connect to the management tool regularly.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Inventory completeness <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Agent reach <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-06">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-07">
+      <td><strong class="mono">BASE-07</strong> Logging<div class="cell-sub">Administrative actions are recorded with their integrity protected.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Log integrity <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td><a href="#demo-unavailable">15</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-07">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-08">
+      <td><strong class="mono">BASE-08</strong> Data backup<div class="cell-sub">Management data is backed up every day.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Backup <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td><a href="#demo-unavailable">1</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-08">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-09">
+      <td><strong class="mono">BASE-09</strong> Identity and authorization management<div class="cell-sub">Multi-factor authentication for administrative access.</div></td>
+      <td><span class="pill pill--failed">Deviation</span></td>
+      <td><div>Multi-factor authentication <span class="muted">· Primary</span> <span class="pill pill--failed">Deviation</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-09">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-10">
+      <td><strong class="mono">BASE-10</strong> Detection of security events<div class="cell-sub">Resource and health monitoring and detection of actively exploited vulnerabilities.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Continuous monitoring <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Actively exploited vulnerabilities <span class="muted">· Supporting</span> <span class="pill pill--failed">Deviation</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-10">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-11">
+      <td><strong class="mono">BASE-11</strong> Configuration standards<div class="cell-sub">Servers comply with defined standards.</div></td>
+      <td><span class="pill pill--warning">Evidence missing</span></td>
+      <td><div>Configuration standards <span class="muted">· Primary</span> <span class="pill pill--warning">Evidence missing</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-11">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-12">
+      <td><strong class="mono">BASE-12</strong> Documented patch and change concept<div class="cell-sub">The patch and change process is defined in writing (manual evidence).</div></td>
+      <td><span class="pill pill--in_progress">Manual evidence present</span></td>
+      <td>
+        <div class="cell-sub">Process document: 1 items</div></td>
+      <td><a href="#demo-unavailable">1</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-12">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel panel--flush report__section" id="p-itsm">
+  <div class="panel__head"><h3 class="panel__title">IT service management assessments <span class="muted mono">itsm@1</span></h3>
+    <span><span class="pill pill--failed">Deviation: 1</span> <span class="pill pill--warning">Evidence missing: 1</span> <span class="pill pill--queued">Manual evidence required: 1</span> <span class="pill pill--succeeded">Evidence sufficient: 5</span> </span></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Control</th><th>Automated outcome</th><th>Checks</th><th>Evidence</th><th>Manual review</th></tr></thead>
+    <tbody>
+    
+    <tr id="c-itsm-ITSM-01">
+      <td><strong class="mono">ITSM-01</strong> Change enablement<div class="cell-sub">Changes are recorded, approved and carried out as planned.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Change records <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Change approval <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Update jobs <span class="muted">· Supporting</span> <span class="pill pill--warning">Evidence missing</span></div>
+        </td>
+      <td><a href="#demo-unavailable">3</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-01">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-02">
+      <td><strong class="mono">ITSM-02</strong> Release and deployment management<div class="cell-sub">Rollout of updates and their success rate.</div></td>
+      <td><span class="pill pill--warning">Evidence missing</span></td>
+      <td><div>Update jobs <span class="muted">· Primary</span> <span class="pill pill--warning">Evidence missing</span></div><div>Pending reboots <span class="muted">· Supporting</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-02">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-03">
+      <td><strong class="mono">ITSM-03</strong> Service configuration management<div class="cell-sub">Inventory of configuration items and their compliance with standards.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Inventory completeness <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Configuration standards <span class="muted">· Supporting</span> <span class="pill pill--warning">Evidence missing</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-03">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-04">
+      <td><strong class="mono">ITSM-04</strong> IT asset management<div class="cell-sub">Inventory and lifecycle of assets.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Inventory completeness <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>End-of-life systems <span class="muted">· Supporting</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-04">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-05">
+      <td><strong class="mono">ITSM-05</strong> Monitoring and event management<div class="cell-sub">Continuous monitoring and reachability of systems.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Continuous monitoring <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Agent reach <span class="muted">· Supporting</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-05">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-06">
+      <td><strong class="mono">ITSM-06</strong> Information security management<div class="cell-sub">Resolution of vulnerabilities and access security.</div></td>
+      <td><span class="pill pill--failed">Deviation</span></td>
+      <td><div>Remediation target (SLA) <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div><div>Actively exploited vulnerabilities <span class="muted">· Primary</span> <span class="pill pill--failed">Deviation</span></div><div>Multi-factor authentication <span class="muted">· Supporting</span> <span class="pill pill--failed">Deviation</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-06">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-07">
+      <td><strong class="mono">ITSM-07</strong> Service level management<div class="cell-sub">Meeting the defined service levels (SLA) for security updates.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Remediation target (SLA) <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-07">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-08">
+      <td><strong class="mono">ITSM-08</strong> Incident and problem process<div class="cell-sub">The incident and problem management process is documented (manual evidence).</div></td>
+      <td><span class="pill pill--queued">Manual evidence required</span></td>
+      <td>
+        <div class="cell-sub">Process document: 0 items</div></td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-08">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel panel--flush report__section" id="p-general">
+  <div class="panel__head"><h3 class="panel__title">General security &amp; patch compliance <span class="muted mono">general@1</span></h3>
+    <span><span class="pill pill--failed">Deviation: 2</span> <span class="pill pill--warning">Evidence missing: 1</span> <span class="pill pill--partial">Partial: 1</span> <span class="pill pill--succeeded">Evidence sufficient: 8</span> </span></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Control</th><th>Automated outcome</th><th>Checks</th><th>Evidence</th><th>Manual review</th></tr></thead>
+    <tbody>
+    
+    <tr id="c-general-GEN-01">
+      <td><strong class="mono">GEN-01</strong> Vulnerabilities resolved within targets<div class="cell-sub">Vulnerabilities are resolved within the targets set per severity.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Remediation target (SLA) <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-01">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-02">
+      <td><strong class="mono">GEN-02</strong> No overdue actively exploited vulnerability<div class="cell-sub">Vulnerabilities in the CISA KEV catalog are resolved before their due date.</div></td>
+      <td><span class="pill pill--failed">Deviation</span></td>
+      <td><div>Actively exploited vulnerabilities <span class="muted">· Primary</span> <span class="pill pill--failed">Deviation</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-02">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-03">
+      <td><strong class="mono">GEN-03</strong> Security update currency<div class="cell-sub">Share of systems without pending security updates.</div></td>
+      <td><span class="pill pill--partial">Partial</span></td>
+      <td><div>Security update currency <span class="muted">· Primary</span> <span class="pill pill--partial">Partial</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-03">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-04">
+      <td><strong class="mono">GEN-04</strong> Update job success<div class="cell-sub">Failure rate of update jobs.</div></td>
+      <td><span class="pill pill--warning">Evidence missing</span></td>
+      <td><div>Update jobs <span class="muted">· Primary</span> <span class="pill pill--warning">Evidence missing</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-04">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-05">
+      <td><strong class="mono">GEN-05</strong> No end-of-life operating system<div class="cell-sub">No operating system is out of vendor support.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>End-of-life systems <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-05">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-06">
+      <td><strong class="mono">GEN-06</strong> Agent reach<div class="cell-sub">Systems connect regularly throughout the period.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Agent reach <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-06">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-07">
+      <td><strong class="mono">GEN-07</strong> Pending reboots<div class="cell-sub">No system goes long without the reboot an update needs.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Pending reboots <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-07">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-08">
+      <td><strong class="mono">GEN-08</strong> Accepted risks<div class="cell-sub">Accepted risks have an end date and a reason.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Accepted risks <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-08">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-09">
+      <td><strong class="mono">GEN-09</strong> Multi-factor authentication for administrators<div class="cell-sub">Every administrator account uses multi-factor authentication.</div></td>
+      <td><span class="pill pill--failed">Deviation</span></td>
+      <td><div>Multi-factor authentication <span class="muted">· Primary</span> <span class="pill pill--failed">Deviation</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-09">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-10">
+      <td><strong class="mono">GEN-10</strong> Daily backup<div class="cell-sub">The management database is backed up every day.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Backup <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td><a href="#demo-unavailable">1</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-10">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-11">
+      <td><strong class="mono">GEN-11</strong> Evidence chain integrity<div class="cell-sub">A hash chain shows that evidence items were not changed.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Log integrity <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td><a href="#demo-unavailable">15</a></td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-11">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-12">
+      <td><strong class="mono">GEN-12</strong> Continuous monitoring<div class="cell-sub">Resource usage of systems is monitored continuously.</div></td>
+      <td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td><div>Continuous monitoring <span class="muted">· Primary</span> <span class="pill pill--succeeded">Evidence sufficient</span></div>
+        </td>
+      <td>0</td>
+      <td>Not reviewed
+        
+        <details class="no-print"><summary>Review</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-12">
+            
+            <select class="field__input" name="status" aria-label="Manual review"><option value="not_reviewed" selected>Not reviewed</option><option value="accepted">Reviewed, accepted</option><option value="gap">Reviewed, gap found</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="Review note"></textarea>
+            <button class="button button--sm" type="submit">Save</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">Shared checks</h2></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Check</th><th>Automated outcome</th><th>Measured values</th><th>Gaps</th><th>Evidence</th></tr></thead>
+    <tbody>
+    
+    <tr><td>Multi-factor authentication</td><td><span class="pill pill--failed">Deviation</span></td>
+      <td class="cell-sub"><div>Administrators: <strong>1</strong></div><div>Without multi-factor authentication: <strong>1</strong></div></td>
+      <td class="cell-sub"><div>1 administrators have no multi-factor authentication.</div></td><td>0</td></tr>
+    
+    <tr><td>Agent reach</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Host-days: <strong>6</strong></div><div>Host-days reached: <strong>6</strong></div><div>Reach: <strong>100.0 %</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Backup</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Days: <strong>1</strong></div><div>Days with a backup: <strong>1</strong></div><div>Failed backups: <strong>0</strong></div><div>Backup day rate: <strong>100.0 %</strong></div></td>
+      <td class="cell-sub"></td><td>1</td></tr>
+    
+    <tr><td>Change approval</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Preview approvals: <strong>0</strong></div><div>Approved updates: <strong>0</strong></div><div>Planned changes: <strong>1</strong></div></td>
+      <td class="cell-sub"></td><td>1</td></tr>
+    
+    <tr><td>Change records</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Changes: <strong>1</strong></div><div>Started by users: <strong>1</strong></div><div>Started by schedules: <strong>0</strong></div><div>Started by rolling updates: <strong>0</strong></div><div>Automatic: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>3</td></tr>
+    
+    <tr><td>Configuration standards</td><td><span class="pill pill--warning">Evidence missing</span></td>
+      <td class="cell-sub"><div>Server standards: <strong>0</strong></div><div>Open deviations: <strong>0</strong></div><div>Hosts with deviations: <strong>0</strong></div><div>Deviations detected in the period: <strong>0</strong></div></td>
+      <td class="cell-sub"><div>No server standard is defined.</div></td><td>0</td></tr>
+    
+    <tr><td>End-of-life systems</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Hosts: <strong>6</strong></div><div>End-of-life operating systems: <strong>0</strong></div><div>Support ending soon: <strong>0</strong></div><div>Support calendar unknown: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>End-of-life systems (Linux)</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Hosts: <strong>6</strong></div><div>End-of-life operating systems: <strong>0</strong></div><div>Support ending soon: <strong>0</strong></div><div>Support calendar unknown: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>End-of-life systems (Windows 10, Windows 11, Other Windows)</td><td><span class="pill pill--expired">Not applicable</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>No hosts on this platform.</div></td><td>0</td></tr>
+    
+    <tr><td>End-of-life systems (Windows Server)</td><td><span class="pill pill--expired">Not applicable</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>No hosts on this platform.</div></td><td>0</td></tr>
+    
+    <tr><td>Inventory completeness</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Hosts: <strong>6</strong></div><div>Not seen for over 7 days: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Log integrity</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Audit log entries: <strong>15</strong></div><div>Items in the chain: <strong>18</strong></div></td>
+      <td class="cell-sub"></td><td>15</td></tr>
+    
+    <tr><td>Continuous monitoring</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Host-days: <strong>6</strong></div><div>Host-days monitored: <strong>6</strong></div><div>Monitoring rate: <strong>100.0 %</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Update jobs</td><td><span class="pill pill--warning">Evidence missing</span></td>
+      <td class="cell-sub"><div>Update jobs: <strong>0</strong></div><div>Succeeded: <strong>0</strong></div><div>Partial: <strong>0</strong></div><div>Failed: <strong>0</strong></div><div>Not run (expired, cancelled): <strong>0</strong></div><div>Failure rate: <strong>0.0 %</strong></div></td>
+      <td class="cell-sub"><div>No update job ran in the period.</div></td><td>0</td></tr>
+    
+    <tr><td>Security update currency</td><td><span class="pill pill--partial">Partial</span></td>
+      <td class="cell-sub"><div>Hosts: <strong>6</strong></div><div>Without pending security updates: <strong>2</strong></div><div>Pending security updates: <strong>522</strong></div><div>Up-to-date hosts: <strong>33.3 %</strong></div></td>
+      <td class="cell-sub"><div>Hosts without pending security updates: 33.3%, the target is 90%.</div></td><td>0</td></tr>
+    
+    <tr><td>Security update currency (Linux)</td><td><span class="pill pill--partial">Partial</span></td>
+      <td class="cell-sub"><div>Hosts: <strong>6</strong></div><div>Without pending security updates: <strong>2</strong></div><div>Pending security updates: <strong>522</strong></div><div>Up-to-date hosts: <strong>33.3 %</strong></div></td>
+      <td class="cell-sub"><div>Hosts without pending security updates: 33.3%, the target is 90%.</div></td><td>0</td></tr>
+    
+    <tr><td>Security update currency (Windows 10, Windows 11, Other Windows)</td><td><span class="pill pill--expired">Not applicable</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>No hosts on this platform.</div></td><td>0</td></tr>
+    
+    <tr><td>Security update currency (Windows Server)</td><td><span class="pill pill--expired">Not applicable</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>No hosts on this platform.</div></td><td>0</td></tr>
+    
+    <tr><td>Pending reboots</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Reboot pending: <strong>1</strong></div><div>Pending for too long: <strong>0</strong></div><div>Reboot jobs: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Pending reboots (Linux)</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Reboot pending: <strong>1</strong></div><div>Pending for too long: <strong>0</strong></div><div>Reboot jobs: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Pending reboots (Windows 10, Windows 11, Other Windows)</td><td><span class="pill pill--expired">Not applicable</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>No hosts on this platform.</div></td><td>0</td></tr>
+    
+    <tr><td>Pending reboots (Windows Server)</td><td><span class="pill pill--expired">Not applicable</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>No hosts on this platform.</div></td><td>0</td></tr>
+    
+    <tr><td>Accepted risks</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Accepted risks: <strong>0</strong></div><div>Without end date: <strong>0</strong></div><div>Without reason: <strong>0</strong></div><div>Ending within 30 days: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Actively exploited vulnerabilities</td><td><span class="pill pill--failed">Deviation</span></td>
+      <td class="cell-sub"><div>Open exploited vulnerabilities: <strong>44</strong></div><div>Past due date: <strong>44</strong></div><div>Exploited vulnerabilities resolved: <strong>0</strong></div></td>
+      <td class="cell-sub"><div>44 actively exploited vulnerabilities are past the CISA due date.</div></td><td>0</td></tr>
+    
+    <tr><td>Remediation target (SLA)</td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>Findings resolved: <strong>0</strong></div><div>Resolved in time: <strong>0</strong></div><div>Resolved late: <strong>0</strong></div><div>Open overdue findings: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">12. Collected technical evidence <span class="muted">(18)</span></h2>
+    <a class="no-print" href="#demo-unavailable">Show all in the evidence repository</a></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Kind</th><th>Time</th><th>Host</th><th>Subject</th><th>Controls</th><th>SHA-256</th></tr></thead>
+    <tbody>
+    
+    <tr><td><a class="mono" href="compliance-evidence-18.html">18</a></td><td>Manual evidence</td><td>2026-11-23 21:38</td><td></td>
+      <td><span class="mono">Bilgi güvenliği politikası v4</span></td><td class="cell-sub">baseline:BASE-12, isms:ISMS-12</td><td class="mono" title="98342fc929f3e65a31558043a8782132243ccaa1ba2f2b8cf38785a69fec3654">98342fc929f3</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-17.html">17</a></td><td>Backup</td><td>2026-11-23 21:10</td><td></td>
+      <td><span class="mono">database</span> <span class="muted">succeeded</span></td><td class="cell-sub">baseline:BASE-08, general:GEN-10, isms:ISMS-08</td><td class="mono" title="d7832c1d957181421047d20f9984b19675ac66fb26a2736113e7534772c5b8e4">d7832c1d9571</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-16.html">16</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Update job started</td><td class="cell-sub">baseline:BASE-01, baseline:BASE-07, general:GEN-11, isms:ISMS-04, isms:ISMS-05, isms:ISMS-06, itsm:ITSM-01</td><td class="mono" title="b31abbfa8eddf6470f602069858d9d1047ab283fc3339560c350a3d653a6e8b6">b31abbfa8edd</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-15.html">15</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Schedule created</td><td class="cell-sub">baseline:BASE-01, baseline:BASE-07, general:GEN-11, isms:ISMS-04, isms:ISMS-05, isms:ISMS-06, itsm:ITSM-01</td><td class="mono" title="15f2a42755c84dbf1c5e12595f07cecd5bbc9dac28270791206e9c17cfe494c3">15f2a42755c8</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-14.html">14</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Servers added to group</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="1270b957d7cb917b8b4bfe55cf9b0b2bf5bd2d2ce586248877ad4e2b902ae357">1270b957d7cb</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-13.html">13</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Servers added to group</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="fdc733ba4e4ce5069a026d54be00a0317a4a34eef5aceed1a16af6fffff9fd06">fdc733ba4e4c</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-12.html">12</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Group created</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="02cddc7a0d0cffd394937991bf2a293cc730f97b3ddfbc3b6cb2db917519198e">02cddc7a0d0c</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-11.html">11</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Group created</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="4626b7b9d0cb960e6e985beca3ba03c5ef06fd231fe96e8ba1afa68bd1a46e25">4626b7b9d0cb</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">10</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Agent enrolled</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="3155a4ad067890cac8b966642fad9d34f8f18fb6ee4423f09de05fb91a863a8e">3155a4ad0678</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">9</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Agent enrolled</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="c28848a82ad75cb8ebe689bc25ac18b06e069725aa9c5aefab8b5667fac87618">c28848a82ad7</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">8</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Agent enrolled</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="579edafe240842d1e7113435f3ae91df75a2bd225bb6e1325bda293674ce9521">579edafe2408</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">7</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Agent enrolled</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="ee1869c36dfb666bb99b10eb6c1328925840d8e8b1d88dcdc5bf1a6bf6a56919">ee1869c36dfb</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">6</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Agent enrolled</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="67fdba22849249f370c772fb1ddb26e781b4486c581c8c1f91178316aa1bd4e4">67fdba228492</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">5</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Agent enrolled</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="d0568112ce0edffb876778c144f9f26cda7526e713e2fbafaa95f2d665e2ed6c">d0568112ce0e</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">4</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Enrollment token created</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="a1688df1a4d7c07200c091cf7e6727bc98228a535312eea3a55d6968bc82ad23">a1688df1a4d7</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">3</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>Signed in</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="379c105a045024010ad11132f84acafe0a6549da397655ee67312501c3bebc24">379c105a0450</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">1</a></td><td>Change job</td><td>2026-11-23 21:09</td><td>web-02</td>
+      <td>Update preview <span class="muted">· Succeeded</span></td><td class="cell-sub">baseline:BASE-01, isms:ISMS-04, isms:ISMS-05, itsm:ITSM-01</td><td class="mono" title="1f15e54df9cd1853fa262552a9ad961320131383f38f40bd619f21d205bca4d2">1f15e54df9cd</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">2</a></td><td>Audit log entry</td><td>2026-11-23 21:09</td><td></td>
+      <td>First administrator created</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="82a511193b40bc42079edbe4b4fae261322baff1bdfa3370ab1ec3bd5acc3869">82a511193b40</td></tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+  
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">13. Missing evidence and recommendations <span class="muted">(21)</span></h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Control</th><th>Automated outcome</th><th>Gaps</th><th>Recommendations</th></tr></thead>
+    <tbody>
+    
+    <tr><td>Information security management audits<div><strong class="mono">ISMS-02</strong> Technical vulnerability management</div></td><td><span class="pill pill--failed">Deviation</span></td>
+      <td class="cell-sub"><div>44 actively exploited vulnerabilities are past the CISA due date.</div><div>No update job ran in the period.</div><div>Hosts without pending security updates: 33.3%, the target is 90%.</div></td><td class="cell-sub"><div>Resolve vulnerabilities in the CISA KEV catalog before their due date.</div><div>Review the output of failed update jobs and retry the remaining packages; define a regular update schedule.</div><div>Apply pending security updates with scheduled or rolling updates.</div></td></tr>
+    
+    <tr><td>Information security management audits<div><strong class="mono">ISMS-03</strong> Configuration management</div></td><td><span class="pill pill--warning">Evidence missing</span></td>
+      <td class="cell-sub"><div>No server standard is defined.</div></td><td class="cell-sub"><div>Define server standards and resolve the deviations found.</div></td></tr>
+    
+    <tr><td>Information security management audits<div><strong class="mono">ISMS-05</strong> Change management</div></td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>No update job ran in the period.</div><div>Manual evidence missing: Process document.</div></td><td class="cell-sub"><div>Review the output of failed update jobs and retry the remaining packages; define a regular update schedule.</div><div>Add the process description as manual evidence and map it to this control.</div></td></tr>
+    
+    <tr><td>Information security management audits<div><strong class="mono">ISMS-09</strong> Secure authentication and privileged access</div></td><td><span class="pill pill--failed">Deviation</span></td>
+      <td class="cell-sub"><div>1 administrators have no multi-factor authentication.</div></td><td class="cell-sub"><div>Enable and require two-step verification for every administrator.</div></td></tr>
+    
+    <tr><td>Information security management audits<div><strong class="mono">ISMS-12</strong> Policies and procedures</div></td><td><span class="pill pill--in_progress">Manual evidence present</span></td>
+      <td class="cell-sub"></td><td class="cell-sub"></td></tr>
+    
+    <tr><td>IT baseline protection audits<div><strong class="mono">BASE-01</strong> Patch and change management</div></td><td><span class="pill pill--warning">Evidence missing</span></td>
+      <td class="cell-sub"><div>No update job ran in the period.</div><div>Manual evidence missing: Process document.</div></td><td class="cell-sub"><div>Review the output of failed update jobs and retry the remaining packages; define a regular update schedule.</div><div>Add the process description as manual evidence and map it to this control.</div></td></tr>
+    
+    <tr><td>IT baseline protection audits<div><strong class="mono">BASE-02</strong> Timely security updates</div></td><td><span class="pill pill--failed">Deviation</span></td>
+      <td class="cell-sub"><div>44 actively exploited vulnerabilities are past the CISA due date.</div><div>Hosts without pending security updates: 33.3%, the target is 90%.</div></td><td class="cell-sub"><div>Resolve vulnerabilities in the CISA KEV catalog before their due date.</div><div>Apply pending security updates with scheduled or rolling updates.</div></td></tr>
+    
+    <tr><td>IT baseline protection audits<div><strong class="mono">BASE-03</strong> Linux servers</div></td><td><span class="pill pill--partial">Partial</span></td>
+      <td class="cell-sub"><div>Hosts without pending security updates: 33.3%, the target is 90%.</div></td><td class="cell-sub"><div>Apply pending security updates with scheduled or rolling updates.</div></td></tr>
+    
+    <tr><td>IT baseline protection audits<div><strong class="mono">BASE-09</strong> Identity and authorization management</div></td><td><span class="pill pill--failed">Deviation</span></td>
+      <td class="cell-sub"><div>1 administrators have no multi-factor authentication.</div></td><td class="cell-sub"><div>Enable and require two-step verification for every administrator.</div></td></tr>
+    
+    <tr><td>IT baseline protection audits<div><strong class="mono">BASE-10</strong> Detection of security events</div></td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>44 actively exploited vulnerabilities are past the CISA due date.</div></td><td class="cell-sub"><div>Resolve vulnerabilities in the CISA KEV catalog before their due date.</div></td></tr>
+    
+    <tr><td>IT baseline protection audits<div><strong class="mono">BASE-11</strong> Configuration standards</div></td><td><span class="pill pill--warning">Evidence missing</span></td>
+      <td class="cell-sub"><div>No server standard is defined.</div></td><td class="cell-sub"><div>Define server standards and resolve the deviations found.</div></td></tr>
+    
+    <tr><td>IT baseline protection audits<div><strong class="mono">BASE-12</strong> Documented patch and change concept</div></td><td><span class="pill pill--in_progress">Manual evidence present</span></td>
+      <td class="cell-sub"></td><td class="cell-sub"></td></tr>
+    
+    <tr><td>IT service management assessments<div><strong class="mono">ITSM-01</strong> Change enablement</div></td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>No update job ran in the period.</div></td><td class="cell-sub"><div>Review the output of failed update jobs and retry the remaining packages; define a regular update schedule.</div></td></tr>
+    
+    <tr><td>IT service management assessments<div><strong class="mono">ITSM-02</strong> Release and deployment management</div></td><td><span class="pill pill--warning">Evidence missing</span></td>
+      <td class="cell-sub"><div>No update job ran in the period.</div></td><td class="cell-sub"><div>Review the output of failed update jobs and retry the remaining packages; define a regular update schedule.</div></td></tr>
+    
+    <tr><td>IT service management assessments<div><strong class="mono">ITSM-03</strong> Service configuration management</div></td><td><span class="pill pill--succeeded">Evidence sufficient</span></td>
+      <td class="cell-sub"><div>No server standard is defined.</div></td><td class="cell-sub"><div>Define server standards and resolve the deviations found.</div></td></tr>
+    
+    <tr><td>IT service management assessments<div><strong class="mono">ITSM-06</strong> Information security management</div></td><td><span class="pill pill--failed">Deviation</span></td>
+      <td class="cell-sub"><div>44 actively exploited vulnerabilities are past the CISA due date.</div><div>1 administrators have no multi-factor authentication.</div></td><td class="cell-sub"><div>Resolve vulnerabilities in the CISA KEV catalog before their due date.</div><div>Enable and require two-step verification for every administrator.</div></td></tr>
+    
+    <tr><td>IT service management assessments<div><strong class="mono">ITSM-08</strong> Incident and problem process</div></td><td><span class="pill pill--queued">Manual evidence required</span></td>
+      <td class="cell-sub"><div>Manual evidence missing: Process document.</div></td><td class="cell-sub"><div>Add the process description as manual evidence and map it to this control.</div></td></tr>
+    
+    <tr><td>General security &amp; patch compliance<div><strong class="mono">GEN-02</strong> No overdue actively exploited vulnerability</div></td><td><span class="pill pill--failed">Deviation</span></td>
+      <td class="cell-sub"><div>44 actively exploited vulnerabilities are past the CISA due date.</div></td><td class="cell-sub"><div>Resolve vulnerabilities in the CISA KEV catalog before their due date.</div></td></tr>
+    
+    <tr><td>General security &amp; patch compliance<div><strong class="mono">GEN-03</strong> Security update currency</div></td><td><span class="pill pill--partial">Partial</span></td>
+      <td class="cell-sub"><div>Hosts without pending security updates: 33.3%, the target is 90%.</div></td><td class="cell-sub"><div>Apply pending security updates with scheduled or rolling updates.</div></td></tr>
+    
+    <tr><td>General security &amp; patch compliance<div><strong class="mono">GEN-04</strong> Update job success</div></td><td><span class="pill pill--warning">Evidence missing</span></td>
+      <td class="cell-sub"><div>No update job ran in the period.</div></td><td class="cell-sub"><div>Review the output of failed update jobs and retry the remaining packages; define a regular update schedule.</div></td></tr>
+    
+    <tr><td>General security &amp; patch compliance<div><strong class="mono">GEN-09</strong> Multi-factor authentication for administrators</div></td><td><span class="pill pill--failed">Deviation</span></td>
+      <td class="cell-sub"><div>1 administrators have no multi-factor authentication.</div></td><td class="cell-sub"><div>Enable and require two-step verification for every administrator.</div></td></tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+<p class="footnote">Vulnerability ids, titles and package names are shown as in their source. Exports are built from the stored version, so the same version always gives the same content.</p>
+
+  </main>
+</div>
+
+</body>
+</html>

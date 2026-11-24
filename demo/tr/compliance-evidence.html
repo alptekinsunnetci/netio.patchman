@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Denetim Kanıtları · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-evidence.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Denetim Kanıtları</h1>
+    <p class="pagehead__sub">Tüm çerçevelerin kullandığı ortak kanıt deposu. Kayıtlar değiştirilemez ve hash zinciriyle korunur.</p>
+  </div>
+</header>
+
+<form class="filters" method="get" action="#">
+  
+  
+  <input class="field__input" type="search" name="q" value="" placeholder="Sunucu, konu veya kişi" aria-label="Sunucu, konu veya kişi">
+  <select class="field__input" name="kind" aria-label="Tür">
+    <option value="">Tüm türler</option>
+    <option value="update_job">Güncelleme işi</option><option value="change_job">Değişiklik işi</option><option value="vuln_resolved">Giderilen açık</option><option value="audit_event">Denetim kaydı</option><option value="drift_detected">Standart sapması</option><option value="backup_result">Yedekleme</option><option value="inventory_snapshot">Günlük envanter</option><option value="manual">Manuel kanıt</option>
+  </select>
+  <select class="field__input" name="platform" aria-label="Platform">
+    <option value="">Tüm platformlar</option>
+    <option value="linux">Linux</option><option value="windows_server">Windows Server</option><option value="windows_10">Windows 10</option><option value="windows_11">Windows 11</option><option value="windows_other">Diğer Windows</option>
+  </select>
+  <input class="field__input" type="date" name="from" value="" aria-label="Başlangıç">
+  <input class="field__input" type="date" name="to" value="" aria-label="Bitiş">
+  <button class="button" type="submit">Filtrele</button>
+</form>
+
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">Kanıt kayıtları <span class="muted">(33)</span></h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Tür</th><th>Zaman</th><th>Sunucu</th><th>Konu</th><th>Kişi</th><th>SHA-256</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">33</a></td>
+      <td>Denetim kaydı</td>
+      <td>24.11.2026 09:57</td>
+      <td></td>
+      <td>Uyum raporu dışa aktarıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="e32651a58021adc471c0903ca816149af32d9661563240e7329b3bc0b482d98a">e32651a58021</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">32</a></td>
+      <td>Denetim kaydı</td>
+      <td>24.11.2026 09:57</td>
+      <td></td>
+      <td>Uyum raporu dışa aktarıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="654d0c1b5fbc8bff25e7a20ebedefd4a844769f01c8a4542cadbedf20992ed41">654d0c1b5fbc</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">31</a></td>
+      <td>Denetim kaydı</td>
+      <td>24.11.2026 09:57</td>
+      <td></td>
+      <td>Uyum raporu dışa aktarıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="fde34461b2c53f80a61bf93b95acb2305611d53be13409bbb0a3b3bd540a03bf">fde34461b2c5</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">30</a></td>
+      <td>Denetim kaydı</td>
+      <td>24.11.2026 09:57</td>
+      <td></td>
+      <td>Uyum raporu dışa aktarıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="dae2d804f1a5663194b554b3af93d2af87b24a1a44f24e07bee6b854290f5388">dae2d804f1a5</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">29</a></td>
+      <td>Denetim kaydı</td>
+      <td>24.11.2026 09:57</td>
+      <td></td>
+      <td>Uyum raporu dışa aktarıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="c05a60143c2b4bceb13379ec912ebf87756615c6ca32e72dbd3e8217e01a7917">c05a60143c2b</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">28</a></td>
+      <td>Denetim kaydı</td>
+      <td>24.11.2026 09:57</td>
+      <td></td>
+      <td>Uyum raporu dışa aktarıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="be7db49f3484c11c1b7006305803738e7a2bf47c8699a8ada1465d8f51512f18">be7db49f3484</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">27</a></td>
+      <td>Denetim kaydı</td>
+      <td>24.11.2026 09:57</td>
+      <td></td>
+      <td>Giriş yapıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="577d95beb2e0ac190e9dad33653f214281f7c1b6de09dac4ca436659bfe715b8">577d95beb2e0</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">25</a></td>
+      <td>Yedekleme</td>
+      <td>24.11.2026 09:57</td>
+      <td></td>
+      <td><span class="mono">database</span> <span class="muted">succeeded</span></td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="0cf151c14e0cb1c7553212b847959956ff18f4ae30db8732eb26905c09edd67b">0cf151c14e0c</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">26</a></td>
+      <td>Günlük envanter</td>
+      <td>24.11.2026 02:59</td>
+      <td></td>
+      <td><span class="mono">2026-11-23</span></td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="17cca43b70ac20d25912e2a01e8c34e54358bbbc6da445579ec65caf84cd71c9">17cca43b70ac</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">24</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:42</td>
+      <td></td>
+      <td>Uyum raporu dışa aktarıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="c38cddb904ef6776939796539341800d54cdfe4788d3c0a8adcc5acb8656ae5c">c38cddb904ef</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">23</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:40</td>
+      <td></td>
+      <td>Uyum raporu dışa aktarıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="8ec12a9ce6d03d101928b4c8ca7c74a47fd8cba958bf6251617031281f59cf65">8ec12a9ce6d0</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">22</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:38</td>
+      <td></td>
+      <td>Giriş yapıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="17fc46981162507229c25b7f7be00a98657e488b0e27ba2b15b189dd80bcf499">17fc46981162</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">21</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:38</td>
+      <td></td>
+      <td>Uyum raporu oluşturuldu</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="92166ccd0b18ba921db6be9a6960ef07082024404dbe0cb66450051fe733a2d4">92166ccd0b18</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">20</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:38</td>
+      <td></td>
+      <td>Manuel kanıt eklendi</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="04ebfbeaac702a7445558ec639fc2a9d99fd9ebddc9034fc3b0a5bbba93dfe9c">04ebfbeaac70</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-18.html">18</a></td>
+      <td>Manuel kanıt</td>
+      <td>23.11.2026 21:38</td>
+      <td></td>
+      <td><span class="mono">Bilgi güvenliği politikası v4</span></td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="98342fc929f3e65a31558043a8782132243ccaa1ba2f2b8cf38785a69fec3654">98342fc929f3</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">19</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:38</td>
+      <td></td>
+      <td>Giriş yapıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="98e7bd060834e1708191897bf9fbf7a991bc4014da97b83f3bdd1f16e69b5611">98e7bd060834</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-17.html">17</a></td>
+      <td>Yedekleme</td>
+      <td>23.11.2026 21:10</td>
+      <td></td>
+      <td><span class="mono">database</span> <span class="muted">succeeded</span></td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="d7832c1d957181421047d20f9984b19675ac66fb26a2736113e7534772c5b8e4">d7832c1d9571</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-16.html">16</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Güncelleme işi başlatıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="b31abbfa8eddf6470f602069858d9d1047ab283fc3339560c350a3d653a6e8b6">b31abbfa8edd</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-15.html">15</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Zamanlama oluşturuldu</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="15f2a42755c84dbf1c5e12595f07cecd5bbc9dac28270791206e9c17cfe494c3">15f2a42755c8</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-14.html">14</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Gruba sunucu eklendi</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="1270b957d7cb917b8b4bfe55cf9b0b2bf5bd2d2ce586248877ad4e2b902ae357">1270b957d7cb</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-13.html">13</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Gruba sunucu eklendi</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="fdc733ba4e4ce5069a026d54be00a0317a4a34eef5aceed1a16af6fffff9fd06">fdc733ba4e4c</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-12.html">12</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Grup oluşturuldu</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="02cddc7a0d0cffd394937991bf2a293cc730f97b3ddfbc3b6cb2db917519198e">02cddc7a0d0c</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-11.html">11</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Grup oluşturuldu</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="4626b7b9d0cb960e6e985beca3ba03c5ef06fd231fe96e8ba1afa68bd1a46e25">4626b7b9d0cb</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">10</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Ajan kaydoldu</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="3155a4ad067890cac8b966642fad9d34f8f18fb6ee4423f09de05fb91a863a8e">3155a4ad0678</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">9</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Ajan kaydoldu</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="c28848a82ad75cb8ebe689bc25ac18b06e069725aa9c5aefab8b5667fac87618">c28848a82ad7</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">8</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Ajan kaydoldu</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="579edafe240842d1e7113435f3ae91df75a2bd225bb6e1325bda293674ce9521">579edafe2408</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">7</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Ajan kaydoldu</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="ee1869c36dfb666bb99b10eb6c1328925840d8e8b1d88dcdc5bf1a6bf6a56919">ee1869c36dfb</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">6</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Ajan kaydoldu</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="67fdba22849249f370c772fb1ddb26e781b4486c581c8c1f91178316aa1bd4e4">67fdba228492</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">5</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Ajan kaydoldu</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="d0568112ce0edffb876778c144f9f26cda7526e713e2fbafaa95f2d665e2ed6c">d0568112ce0e</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">4</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Kayıt anahtarı oluşturuldu</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="a1688df1a4d7c07200c091cf7e6727bc98228a535312eea3a55d6968bc82ad23">a1688df1a4d7</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">3</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>Giriş yapıldı</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="379c105a045024010ad11132f84acafe0a6549da397655ee67312501c3bebc24">379c105a0450</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">1</a></td>
+      <td>Değişiklik işi</td>
+      <td>23.11.2026 21:09</td>
+      <td>web-02<div class="cell-sub">Linux</div></td>
+      <td>Güncelleme önizlemesi <span class="muted">· Başarılı</span></td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="1f15e54df9cd1853fa262552a9ad961320131383f38f40bd619f21d205bca4d2">1f15e54df9cd</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">2</a></td>
+      <td>Denetim kaydı</td>
+      <td>23.11.2026 21:09</td>
+      <td></td>
+      <td>İlk yönetici oluşturuldu</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="82a511193b40bc42079edbe4b4fae261322baff1bdfa3370ab1ec3bd5acc3869">82a511193b40</td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+<p class="pager__info pager__info--single">Toplam 33 kayıt</p>
+
+
+<form class="form" method="post" action="#" id="manual">
+  <input type="hidden" name="_csrf" value="demo">
+  <section class="panel">
+    <h2 class="panel__title">Manuel kanıt ekle</h2>
+    <p class="muted">Politika ve süreç belgeleri gibi otomatik toplanamayan kanıtları kaydedin. Belgenin kendisi değil, adı, tarihi ve nerede bulunduğu saklanır.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Belge adı</span>
+        <input class="field__input" type="text" name="title" maxlength="200" required placeholder="Örn. Yama yönetimi prosedürü v3"></label>
+      <label class="field"><span class="field__label">Belge tarihi</span>
+        <input class="field__input" type="date" name="date" value="2026-11-24" max="2026-11-24"></label>
+    </div>
+    <label class="field"><span class="field__label">Konum veya referans</span>
+      <input class="field__input" type="text" name="reference" maxlength="500" placeholder="Örn. DMS-2026-114 veya https://intranet.example.test/politikalar">
+      <span class="field__hint">Denetçinin belgeyi bulabileceği yer: belge yönetim numarası, adres veya dosya yolu.</span></label>
+    <label class="field"><span class="field__label">Açıklama</span>
+      <textarea class="field__input" name="description" rows="3" maxlength="2000"></textarea></label>
+    <label class="field"><span class="field__label">Eşlenen kontroller</span>
+      <select class="field__input" name="controls" multiple size="10" required>
+        <option value="isms:ISMS-01">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-01 Varlık envanteri</option><option value="isms:ISMS-02">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-02 Teknik güvenlik açıklarının yönetimi</option><option value="isms:ISMS-03">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-03 Yapılandırma yönetimi</option><option value="isms:ISMS-04">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-04 İşletimdeki sistemlerde yazılım değişiklikleri</option><option value="isms:ISMS-05">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-05 Değişiklik yönetimi</option><option value="isms:ISMS-06">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-06 Kayıt tutma</option><option value="isms:ISMS-07">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-07 İzleme faaliyetleri</option><option value="isms:ISMS-08">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-08 Bilgi yedekleme</option><option value="isms:ISMS-09">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-09 Güvenli kimlik doğrulama ve ayrıcalıklı erişim</option><option value="isms:ISMS-10">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-10 Sistem yaşam döngüsü</option><option value="isms:ISMS-11">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-11 Risk işleme</option><option value="isms:ISMS-12">Bilgi Güvenliği Yönetimi Denetimleri · ISMS-12 Politikalar ve prosedürler</option><option value="baseline:BASE-01">BT Temel Koruma Denetimleri · BASE-01 Yama ve değişiklik yönetimi</option><option value="baseline:BASE-02">BT Temel Koruma Denetimleri · BASE-02 Güvenlik güncellemelerinin zamanında uygulanması</option><option value="baseline:BASE-03">BT Temel Koruma Denetimleri · BASE-03 Linux sunucular</option><option value="baseline:BASE-04">BT Temel Koruma Denetimleri · BASE-04 Windows sunucular</option><option value="baseline:BASE-05">BT Temel Koruma Denetimleri · BASE-05 Windows istemciler</option><option value="baseline:BASE-06">BT Temel Koruma Denetimleri · BASE-06 Düzenli BT yönetimi ve envanter</option><option value="baseline:BASE-07">BT Temel Koruma Denetimleri · BASE-07 Kayıt tutma</option><option value="baseline:BASE-08">BT Temel Koruma Denetimleri · BASE-08 Veri yedekleme</option><option value="baseline:BASE-09">BT Temel Koruma Denetimleri · BASE-09 Kimlik ve yetki yönetimi</option><option value="baseline:BASE-10">BT Temel Koruma Denetimleri · BASE-10 Güvenlik olaylarının tespiti</option><option value="baseline:BASE-11">BT Temel Koruma Denetimleri · BASE-11 Yapılandırma standartları</option><option value="baseline:BASE-12">BT Temel Koruma Denetimleri · BASE-12 Belgelenmiş yama ve değişiklik konsepti</option><option value="itsm:ITSM-01">BT Hizmet Yönetimi Değerlendirmeleri · ITSM-01 Değişiklik etkinleştirme</option><option value="itsm:ITSM-02">BT Hizmet Yönetimi Değerlendirmeleri · ITSM-02 Sürüm ve dağıtım yönetimi</option><option value="itsm:ITSM-03">BT Hizmet Yönetimi Değerlendirmeleri · ITSM-03 Hizmet yapılandırma yönetimi</option><option value="itsm:ITSM-04">BT Hizmet Yönetimi Değerlendirmeleri · ITSM-04 BT varlık yönetimi</option><option value="itsm:ITSM-05">BT Hizmet Yönetimi Değerlendirmeleri · ITSM-05 İzleme ve olay yönetimi</option><option value="itsm:ITSM-06">BT Hizmet Yönetimi Değerlendirmeleri · ITSM-06 Bilgi güvenliği yönetimi</option><option value="itsm:ITSM-07">BT Hizmet Yönetimi Değerlendirmeleri · ITSM-07 Hizmet seviyesi yönetimi</option><option value="itsm:ITSM-08">BT Hizmet Yönetimi Değerlendirmeleri · ITSM-08 Olay ve sorun yönetimi süreci</option><option value="general:GEN-01">Genel Güvenlik ve Yama Uyumu · GEN-01 Açıklar hedef sürede gideriliyor</option><option value="general:GEN-02">Genel Güvenlik ve Yama Uyumu · GEN-02 Süresi geçmiş istismar edilen açık yok</option><option value="general:GEN-03">Genel Güvenlik ve Yama Uyumu · GEN-03 Güvenlik güncellemesi güncelliği</option><option value="general:GEN-04">Genel Güvenlik ve Yama Uyumu · GEN-04 Güncelleme işlerinin başarısı</option><option value="general:GEN-05">Genel Güvenlik ve Yama Uyumu · GEN-05 Desteği biten işletim sistemi yok</option><option value="general:GEN-06">Genel Güvenlik ve Yama Uyumu · GEN-06 Ajan erişim kapsamı</option><option value="general:GEN-07">Genel Güvenlik ve Yama Uyumu · GEN-07 Bekleyen yeniden başlatmalar</option><option value="general:GEN-08">Genel Güvenlik ve Yama Uyumu · GEN-08 Kabul edilen riskler</option><option value="general:GEN-09">Genel Güvenlik ve Yama Uyumu · GEN-09 Yöneticilerde çok faktörlü doğrulama</option><option value="general:GEN-10">Genel Güvenlik ve Yama Uyumu · GEN-10 Günlük yedekleme</option><option value="general:GEN-11">Genel Güvenlik ve Yama Uyumu · GEN-11 Kanıt zinciri bütünlüğü</option><option value="general:GEN-12">Genel Güvenlik ve Yama Uyumu · GEN-12 Sürekli izleme</option>
+      </select>
+      <span class="field__hint">Birden fazla seçmek için Ctrl (Mac&#39;te Cmd) tuşunu basılı tutun.</span></label>
+  </section>
+  <div><button class="button button--primary" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-plus"></use></svg>Kanıtı kaydet</button></div>
+</form>
+
+
+  </main>
+</div>
+
+</body>
+</html>

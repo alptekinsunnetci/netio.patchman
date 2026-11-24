@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Uyum Politikaları · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-policies.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Uyum Politikaları</h1>
+    <p class="pagehead__sub">Etkin değerlendirme çerçeveleri, otomatik kontrollerin eşikleri, kontrol uygulanabilirliği ve sunucu standartları.</p>
+  </div>
+</header>
+<nav class="tabs" aria-label="Uyum Politikaları">
+  <a class="tab" href="compliance-policies.html">Çerçeveler ve eşikler</a>
+  <a class="tab is-active" href="compliance-policies--tab-controls.html">Kontrol uygulanabilirliği</a>
+  <a class="tab" href="standards.html">Sunucu Standartları</a>
+</nav>
+
+
+
+
+
+<p class="muted">Kuruluşunuzda uygulanmayan bir kontrolü gerekçesiyle kapsam dışı bırakın. Gerekçe raporlarda kontrolün yanında gösterilir.</p>
+
+<form class="form" method="post" action="#" id="p-isms">
+  <input type="hidden" name="_csrf" value="demo"><input type="hidden" name="profile" value="isms">
+  <fieldset class="fieldset">
+  <section class="panel panel--flush">
+    <div class="panel__head"><h2 class="panel__title">Bilgi Güvenliği Yönetimi Denetimleri <span class="muted mono">isms@1</span></h2></div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Kontrol</th><th>Ölçümler</th><th>Uygulanır</th><th>Gerekçe</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><strong class="mono">ISMS-01</strong> Varlık envanteri<div class="cell-sub">Yönetilen sunucu ve istemcilerin güncel, eksiksiz envanteri ve düzenli raporlaması.</div></td>
+        <td class="cell-sub"><div>Envanter bütünlüğü · Birincil</div><div>Ajan erişim kapsamı · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-01" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-01" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-02</strong> Teknik güvenlik açıklarının yönetimi<div class="cell-sub">Açıkların tespiti, hedef sürelerde giderilmesi ve istismar edilen açıkların önceliklendirilmesi.</div></td>
+        <td class="cell-sub"><div>Düzeltme süresi (SLA) · Birincil</div><div>İstismar edilen açıklar · Birincil</div><div>Güncelleme işleri · Destekleyici</div><div>Güvenlik güncellemesi güncelliği · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-02" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-02" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-03</strong> Yapılandırma yönetimi<div class="cell-sub">Tanımlı sunucu standartlarına uyum ve sapmaların izlenmesi.</div></td>
+        <td class="cell-sub"><div>Yapılandırma standartları · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-03" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-03" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-04</strong> İşletimdeki sistemlerde yazılım değişiklikleri<div class="cell-sub">Sistemlerdeki kurulum ve güncellemelerin kayıtlı ve onaylı yapılması.</div></td>
+        <td class="cell-sub"><div>Değişiklik kaydı · Birincil</div><div>Değişiklik onayı · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-04" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-04" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-05</strong> Değişiklik yönetimi<div class="cell-sub">Değişikliklerin planlanması, onaylanması, uygulanması ve sonuçlarının izlenmesi.</div></td>
+        <td class="cell-sub"><div>Değişiklik kaydı · Birincil</div><div>Değişiklik onayı · Birincil</div><div>Güncelleme işleri · Destekleyici</div><div>Süreç belgesi</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-05" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-05" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-06</strong> Kayıt tutma<div class="cell-sub">Kullanıcı ve sistem işlemlerinin değiştirilemez biçimde kaydedilmesi.</div></td>
+        <td class="cell-sub"><div>Kayıt bütünlüğü · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-06" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-06" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-07</strong> İzleme faaliyetleri<div class="cell-sub">Sistemlerin kaynak ve sağlık durumunun sürekli izlenmesi.</div></td>
+        <td class="cell-sub"><div>Sürekli izleme · Birincil</div><div>Ajan erişim kapsamı · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-07" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-07" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-08</strong> Bilgi yedekleme<div class="cell-sub">Yönetim verilerinin düzenli ve başarılı yedeklenmesi.</div></td>
+        <td class="cell-sub"><div>Yedekleme · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-08" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-08" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-09</strong> Güvenli kimlik doğrulama ve ayrıcalıklı erişim<div class="cell-sub">Yönetici hesaplarında çok faktörlü doğrulama ve erişim değişikliklerinin izlenmesi.</div></td>
+        <td class="cell-sub"><div>Çok faktörlü doğrulama · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-09" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-09" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-10</strong> Sistem yaşam döngüsü<div class="cell-sub">Desteği biten işletim sistemlerinin tespit edilmesi ve yenilenmesi.</div></td>
+        <td class="cell-sub"><div>Desteği biten sistemler · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-10" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-10" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-11</strong> Risk işleme<div class="cell-sub">Kabul edilen risklerin gerekçeli, süreli ve izlenebilir olması.</div></td>
+        <td class="cell-sub"><div>Kabul edilen riskler · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-11" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-11" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-12</strong> Politikalar ve prosedürler<div class="cell-sub">Bilgi güvenliği politikası ve ilgili prosedürlerin belgelenmesi (manuel kanıt).</div></td>
+        <td class="cell-sub"><div>Politika belgesi</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-12" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-12" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <div><button class="button button--primary" type="submit">Kaydet</button></div>
+  </fieldset>
+</form>
+
+<form class="form" method="post" action="#" id="p-baseline">
+  <input type="hidden" name="_csrf" value="demo"><input type="hidden" name="profile" value="baseline">
+  <fieldset class="fieldset">
+  <section class="panel panel--flush">
+    <div class="panel__head"><h2 class="panel__title">BT Temel Koruma Denetimleri <span class="muted mono">baseline@1</span></h2></div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Kontrol</th><th>Ölçümler</th><th>Uygulanır</th><th>Gerekçe</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><strong class="mono">BASE-01</strong> Yama ve değişiklik yönetimi<div class="cell-sub">Güncellemelerin bir süreç içinde uygulanması ve her değişikliğin kaydı.</div></td>
+        <td class="cell-sub"><div>Güncelleme işleri · Birincil</div><div>Değişiklik kaydı · Birincil</div><div>Süreç belgesi</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-01" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-01" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-02</strong> Güvenlik güncellemelerinin zamanında uygulanması<div class="cell-sub">Güvenlik güncellemelerinin hedef sürelerde, istismar edilen açıklarda öncelikli uygulanması.</div></td>
+        <td class="cell-sub"><div>Düzeltme süresi (SLA) · Birincil</div><div>İstismar edilen açıklar · Birincil</div><div>Güvenlik güncellemesi güncelliği · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-02" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-02" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-03</strong> Linux sunucular<div class="cell-sub">Linux sunucularda güncel güvenlik yamaları, desteklenen sürümler ve bekleyen yeniden başlatmalar.</div></td>
+        <td class="cell-sub"><div>Güvenlik güncellemesi güncelliği (Linux) · Birincil</div><div>Desteği biten sistemler (Linux) · Birincil</div><div>Bekleyen yeniden başlatmalar (Linux) · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-03" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-03" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-04</strong> Windows sunucular<div class="cell-sub">Windows Server sistemlerinde güncel güvenlik güncellemeleri, desteklenen sürümler ve bekleyen yeniden başlatmalar.</div></td>
+        <td class="cell-sub"><div>Güvenlik güncellemesi güncelliği (Windows Server) · Birincil</div><div>Desteği biten sistemler (Windows Server) · Birincil</div><div>Bekleyen yeniden başlatmalar (Windows Server) · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-04" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-04" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-05</strong> Windows istemciler<div class="cell-sub">Windows 10 ve Windows 11 istemcilerde güncel güvenlik güncellemeleri, desteklenen sürümler ve bekleyen yeniden başlatmalar.</div></td>
+        <td class="cell-sub"><div>Güvenlik güncellemesi güncelliği (Windows 10, Windows 11, Diğer Windows) · Birincil</div><div>Desteği biten sistemler (Windows 10, Windows 11, Diğer Windows) · Birincil</div><div>Bekleyen yeniden başlatmalar (Windows 10, Windows 11, Diğer Windows) · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-05" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-05" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-06</strong> Düzenli BT yönetimi ve envanter<div class="cell-sub">Tüm sistemlerin envanterde olması ve yönetim aracına düzenli bağlanması.</div></td>
+        <td class="cell-sub"><div>Envanter bütünlüğü · Birincil</div><div>Ajan erişim kapsamı · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-06" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-06" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-07</strong> Kayıt tutma<div class="cell-sub">Yönetim işlemlerinin bütünlüğü korunarak kaydedilmesi.</div></td>
+        <td class="cell-sub"><div>Kayıt bütünlüğü · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-07" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-07" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-08</strong> Veri yedekleme<div class="cell-sub">Yönetim verilerinin her gün yedeklenmesi.</div></td>
+        <td class="cell-sub"><div>Yedekleme · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-08" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-08" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-09</strong> Kimlik ve yetki yönetimi<div class="cell-sub">Yönetici erişiminde çok faktörlü doğrulama.</div></td>
+        <td class="cell-sub"><div>Çok faktörlü doğrulama · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-09" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-09" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-10</strong> Güvenlik olaylarının tespiti<div class="cell-sub">Kaynak ve sağlık izlemesi ile istismar edilen açıkların tespiti.</div></td>
+        <td class="cell-sub"><div>Sürekli izleme · Birincil</div><div>İstismar edilen açıklar · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-10" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-10" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-11</strong> Yapılandırma standartları<div class="cell-sub">Sunucuların tanımlı standartlara uyması.</div></td>
+        <td class="cell-sub"><div>Yapılandırma standartları · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-11" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-11" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-12</strong> Belgelenmiş yama ve değişiklik konsepti<div class="cell-sub">Yama ve değişiklik sürecinin yazılı olarak tanımlanması (manuel kanıt).</div></td>
+        <td class="cell-sub"><div>Süreç belgesi</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-12" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-12" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <div><button class="button button--primary" type="submit">Kaydet</button></div>
+  </fieldset>
+</form>
+
+<form class="form" method="post" action="#" id="p-itsm">
+  <input type="hidden" name="_csrf" value="demo"><input type="hidden" name="profile" value="itsm">
+  <fieldset class="fieldset">
+  <section class="panel panel--flush">
+    <div class="panel__head"><h2 class="panel__title">BT Hizmet Yönetimi Değerlendirmeleri <span class="muted mono">itsm@1</span></h2></div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Kontrol</th><th>Ölçümler</th><th>Uygulanır</th><th>Gerekçe</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><strong class="mono">ITSM-01</strong> Değişiklik etkinleştirme<div class="cell-sub">Değişikliklerin kaydı, onayı ve planlı uygulanması.</div></td>
+        <td class="cell-sub"><div>Değişiklik kaydı · Birincil</div><div>Değişiklik onayı · Birincil</div><div>Güncelleme işleri · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-01" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-01" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-02</strong> Sürüm ve dağıtım yönetimi<div class="cell-sub">Güncellemelerin dağıtımı ve başarı oranı.</div></td>
+        <td class="cell-sub"><div>Güncelleme işleri · Birincil</div><div>Bekleyen yeniden başlatmalar · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-02" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-02" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-03</strong> Hizmet yapılandırma yönetimi<div class="cell-sub">Yapılandırma öğelerinin envanteri ve standartlara uyumu.</div></td>
+        <td class="cell-sub"><div>Envanter bütünlüğü · Birincil</div><div>Yapılandırma standartları · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-03" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-03" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-04</strong> BT varlık yönetimi<div class="cell-sub">Varlıkların envanteri ve yaşam döngüsü.</div></td>
+        <td class="cell-sub"><div>Envanter bütünlüğü · Birincil</div><div>Desteği biten sistemler · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-04" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-04" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-05</strong> İzleme ve olay yönetimi<div class="cell-sub">Sistemlerin sürekli izlenmesi ve erişilebilirliği.</div></td>
+        <td class="cell-sub"><div>Sürekli izleme · Birincil</div><div>Ajan erişim kapsamı · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-05" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-05" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-06</strong> Bilgi güvenliği yönetimi<div class="cell-sub">Açıkların giderilmesi ve erişim güvenliği.</div></td>
+        <td class="cell-sub"><div>Düzeltme süresi (SLA) · Birincil</div><div>İstismar edilen açıklar · Birincil</div><div>Çok faktörlü doğrulama · Destekleyici</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-06" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-06" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-07</strong> Hizmet seviyesi yönetimi<div class="cell-sub">Güvenlik güncellemelerinde tanımlı hizmet seviyelerine (SLA) uyum.</div></td>
+        <td class="cell-sub"><div>Düzeltme süresi (SLA) · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-07" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-07" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-08</strong> Olay ve sorun yönetimi süreci<div class="cell-sub">Olay ve sorun yönetimi sürecinin belgelenmesi (manuel kanıt).</div></td>
+        <td class="cell-sub"><div>Süreç belgesi</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-08" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-08" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <div><button class="button button--primary" type="submit">Kaydet</button></div>
+  </fieldset>
+</form>
+
+<form class="form" method="post" action="#" id="p-general">
+  <input type="hidden" name="_csrf" value="demo"><input type="hidden" name="profile" value="general">
+  <fieldset class="fieldset">
+  <section class="panel panel--flush">
+    <div class="panel__head"><h2 class="panel__title">Genel Güvenlik ve Yama Uyumu <span class="muted mono">general@1</span></h2></div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Kontrol</th><th>Ölçümler</th><th>Uygulanır</th><th>Gerekçe</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><strong class="mono">GEN-01</strong> Açıklar hedef sürede gideriliyor<div class="cell-sub">Güvenlik açıklarının önem derecesine göre tanımlı sürelerde giderilmesi.</div></td>
+        <td class="cell-sub"><div>Düzeltme süresi (SLA) · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-01" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-01" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-02</strong> Süresi geçmiş istismar edilen açık yok<div class="cell-sub">CISA KEV listesindeki açıkların son tarihinden önce giderilmesi.</div></td>
+        <td class="cell-sub"><div>İstismar edilen açıklar · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-02" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-02" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-03</strong> Güvenlik güncellemesi güncelliği<div class="cell-sub">Bekleyen güvenlik güncellemesi olmayan sistemlerin oranı.</div></td>
+        <td class="cell-sub"><div>Güvenlik güncellemesi güncelliği · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-03" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-03" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-04</strong> Güncelleme işlerinin başarısı<div class="cell-sub">Güncelleme işlerinin başarısızlık oranı.</div></td>
+        <td class="cell-sub"><div>Güncelleme işleri · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-04" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-04" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-05</strong> Desteği biten işletim sistemi yok<div class="cell-sub">Üretici desteği biten işletim sistemlerinin bulunmaması.</div></td>
+        <td class="cell-sub"><div>Desteği biten sistemler · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-05" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-05" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-06</strong> Ajan erişim kapsamı<div class="cell-sub">Sistemlerin dönem boyunca düzenli bağlanması.</div></td>
+        <td class="cell-sub"><div>Ajan erişim kapsamı · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-06" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-06" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-07</strong> Bekleyen yeniden başlatmalar<div class="cell-sub">Güncellemeden sonra uzun süre yeniden başlatılmayan sistem bulunmaması.</div></td>
+        <td class="cell-sub"><div>Bekleyen yeniden başlatmalar · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-07" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-07" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-08</strong> Kabul edilen riskler<div class="cell-sub">Kabul edilen risklerin süreli ve gerekçeli olması.</div></td>
+        <td class="cell-sub"><div>Kabul edilen riskler · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-08" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-08" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-09</strong> Yöneticilerde çok faktörlü doğrulama<div class="cell-sub">Tüm yönetici hesaplarında çok faktörlü doğrulama.</div></td>
+        <td class="cell-sub"><div>Çok faktörlü doğrulama · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-09" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-09" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-10</strong> Günlük yedekleme<div class="cell-sub">Yönetim veritabanının her gün yedeklenmesi.</div></td>
+        <td class="cell-sub"><div>Yedekleme · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-10" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-10" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-11</strong> Kanıt zinciri bütünlüğü<div class="cell-sub">Kanıt kayıtlarının değiştirilmediğinin hash zinciriyle doğrulanması.</div></td>
+        <td class="cell-sub"><div>Kayıt bütünlüğü · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-11" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-11" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-12</strong> Sürekli izleme<div class="cell-sub">Sistemlerin kaynak kullanımının sürekli izlenmesi.</div></td>
+        <td class="cell-sub"><div>Sürekli izleme · Birincil</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-12" value="1" checked> Uygulanır</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-12" value="" maxlength="1000" aria-label="Gerekçe">
+          </td>
+      </tr>
+      
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <div><button class="button button--primary" type="submit">Kaydet</button></div>
+  </fieldset>
+</form>
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

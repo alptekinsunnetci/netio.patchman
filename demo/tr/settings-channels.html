@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Bildirim kanalları · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="settings.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="settings.html">Sistem Ayarları</a> / <span>Bildirim kanalları</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Bildirim kanalları</h1>
+    <p class="pagehead__sub">Bildirimleri Slack, Microsoft Teams, Telegram veya kendi sisteminize (webhook) de gönderin.</p>
+  </div>
+</header>
+<nav class="tabs settings-tabs" aria-label="Sistem Ayarları">
+  <a class="tab" href="settings.html">Genel</a>
+  <a class="tab" href="#demo-unavailable">Sunucu yapılandırması</a>
+  <a class="tab is-active" href="settings-channels.html">Bildirim kanalları</a>
+  <a class="tab" href="settings-health.html">Sağlık kontrolleri</a>
+  <a class="tab" href="settings-score.html">Güvenlik skoru ağırlıkları</a>
+</nav>
+
+<section class="panel panel--flush">
+  <div class="empty"><p class="empty__body">Henüz bildirim kanalı yok.</p></div>
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">Kanal ekle</h2>
+  <form class="form" method="post" action="#">
+    <input type="hidden" name="_csrf" value="demo">
+    <div class="daypicker">
+      <label class="check-label"><input type="radio" name="type" value="slack" checked> Slack</label><label class="check-label"><input type="radio" name="type" value="teams"> Microsoft Teams</label><label class="check-label"><input type="radio" name="type" value="telegram"> Telegram</label><label class="check-label"><input type="radio" name="type" value="webhook"> Webhook (JSON)</label><label class="check-label"><input type="radio" name="type" value="jira"> Jira</label><label class="check-label"><input type="radio" name="type" value="servicenow"> ServiceNow</label><label class="check-label"><input type="radio" name="type" value="glpi"> GLPI</label><label class="check-label"><input type="radio" name="type" value="zabbix"> Zabbix (trapper)</label>
+    </div>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Kanal adı</span>
+        <input class="field__input" type="text" name="name" value="" maxlength="60" required placeholder="Örneğin NOC Slack kanalı"></label>
+      <label class="field"><span class="field__label">En düşük seviye</span>
+        <select class="field__input" name="min_level"><option value="info">Bilgi</option><option value="warning" selected>Uyarı</option><option value="critical">Kritik</option></select>
+        <span class="field__hint">Bu seviyenin altındaki bildirimler bu kanala gönderilmez.</span></label>
+    </div>
+    <div data-show-when="type=slack|teams|webhook">
+      <label class="field"><span class="field__label">Webhook adresi</span>
+        <input class="field__input mono" type="url" name="url" autocomplete="off" placeholder="https://…"></label>
+      <p class="field__hint" data-show-when="type=slack">Slack&#39;te Apps → Incoming Webhooks ile kanal için bir adres oluşturun (https://hooks.slack.com/services/…).</p><p class="field__hint" data-show-when="type=teams">Teams kanalında Workflows → &#34;Post to a channel when a webhook request is received&#34; şablonuyla bir adres oluşturun. Mesajlar Adaptive Card olarak gönderilir.</p><p class="field__hint" data-show-when="type=webhook">Her bildirim JSON olarak POST edilir (event, kind, level, title, text, url, params, created_at). HTTP de kabul edilir; iç ağ dışında HTTPS kullanın.</p>
+    </div>
+    <div data-show-when="type=webhook">
+      <label class="field"><span class="field__label">İmza anahtarı (isteğe bağlı)</span>
+        <input class="field__input mono" type="text" name="secret" maxlength="200" autocomplete="off">
+        <span class="field__hint">Girilirse istek gövdesinin HMAC-SHA256 imzası X-Netio-Patchman-Signature: sha256=&lt;hex&gt; başlığıyla, &#34;&lt;zaman&gt;.&lt;gövde&gt;&#34; imzası X-Netio-Patchman-Signature-V2: t=&lt;zaman&gt;,sha256=&lt;hex&gt; başlığıyla gönderilir. V2 ile eski teslimatların tekrar gönderilmesi reddedilebilir.</span></label>
+    </div>
+    <div data-show-when="type=telegram" class="form-grid">
+      <label class="field"><span class="field__label">Bot anahtarı</span>
+        <input class="field__input mono" type="text" name="bot_token" autocomplete="off" placeholder="123456789:AA…"></label>
+      <label class="field"><span class="field__label">Sohbet kimliği</span>
+        <input class="field__input mono" type="text" name="chat_id" value="" autocomplete="off" placeholder="-1001234567890"></label>
+      <p class="field__hint">@BotFather ile bir bot oluşturun ve botu gruba ekleyin. Sohbet kimliği grup için eksi işaretiyle başlar (-100…) veya kanal adı olabilir (@kanal_adi).</p>
+    </div>
+    <div data-show-when="type=jira|servicenow|glpi">
+      <label class="field"><span class="field__label">Sunucu adresi</span>
+        <input class="field__input mono" type="url" name="ticket_url" autocomplete="off" placeholder="https://…"></label>
+      <p class="field__hint" data-show-when="type=jira">Her bildirim için REST API v2 ile bir kayıt açılır (/rest/api/2/issue). Jira Cloud&#39;da kullanıcı e-posta adresi ve API anahtarı, Jira Server&#39;da kullanıcı adı ve kişisel erişim anahtarı kullanılır.</p><p class="field__hint" data-show-when="type=servicenow">Her bildirim Table API ile bir kayıt olarak eklenir (/api/now/table/&lt;tablo&gt;, varsayılan incident). Kullanıcının bu tabloya yazma yetkisi olmalıdır.</p><p class="field__hint" data-show-when="type=glpi">Adres GLPI REST API kök adresidir (…/apirest.php). Anahtar alanına kullanıcının API anahtarı (user_token), uygulama anahtarına API istemcisinin App-Token değeri girilir. Her bildirim bir talep (Ticket) açar.</p>
+      <div class="form-grid">
+        <label class="field" data-show-when="type=jira|servicenow"><span class="field__label">Kullanıcı</span><input class="field__input" type="text" name="user" value="" maxlength="200" autocomplete="off"></label>
+        <label class="field"><span class="field__label">Parola veya API anahtarı</span><input class="field__input mono" type="password" name="ticket_secret" maxlength="500" autocomplete="new-password"></label>
+        <label class="field" data-show-when="type=jira"><span class="field__label">Proje anahtarı</span><input class="field__input mono" type="text" name="project" value="" maxlength="50" placeholder="OPS"></label>
+        <label class="field" data-show-when="type=jira"><span class="field__label">Kayıt türü</span><input class="field__input" type="text" name="issue_type" value="" maxlength="50" placeholder="Task"></label>
+        <label class="field" data-show-when="type=servicenow"><span class="field__label">Tablo</span><input class="field__input mono" type="text" name="table" value="" maxlength="80" placeholder="incident"></label>
+        <label class="field" data-show-when="type=glpi"><span class="field__label">Uygulama anahtarı (App-Token)</span><input class="field__input mono" type="password" name="app_token" maxlength="200" autocomplete="new-password"></label>
+      </div>
+    </div>
+    <div data-show-when="type=zabbix" class="form-grid">
+      <label class="field"><span class="field__label">Zabbix sunucusu veya proxy (adres:port)</span><input class="field__input mono" type="text" name="zabbix_server" value="" maxlength="255" placeholder="zabbix.your-domain:10051"></label>
+      <label class="field"><span class="field__label">Zabbix host adı</span><input class="field__input mono" type="text" name="host" value="" maxlength="128"></label>
+      <label class="field"><span class="field__label">Öğe anahtarı</span><input class="field__input mono" type="text" name="key" value="" maxlength="255" placeholder="netio.patchman.event"></label>
+      <p class="field__hint">Bildirim, Zabbix sender protokolüyle bir trapper öğesinin değeri olarak JSON biçiminde gönderilir. Zabbix&#39;te bu sunucu adıyla bir host ve aynı anahtarla &#34;Zabbix trapper&#34; türünde metin öğesi oluşturun; tetikleyicileri bu değere göre yazabilirsiniz.</p>
+    </div>
+    <fieldset class="fieldset">
+      <legend>Olaylar</legend>
+      <div class="checklist"><label class="check-label"><input type="checkbox" name="events" value="critical_cve"> Kritik CVE</label><label class="check-label"><input type="checkbox" name="events" value="kev"> Aktif istismar edilen açık (KEV)</label><label class="check-label"><input type="checkbox" name="events" value="vuln"> Diğer yeni açıklar</label><label class="check-label"><input type="checkbox" name="events" value="eol"> EOL yaklaşan veya geçen yazılım</label><label class="check-label"><input type="checkbox" name="events" value="update_started"> Güncelleme başladı</label><label class="check-label"><input type="checkbox" name="events" value="update_succeeded"> Güncelleme başarılı</label><label class="check-label"><input type="checkbox" name="events" value="update_failed"> Güncelleme başarısız veya kısmi</label><label class="check-label"><input type="checkbox" name="events" value="rollback"> Geri dönüş yapıldı</label><label class="check-label"><input type="checkbox" name="events" value="reboot_required"> Yeniden başlatma gerekiyor</label><label class="check-label"><input type="checkbox" name="events" value="health_failed"> Sağlık kontrolü ve kaynak uyarıları</label><label class="check-label"><input type="checkbox" name="events" value="sla_overdue"> SLA süresi aşıldı</label><label class="check-label"><input type="checkbox" name="events" value="score_below"> Güvenlik puanı eşiğin altında</label><label class="check-label"><input type="checkbox" name="events" value="host_offline"> Sunucu çevrimdışı</label><label class="check-label"><input type="checkbox" name="events" value="drift"> Standart sapması</label><label class="check-label"><input type="checkbox" name="events" value="rollout"> Kademeli dağıtım durumu</label><label class="check-label"><input type="checkbox" name="events" value="software_changed"> Yazılım envanteri değişti</label><label class="check-label"><input type="checkbox" name="events" value="other"> Diğer bildirimler</label></div>
+      <p class="field__hint">Hiçbiri seçilmezse en düşük düzeyi geçen her bildirim gönderilir. Olay seçilirse düzeye bakılmaz, yalnızca seçilen olaylar gönderilir.</p>
+    </fieldset>
+    <p class="field__hint">Webhook adresi ve bot anahtarı gizli bilgidir; kaydedildikten sonra tam olarak gösterilmez. Değiştirmek için kanalı silip yeniden ekleyin.</p>
+    <div><button class="button button--primary" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-plus"></use></svg>Kanal ekle</button></div>
+  </form>
+</section>
+
+  </main>
+</div>
+
+</body>
+</html>

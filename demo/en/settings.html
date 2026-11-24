@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Settings · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="settings.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Settings</h1>
+    <p class="pagehead__sub">Notification, agent and scan settings</p>
+  </div>
+</header>
+<nav class="tabs settings-tabs" aria-label="Settings">
+  <a class="tab is-active" href="settings.html">General</a>
+  <a class="tab" href="#demo-unavailable">Server configuration</a>
+  <a class="tab" href="settings-channels.html">Notification channels</a>
+  <a class="tab" href="settings-health.html">Health checks</a>
+  <a class="tab" href="settings-score.html">Security score weights</a>
+</nav>
+<nav class="chips settings-jump" aria-label="Go to section">
+  <a class="chip" href="#email">Email</a><a class="chip" href="#agents">Agents</a><a class="chip" href="#scan">Scanning</a><a class="chip" href="#security">Security</a><a class="chip" href="#updates">Updates</a><a class="chip" href="#monitoring">Resource monitoring</a><a class="chip" href="#sla">Remediation times</a><a class="chip" href="#inventory">Inventory and EOL</a><a class="chip" href="#backup">Backup</a>
+</nav>
+
+<form class="form" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo">
+
+  <section class="panel" id="email">
+    <h2 class="panel__title">Email notifications</h2>
+    <p class="alert alert--warning">No SMTP server is configured. To send email, enter the SMTP server and sender address on the Server configuration page. <a href="#demo-unavailable">Server configuration</a></p>
+    <label class="check-label"><input type="checkbox" name="email_enabled" value="1" checked> Send email notifications</label>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Minimum severity</span>
+        <select class="field__input" name="email_min_severity"><option value="critical">Critical</option><option value="high" selected>High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+        <span class="field__hint">No email is sent for new vulnerabilities below this severity; they still appear in the notification center and lists.</span></label>
+      <label class="field"><span class="field__label">Digest threshold</span>
+        <input class="field__input" type="number" name="email_digest_threshold" min="1" max="1000" value="5">
+        <span class="field__hint">If a scan finds more new vulnerabilities than this, one digest is sent instead of an email for each.</span></label>
+    </div>
+    <label class="field"><span class="field__label">Recipients</span>
+      <textarea class="field__input field__input--area" name="email_recipients" rows="3" placeholder="security@your-domain"></textarea>
+      <span class="field__hint">One address per line. If empty, email goes to all active administrators.</span></label>
+    <label class="check-label"><input type="checkbox" name="email_kev_always" value="1" checked> Always email actively exploited vulnerabilities (CISA KEV), regardless of severity</label>
+    <label class="check-label"><input type="checkbox" name="email_agent_offline" value="1"> Email when an agent goes offline</label>
+    <label class="check-label"><input type="checkbox" name="email_job_failed" value="1" checked> Email when an update job fails or partially completes</label>
+    <label class="check-label"><input type="checkbox" name="email_server_update" value="1" checked> Email when a new netio.patchman version is released</label>
+  </section>
+
+  <section class="panel" id="agents">
+    <h2 class="panel__title">Agents</h2>
+    <label class="check-label"><input type="checkbox" name="agent_auto_update" value="1" checked> Update agents automatically</label>
+    <p class="field__hint">Agents running a version other than the one the server distributes download the new version on their next connection, verify its SHA-256 digest and restart. At most 25 agents update at once; a failed update is retried after 6 hours.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Check-in interval (seconds)</span>
+        <input class="field__input" type="number" name="agent_checkin_seconds" min="15" max="3600" value="60"></label>
+      <label class="field"><span class="field__label">Inventory interval (minutes)</span>
+        <input class="field__input" type="number" name="agent_report_minutes" min="5" max="1440" value="60"></label>
+      <label class="field"><span class="field__label">Offline after (minutes)</span>
+        <input class="field__input" type="number" name="agent_offline_minutes" min="2" max="10080" value="10"></label>
+    </div>
+  </section>
+
+  <section class="panel" id="scan">
+    <h2 class="panel__title">Vulnerability scanning</h2>
+    <label class="check-label"><input type="checkbox" name="scan_enabled" value="1" checked> Enable vulnerability scanning</label>
+    <p class="field__hint">Data sources: OSV.dev (distribution security advisories and CVE records), the Microsoft Security Update Guide (Windows), the CISA Known Exploited Vulnerabilities catalog and FIRST EPSS scores. The source addresses can be changed on the Server configuration page.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Retention (days)</span>
+        <input class="field__input" type="number" name="retention_days" min="7" max="3650" value="90">
+        <span class="field__hint">Resolved findings, finished jobs and notifications are deleted after this period.</span></label>
+    </div>
+  </section>
+
+  <section class="panel" id="security">
+    <h2 class="panel__title">Security</h2>
+    <label class="check-label"><input type="checkbox" name="auth_require_mfa" value="1"> Require two-factor authentication for all users</label>
+    <p class="field__hint">When on, users without an authenticator can only open their profile page until they set one up.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Longest risk acceptance (days)</span>
+        <input class="field__input" type="number" name="risk_max_days" min="0" max="3650" value="365">
+        <span class="field__hint">0 allows acceptance without expiry. Recommended: 365 or less.</span></label>
+    </div>
+  </section>
+
+  <section class="panel" id="updates">
+    <h2 class="panel__title">Updates</h2>
+    <label class="field"><span class="field__label">Packages not to update (all servers)</span>
+      <textarea class="field__input mono" name="update_exclude" rows="3" maxlength="4000"></textarea>
+      <span class="field__hint">Package names separated by commas, spaces or lines; * and ? allowed (e.g. kernel*, mysql-server, KB5034439). Group and server pages add their own lists. Every update job, from the dashboard, schedules or the API, skips these packages; their vulnerabilities are still shown.</span></label>
+    <label class="check-label"><input type="checkbox" name="require_preview" value="1" checked> For updates started on a server page, show a preview first and update after approval</label>
+    <p class="field__hint">Applies to servers whose agent supports previews (1.0.0&#43;). Bulk actions, schedules and the API are not affected.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">If a check fails before an update</span>
+        <select class="field__input" name="health_policy">
+          <option value="abort" selected>Do not run the update</option>
+          <option value="continue">Update anyway</option>
+        </select></label>
+      <label class="field"><span class="field__label">Wait after the update (seconds)</span>
+        <input class="field__input" type="number" name="health_delay" min="0" max="600" value="15">
+        <span class="field__hint">Lets services restart before the health checks run.</span></label>
+    </div>
+  </section>
+
+  <section class="panel" id="monitoring">
+    <h2 class="panel__title">Resource monitoring</h2>
+    <p class="field__hint">Agents report CPU, memory, swap and disk usage at the interval; the server page shows current values and 30 days of charts. Defined extra checks run at the same interval. A limit or check failing two measurements in a row is notified, and so is its recovery. Requires agent 1.0.2 or later.</p>
+    <input type="hidden" name="monitor_section" value="1">
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Measurement interval (minutes)</span>
+        <input class="field__input" type="number" name="health_monitor" min="0" max="1440" value="5">
+        <span class="field__hint">0 turns monitoring off. Checks still run with updates.</span></label>
+      <label class="field"><span class="field__label">Disk usage warning (%)</span>
+        <input class="field__input" type="number" name="health_disk_warn" min="0" max="100" value="90"></label>
+      <label class="field"><span class="field__label">Memory usage warning (%)</span>
+        <input class="field__input" type="number" name="health_memory_warn" min="0" max="100" value="95"></label>
+      <label class="field"><span class="field__label">CPU use warning (%)</span>
+        <input class="field__input" type="number" name="health_cpu_warn" min="0" max="1000" value="90">
+        <span class="field__hint">Average CPU use over the measurement interval. Agents before 1.0.2 use the 1-minute load divided by the number of cores.</span></label>
+    </div>
+    <p class="field__hint">These limits apply to every server without defining anything; 0 turns a limit off. For limits per server or group, add a CPU, memory and disk check on the Health checks page.</p>
+  </section>
+
+  <section class="panel" id="sla">
+    <h2 class="panel__title">Remediation targets (SLA)</h2>
+    <p class="field__hint">Days to resolve a finding after its first detection, by severity. 0 means no target for that severity. Overdue findings are marked and appear on the dashboard, in the report and in the notification center.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Critical (days)</span>
+        <input class="field__input" type="number" name="sla_critical_days" min="0" max="3650" value="15"></label>
+      <label class="field"><span class="field__label">High (days)</span>
+        <input class="field__input" type="number" name="sla_high_days" min="0" max="3650" value="30"></label>
+      <label class="field"><span class="field__label">Medium (days)</span>
+        <input class="field__input" type="number" name="sla_medium_days" min="0" max="3650" value="90"></label>
+      <label class="field"><span class="field__label">Low (days)</span>
+        <input class="field__input" type="number" name="sla_low_days" min="0" max="3650" value="180"></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="email_sla_overdue" value="1" checked> Send email about overdue findings</label>
+  </section>
+  <section class="panel" id="inventory">
+    <h2 class="panel__title">Software inventory</h2>
+    <input type="hidden" name="inventory_section" value="1">
+    <label class="check-label"><input type="checkbox" name="software_notify" value="1" checked> Notify when software is installed, removed or changes version</label>
+    <p class="field__hint">At most one notification per server report. The change history is always kept, regardless of this setting.</p>
+    <label class="check-label"><input type="checkbox" name="eol_notify" value="1" checked> Notify when OS or software support has ended or is about to end</label>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Advance warning (days)</span>
+        <input class="field__input" type="number" name="eol_warn_days" min="0" max="730" value="90">
+        <span class="field__hint">A release counts as ending soon this many days before its end of support and is notified once. No notification for software the distribution keeps maintaining.</span></label>
+    </div>
+  </section>
+
+  <section class="panel" id="backup">
+    <h2 class="panel__title">Automatic backup</h2>
+    <label class="check-label"><input type="checkbox" name="backup_enabled" value="1" checked> Back up the database automatically every day</label>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Backup time</span>
+        <input class="field__input" type="text" name="backup_time" value="02:30" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" inputmode="numeric" maxlength="5" required></label>
+      <label class="field"><span class="field__label">Backups to keep</span>
+        <input class="field__input" type="number" name="backup_keep" min="1" max="365" value="7" required></label>
+    </div>
+    <p class="field__hint">Backups are written to the backup directory on the server; the newest backups are kept and older ones deleted. Since they only exist on this server, copy them elsewhere regularly too (PATCHMAN_BACKUP_DIR can point to a separate disk). If the server is down at the backup time, the backup runs when it starts.</p>
+  </section>
+
+  <div><button class="button button--primary" type="submit">Save</button></div>
+</form>
+
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">Backups</h2>
+    <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-download"></use></svg>Back up now</button></form>
+  </div>
+  <div class="panel__body">
+    <p class="muted">Directory: /data/backups · Last backup: November 24, 2026 09:57</p>
+    
+    
+  </div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>File</th><th>Created</th><th class="num">Size</th><th></th></tr></thead>
+    <tbody>
+    <tr><td class="mono">netio-patchman-20261124-095701.db</td><td>2026-11-24 09:57</td><td class="num">117.7 MB</td><td><a class="button button--sm" href="#demo-unavailable">Download</a></td></tr><tr><td class="mono">netio-patchman-20261123-211000.db</td><td>2026-11-23 21:10</td><td class="num">15.9 MB</td><td><a class="button button--sm" href="#demo-unavailable">Download</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+
+<div class="grid-2">
+  <section class="panel">
+    <h2 class="panel__title">Scan status</h2>
+    <dl class="dl">
+      <dt>Last scan</dt><dd>Never</dd>
+      <dt>State</dt><dd>Idle</dd>
+      <dt>KEV catalog</dt><dd>November 23, 2026 21:09 · 1790 entries</dd>
+      
+    </dl>
+    <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-refresh"></use></svg>Scan all servers now</button></form>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">Test email</h2>
+    <p class="muted">Send a test email to check the SMTP configuration.</p>
+    <form class="form form--row" method="post" action="#">
+      <input type="hidden" name="_csrf" value="demo">
+      <label class="field field--grow"><span class="field__label">Email address</span><input class="field__input" type="email" name="to" value="admin@example.test" required></label>
+      <div class="field field--end"><button class="button" type="submit" disabled>Send</button></div>
+    </form>
+  </section>
+</div>
+
+  </main>
+</div>
+
+</body>
+</html>

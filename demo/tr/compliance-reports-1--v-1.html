@@ -1,0 +1,1617 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>2026 yıllık bilgi güvenliği denetimi · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-reports.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb no-print"><a href="compliance-reports.html">Uyum Raporları</a> / <span>2026 yıllık bilgi güvenliği denetimi</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">2026 yıllık bilgi güvenliği denetimi</h1>
+    <p class="pagehead__sub">Değerlendirme dönemi: 26.08.2026 – 23.11.2026 · Tüm sunucular</p>
+    <p class="report__meta">v1 <span class="pill">Taslak</span>
+      · Oluşturulma: 23.11.2026 21:38 · admin@example.test · SHA-256 <span class="mono" title="589a7ae66f8c2c323aacc65c44530cde212ee55606a2158b5a750f7352420a33">589a7ae66f8c</span>
+      </p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="button" href="../files/compliance-report-v1-tr.pdf"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-download"></use></svg>PDF</a>
+    <a class="button" href="../files/compliance-report-v1-tr.zip"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-download"></use></svg>CSV</a>
+    <a class="button" href="../files/compliance-report-v1-tr.json"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-download"></use></svg>JSON</a>
+    <button class="button" type="button" data-print><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-print"></use></svg>Yazdır</button>
+  </div>
+</header>
+
+<div class="no-print">
+
+<div class="filters">
+  <form class="filters" method="get" action="#">
+    <label class="field field--inline"><span class="field__label">Sürüm</span>
+      <select class="field__input" name="v"><option value="1" selected>v1 · 23.11.2026 21:38 · Taslak</option></select></label>
+    <button class="button" type="submit">Göster</button>
+  </form>
+  
+  <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+    <button class="button" type="submit" title="Güncel kanıtlarla yeniden değerlendirir; önceki sürümler değişmeden saklanır. Otomatik sonucu değişmeyen kontrollerin incelemeleri yeni sürüme aktarılır."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-refresh"></use></svg>Yeni sürüm oluştur</button></form>
+  
+  
+  <form method="post" action="#" data-confirm="Kesinleşen sürüm ve incelemeleri bir daha değiştirilemez. Devam edilsin mi?"><input type="hidden" name="_csrf" value="demo">
+    <button class="button button--primary" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg>Sürümü kesinleştir</button></form>
+  
+  
+  <form method="post" action="#" data-confirm="Rapor ve tüm taslak sürümleri silinsin mi?"><input type="hidden" name="_csrf" value="demo">
+    <button class="button button--danger" type="submit">Raporu sil</button></form>
+  
+</div>
+</div>
+
+<p class="alert alert--info">Bu rapor netio.patchman&#39;in otomatik olarak topladığı teknik kanıtlara dayanır. Bir belgelendirme, sertifika veya uygunluk beyanı değildir. Bir kanıtın birden fazla çerçevede kullanılması, o çerçevelerin gereksinimlerinin karşılandığı anlamına gelmez. Değerlendirme ve karar yetkili denetçiye aittir.</p>
+<p class="alert alert--warning">Kanıt toplama 23.11.2026 21:10 tarihinde başladı; dönemin bu tarihten önceki kısmı için kanıt eksik olabilir.</p>
+
+
+<section class="panel report__section">
+  <h2 class="panel__title">1. Yönetici özeti</h2>
+  <p>Kapsamdaki sunucu: 6. <span class="pill">Linux: 6</span> </p>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Çerçeve</th><th>Kontrol</th><th>Kontrol sonuçları</th></tr></thead>
+    <tbody>
+    <tr><td><a href="#p-isms">Bilgi Güvenliği Yönetimi Denetimleri</a> <span class="muted mono">isms@1</span></td><td>12</td>
+      <td><span class="pill pill--failed">Sapma: 2</span> <span class="pill pill--warning">Kanıt eksik: 1</span> <span class="pill pill--in_progress">Manuel kanıt mevcut: 1</span> <span class="pill pill--succeeded">Kanıt yeterli: 8</span> </td></tr><tr><td><a href="#p-baseline">BT Temel Koruma Denetimleri</a> <span class="muted mono">baseline@1</span></td><td>12</td>
+      <td><span class="pill pill--failed">Sapma: 2</span> <span class="pill pill--warning">Kanıt eksik: 2</span> <span class="pill pill--partial">Kısmi: 1</span> <span class="pill pill--in_progress">Manuel kanıt mevcut: 1</span> <span class="pill pill--succeeded">Kanıt yeterli: 4</span> <span class="pill pill--expired">Uygulanamaz: 2</span> </td></tr><tr><td><a href="#p-itsm">BT Hizmet Yönetimi Değerlendirmeleri</a> <span class="muted mono">itsm@1</span></td><td>8</td>
+      <td><span class="pill pill--failed">Sapma: 1</span> <span class="pill pill--warning">Kanıt eksik: 1</span> <span class="pill pill--queued">Manuel kanıt gerekli: 1</span> <span class="pill pill--succeeded">Kanıt yeterli: 5</span> </td></tr><tr><td><a href="#p-general">Genel Güvenlik ve Yama Uyumu</a> <span class="muted mono">general@1</span></td><td>12</td>
+      <td><span class="pill pill--failed">Sapma: 2</span> <span class="pill pill--warning">Kanıt eksik: 1</span> <span class="pill pill--partial">Kısmi: 1</span> <span class="pill pill--succeeded">Kanıt yeterli: 8</span> </td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="footnote">Sayılar kontrol sonuçlarıdır, uygunluk hükmü değildir. Her çerçeve kendi kontrolleriyle ayrı değerlendirilir.</p>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">2. Rapor kapsamı ve değerlendirme dönemi</h2>
+  <dl class="dl">
+    <dt>Değerlendirme dönemi</dt><dd>26.08.2026 – 23.11.2026</dd>
+    <dt>Kapsam</dt><dd>Tüm sunucular</dd>
+    <dt>Değerlendirme çerçeveleri</dt><dd><div>Bilgi Güvenliği Yönetimi Denetimleri <span class="muted mono">isms@1</span><div class="cell-sub">Bilgi güvenliği yönetim sistemi denetimlerinde istenen teknik kanıtlar: varlık envanteri, açıklık yönetimi, değişiklik, kayıt, yedekleme ve erişim.</div></div><div>BT Temel Koruma Denetimleri <span class="muted mono">baseline@1</span><div class="cell-sub">Temel koruma yaklaşımıyla yapılan değerlendirmeler için modül bazlı teknik kanıtlar: yama ve değişiklik yönetimi, Linux ve Windows sunucular, Windows istemciler, kayıt ve yedekleme.</div></div><div>BT Hizmet Yönetimi Değerlendirmeleri <span class="muted mono">itsm@1</span><div class="cell-sub">BT hizmet yönetimi uygulamalarını destekleyen kanıtlar: değişiklik etkinleştirme, sürüm ve dağıtım, yapılandırma ve varlık yönetimi, izleme ve hizmet seviyeleri.</div></div><div>Genel Güvenlik ve Yama Uyumu <span class="muted mono">general@1</span><div class="cell-sub">netio.patchman&#39;in ölçülebilir hedeflerle tanımladığı temel güvenlik ve güncelleme kontrolleri.</div></div></dd>
+    <dt>Kanıt toplama başlangıcı</dt><dd>23.11.2026 21:10</dd>
+    <dt>Değerlendirme motoru</dt><dd class="mono">1 · netio.patchman 1.0.3</dd>
+    <dt>SHA-256</dt><dd class="mono break">589a7ae66f8c2c323aacc65c44530cde212ee55606a2158b5a750f7352420a33</dd>
+    
+  </dl>
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">3. Yönetilen varlık envanteri <span class="muted">(6)</span></h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Sunucu</th><th>Platform</th><th>İşletim sistemi</th><th>Ajan</th><th>Son bağlantı</th><th>Gruplar</th><th>Destek durumu</th></tr></thead>
+    <tbody>
+    
+    <tr><td><a href="servers-6.html">backup-01</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>23.11.2026 21:09</td><td class="cell-sub"></td>
+      <td>Destekleniyor</td></tr>
+    
+    <tr><td><a href="servers-3.html">db-01</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>23.11.2026 21:09</td><td class="cell-sub">Veritabanı</td>
+      <td>Destekleniyor</td></tr>
+    
+    <tr><td><a href="servers-4.html">db-02</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>23.11.2026 21:09</td><td class="cell-sub">Veritabanı</td>
+      <td>Destekleniyor</td></tr>
+    
+    <tr><td><a href="servers-5.html">mail-01</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>23.11.2026 21:09</td><td class="cell-sub"></td>
+      <td>Destekleniyor</td></tr>
+    
+    <tr><td><a href="servers-1.html">web-01</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>23.11.2026 21:09</td><td class="cell-sub">Web</td>
+      <td>Destekleniyor</td></tr>
+    
+    <tr><td><a href="servers-2.html">web-02</a></td><td>Linux</td><td>Ubuntu 24.04.4 LTS <span class="muted">24.04.4 LTS (Noble Numbat)</span></td>
+      <td class="mono">1.0.3</td><td>23.11.2026 21:09</td><td class="cell-sub">Web</td>
+      <td>Destekleniyor</td></tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+  
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">4. Linux ve Windows güncelleme durumu</h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Platform</th><th>Sunucu</th><th>Güvenlik güncellemesi bekleyen</th><th>Güvenlik güncellemesi</th><th>Tüm güncellemeler</th><th>Yeniden başlatma bekleyen</th><th>Başarılı güncelleme işi</th><th>Başarısız güncelleme işi</th></tr></thead>
+    <tbody>
+    <tr><td>Linux</td><td>6</td><td>4</td><td>522</td><td>710</td><td>1</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+
+<section class="panel report__section">
+  <h2 class="panel__title">5. Güvenlik açığı yönetimi</h2>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th></th><th>Kritik</th><th>Yüksek</th><th>Orta</th><th>Düşük</th><th>KEV</th></tr></thead>
+    <tbody>
+      <tr><td>Dönem başında açık</td><td>2608</td><td>17739</td><td>14952</td><td>7811</td><td>44</td></tr>
+      <tr><td>Dönem sonunda açık</td><td>2608</td><td>17739</td><td>14952</td><td>7811</td><td>44</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Dönemde giderilen bulgu: 0 · ortalama giderme süresi: 0,0 gün · giderilen istismar edilen açık: 0.</p>
+  
+  <h3 class="panel__title">Açık kalan istismar edilen açıklar (oluşturma anında)</h3>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>CVE</th><th>Başlık</th><th>CISA son tarihi</th><th>Sunucu</th></tr></thead>
+    <tbody><tr><td><a class="mono" href="vulnerabilities-CVE-2024-36971.html">CVE-2024-36971</a></td><td lang="en">net: fix __dst_negative_advice() race</td><td class="mono">2024-08-28</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2024-53104.html">CVE-2024-53104</a></td><td lang="en">media: uvcvideo: Skip parsing frames of type UVC_VS_UNDEFINED in uvc_parse_format</td><td class="mono">2025-02-26</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2024-50302.html">CVE-2024-50302</a></td><td lang="en">HID: core: zero-initialize the report buffer</td><td class="mono">2025-03-25</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2024-53150.html">CVE-2024-53150</a></td><td lang="en">ALSA: usb-audio: Fix out of bounds reads when finding clock sources</td><td class="mono">2025-04-30</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2024-53197.html">CVE-2024-53197</a></td><td lang="en">ALSA: usb-audio: Fix potential out-of-bound accesses for Extigy and Mbox devices</td><td class="mono">2025-04-30</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2025-48384.html">CVE-2025-48384</a></td><td lang="en">Git allows arbitrary code execution through broken config quoting</td><td class="mono">2025-09-15</td><td>3</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2025-38352.html">CVE-2025-38352</a></td><td lang="en">posix-cpu-timers: fix race between handle_posix_cpu_timers() and posix_cpu_timer_del()</td><td class="mono">2025-09-25</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2025-32463.html">CVE-2025-32463</a></td><td lang="en"></td><td class="mono">2025-10-20</td><td>3</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-31431.html">CVE-2026-31431</a></td><td lang="en">crypto: algif_aead - Revert to operating out-of-place</td><td class="mono">2026-05-15</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-53362.html">CVE-2026-53362</a></td><td lang="en">ipv6: account for fraggap on the paged allocation path</td><td class="mono">2026-08-30</td><td>6</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2025-39682.html">CVE-2025-39682</a></td><td lang="en">tls: fix handling of zero-length records on the rx_list</td><td class="mono">2026-09-21</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2025-39964.html">CVE-2025-39964</a></td><td lang="en">crypto: af_alg - Disallow concurrent writes in af_alg_sendmsg</td><td class="mono">2026-09-21</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-53266.html">CVE-2026-53266</a></td><td lang="en">netfilter: bridge: make ebt_snat ARP rewrite writable</td><td class="mono">2026-09-21</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-109618.html">CVE-2026-109618</a></td><td lang="en">RCE via OOM corruption</td><td class="mono">2026-10-29</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-109619.html">CVE-2026-109619</a></td><td lang="en">RCE via stale global state</td><td class="mono">2026-10-29</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-46300.html">CVE-2026-46300</a></td><td lang="en">net: skbuff: preserve shared-frag marker during coalescing</td><td class="mono">2026-10-31</td><td>2</td></tr><tr><td><a class="mono" href="vulnerabilities-CVE-2026-111497.html">CVE-2026-111497</a></td><td lang="en">Out-of-Bounds Write in Google Brotli Decoder</td><td class="mono">2026-11-10</td><td>6</td></tr></tbody>
+  </table>
+  </div>
+  
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">6. Yama uyumu</h2>
+  <p>Dönemde 0 güncelleme işi: 0 başarılı, 0 kısmi, 0 başarısız; başarılı işlerde 0 paket güncellendi.</p>
+  <p>Dönem sonunda 6 sunucunun 2 tanesinde bekleyen güvenlik güncellemesi yok.</p>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">7. Güvenlik güncellemesi SLA&#39;sı</h2>
+  
+  <p>Hedef süreler: kritik 15, yüksek 30, orta 90, düşük 180 gün (0 = hedef yok).</p>
+  <p>Dönemde giderilen 0 bulgunun 0 tanesi süresinde, 0 tanesi süresi geçtikten sonra giderildi. Dönem sonunda süresi dolmuş açık bulgu: 0.</p>
+  
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">8. Desteği biten sistemler</h2></div>
+  <div class="empty"><p class="empty__body">Desteği biten veya bitmek üzere olan işletim sistemi yok.</p></div>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">9. Değişiklik yönetimi</h2>
+  <p>Dönemde kayıtlı değişiklik: 1 · önizleme sonrası onay: 0.</p>
+  <div class="grid-2">
+    <dl class="dl"><dt>Güncelleme önizlemesi</dt><dd>1</dd></dl>
+    <dl class="dl"><dt>Kullanıcı</dt><dd>1</dd></dl>
+  </div>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">10. Denetim kayıtları</h2>
+  <p>Dönemdeki denetim kaydı: 15. Kanıt zinciri doğrulandı (18 kayıt).</p>
+  <details><summary>İşlemlere göre</summary><dl class="dl"><dt>Ajan kaydoldu</dt><dd>6</dd><dt>Gruba sunucu eklendi</dt><dd>2</dd><dt>Grup oluşturuldu</dt><dd>2</dd><dt>Giriş yapıldı</dt><dd>1</dd><dt>Güncelleme işi başlatıldı</dt><dd>1</dd><dt>Kayıt anahtarı oluşturuldu</dt><dd>1</dd><dt>Zamanlama oluşturuldu</dt><dd>1</dd><dt>İlk yönetici oluşturuldu</dt><dd>1</dd></dl></details>
+</section>
+
+<section class="panel report__section">
+  <h2 class="panel__title">11. Çerçevelere göre kontrol değerlendirmeleri</h2>
+  <p class="footnote">Otomatik sonuç yalnızca birincil ölçümlerden hesaplanır; destekleyici ölçümler kanıt ekler, sonucu iyileştirmez. Manuel inceleme otomatik sonucun yanında ayrıca saklanır.</p>
+</section>
+
+<section class="panel panel--flush report__section" id="p-isms">
+  <div class="panel__head"><h3 class="panel__title">Bilgi Güvenliği Yönetimi Denetimleri <span class="muted mono">isms@1</span></h3>
+    <span><span class="pill pill--failed">Sapma: 2</span> <span class="pill pill--warning">Kanıt eksik: 1</span> <span class="pill pill--in_progress">Manuel kanıt mevcut: 1</span> <span class="pill pill--succeeded">Kanıt yeterli: 8</span> </span></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Kontrol</th><th>Otomatik sonuç</th><th>Ölçümler</th><th>Kanıt</th><th>Manuel inceleme</th></tr></thead>
+    <tbody>
+    
+    <tr id="c-isms-ISMS-01">
+      <td><strong class="mono">ISMS-01</strong> Varlık envanteri<div class="cell-sub">Yönetilen sunucu ve istemcilerin güncel, eksiksiz envanteri ve düzenli raporlaması.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Envanter bütünlüğü <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Ajan erişim kapsamı <span class="muted">· Destekleyici</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-01">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-02">
+      <td><strong class="mono">ISMS-02</strong> Teknik güvenlik açıklarının yönetimi<div class="cell-sub">Açıkların tespiti, hedef sürelerde giderilmesi ve istismar edilen açıkların önceliklendirilmesi.</div></td>
+      <td><span class="pill pill--failed">Sapma</span></td>
+      <td><div>Düzeltme süresi (SLA) <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>İstismar edilen açıklar <span class="muted">· Birincil</span> <span class="pill pill--failed">Sapma</span></div><div>Güncelleme işleri <span class="muted">· Destekleyici</span> <span class="pill pill--warning">Kanıt eksik</span></div><div>Güvenlik güncellemesi güncelliği <span class="muted">· Destekleyici</span> <span class="pill pill--partial">Kısmi</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-02">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-03">
+      <td><strong class="mono">ISMS-03</strong> Yapılandırma yönetimi<div class="cell-sub">Tanımlı sunucu standartlarına uyum ve sapmaların izlenmesi.</div></td>
+      <td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td><div>Yapılandırma standartları <span class="muted">· Birincil</span> <span class="pill pill--warning">Kanıt eksik</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-03">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-04">
+      <td><strong class="mono">ISMS-04</strong> İşletimdeki sistemlerde yazılım değişiklikleri<div class="cell-sub">Sistemlerdeki kurulum ve güncellemelerin kayıtlı ve onaylı yapılması.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Değişiklik kaydı <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Değişiklik onayı <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td><a href="#demo-unavailable">3</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-04">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-05">
+      <td><strong class="mono">ISMS-05</strong> Değişiklik yönetimi<div class="cell-sub">Değişikliklerin planlanması, onaylanması, uygulanması ve sonuçlarının izlenmesi.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Değişiklik kaydı <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Değişiklik onayı <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Güncelleme işleri <span class="muted">· Destekleyici</span> <span class="pill pill--warning">Kanıt eksik</span></div>
+        <div class="cell-sub">Süreç belgesi: 0 kayıt</div></td>
+      <td><a href="#demo-unavailable">3</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-05">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-06">
+      <td><strong class="mono">ISMS-06</strong> Kayıt tutma<div class="cell-sub">Kullanıcı ve sistem işlemlerinin değiştirilemez biçimde kaydedilmesi.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Kayıt bütünlüğü <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td><a href="#demo-unavailable">15</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-06">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-07">
+      <td><strong class="mono">ISMS-07</strong> İzleme faaliyetleri<div class="cell-sub">Sistemlerin kaynak ve sağlık durumunun sürekli izlenmesi.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Sürekli izleme <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Ajan erişim kapsamı <span class="muted">· Destekleyici</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-07">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-08">
+      <td><strong class="mono">ISMS-08</strong> Bilgi yedekleme<div class="cell-sub">Yönetim verilerinin düzenli ve başarılı yedeklenmesi.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Yedekleme <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td><a href="#demo-unavailable">1</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-08">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-09">
+      <td><strong class="mono">ISMS-09</strong> Güvenli kimlik doğrulama ve ayrıcalıklı erişim<div class="cell-sub">Yönetici hesaplarında çok faktörlü doğrulama ve erişim değişikliklerinin izlenmesi.</div></td>
+      <td><span class="pill pill--failed">Sapma</span></td>
+      <td><div>Çok faktörlü doğrulama <span class="muted">· Birincil</span> <span class="pill pill--failed">Sapma</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-09">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-10">
+      <td><strong class="mono">ISMS-10</strong> Sistem yaşam döngüsü<div class="cell-sub">Desteği biten işletim sistemlerinin tespit edilmesi ve yenilenmesi.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Desteği biten sistemler <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-10">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-11">
+      <td><strong class="mono">ISMS-11</strong> Risk işleme<div class="cell-sub">Kabul edilen risklerin gerekçeli, süreli ve izlenebilir olması.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Kabul edilen riskler <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-11">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-isms-ISMS-12">
+      <td><strong class="mono">ISMS-12</strong> Politikalar ve prosedürler<div class="cell-sub">Bilgi güvenliği politikası ve ilgili prosedürlerin belgelenmesi (manuel kanıt).</div></td>
+      <td><span class="pill pill--in_progress">Manuel kanıt mevcut</span></td>
+      <td>
+        <div class="cell-sub">Politika belgesi: 1 kayıt</div></td>
+      <td><a href="#demo-unavailable">1</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="isms"><input type="hidden" name="control" value="ISMS-12">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel panel--flush report__section" id="p-baseline">
+  <div class="panel__head"><h3 class="panel__title">BT Temel Koruma Denetimleri <span class="muted mono">baseline@1</span></h3>
+    <span><span class="pill pill--failed">Sapma: 2</span> <span class="pill pill--warning">Kanıt eksik: 2</span> <span class="pill pill--partial">Kısmi: 1</span> <span class="pill pill--in_progress">Manuel kanıt mevcut: 1</span> <span class="pill pill--succeeded">Kanıt yeterli: 4</span> <span class="pill pill--expired">Uygulanamaz: 2</span> </span></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Kontrol</th><th>Otomatik sonuç</th><th>Ölçümler</th><th>Kanıt</th><th>Manuel inceleme</th></tr></thead>
+    <tbody>
+    
+    <tr id="c-baseline-BASE-01">
+      <td><strong class="mono">BASE-01</strong> Yama ve değişiklik yönetimi<div class="cell-sub">Güncellemelerin bir süreç içinde uygulanması ve her değişikliğin kaydı.</div></td>
+      <td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td><div>Güncelleme işleri <span class="muted">· Birincil</span> <span class="pill pill--warning">Kanıt eksik</span></div><div>Değişiklik kaydı <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        <div class="cell-sub">Süreç belgesi: 0 kayıt</div></td>
+      <td><a href="#demo-unavailable">3</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-01">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-02">
+      <td><strong class="mono">BASE-02</strong> Güvenlik güncellemelerinin zamanında uygulanması<div class="cell-sub">Güvenlik güncellemelerinin hedef sürelerde, istismar edilen açıklarda öncelikli uygulanması.</div></td>
+      <td><span class="pill pill--failed">Sapma</span></td>
+      <td><div>Düzeltme süresi (SLA) <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>İstismar edilen açıklar <span class="muted">· Birincil</span> <span class="pill pill--failed">Sapma</span></div><div>Güvenlik güncellemesi güncelliği <span class="muted">· Destekleyici</span> <span class="pill pill--partial">Kısmi</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-02">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-03">
+      <td><strong class="mono">BASE-03</strong> Linux sunucular<div class="cell-sub">Linux sunucularda güncel güvenlik yamaları, desteklenen sürümler ve bekleyen yeniden başlatmalar.</div></td>
+      <td><span class="pill pill--partial">Kısmi</span></td>
+      <td><div>Güvenlik güncellemesi güncelliği (Linux) <span class="muted">· Birincil</span> <span class="pill pill--partial">Kısmi</span></div><div>Desteği biten sistemler (Linux) <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Bekleyen yeniden başlatmalar (Linux) <span class="muted">· Destekleyici</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-03">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-04">
+      <td><strong class="mono">BASE-04</strong> Windows sunucular<div class="cell-sub">Windows Server sistemlerinde güncel güvenlik güncellemeleri, desteklenen sürümler ve bekleyen yeniden başlatmalar.</div></td>
+      <td><span class="pill pill--expired">Uygulanamaz</span></td>
+      <td><div>Güvenlik güncellemesi güncelliği (Windows Server) <span class="muted">· Birincil</span> <span class="pill pill--expired">Uygulanamaz</span></div><div>Desteği biten sistemler (Windows Server) <span class="muted">· Birincil</span> <span class="pill pill--expired">Uygulanamaz</span></div><div>Bekleyen yeniden başlatmalar (Windows Server) <span class="muted">· Destekleyici</span> <span class="pill pill--expired">Uygulanamaz</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-04">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-05">
+      <td><strong class="mono">BASE-05</strong> Windows istemciler<div class="cell-sub">Windows 10 ve Windows 11 istemcilerde güncel güvenlik güncellemeleri, desteklenen sürümler ve bekleyen yeniden başlatmalar.</div></td>
+      <td><span class="pill pill--expired">Uygulanamaz</span></td>
+      <td><div>Güvenlik güncellemesi güncelliği (Windows 10, Windows 11, Diğer Windows) <span class="muted">· Birincil</span> <span class="pill pill--expired">Uygulanamaz</span></div><div>Desteği biten sistemler (Windows 10, Windows 11, Diğer Windows) <span class="muted">· Birincil</span> <span class="pill pill--expired">Uygulanamaz</span></div><div>Bekleyen yeniden başlatmalar (Windows 10, Windows 11, Diğer Windows) <span class="muted">· Destekleyici</span> <span class="pill pill--expired">Uygulanamaz</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-05">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-06">
+      <td><strong class="mono">BASE-06</strong> Düzenli BT yönetimi ve envanter<div class="cell-sub">Tüm sistemlerin envanterde olması ve yönetim aracına düzenli bağlanması.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Envanter bütünlüğü <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Ajan erişim kapsamı <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-06">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-07">
+      <td><strong class="mono">BASE-07</strong> Kayıt tutma<div class="cell-sub">Yönetim işlemlerinin bütünlüğü korunarak kaydedilmesi.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Kayıt bütünlüğü <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td><a href="#demo-unavailable">15</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-07">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-08">
+      <td><strong class="mono">BASE-08</strong> Veri yedekleme<div class="cell-sub">Yönetim verilerinin her gün yedeklenmesi.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Yedekleme <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td><a href="#demo-unavailable">1</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-08">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-09">
+      <td><strong class="mono">BASE-09</strong> Kimlik ve yetki yönetimi<div class="cell-sub">Yönetici erişiminde çok faktörlü doğrulama.</div></td>
+      <td><span class="pill pill--failed">Sapma</span></td>
+      <td><div>Çok faktörlü doğrulama <span class="muted">· Birincil</span> <span class="pill pill--failed">Sapma</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-09">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-10">
+      <td><strong class="mono">BASE-10</strong> Güvenlik olaylarının tespiti<div class="cell-sub">Kaynak ve sağlık izlemesi ile istismar edilen açıkların tespiti.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Sürekli izleme <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>İstismar edilen açıklar <span class="muted">· Destekleyici</span> <span class="pill pill--failed">Sapma</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-10">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-11">
+      <td><strong class="mono">BASE-11</strong> Yapılandırma standartları<div class="cell-sub">Sunucuların tanımlı standartlara uyması.</div></td>
+      <td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td><div>Yapılandırma standartları <span class="muted">· Birincil</span> <span class="pill pill--warning">Kanıt eksik</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-11">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-baseline-BASE-12">
+      <td><strong class="mono">BASE-12</strong> Belgelenmiş yama ve değişiklik konsepti<div class="cell-sub">Yama ve değişiklik sürecinin yazılı olarak tanımlanması (manuel kanıt).</div></td>
+      <td><span class="pill pill--in_progress">Manuel kanıt mevcut</span></td>
+      <td>
+        <div class="cell-sub">Süreç belgesi: 1 kayıt</div></td>
+      <td><a href="#demo-unavailable">1</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="baseline"><input type="hidden" name="control" value="BASE-12">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel panel--flush report__section" id="p-itsm">
+  <div class="panel__head"><h3 class="panel__title">BT Hizmet Yönetimi Değerlendirmeleri <span class="muted mono">itsm@1</span></h3>
+    <span><span class="pill pill--failed">Sapma: 1</span> <span class="pill pill--warning">Kanıt eksik: 1</span> <span class="pill pill--queued">Manuel kanıt gerekli: 1</span> <span class="pill pill--succeeded">Kanıt yeterli: 5</span> </span></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Kontrol</th><th>Otomatik sonuç</th><th>Ölçümler</th><th>Kanıt</th><th>Manuel inceleme</th></tr></thead>
+    <tbody>
+    
+    <tr id="c-itsm-ITSM-01">
+      <td><strong class="mono">ITSM-01</strong> Değişiklik etkinleştirme<div class="cell-sub">Değişikliklerin kaydı, onayı ve planlı uygulanması.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Değişiklik kaydı <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Değişiklik onayı <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Güncelleme işleri <span class="muted">· Destekleyici</span> <span class="pill pill--warning">Kanıt eksik</span></div>
+        </td>
+      <td><a href="#demo-unavailable">3</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-01">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-02">
+      <td><strong class="mono">ITSM-02</strong> Sürüm ve dağıtım yönetimi<div class="cell-sub">Güncellemelerin dağıtımı ve başarı oranı.</div></td>
+      <td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td><div>Güncelleme işleri <span class="muted">· Birincil</span> <span class="pill pill--warning">Kanıt eksik</span></div><div>Bekleyen yeniden başlatmalar <span class="muted">· Destekleyici</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-02">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-03">
+      <td><strong class="mono">ITSM-03</strong> Hizmet yapılandırma yönetimi<div class="cell-sub">Yapılandırma öğelerinin envanteri ve standartlara uyumu.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Envanter bütünlüğü <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Yapılandırma standartları <span class="muted">· Destekleyici</span> <span class="pill pill--warning">Kanıt eksik</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-03">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-04">
+      <td><strong class="mono">ITSM-04</strong> BT varlık yönetimi<div class="cell-sub">Varlıkların envanteri ve yaşam döngüsü.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Envanter bütünlüğü <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Desteği biten sistemler <span class="muted">· Destekleyici</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-04">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-05">
+      <td><strong class="mono">ITSM-05</strong> İzleme ve olay yönetimi<div class="cell-sub">Sistemlerin sürekli izlenmesi ve erişilebilirliği.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Sürekli izleme <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>Ajan erişim kapsamı <span class="muted">· Destekleyici</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-05">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-06">
+      <td><strong class="mono">ITSM-06</strong> Bilgi güvenliği yönetimi<div class="cell-sub">Açıkların giderilmesi ve erişim güvenliği.</div></td>
+      <td><span class="pill pill--failed">Sapma</span></td>
+      <td><div>Düzeltme süresi (SLA) <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div><div>İstismar edilen açıklar <span class="muted">· Birincil</span> <span class="pill pill--failed">Sapma</span></div><div>Çok faktörlü doğrulama <span class="muted">· Destekleyici</span> <span class="pill pill--failed">Sapma</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-06">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-07">
+      <td><strong class="mono">ITSM-07</strong> Hizmet seviyesi yönetimi<div class="cell-sub">Güvenlik güncellemelerinde tanımlı hizmet seviyelerine (SLA) uyum.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Düzeltme süresi (SLA) <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-07">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-itsm-ITSM-08">
+      <td><strong class="mono">ITSM-08</strong> Olay ve sorun yönetimi süreci<div class="cell-sub">Olay ve sorun yönetimi sürecinin belgelenmesi (manuel kanıt).</div></td>
+      <td><span class="pill pill--queued">Manuel kanıt gerekli</span></td>
+      <td>
+        <div class="cell-sub">Süreç belgesi: 0 kayıt</div></td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="itsm"><input type="hidden" name="control" value="ITSM-08">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel panel--flush report__section" id="p-general">
+  <div class="panel__head"><h3 class="panel__title">Genel Güvenlik ve Yama Uyumu <span class="muted mono">general@1</span></h3>
+    <span><span class="pill pill--failed">Sapma: 2</span> <span class="pill pill--warning">Kanıt eksik: 1</span> <span class="pill pill--partial">Kısmi: 1</span> <span class="pill pill--succeeded">Kanıt yeterli: 8</span> </span></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Kontrol</th><th>Otomatik sonuç</th><th>Ölçümler</th><th>Kanıt</th><th>Manuel inceleme</th></tr></thead>
+    <tbody>
+    
+    <tr id="c-general-GEN-01">
+      <td><strong class="mono">GEN-01</strong> Açıklar hedef sürede gideriliyor<div class="cell-sub">Güvenlik açıklarının önem derecesine göre tanımlı sürelerde giderilmesi.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Düzeltme süresi (SLA) <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-01">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-02">
+      <td><strong class="mono">GEN-02</strong> Süresi geçmiş istismar edilen açık yok<div class="cell-sub">CISA KEV listesindeki açıkların son tarihinden önce giderilmesi.</div></td>
+      <td><span class="pill pill--failed">Sapma</span></td>
+      <td><div>İstismar edilen açıklar <span class="muted">· Birincil</span> <span class="pill pill--failed">Sapma</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-02">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-03">
+      <td><strong class="mono">GEN-03</strong> Güvenlik güncellemesi güncelliği<div class="cell-sub">Bekleyen güvenlik güncellemesi olmayan sistemlerin oranı.</div></td>
+      <td><span class="pill pill--partial">Kısmi</span></td>
+      <td><div>Güvenlik güncellemesi güncelliği <span class="muted">· Birincil</span> <span class="pill pill--partial">Kısmi</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-03">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-04">
+      <td><strong class="mono">GEN-04</strong> Güncelleme işlerinin başarısı<div class="cell-sub">Güncelleme işlerinin başarısızlık oranı.</div></td>
+      <td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td><div>Güncelleme işleri <span class="muted">· Birincil</span> <span class="pill pill--warning">Kanıt eksik</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-04">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-05">
+      <td><strong class="mono">GEN-05</strong> Desteği biten işletim sistemi yok<div class="cell-sub">Üretici desteği biten işletim sistemlerinin bulunmaması.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Desteği biten sistemler <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-05">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-06">
+      <td><strong class="mono">GEN-06</strong> Ajan erişim kapsamı<div class="cell-sub">Sistemlerin dönem boyunca düzenli bağlanması.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Ajan erişim kapsamı <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-06">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-07">
+      <td><strong class="mono">GEN-07</strong> Bekleyen yeniden başlatmalar<div class="cell-sub">Güncellemeden sonra uzun süre yeniden başlatılmayan sistem bulunmaması.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Bekleyen yeniden başlatmalar <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-07">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-08">
+      <td><strong class="mono">GEN-08</strong> Kabul edilen riskler<div class="cell-sub">Kabul edilen risklerin süreli ve gerekçeli olması.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Kabul edilen riskler <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-08">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-09">
+      <td><strong class="mono">GEN-09</strong> Yöneticilerde çok faktörlü doğrulama<div class="cell-sub">Tüm yönetici hesaplarında çok faktörlü doğrulama.</div></td>
+      <td><span class="pill pill--failed">Sapma</span></td>
+      <td><div>Çok faktörlü doğrulama <span class="muted">· Birincil</span> <span class="pill pill--failed">Sapma</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-09">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-10">
+      <td><strong class="mono">GEN-10</strong> Günlük yedekleme<div class="cell-sub">Yönetim veritabanının her gün yedeklenmesi.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Yedekleme <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td><a href="#demo-unavailable">1</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-10">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-11">
+      <td><strong class="mono">GEN-11</strong> Kanıt zinciri bütünlüğü<div class="cell-sub">Kanıt kayıtlarının değiştirilmediğinin hash zinciriyle doğrulanması.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Kayıt bütünlüğü <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td><a href="#demo-unavailable">15</a></td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-11">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    <tr id="c-general-GEN-12">
+      <td><strong class="mono">GEN-12</strong> Sürekli izleme<div class="cell-sub">Sistemlerin kaynak kullanımının sürekli izlenmesi.</div></td>
+      <td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td><div>Sürekli izleme <span class="muted">· Birincil</span> <span class="pill pill--succeeded">Kanıt yeterli</span></div>
+        </td>
+      <td>0</td>
+      <td>İncelenmedi
+        
+        <details class="no-print"><summary>İncele</summary>
+          <form method="post" action="#"><input type="hidden" name="_csrf" value="demo">
+            <input type="hidden" name="profile" value="general"><input type="hidden" name="control" value="GEN-12">
+            
+            <select class="field__input" name="status" aria-label="Manuel inceleme"><option value="not_reviewed" selected>İncelenmedi</option><option value="accepted">İncelendi, kabul edildi</option><option value="gap">İncelendi, eksik var</option></select>
+            <textarea class="field__input" name="note" rows="2" maxlength="2000" aria-label="İnceleme notu"></textarea>
+            <button class="button button--sm" type="submit">Kaydet</button>
+          </form>
+        </details>
+        
+      </td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">Ortak ölçümler</h2></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Ölçüm</th><th>Otomatik sonuç</th><th>Ölçülen değerler</th><th>Eksikler</th><th>Kanıt</th></tr></thead>
+    <tbody>
+    
+    <tr><td>Çok faktörlü doğrulama</td><td><span class="pill pill--failed">Sapma</span></td>
+      <td class="cell-sub"><div>Yönetici: <strong>1</strong></div><div>Çok faktörlü doğrulaması olmayan: <strong>1</strong></div></td>
+      <td class="cell-sub"><div>1 yöneticide çok faktörlü doğrulama yok.</div></td><td>0</td></tr>
+    
+    <tr><td>Ajan erişim kapsamı</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Sunucu-gün: <strong>6</strong></div><div>Bağlanılan sunucu-gün: <strong>6</strong></div><div>Erişim kapsamı: <strong>100,0 %</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Yedekleme</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Gün: <strong>1</strong></div><div>Yedek alınan gün: <strong>1</strong></div><div>Başarısız yedek: <strong>0</strong></div><div>Yedek alınan gün oranı: <strong>100,0 %</strong></div></td>
+      <td class="cell-sub"></td><td>1</td></tr>
+    
+    <tr><td>Değişiklik onayı</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Önizleme onayı: <strong>0</strong></div><div>Onaylı güncelleme: <strong>0</strong></div><div>Planlanan değişiklik: <strong>1</strong></div></td>
+      <td class="cell-sub"></td><td>1</td></tr>
+    
+    <tr><td>Değişiklik kaydı</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Değişiklik: <strong>1</strong></div><div>Kullanıcı başlattı: <strong>1</strong></div><div>Zamanlama başlattı: <strong>0</strong></div><div>Kademeli güncelleme başlattı: <strong>0</strong></div><div>Otomatik: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>3</td></tr>
+    
+    <tr><td>Yapılandırma standartları</td><td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td class="cell-sub"><div>Sunucu standardı: <strong>0</strong></div><div>Açık sapma: <strong>0</strong></div><div>Sapması olan sunucu: <strong>0</strong></div><div>Dönemde tespit edilen sapma: <strong>0</strong></div></td>
+      <td class="cell-sub"><div>Tanımlı sunucu standardı yok.</div></td><td>0</td></tr>
+    
+    <tr><td>Desteği biten sistemler</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Sunucu: <strong>6</strong></div><div>Desteği biten işletim sistemi: <strong>0</strong></div><div>Desteği yakında biten: <strong>0</strong></div><div>Destek takvimi bilinmeyen: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Desteği biten sistemler (Linux)</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Sunucu: <strong>6</strong></div><div>Desteği biten işletim sistemi: <strong>0</strong></div><div>Desteği yakında biten: <strong>0</strong></div><div>Destek takvimi bilinmeyen: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Desteği biten sistemler (Windows 10, Windows 11, Diğer Windows)</td><td><span class="pill pill--expired">Uygulanamaz</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>Bu platformda sunucu yok.</div></td><td>0</td></tr>
+    
+    <tr><td>Desteği biten sistemler (Windows Server)</td><td><span class="pill pill--expired">Uygulanamaz</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>Bu platformda sunucu yok.</div></td><td>0</td></tr>
+    
+    <tr><td>Envanter bütünlüğü</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Sunucu: <strong>6</strong></div><div>7 günden uzun bağlanmayan: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Kayıt bütünlüğü</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Denetim kaydı: <strong>15</strong></div><div>Zincirdeki kanıt: <strong>18</strong></div></td>
+      <td class="cell-sub"></td><td>15</td></tr>
+    
+    <tr><td>Sürekli izleme</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Sunucu-gün: <strong>6</strong></div><div>İzlenen sunucu-gün: <strong>6</strong></div><div>İzleme oranı: <strong>100,0 %</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Güncelleme işleri</td><td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td class="cell-sub"><div>Güncelleme işi: <strong>0</strong></div><div>Başarılı: <strong>0</strong></div><div>Kısmi: <strong>0</strong></div><div>Başarısız: <strong>0</strong></div><div>Çalışmayan (süresi dolan, iptal): <strong>0</strong></div><div>Başarısızlık oranı: <strong>0,0 %</strong></div></td>
+      <td class="cell-sub"><div>Dönemde güncelleme işi çalışmadı.</div></td><td>0</td></tr>
+    
+    <tr><td>Güvenlik güncellemesi güncelliği</td><td><span class="pill pill--partial">Kısmi</span></td>
+      <td class="cell-sub"><div>Sunucu: <strong>6</strong></div><div>Güvenlik güncellemesi bekleyen olmayan: <strong>2</strong></div><div>Bekleyen güvenlik güncellemesi: <strong>522</strong></div><div>Güncel sunucu oranı: <strong>33,3 %</strong></div></td>
+      <td class="cell-sub"><div>Bekleyen güvenlik güncellemesi olmayan sunucu oranı %33,3, hedef %90.</div></td><td>0</td></tr>
+    
+    <tr><td>Güvenlik güncellemesi güncelliği (Linux)</td><td><span class="pill pill--partial">Kısmi</span></td>
+      <td class="cell-sub"><div>Sunucu: <strong>6</strong></div><div>Güvenlik güncellemesi bekleyen olmayan: <strong>2</strong></div><div>Bekleyen güvenlik güncellemesi: <strong>522</strong></div><div>Güncel sunucu oranı: <strong>33,3 %</strong></div></td>
+      <td class="cell-sub"><div>Bekleyen güvenlik güncellemesi olmayan sunucu oranı %33,3, hedef %90.</div></td><td>0</td></tr>
+    
+    <tr><td>Güvenlik güncellemesi güncelliği (Windows 10, Windows 11, Diğer Windows)</td><td><span class="pill pill--expired">Uygulanamaz</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>Bu platformda sunucu yok.</div></td><td>0</td></tr>
+    
+    <tr><td>Güvenlik güncellemesi güncelliği (Windows Server)</td><td><span class="pill pill--expired">Uygulanamaz</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>Bu platformda sunucu yok.</div></td><td>0</td></tr>
+    
+    <tr><td>Bekleyen yeniden başlatmalar</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Yeniden başlatma bekleyen: <strong>1</strong></div><div>Uzun süredir bekleyen: <strong>0</strong></div><div>Yeniden başlatma işi: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Bekleyen yeniden başlatmalar (Linux)</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Yeniden başlatma bekleyen: <strong>1</strong></div><div>Uzun süredir bekleyen: <strong>0</strong></div><div>Yeniden başlatma işi: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>Bekleyen yeniden başlatmalar (Windows 10, Windows 11, Diğer Windows)</td><td><span class="pill pill--expired">Uygulanamaz</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>Bu platformda sunucu yok.</div></td><td>0</td></tr>
+    
+    <tr><td>Bekleyen yeniden başlatmalar (Windows Server)</td><td><span class="pill pill--expired">Uygulanamaz</span></td>
+      <td class="cell-sub"></td>
+      <td class="cell-sub"><div>Bu platformda sunucu yok.</div></td><td>0</td></tr>
+    
+    <tr><td>Kabul edilen riskler</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Kabul edilen risk: <strong>0</strong></div><div>Bitiş tarihi olmayan: <strong>0</strong></div><div>Gerekçesi olmayan: <strong>0</strong></div><div>30 gün içinde bitecek: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    <tr><td>İstismar edilen açıklar</td><td><span class="pill pill--failed">Sapma</span></td>
+      <td class="cell-sub"><div>Açık istismar edilen açık: <strong>44</strong></div><div>Son tarihi geçmiş: <strong>44</strong></div><div>Giderilen istismar edilen açık: <strong>0</strong></div></td>
+      <td class="cell-sub"><div>CISA son tarihi geçmiş 44 istismar edilen açık var.</div></td><td>0</td></tr>
+    
+    <tr><td>Düzeltme süresi (SLA)</td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Giderilen bulgu: <strong>0</strong></div><div>Süresinde giderilen: <strong>0</strong></div><div>Geç giderilen: <strong>0</strong></div><div>Süresi dolmuş açık bulgu: <strong>0</strong></div></td>
+      <td class="cell-sub"></td><td>0</td></tr>
+    
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">12. Toplanan teknik kanıtlar <span class="muted">(18)</span></h2>
+    <a class="no-print" href="#demo-unavailable">Tümünü kanıt deposunda göster</a></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Tür</th><th>Zaman</th><th>Sunucu</th><th>Konu</th><th>Kontroller</th><th>SHA-256</th></tr></thead>
+    <tbody>
+    
+    <tr><td><a class="mono" href="compliance-evidence-18.html">18</a></td><td>Manuel kanıt</td><td>23.11.2026 21:38</td><td></td>
+      <td><span class="mono">Bilgi güvenliği politikası v4</span></td><td class="cell-sub">baseline:BASE-12, isms:ISMS-12</td><td class="mono" title="98342fc929f3e65a31558043a8782132243ccaa1ba2f2b8cf38785a69fec3654">98342fc929f3</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-17.html">17</a></td><td>Yedekleme</td><td>23.11.2026 21:10</td><td></td>
+      <td><span class="mono">database</span> <span class="muted">succeeded</span></td><td class="cell-sub">baseline:BASE-08, general:GEN-10, isms:ISMS-08</td><td class="mono" title="d7832c1d957181421047d20f9984b19675ac66fb26a2736113e7534772c5b8e4">d7832c1d9571</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-16.html">16</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Güncelleme işi başlatıldı</td><td class="cell-sub">baseline:BASE-01, baseline:BASE-07, general:GEN-11, isms:ISMS-04, isms:ISMS-05, isms:ISMS-06, itsm:ITSM-01</td><td class="mono" title="b31abbfa8eddf6470f602069858d9d1047ab283fc3339560c350a3d653a6e8b6">b31abbfa8edd</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-15.html">15</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Zamanlama oluşturuldu</td><td class="cell-sub">baseline:BASE-01, baseline:BASE-07, general:GEN-11, isms:ISMS-04, isms:ISMS-05, isms:ISMS-06, itsm:ITSM-01</td><td class="mono" title="15f2a42755c84dbf1c5e12595f07cecd5bbc9dac28270791206e9c17cfe494c3">15f2a42755c8</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-14.html">14</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Gruba sunucu eklendi</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="1270b957d7cb917b8b4bfe55cf9b0b2bf5bd2d2ce586248877ad4e2b902ae357">1270b957d7cb</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-13.html">13</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Gruba sunucu eklendi</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="fdc733ba4e4ce5069a026d54be00a0317a4a34eef5aceed1a16af6fffff9fd06">fdc733ba4e4c</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-12.html">12</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Grup oluşturuldu</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="02cddc7a0d0cffd394937991bf2a293cc730f97b3ddfbc3b6cb2db917519198e">02cddc7a0d0c</td></tr>
+    
+    <tr><td><a class="mono" href="compliance-evidence-11.html">11</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Grup oluşturuldu</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="4626b7b9d0cb960e6e985beca3ba03c5ef06fd231fe96e8ba1afa68bd1a46e25">4626b7b9d0cb</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">10</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Ajan kaydoldu</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="3155a4ad067890cac8b966642fad9d34f8f18fb6ee4423f09de05fb91a863a8e">3155a4ad0678</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">9</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Ajan kaydoldu</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="c28848a82ad75cb8ebe689bc25ac18b06e069725aa9c5aefab8b5667fac87618">c28848a82ad7</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">8</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Ajan kaydoldu</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="579edafe240842d1e7113435f3ae91df75a2bd225bb6e1325bda293674ce9521">579edafe2408</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">7</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Ajan kaydoldu</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="ee1869c36dfb666bb99b10eb6c1328925840d8e8b1d88dcdc5bf1a6bf6a56919">ee1869c36dfb</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">6</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Ajan kaydoldu</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="67fdba22849249f370c772fb1ddb26e781b4486c581c8c1f91178316aa1bd4e4">67fdba228492</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">5</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Ajan kaydoldu</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="d0568112ce0edffb876778c144f9f26cda7526e713e2fbafaa95f2d665e2ed6c">d0568112ce0e</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">4</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Kayıt anahtarı oluşturuldu</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="a1688df1a4d7c07200c091cf7e6727bc98228a535312eea3a55d6968bc82ad23">a1688df1a4d7</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">3</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>Giriş yapıldı</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="379c105a045024010ad11132f84acafe0a6549da397655ee67312501c3bebc24">379c105a0450</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">1</a></td><td>Değişiklik işi</td><td>23.11.2026 21:09</td><td>web-02</td>
+      <td>Güncelleme önizlemesi <span class="muted">· Başarılı</span></td><td class="cell-sub">baseline:BASE-01, isms:ISMS-04, isms:ISMS-05, itsm:ITSM-01</td><td class="mono" title="1f15e54df9cd1853fa262552a9ad961320131383f38f40bd619f21d205bca4d2">1f15e54df9cd</td></tr>
+    
+    <tr><td><a class="mono" href="#demo-unavailable">2</a></td><td>Denetim kaydı</td><td>23.11.2026 21:09</td><td></td>
+      <td>İlk yönetici oluşturuldu</td><td class="cell-sub">baseline:BASE-07, general:GEN-11, isms:ISMS-06</td><td class="mono" title="82a511193b40bc42079edbe4b4fae261322baff1bdfa3370ab1ec3bd5acc3869">82a511193b40</td></tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+  
+</section>
+
+<section class="panel panel--flush report__section">
+  <div class="panel__head"><h2 class="panel__title">13. Eksik kanıtlar ve iyileştirme önerileri <span class="muted">(21)</span></h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Kontrol</th><th>Otomatik sonuç</th><th>Eksikler</th><th>Öneriler</th></tr></thead>
+    <tbody>
+    
+    <tr><td>Bilgi Güvenliği Yönetimi Denetimleri<div><strong class="mono">ISMS-02</strong> Teknik güvenlik açıklarının yönetimi</div></td><td><span class="pill pill--failed">Sapma</span></td>
+      <td class="cell-sub"><div>CISA son tarihi geçmiş 44 istismar edilen açık var.</div><div>Dönemde güncelleme işi çalışmadı.</div><div>Bekleyen güvenlik güncellemesi olmayan sunucu oranı %33,3, hedef %90.</div></td><td class="cell-sub"><div>CISA KEV listesindeki açıkları son tarihlerinden önce giderin.</div><div>Başarısız güncelleme işlerinin çıktısını inceleyin ve kalan paketleri yeniden deneyin; düzenli güncelleme zamanlaması tanımlayın.</div><div>Bekleyen güvenlik güncellemelerini zamanlanmış veya kademeli güncellemelerle uygulayın.</div></td></tr>
+    
+    <tr><td>Bilgi Güvenliği Yönetimi Denetimleri<div><strong class="mono">ISMS-03</strong> Yapılandırma yönetimi</div></td><td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td class="cell-sub"><div>Tanımlı sunucu standardı yok.</div></td><td class="cell-sub"><div>Sunucu standartları tanımlayın ve tespit edilen sapmaları giderin.</div></td></tr>
+    
+    <tr><td>Bilgi Güvenliği Yönetimi Denetimleri<div><strong class="mono">ISMS-05</strong> Değişiklik yönetimi</div></td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Dönemde güncelleme işi çalışmadı.</div><div>Manuel kanıt eksik: Süreç belgesi.</div></td><td class="cell-sub"><div>Başarısız güncelleme işlerinin çıktısını inceleyin ve kalan paketleri yeniden deneyin; düzenli güncelleme zamanlaması tanımlayın.</div><div>Süreç tanımını Denetim Kanıtları&#39;na manuel kanıt olarak ekleyin ve bu kontrole eşleyin.</div></td></tr>
+    
+    <tr><td>Bilgi Güvenliği Yönetimi Denetimleri<div><strong class="mono">ISMS-09</strong> Güvenli kimlik doğrulama ve ayrıcalıklı erişim</div></td><td><span class="pill pill--failed">Sapma</span></td>
+      <td class="cell-sub"><div>1 yöneticide çok faktörlü doğrulama yok.</div></td><td class="cell-sub"><div>Tüm yöneticilerde iki aşamalı doğrulamayı etkinleştirin ve zorunlu kılın.</div></td></tr>
+    
+    <tr><td>Bilgi Güvenliği Yönetimi Denetimleri<div><strong class="mono">ISMS-12</strong> Politikalar ve prosedürler</div></td><td><span class="pill pill--in_progress">Manuel kanıt mevcut</span></td>
+      <td class="cell-sub"></td><td class="cell-sub"></td></tr>
+    
+    <tr><td>BT Temel Koruma Denetimleri<div><strong class="mono">BASE-01</strong> Yama ve değişiklik yönetimi</div></td><td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td class="cell-sub"><div>Dönemde güncelleme işi çalışmadı.</div><div>Manuel kanıt eksik: Süreç belgesi.</div></td><td class="cell-sub"><div>Başarısız güncelleme işlerinin çıktısını inceleyin ve kalan paketleri yeniden deneyin; düzenli güncelleme zamanlaması tanımlayın.</div><div>Süreç tanımını Denetim Kanıtları&#39;na manuel kanıt olarak ekleyin ve bu kontrole eşleyin.</div></td></tr>
+    
+    <tr><td>BT Temel Koruma Denetimleri<div><strong class="mono">BASE-02</strong> Güvenlik güncellemelerinin zamanında uygulanması</div></td><td><span class="pill pill--failed">Sapma</span></td>
+      <td class="cell-sub"><div>CISA son tarihi geçmiş 44 istismar edilen açık var.</div><div>Bekleyen güvenlik güncellemesi olmayan sunucu oranı %33,3, hedef %90.</div></td><td class="cell-sub"><div>CISA KEV listesindeki açıkları son tarihlerinden önce giderin.</div><div>Bekleyen güvenlik güncellemelerini zamanlanmış veya kademeli güncellemelerle uygulayın.</div></td></tr>
+    
+    <tr><td>BT Temel Koruma Denetimleri<div><strong class="mono">BASE-03</strong> Linux sunucular</div></td><td><span class="pill pill--partial">Kısmi</span></td>
+      <td class="cell-sub"><div>Bekleyen güvenlik güncellemesi olmayan sunucu oranı %33,3, hedef %90.</div></td><td class="cell-sub"><div>Bekleyen güvenlik güncellemelerini zamanlanmış veya kademeli güncellemelerle uygulayın.</div></td></tr>
+    
+    <tr><td>BT Temel Koruma Denetimleri<div><strong class="mono">BASE-09</strong> Kimlik ve yetki yönetimi</div></td><td><span class="pill pill--failed">Sapma</span></td>
+      <td class="cell-sub"><div>1 yöneticide çok faktörlü doğrulama yok.</div></td><td class="cell-sub"><div>Tüm yöneticilerde iki aşamalı doğrulamayı etkinleştirin ve zorunlu kılın.</div></td></tr>
+    
+    <tr><td>BT Temel Koruma Denetimleri<div><strong class="mono">BASE-10</strong> Güvenlik olaylarının tespiti</div></td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>CISA son tarihi geçmiş 44 istismar edilen açık var.</div></td><td class="cell-sub"><div>CISA KEV listesindeki açıkları son tarihlerinden önce giderin.</div></td></tr>
+    
+    <tr><td>BT Temel Koruma Denetimleri<div><strong class="mono">BASE-11</strong> Yapılandırma standartları</div></td><td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td class="cell-sub"><div>Tanımlı sunucu standardı yok.</div></td><td class="cell-sub"><div>Sunucu standartları tanımlayın ve tespit edilen sapmaları giderin.</div></td></tr>
+    
+    <tr><td>BT Temel Koruma Denetimleri<div><strong class="mono">BASE-12</strong> Belgelenmiş yama ve değişiklik konsepti</div></td><td><span class="pill pill--in_progress">Manuel kanıt mevcut</span></td>
+      <td class="cell-sub"></td><td class="cell-sub"></td></tr>
+    
+    <tr><td>BT Hizmet Yönetimi Değerlendirmeleri<div><strong class="mono">ITSM-01</strong> Değişiklik etkinleştirme</div></td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Dönemde güncelleme işi çalışmadı.</div></td><td class="cell-sub"><div>Başarısız güncelleme işlerinin çıktısını inceleyin ve kalan paketleri yeniden deneyin; düzenli güncelleme zamanlaması tanımlayın.</div></td></tr>
+    
+    <tr><td>BT Hizmet Yönetimi Değerlendirmeleri<div><strong class="mono">ITSM-02</strong> Sürüm ve dağıtım yönetimi</div></td><td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td class="cell-sub"><div>Dönemde güncelleme işi çalışmadı.</div></td><td class="cell-sub"><div>Başarısız güncelleme işlerinin çıktısını inceleyin ve kalan paketleri yeniden deneyin; düzenli güncelleme zamanlaması tanımlayın.</div></td></tr>
+    
+    <tr><td>BT Hizmet Yönetimi Değerlendirmeleri<div><strong class="mono">ITSM-03</strong> Hizmet yapılandırma yönetimi</div></td><td><span class="pill pill--succeeded">Kanıt yeterli</span></td>
+      <td class="cell-sub"><div>Tanımlı sunucu standardı yok.</div></td><td class="cell-sub"><div>Sunucu standartları tanımlayın ve tespit edilen sapmaları giderin.</div></td></tr>
+    
+    <tr><td>BT Hizmet Yönetimi Değerlendirmeleri<div><strong class="mono">ITSM-06</strong> Bilgi güvenliği yönetimi</div></td><td><span class="pill pill--failed">Sapma</span></td>
+      <td class="cell-sub"><div>CISA son tarihi geçmiş 44 istismar edilen açık var.</div><div>1 yöneticide çok faktörlü doğrulama yok.</div></td><td class="cell-sub"><div>CISA KEV listesindeki açıkları son tarihlerinden önce giderin.</div><div>Tüm yöneticilerde iki aşamalı doğrulamayı etkinleştirin ve zorunlu kılın.</div></td></tr>
+    
+    <tr><td>BT Hizmet Yönetimi Değerlendirmeleri<div><strong class="mono">ITSM-08</strong> Olay ve sorun yönetimi süreci</div></td><td><span class="pill pill--queued">Manuel kanıt gerekli</span></td>
+      <td class="cell-sub"><div>Manuel kanıt eksik: Süreç belgesi.</div></td><td class="cell-sub"><div>Süreç tanımını Denetim Kanıtları&#39;na manuel kanıt olarak ekleyin ve bu kontrole eşleyin.</div></td></tr>
+    
+    <tr><td>Genel Güvenlik ve Yama Uyumu<div><strong class="mono">GEN-02</strong> Süresi geçmiş istismar edilen açık yok</div></td><td><span class="pill pill--failed">Sapma</span></td>
+      <td class="cell-sub"><div>CISA son tarihi geçmiş 44 istismar edilen açık var.</div></td><td class="cell-sub"><div>CISA KEV listesindeki açıkları son tarihlerinden önce giderin.</div></td></tr>
+    
+    <tr><td>Genel Güvenlik ve Yama Uyumu<div><strong class="mono">GEN-03</strong> Güvenlik güncellemesi güncelliği</div></td><td><span class="pill pill--partial">Kısmi</span></td>
+      <td class="cell-sub"><div>Bekleyen güvenlik güncellemesi olmayan sunucu oranı %33,3, hedef %90.</div></td><td class="cell-sub"><div>Bekleyen güvenlik güncellemelerini zamanlanmış veya kademeli güncellemelerle uygulayın.</div></td></tr>
+    
+    <tr><td>Genel Güvenlik ve Yama Uyumu<div><strong class="mono">GEN-04</strong> Güncelleme işlerinin başarısı</div></td><td><span class="pill pill--warning">Kanıt eksik</span></td>
+      <td class="cell-sub"><div>Dönemde güncelleme işi çalışmadı.</div></td><td class="cell-sub"><div>Başarısız güncelleme işlerinin çıktısını inceleyin ve kalan paketleri yeniden deneyin; düzenli güncelleme zamanlaması tanımlayın.</div></td></tr>
+    
+    <tr><td>Genel Güvenlik ve Yama Uyumu<div><strong class="mono">GEN-09</strong> Yöneticilerde çok faktörlü doğrulama</div></td><td><span class="pill pill--failed">Sapma</span></td>
+      <td class="cell-sub"><div>1 yöneticide çok faktörlü doğrulama yok.</div></td><td class="cell-sub"><div>Tüm yöneticilerde iki aşamalı doğrulamayı etkinleştirin ve zorunlu kılın.</div></td></tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+<p class="footnote">Güvenlik açığı kimlikleri, başlıkları ve paket adları kaynaktaki özgün haliyle gösterilir. Dışa aktarımlar saklanan sürümden üretilir; aynı sürüm her zaman aynı içeriği verir.</p>
+
+  </main>
+</div>
+
+</body>
+</html>

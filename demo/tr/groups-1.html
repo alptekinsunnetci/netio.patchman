@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Web · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="groups.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="groups.html">Sunucu Grupları</a> / <span>Web</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Web</h1>
+    <p class="pagehead__sub">Web ve uygulama sunucuları · 2 sunucu</p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="button" href="servers.html" title="Sunucu Envanteri&#39;nde sunucuları seçip &#34;Gruba ekle&#34; düğmesini kullanın."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg>Sunucu ekle</a>
+    <a class="button" href="#demo-unavailable"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg>Uyum Raporları</a>
+  </div>
+</header>
+
+<section class="stats stats--compact">
+  <a class="stat" href="#demo-unavailable"><p class="stat__label">Grup güvenlik skoru</p><p class="stat__value"><span class="score score--critical">20</span></p><p class="stat__meta">En düşük: 20</p></a>
+  <div class="stat"><p class="stat__label">Kritik Güvenlik Açığı</p><p class="stat__value">653</p><p class="stat__meta">4893 yüksek önem dereceli</p></div>
+  <div class="stat stat--critical"><p class="stat__label">İstismar Edilen Açık</p><p class="stat__value">17</p><p class="stat__meta">CISA KEV kataloğunda</p></div>
+  <div class="stat"><p class="stat__label">Sunucu sayısı</p><p class="stat__value">2</p><p class="stat__meta">Oluşturulma: 23.11.2026</p></div>
+</section>
+
+<form method="post" action="#" data-confirm="Seçili sunucular “Web” grubundan çıkarılsın mı?">
+<input type="hidden" name="_csrf" value="demo"><input type="hidden" name="group_id" value="1"><input type="hidden" name="op" value="remove"><input type="hidden" name="back" value="/groups/1">
+<section class="panel panel--flush">
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th class="check"><input type="checkbox" data-check-all="host_ids" aria-label="Tümünü seç"></th><th>Sunucu Adı</th><th>İşletim Sistemi</th><th>Durum</th><th class="num">Skor</th><th>Güvenlik Açıkları</th><th class="num">Güvenlik Güncellemesi</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td class="check"><input type="checkbox" name="host_ids" value="1" aria-label="web-01"></td>
+      <td><a href="servers-1.html"><strong>web-01</strong></a> <span class="pill pill--warning">Yeniden başlatma gerekli</span></td>
+      <td>Ubuntu 24.04.4 LTS<div class="cell-sub">KVM sanal makine</div></td>
+      <td><span class="pill pill--offline">Çevrimdışı</span></td>
+      <td class="num"><a href="servers-1-score.html"><span class="score score--critical">20</span></a></td>
+      <td><span class="sevcounts"><span class="sevcount sevcount--critical" title="Kritik">653</span><span class="sevcount sevcount--high" title="Yüksek">4893</span><span class="sevcount sevcount--medium" title="Orta">4571</span><span class="sevcount sevcount--low" title="Düşük">1456</span><span class="sevcount sevcount--unknown" title="Bilinmiyor">111</span></span></td>
+      <td class="num">236</td>
+    </tr>
+    
+    <tr>
+      <td class="check"><input type="checkbox" name="host_ids" value="2" aria-label="web-02"></td>
+      <td><a href="servers-2.html"><strong>web-02</strong></a></td>
+      <td>Ubuntu 24.04.4 LTS<div class="cell-sub">KVM sanal makine</div></td>
+      <td><span class="pill pill--offline">Çevrimdışı</span></td>
+      <td class="num"><a href="servers-2-score.html"><span class="score score--critical">20</span></a></td>
+      <td><span class="sevcounts"><span class="sevcount sevcount--critical" title="Kritik">646</span><span class="sevcount sevcount--high" title="Yüksek">4852</span><span class="sevcount sevcount--medium" title="Orta">4506</span><span class="sevcount sevcount--low" title="Düşük">1434</span><span class="sevcount sevcount--unknown" title="Bilinmiyor">93</span></span></td>
+      <td class="num">156</td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  <div class="panel__foot"><button class="button" type="submit">Seçilenleri gruptan çıkar</button></div>
+  
+</section>
+</form>
+<p class="pager__info pager__info--single">Toplam 2 kayıt</p>
+
+
+<section class="panel" aria-labelledby="trend-title">
+  <div class="panel__head">
+    <h2 class="panel__title" id="trend-title">Günlük eğilim</h2>
+    <span class="panel__link muted">27.08.2026 – 24.11.2026</span>
+  </div>
+  
+  
+  <div class="trends trends--single">
+    
+    <figure class="trend" data-trend>
+      <figcaption class="trend__head"><span class="trend__title">Ortalama güvenlik skoru</span><span class="trend__last">20</span></figcaption>
+      <div class="trend__plot" data-values=",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,20,20" data-labels="27.08.2026|28.08.2026|29.08.2026|30.08.2026|31.08.2026|01.09.2026|02.09.2026|03.09.2026|04.09.2026|05.09.2026|06.09.2026|07.09.2026|08.09.2026|09.09.2026|10.09.2026|11.09.2026|12.09.2026|13.09.2026|14.09.2026|15.09.2026|16.09.2026|17.09.2026|18.09.2026|19.09.2026|20.09.2026|21.09.2026|22.09.2026|23.09.2026|24.09.2026|25.09.2026|26.09.2026|27.09.2026|28.09.2026|29.09.2026|30.09.2026|01.10.2026|02.10.2026|03.10.2026|04.10.2026|05.10.2026|06.10.2026|07.10.2026|08.10.2026|09.10.2026|10.10.2026|11.10.2026|12.10.2026|13.10.2026|14.10.2026|15.10.2026|16.10.2026|17.10.2026|18.10.2026|19.10.2026|20.10.2026|21.10.2026|22.10.2026|23.10.2026|24.10.2026|25.10.2026|26.10.2026|27.10.2026|28.10.2026|29.10.2026|30.10.2026|31.10.2026|01.11.2026|02.11.2026|03.11.2026|04.11.2026|05.11.2026|06.11.2026|07.11.2026|08.11.2026|09.11.2026|10.11.2026|11.11.2026|12.11.2026|13.11.2026|14.11.2026|15.11.2026|16.11.2026|17.11.2026|18.11.2026|19.11.2026|20.11.2026|21.11.2026|22.11.2026|23.11.2026|24.11.2026" data-name="Ortalama güvenlik skoru" role="img" aria-label="Ortalama güvenlik skoru: dönem başında 20, şu anda 20">
+        <span class="trend__tick trend__tick--max">100</span><span class="trend__tick trend__tick--min">0</span>
+        <svg class="trend__svg" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <line class="trend__grid" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="trend__grid" x1="0" y1="20" x2="100" y2="20"></line>
+          <line class="trend__base" x1="0" y1="40" x2="100" y2="40"></line>
+          <path class="trend__area" d="M98.88 40 L98.88 32 L100 32 L100 40 Z"></path>
+          <path class="trend__line" d="M98.88 32 L100 32"></path>
+          <line class="trend__cross" x1="0" y1="0" x2="0" y2="40" hidden></line>
+        </svg>
+        <span class="trend__dot" hidden></span>
+        <span class="trend__tip" role="status" hidden></span>
+      </div>
+    </figure>
+    
+  </div>
+
+  <details class="details">
+    <summary>Günlük değerleri tablo olarak göster</summary>
+    <div class="table-wrap">
+    
+    <table class="table">
+      <thead><tr><th>Gün</th><th class="num">Ortalama güvenlik skoru</th></tr></thead>
+      <tbody><tr><td>23.11.2026</td><td class="num">20</td></tr><tr><td>24.11.2026</td><td class="num">20</td></tr></tbody>
+    </table>
+    
+    </div>
+  </details>
+  
+</section>
+
+
+
+<div class="grid-2">
+  <section class="panel">
+    <h2 class="panel__title">Grubu düzenle</h2>
+    <form class="form" method="post" action="#">
+      <input type="hidden" name="_csrf" value="demo">
+      <label class="field"><span class="field__label">Grup adı</span><input class="field__input" type="text" name="name" value="Web" maxlength="60" required></label>
+      <label class="field"><span class="field__label">Açıklama</span><input class="field__input" type="text" name="description" value="Web ve uygulama sunucuları" maxlength="500"></label>
+      <label class="field"><span class="field__label">Güncellenmeyecek paketler</span><textarea class="field__input mono" name="exclude" rows="2" maxlength="4000"></textarea><span class="field__hint">Bu gruptaki sunucularda güncelleme işlerinin dokunmayacağı paketler (ör. kernel*, mysql-*). Genel listeye ve sunucu listelerine eklenir.</span></label>
+      <div><button class="button button--primary" type="submit">Kaydet</button></div>
+    </form>
+  </section>
+  <section class="panel panel--danger">
+    <h2 class="panel__title">Grubu sil</h2>
+    <p class="muted">Sunucular silinmez, yalnızca bu gruptan çıkar. Bu grubu hedefleyen zamanlamalar devre dışı bırakılır ve hedefleri boşaltılır; hiçbir zaman tüm sunuculara yönelmez.</p>
+    <form method="post" action="#" data-confirm="“Web” grubu silinsin mi?"><input type="hidden" name="_csrf" value="demo">
+      <button class="button button--danger" type="submit">Grubu sil</button></form>
+  </section>
+</div>
+
+
+  </main>
+</div>
+
+</body>
+</html>

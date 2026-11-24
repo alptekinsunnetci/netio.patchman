@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>web-02 · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink is-active" href="servers.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="servers.html">Server Inventory</a> / <span>web-02</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">web-02 <span class="pill pill--offline">Offline</span> </h1>
+    <p class="pagehead__sub">Ubuntu 24.04.4 LTS · <span class="mono">6.8.0-71-generic</span> · KVM virtual machine · last seen 13 h ago</p>
+    <div class="tags"><a class="tag" href="groups-1.html">Web</a></div>
+  </div>
+  
+  <div class="pagehead__actions">
+    <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="refresh">
+      <button class="button" type="submit" title="Asks the agent to send its package list again right away."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-refresh"></use></svg>Refresh inventory</button></form>
+    
+    <form method="post" action="#" data-confirm="All security updates will be installed on web-02. Continue?"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="upgrade_security">
+      <button class="button button--primary" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg>Apply security updates (156)</button></form>
+    <form method="post" action="#" data-confirm="All pending updates will be installed on web-02. Continue?"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="upgrade_all">
+      <button class="button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg>Apply all updates (220)</button></form>
+    
+    
+    <form method="post" action="#" data-confirm="web-02 will reboot within 1 minute and be unavailable meanwhile. Continue?"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="reboot">
+      <button class="button" type="submit" title="Reboots the server in 1 minute. The agent sends a new inventory after startup."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-power"></use></svg>Reboot</button></form>
+    
+    
+  </div>
+  
+</header>
+
+
+
+
+
+
+<section class="stats stats--compact stats--5">
+  <a class="stat" href="servers-2-score.html"><p class="stat__label">Security score</p><p class="stat__value"><span class="score score--critical">20</span></p><p class="stat__meta">Critical</p></a>
+  <div class="stat"><p class="stat__label">Vulnerabilities</p><p class="stat__value">11531</p><p class="stat__meta"><span class="sevcounts"><span class="sevcount sevcount--critical" title="Critical">646</span><span class="sevcount sevcount--high" title="High">4852</span><span class="sevcount sevcount--medium" title="Medium">4506</span><span class="sevcount sevcount--low" title="Low">1434</span><span class="sevcount sevcount--unknown" title="Unknown">93</span></span></p></div>
+  <div class="stat"><p class="stat__label">Security Updates</p><p class="stat__value">156</p><p class="stat__meta">220 updates in total</p></div>
+  <div class="stat"><p class="stat__label">Installed Packages</p><p class="stat__value">642</p><p class="stat__meta">apt</p></div>
+  <div class="stat"><p class="stat__label">Last Scan</p><p class="stat__value stat__value--sm">12 h ago</p><p class="stat__meta">Last Inventory: 13 h ago</p></div>
+</section>
+
+<nav class="tabs" aria-label="Server details">
+  <a class="tab" href="servers-2.html">Vulnerabilities</a>
+  <a class="tab" href="servers-2--tab-updates.html">Pending Updates <span class="tab__count">220</span></a>
+  <a class="tab" href="servers-2--tab-packages.html">Installed Packages <span class="tab__count">642</span></a>
+  <a class="tab is-active" href="servers-2--tab-watched.html">Watched <span class="tab__count">0</span></a>
+  <a class="tab" href="servers-2--tab-software.html">Software</a>
+  <a class="tab" href="servers-2--tab-health.html">Health</a>
+  <a class="tab" href="servers-2--tab-jobs.html">Job History</a>
+  <a class="tab" href="servers-2--tab-info.html">System Information</a>
+</nav>
+
+
+<form class="filters" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo"><input type="hidden" name="watch" value="1"><input type="hidden" name="back" value="/servers/2?tab=watched">
+  <input class="field__input mono" type="text" name="name" maxlength="200" required placeholder="Package name, e.g. nginx" aria-label="Package">
+  <button class="button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg>Watch</button>
+</form>
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">Your watched packages on this server</h2>
+    <a class="panel__link" href="dashboard.html">See across all servers</a>
+  </div>
+  <div class="empty"><p class="empty__body">None of your watched packages is installed on this server. Add one with the star on the Installed Packages tab or by typing its name above.</p></div>
+</section>
+
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

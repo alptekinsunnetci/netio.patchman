@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Audit Evidence · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-evidence.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Audit Evidence</h1>
+    <p class="pagehead__sub">The shared evidence repository every framework uses. Items never change and are protected by a hash chain.</p>
+  </div>
+</header>
+
+<form class="filters" method="get" action="#">
+  
+  
+  <input class="field__input" type="search" name="q" value="" placeholder="Host, subject or actor" aria-label="Host, subject or actor">
+  <select class="field__input" name="kind" aria-label="Kind">
+    <option value="">All kinds</option>
+    <option value="update_job">Update job</option><option value="change_job">Change job</option><option value="vuln_resolved">Resolved vulnerability</option><option value="audit_event">Audit log entry</option><option value="drift_detected">Standard deviation</option><option value="backup_result">Backup</option><option value="inventory_snapshot">Daily inventory</option><option value="manual">Manual evidence</option>
+  </select>
+  <select class="field__input" name="platform" aria-label="Platform">
+    <option value="">All platforms</option>
+    <option value="linux">Linux</option><option value="windows_server">Windows Server</option><option value="windows_10">Windows 10</option><option value="windows_11">Windows 11</option><option value="windows_other">Other Windows</option>
+  </select>
+  <input class="field__input" type="date" name="from" value="" aria-label="From">
+  <input class="field__input" type="date" name="to" value="" aria-label="To">
+  <button class="button" type="submit">Filter</button>
+</form>
+
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">Evidence items <span class="muted">(33)</span></h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Kind</th><th>Time</th><th>Host</th><th>Subject</th><th>Actor</th><th>SHA-256</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">33</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-24 09:57</td>
+      <td></td>
+      <td>Compliance report exported</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="e32651a58021adc471c0903ca816149af32d9661563240e7329b3bc0b482d98a">e32651a58021</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">32</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-24 09:57</td>
+      <td></td>
+      <td>Compliance report exported</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="654d0c1b5fbc8bff25e7a20ebedefd4a844769f01c8a4542cadbedf20992ed41">654d0c1b5fbc</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">31</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-24 09:57</td>
+      <td></td>
+      <td>Compliance report exported</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="fde34461b2c53f80a61bf93b95acb2305611d53be13409bbb0a3b3bd540a03bf">fde34461b2c5</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">30</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-24 09:57</td>
+      <td></td>
+      <td>Compliance report exported</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="dae2d804f1a5663194b554b3af93d2af87b24a1a44f24e07bee6b854290f5388">dae2d804f1a5</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">29</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-24 09:57</td>
+      <td></td>
+      <td>Compliance report exported</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="c05a60143c2b4bceb13379ec912ebf87756615c6ca32e72dbd3e8217e01a7917">c05a60143c2b</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">28</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-24 09:57</td>
+      <td></td>
+      <td>Compliance report exported</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="be7db49f3484c11c1b7006305803738e7a2bf47c8699a8ada1465d8f51512f18">be7db49f3484</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">27</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-24 09:57</td>
+      <td></td>
+      <td>Signed in</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="577d95beb2e0ac190e9dad33653f214281f7c1b6de09dac4ca436659bfe715b8">577d95beb2e0</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">25</a></td>
+      <td>Backup</td>
+      <td>2026-11-24 09:57</td>
+      <td></td>
+      <td><span class="mono">database</span> <span class="muted">succeeded</span></td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="0cf151c14e0cb1c7553212b847959956ff18f4ae30db8732eb26905c09edd67b">0cf151c14e0c</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">26</a></td>
+      <td>Daily inventory</td>
+      <td>2026-11-24 02:59</td>
+      <td></td>
+      <td><span class="mono">2026-11-23</span></td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="17cca43b70ac20d25912e2a01e8c34e54358bbbc6da445579ec65caf84cd71c9">17cca43b70ac</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">24</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:42</td>
+      <td></td>
+      <td>Compliance report exported</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="c38cddb904ef6776939796539341800d54cdfe4788d3c0a8adcc5acb8656ae5c">c38cddb904ef</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">23</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:40</td>
+      <td></td>
+      <td>Compliance report exported</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="8ec12a9ce6d03d101928b4c8ca7c74a47fd8cba958bf6251617031281f59cf65">8ec12a9ce6d0</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">22</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:38</td>
+      <td></td>
+      <td>Signed in</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="17fc46981162507229c25b7f7be00a98657e488b0e27ba2b15b189dd80bcf499">17fc46981162</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">21</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:38</td>
+      <td></td>
+      <td>Compliance report created</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="92166ccd0b18ba921db6be9a6960ef07082024404dbe0cb66450051fe733a2d4">92166ccd0b18</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">20</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:38</td>
+      <td></td>
+      <td>Manual evidence added</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="04ebfbeaac702a7445558ec639fc2a9d99fd9ebddc9034fc3b0a5bbba93dfe9c">04ebfbeaac70</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-18.html">18</a></td>
+      <td>Manual evidence</td>
+      <td>2026-11-23 21:38</td>
+      <td></td>
+      <td><span class="mono">Bilgi güvenliği politikası v4</span></td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="98342fc929f3e65a31558043a8782132243ccaa1ba2f2b8cf38785a69fec3654">98342fc929f3</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">19</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:38</td>
+      <td></td>
+      <td>Signed in</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="98e7bd060834e1708191897bf9fbf7a991bc4014da97b83f3bdd1f16e69b5611">98e7bd060834</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-17.html">17</a></td>
+      <td>Backup</td>
+      <td>2026-11-23 21:10</td>
+      <td></td>
+      <td><span class="mono">database</span> <span class="muted">succeeded</span></td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="d7832c1d957181421047d20f9984b19675ac66fb26a2736113e7534772c5b8e4">d7832c1d9571</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-16.html">16</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Update job started</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="b31abbfa8eddf6470f602069858d9d1047ab283fc3339560c350a3d653a6e8b6">b31abbfa8edd</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-15.html">15</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Schedule created</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="15f2a42755c84dbf1c5e12595f07cecd5bbc9dac28270791206e9c17cfe494c3">15f2a42755c8</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-14.html">14</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Servers added to group</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="1270b957d7cb917b8b4bfe55cf9b0b2bf5bd2d2ce586248877ad4e2b902ae357">1270b957d7cb</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-13.html">13</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Servers added to group</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="fdc733ba4e4ce5069a026d54be00a0317a4a34eef5aceed1a16af6fffff9fd06">fdc733ba4e4c</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-12.html">12</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Group created</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="02cddc7a0d0cffd394937991bf2a293cc730f97b3ddfbc3b6cb2db917519198e">02cddc7a0d0c</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="compliance-evidence-11.html">11</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Group created</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="4626b7b9d0cb960e6e985beca3ba03c5ef06fd231fe96e8ba1afa68bd1a46e25">4626b7b9d0cb</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">10</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Agent enrolled</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="3155a4ad067890cac8b966642fad9d34f8f18fb6ee4423f09de05fb91a863a8e">3155a4ad0678</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">9</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Agent enrolled</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="c28848a82ad75cb8ebe689bc25ac18b06e069725aa9c5aefab8b5667fac87618">c28848a82ad7</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">8</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Agent enrolled</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="579edafe240842d1e7113435f3ae91df75a2bd225bb6e1325bda293674ce9521">579edafe2408</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">7</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Agent enrolled</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="ee1869c36dfb666bb99b10eb6c1328925840d8e8b1d88dcdc5bf1a6bf6a56919">ee1869c36dfb</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">6</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Agent enrolled</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="67fdba22849249f370c772fb1ddb26e781b4486c581c8c1f91178316aa1bd4e4">67fdba228492</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">5</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Agent enrolled</td>
+      <td class="cell-sub">system</td>
+      <td class="mono" title="d0568112ce0edffb876778c144f9f26cda7526e713e2fbafaa95f2d665e2ed6c">d0568112ce0e</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">4</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Enrollment token created</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="a1688df1a4d7c07200c091cf7e6727bc98228a535312eea3a55d6968bc82ad23">a1688df1a4d7</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">3</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>Signed in</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="379c105a045024010ad11132f84acafe0a6549da397655ee67312501c3bebc24">379c105a0450</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">1</a></td>
+      <td>Change job</td>
+      <td>2026-11-23 21:09</td>
+      <td>web-02<div class="cell-sub">Linux</div></td>
+      <td>Update preview <span class="muted">· Succeeded</span></td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="1f15e54df9cd1853fa262552a9ad961320131383f38f40bd619f21d205bca4d2">1f15e54df9cd</td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">2</a></td>
+      <td>Audit log entry</td>
+      <td>2026-11-23 21:09</td>
+      <td></td>
+      <td>First administrator created</td>
+      <td class="cell-sub">admin@example.test</td>
+      <td class="mono" title="82a511193b40bc42079edbe4b4fae261322baff1bdfa3370ab1ec3bd5acc3869">82a511193b40</td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+<p class="pager__info pager__info--single">33 records</p>
+
+
+<form class="form" method="post" action="#" id="manual">
+  <input type="hidden" name="_csrf" value="demo">
+  <section class="panel">
+    <h2 class="panel__title">Add manual evidence</h2>
+    <p class="muted">Record evidence that cannot be collected automatically, such as policy and process documents. The name, date and location of the document are stored, not the file.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Document title</span>
+        <input class="field__input" type="text" name="title" maxlength="200" required placeholder="e.g. Patch management procedure v3"></label>
+      <label class="field"><span class="field__label">Document date</span>
+        <input class="field__input" type="date" name="date" value="2026-11-24" max="2026-11-24"></label>
+    </div>
+    <label class="field"><span class="field__label">Location or reference</span>
+      <input class="field__input" type="text" name="reference" maxlength="500" placeholder="e.g. DMS-2026-114 or https://intranet.example.test/policies">
+      <span class="field__hint">Where the auditor finds the document: a document management number, address or file path.</span></label>
+    <label class="field"><span class="field__label">Description</span>
+      <textarea class="field__input" name="description" rows="3" maxlength="2000"></textarea></label>
+    <label class="field"><span class="field__label">Mapped controls</span>
+      <select class="field__input" name="controls" multiple size="10" required>
+        <option value="isms:ISMS-01">Information security management audits · ISMS-01 Asset inventory</option><option value="isms:ISMS-02">Information security management audits · ISMS-02 Technical vulnerability management</option><option value="isms:ISMS-03">Information security management audits · ISMS-03 Configuration management</option><option value="isms:ISMS-04">Information security management audits · ISMS-04 Software changes on operational systems</option><option value="isms:ISMS-05">Information security management audits · ISMS-05 Change management</option><option value="isms:ISMS-06">Information security management audits · ISMS-06 Logging</option><option value="isms:ISMS-07">Information security management audits · ISMS-07 Monitoring activities</option><option value="isms:ISMS-08">Information security management audits · ISMS-08 Information backup</option><option value="isms:ISMS-09">Information security management audits · ISMS-09 Secure authentication and privileged access</option><option value="isms:ISMS-10">Information security management audits · ISMS-10 System lifecycle</option><option value="isms:ISMS-11">Information security management audits · ISMS-11 Risk treatment</option><option value="isms:ISMS-12">Information security management audits · ISMS-12 Policies and procedures</option><option value="baseline:BASE-01">IT baseline protection audits · BASE-01 Patch and change management</option><option value="baseline:BASE-02">IT baseline protection audits · BASE-02 Timely security updates</option><option value="baseline:BASE-03">IT baseline protection audits · BASE-03 Linux servers</option><option value="baseline:BASE-04">IT baseline protection audits · BASE-04 Windows servers</option><option value="baseline:BASE-05">IT baseline protection audits · BASE-05 Windows clients</option><option value="baseline:BASE-06">IT baseline protection audits · BASE-06 Orderly IT administration and inventory</option><option value="baseline:BASE-07">IT baseline protection audits · BASE-07 Logging</option><option value="baseline:BASE-08">IT baseline protection audits · BASE-08 Data backup</option><option value="baseline:BASE-09">IT baseline protection audits · BASE-09 Identity and authorization management</option><option value="baseline:BASE-10">IT baseline protection audits · BASE-10 Detection of security events</option><option value="baseline:BASE-11">IT baseline protection audits · BASE-11 Configuration standards</option><option value="baseline:BASE-12">IT baseline protection audits · BASE-12 Documented patch and change concept</option><option value="itsm:ITSM-01">IT service management assessments · ITSM-01 Change enablement</option><option value="itsm:ITSM-02">IT service management assessments · ITSM-02 Release and deployment management</option><option value="itsm:ITSM-03">IT service management assessments · ITSM-03 Service configuration management</option><option value="itsm:ITSM-04">IT service management assessments · ITSM-04 IT asset management</option><option value="itsm:ITSM-05">IT service management assessments · ITSM-05 Monitoring and event management</option><option value="itsm:ITSM-06">IT service management assessments · ITSM-06 Information security management</option><option value="itsm:ITSM-07">IT service management assessments · ITSM-07 Service level management</option><option value="itsm:ITSM-08">IT service management assessments · ITSM-08 Incident and problem process</option><option value="general:GEN-01">General security &amp; patch compliance · GEN-01 Vulnerabilities resolved within targets</option><option value="general:GEN-02">General security &amp; patch compliance · GEN-02 No overdue actively exploited vulnerability</option><option value="general:GEN-03">General security &amp; patch compliance · GEN-03 Security update currency</option><option value="general:GEN-04">General security &amp; patch compliance · GEN-04 Update job success</option><option value="general:GEN-05">General security &amp; patch compliance · GEN-05 No end-of-life operating system</option><option value="general:GEN-06">General security &amp; patch compliance · GEN-06 Agent reach</option><option value="general:GEN-07">General security &amp; patch compliance · GEN-07 Pending reboots</option><option value="general:GEN-08">General security &amp; patch compliance · GEN-08 Accepted risks</option><option value="general:GEN-09">General security &amp; patch compliance · GEN-09 Multi-factor authentication for administrators</option><option value="general:GEN-10">General security &amp; patch compliance · GEN-10 Daily backup</option><option value="general:GEN-11">General security &amp; patch compliance · GEN-11 Evidence chain integrity</option><option value="general:GEN-12">General security &amp; patch compliance · GEN-12 Continuous monitoring</option>
+      </select>
+      <span class="field__hint">Hold Ctrl (Cmd on a Mac) to choose several.</span></label>
+  </section>
+  <div><button class="button button--primary" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-plus"></use></svg>Record evidence</button></div>
+</form>
+
+
+  </main>
+</div>
+
+</body>
+</html>

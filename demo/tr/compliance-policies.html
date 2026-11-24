@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Uyum Politikaları · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-policies.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Uyum Politikaları</h1>
+    <p class="pagehead__sub">Etkin değerlendirme çerçeveleri, otomatik kontrollerin eşikleri, kontrol uygulanabilirliği ve sunucu standartları.</p>
+  </div>
+</header>
+<nav class="tabs" aria-label="Uyum Politikaları">
+  <a class="tab is-active" href="compliance-policies.html">Çerçeveler ve eşikler</a>
+  <a class="tab" href="compliance-policies--tab-controls.html">Kontrol uygulanabilirliği</a>
+  <a class="tab" href="standards.html">Sunucu Standartları</a>
+</nav>
+
+
+
+<form class="form" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo">
+  <fieldset class="fieldset">
+  <section class="panel">
+    <h2 class="panel__title">Değerlendirme çerçeveleri</h2>
+    <p class="muted">Rapor oluştururken seçilebilecek çerçeveler. Çerçeve katalogları sürümlüdür; mevcut raporlar oluşturuldukları sürümü korur.</p>
+    <div class="plain-list">
+      <label class="check-label"><input type="checkbox" name="profiles" value="isms" checked> <strong>Bilgi Güvenliği Yönetimi Denetimleri</strong> <span class="muted mono">isms@1</span><span class="cell-sub">Bilgi güvenliği yönetim sistemi denetimlerinde istenen teknik kanıtlar: varlık envanteri, açıklık yönetimi, değişiklik, kayıt, yedekleme ve erişim.</span></label><label class="check-label"><input type="checkbox" name="profiles" value="baseline" checked> <strong>BT Temel Koruma Denetimleri</strong> <span class="muted mono">baseline@1</span><span class="cell-sub">Temel koruma yaklaşımıyla yapılan değerlendirmeler için modül bazlı teknik kanıtlar: yama ve değişiklik yönetimi, Linux ve Windows sunucular, Windows istemciler, kayıt ve yedekleme.</span></label><label class="check-label"><input type="checkbox" name="profiles" value="itsm" checked> <strong>BT Hizmet Yönetimi Değerlendirmeleri</strong> <span class="muted mono">itsm@1</span><span class="cell-sub">BT hizmet yönetimi uygulamalarını destekleyen kanıtlar: değişiklik etkinleştirme, sürüm ve dağıtım, yapılandırma ve varlık yönetimi, izleme ve hizmet seviyeleri.</span></label><label class="check-label"><input type="checkbox" name="profiles" value="general" checked> <strong>Genel Güvenlik ve Yama Uyumu</strong> <span class="muted mono">general@1</span><span class="cell-sub">netio.patchman&#39;in ölçülebilir hedeflerle tanımladığı temel güvenlik ve güncelleme kontrolleri.</span></label>
+    </div>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">Otomatik kontrol eşikleri</h2>
+    <p class="muted">Eşikler yeni oluşturulan sürümlerde kullanılır; mevcut sürümler değişmez.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">En düşük erişim ve izleme kapsamı (%)</span>
+        <input class="field__input" type="number" name="compliance_coverage_min" min="0" max="100" value="95" required>
+        <span class="field__hint">Ajan erişimi, izleme ve yedekleme günleri için.</span></label>
+      <label class="field"><span class="field__label">En yüksek güncelleme hatası oranı (%)</span>
+        <input class="field__input" type="number" name="compliance_patch_failure_max" min="0" max="100" value="10" required>
+        <span class="field__hint">Başarısız veya zaman aşımına uğrayan güncelleme işlerinin oranı.</span></label>
+      <label class="field"><span class="field__label">Güvenlik güncellemesi bekleyen olmayan sunucu oranı (%)</span>
+        <input class="field__input" type="number" name="compliance_currency_min" min="0" max="100" value="90" required>
+        <span class="field__hint">Dönem sonundaki durum.</span></label>
+      <label class="field"><span class="field__label">SLA içinde giderilen bulgu oranı (%)</span>
+        <input class="field__input" type="number" name="compliance_sla_min" min="0" max="100" value="90" required>
+        <span class="field__hint">Dönemde giderilen ve hedef süresi olan bulgular.</span></label>
+      <label class="field"><span class="field__label">En uzun yeniden başlatma bekleme süresi (gün)</span>
+        <input class="field__input" type="number" name="compliance_reboot_max_days" min="1" max="365" value="7" required></label>
+      <label class="field"><span class="field__label">Kanıt saklama süresi (gün)</span>
+        <input class="field__input" type="number" name="compliance_evidence_days" min="400" max="3650" value="1095" required>
+        <span class="field__hint">En az 400 gün; kesinleşmiş rapor sürümlerinin kullandığı kanıtlar hiç silinmez.</span></label>
+    </div>
+  </section>
+  <div><button class="button button--primary" type="submit">Kaydet</button></div>
+  </fieldset>
+</form>
+
+<section class="panel">
+  <h2 class="panel__title">İlgili ayarlar</h2>
+  <p class="muted">Kontroller bu ayarları okur; değerleri tek yerde, kendi ayar sayfalarında tutulur.</p>
+  <dl class="dl">
+    <dt>Düzeltme süreleri (SLA)</dt><dd>Hedef süreler: kritik 15, yüksek 30, orta 90, düşük 180 gün (0 = hedef yok). · <a href="settings.html#sla">Düzenle</a></dd>
+    <dt>Risk kabul süresi</dt><dd>365 gün · <a href="settings.html#security">Düzenle</a></dd>
+    <dt>Çok faktörlü doğrulama zorunlu</dt><dd>Hayır · <a href="settings.html#security">Düzenle</a></dd>
+    <dt>Güncellemeden önce önizleme onayı</dt><dd>Evet · <a href="settings.html#updates">Düzenle</a></dd>
+    <dt>Otomatik yedekleme</dt><dd>Evet · <a href="settings.html#backup">Düzenle</a></dd>
+    <dt>Sürekli izleme</dt><dd>Her 5 dakikada · <a href="settings.html#monitoring">Düzenle</a></dd>
+  </dl>
+</section>
+
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

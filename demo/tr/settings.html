@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Sistem Ayarları · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="settings.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Sistem Ayarları</h1>
+    <p class="pagehead__sub">Bildirim, ajan ve tarama ayarları</p>
+  </div>
+</header>
+<nav class="tabs settings-tabs" aria-label="Sistem Ayarları">
+  <a class="tab is-active" href="settings.html">Genel</a>
+  <a class="tab" href="#demo-unavailable">Sunucu yapılandırması</a>
+  <a class="tab" href="settings-channels.html">Bildirim kanalları</a>
+  <a class="tab" href="settings-health.html">Sağlık kontrolleri</a>
+  <a class="tab" href="settings-score.html">Güvenlik skoru ağırlıkları</a>
+</nav>
+<nav class="chips settings-jump" aria-label="Bölümlere git">
+  <a class="chip" href="#email">E-posta</a><a class="chip" href="#agents">Ajanlar</a><a class="chip" href="#scan">Tarama</a><a class="chip" href="#security">Güvenlik</a><a class="chip" href="#updates">Güncellemeler</a><a class="chip" href="#monitoring">Kaynak izleme</a><a class="chip" href="#sla">Düzeltme süreleri</a><a class="chip" href="#inventory">Envanter ve EOL</a><a class="chip" href="#backup">Yedekleme</a>
+</nav>
+
+<form class="form" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo">
+
+  <section class="panel" id="email">
+    <h2 class="panel__title">E-posta bildirimleri</h2>
+    <p class="alert alert--warning">SMTP sunucusu yapılandırılmamış. E-posta göndermek için Sunucu yapılandırması sayfasında SMTP sunucusunu ve gönderen adresini girin. <a href="#demo-unavailable">Sunucu yapılandırması</a></p>
+    <label class="check-label"><input type="checkbox" name="email_enabled" value="1" checked> E-posta bildirimlerini gönder</label>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">En düşük önem derecesi</span>
+        <select class="field__input" name="email_min_severity"><option value="critical">Kritik</option><option value="high" selected>Yüksek</option><option value="medium">Orta</option><option value="low">Düşük</option></select>
+        <span class="field__hint">Bu derecenin altındaki yeni güvenlik açıkları için e-posta gönderilmez; bildirim merkezinde ve listelerde görünmeye devam eder.</span></label>
+      <label class="field"><span class="field__label">Özet e-posta eşiği</span>
+        <input class="field__input" type="number" name="email_digest_threshold" min="1" max="1000" value="5">
+        <span class="field__hint">Bir taramada bu sayıdan fazla yeni açık bulunursa her biri için ayrı e-posta yerine tek bir özet gönderilir.</span></label>
+    </div>
+    <label class="field"><span class="field__label">Alıcılar</span>
+      <textarea class="field__input field__input--area" name="email_recipients" rows="3" placeholder="guvenlik@your-domain"></textarea>
+      <span class="field__hint">Her satıra bir adres yazın. Boş bırakılırsa tüm etkin yöneticilere gönderilir.</span></label>
+    <label class="check-label"><input type="checkbox" name="email_kev_always" value="1" checked> Aktif olarak istismar edilen açıklar (CISA KEV) için önem derecesinden bağımsız olarak e-posta gönder</label>
+    <label class="check-label"><input type="checkbox" name="email_agent_offline" value="1"> Ajan bağlantısı kesildiğinde e-posta gönder</label>
+    <label class="check-label"><input type="checkbox" name="email_job_failed" value="1" checked> Güncelleme işi başarısız olduğunda veya kısmen tamamlandığında e-posta gönder</label>
+    <label class="check-label"><input type="checkbox" name="email_server_update" value="1" checked> Yeni netio.patchman sürümü yayımlandığında e-posta gönder</label>
+  </section>
+
+  <section class="panel" id="agents">
+    <h2 class="panel__title">Ajanlar</h2>
+    <label class="check-label"><input type="checkbox" name="agent_auto_update" value="1" checked> Ajanları otomatik olarak güncelle</label>
+    <p class="field__hint">Sunucunun dağıttığı sürümden farklı bir sürüm çalıştıran ajanlar bir sonraki bağlantılarında yeni sürümü indirir, SHA-256 özetini doğrular ve yeniden başlar. Aynı anda en fazla 25 ajan güncellenir; başarısız bir güncelleme 6 saat sonra yeniden denenir.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Bağlantı aralığı (saniye)</span>
+        <input class="field__input" type="number" name="agent_checkin_seconds" min="15" max="3600" value="60"></label>
+      <label class="field"><span class="field__label">Envanter gönderim aralığı (dakika)</span>
+        <input class="field__input" type="number" name="agent_report_minutes" min="5" max="1440" value="60"></label>
+      <label class="field"><span class="field__label">Çevrimdışı sayılma süresi (dakika)</span>
+        <input class="field__input" type="number" name="agent_offline_minutes" min="2" max="10080" value="10"></label>
+    </div>
+  </section>
+
+  <section class="panel" id="scan">
+    <h2 class="panel__title">Güvenlik açığı taraması</h2>
+    <label class="check-label"><input type="checkbox" name="scan_enabled" value="1" checked> Güvenlik açığı taramasını etkinleştir</label>
+    <p class="field__hint">Veri kaynakları: OSV.dev (dağıtım güvenlik duyuruları ve CVE kayıtları), Microsoft Security Update Guide (Windows), CISA Known Exploited Vulnerabilities kataloğu ve FIRST EPSS puanları. Kaynak adresleri Sunucu yapılandırması sayfasından değiştirilebilir.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Kayıt saklama süresi (gün)</span>
+        <input class="field__input" type="number" name="retention_days" min="7" max="3650" value="90">
+        <span class="field__hint">Çözülmüş bulgular, tamamlanmış işler ve bildirimler bu süreden sonra silinir.</span></label>
+    </div>
+  </section>
+
+  <section class="panel" id="security">
+    <h2 class="panel__title">Güvenlik</h2>
+    <label class="check-label"><input type="checkbox" name="auth_require_mfa" value="1"> Tüm kullanıcılar için iki adımlı doğrulamayı zorunlu kıl</label>
+    <p class="field__hint">Açıkken doğrulayıcı uygulaması tanımlamamış kullanıcılar, kurulum yapana kadar yalnızca Profil sayfasını açabilir.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">En uzun risk kabulü süresi (gün)</span>
+        <input class="field__input" type="number" name="risk_max_days" min="0" max="3650" value="365">
+        <span class="field__hint">0: süresiz kabule izin verilir. Önerilen: 365 veya daha az.</span></label>
+    </div>
+  </section>
+
+  <section class="panel" id="updates">
+    <h2 class="panel__title">Güncellemeler</h2>
+    <label class="field"><span class="field__label">Güncellenmeyecek paketler (tüm sunucular)</span>
+      <textarea class="field__input mono" name="update_exclude" rows="3" maxlength="4000"></textarea>
+      <span class="field__hint">Virgül, boşluk veya satırla ayrılmış paket adları; * ve ? kullanılabilir (ör. kernel*, mysql-server, KB5034439). Grup ve sunucu sayfalarında ek listeler tanımlanabilir. Bu paketler panelden, zamanlamalardan ve API&#39;den gelen tüm güncelleme işlerinde atlanır; güvenlik açıkları gösterilmeye devam eder.</span></label>
+    <label class="check-label"><input type="checkbox" name="require_preview" value="1" checked> Sunucu sayfasından başlatılan güncellemelerde önce önizleme göster, onaydan sonra güncelle</label>
+    <p class="field__hint">Ajanı önizlemeyi destekleyen (1.0.0&#43;) sunucularda geçerlidir. Toplu işlemler, zamanlanmış güncellemeler ve API etkilenmez.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Güncelleme öncesi kontrol başarısızsa</span>
+        <select class="field__input" name="health_policy">
+          <option value="abort" selected>Güncellemeyi yapma</option>
+          <option value="continue">Yine de güncelle</option>
+        </select></label>
+      <label class="field"><span class="field__label">Güncelleme sonrası bekleme (saniye)</span>
+        <input class="field__input" type="number" name="health_delay" min="0" max="600" value="15">
+        <span class="field__hint">Servislerin yeniden başlaması için sağlık kontrollerinden önce beklenir.</span></label>
+    </div>
+  </section>
+
+  <section class="panel" id="monitoring">
+    <h2 class="panel__title">Kaynak izleme</h2>
+    <p class="field__hint">Ajanlar belirlenen aralıkla işlemci, bellek, takas alanı ve disk kullanımını bildirir; sunucu sayfasında anlık değerler ve 30 günlük grafikler görünür. Tanımlı ek kontroller de aynı aralıkla çalışır. Bir sınır veya kontrol art arda iki ölçümde başarısız olursa bildirim gönderilir, düzeldiğinde de bildirilir. Ajan 1.0.2 veya sonrası gerekir.</p>
+    <input type="hidden" name="monitor_section" value="1">
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Ölçüm aralığı (dakika)</span>
+        <input class="field__input" type="number" name="health_monitor" min="0" max="1440" value="5">
+        <span class="field__hint">0 izlemeyi kapatır. Kontroller güncellemelerde yine çalışır.</span></label>
+      <label class="field"><span class="field__label">Disk doluluk uyarısı (%)</span>
+        <input class="field__input" type="number" name="health_disk_warn" min="0" max="100" value="90"></label>
+      <label class="field"><span class="field__label">Bellek kullanımı uyarısı (%)</span>
+        <input class="field__input" type="number" name="health_memory_warn" min="0" max="100" value="95"></label>
+      <label class="field"><span class="field__label">İşlemci kullanımı uyarısı (%)</span>
+        <input class="field__input" type="number" name="health_cpu_warn" min="0" max="1000" value="90">
+        <span class="field__hint">Ölçüm aralığındaki ortalama işlemci kullanımı. 1.0.2 öncesi ajanlarda 1 dakikalık yükün çekirdek sayısına oranı kullanılır.</span></label>
+    </div>
+    <p class="field__hint">Bu sınırlar her sunucuda ayrıca tanımlamaya gerek kalmadan uygulanır; 0 ilgili sınırı kapatır. Sunucuya veya gruba özel sınırlar için Sağlık kontrolleri sayfasında CPU, bellek ve disk kontrolü ekleyin.</p>
+  </section>
+
+  <section class="panel" id="sla">
+    <h2 class="panel__title">Düzeltme süreleri (SLA)</h2>
+    <p class="field__hint">Bir bulgunun ilk tespitinden sonra kapatılması gereken gün sayısı, önem derecesine göre. 0 girilirse o önem derecesi için süre yoktur. Süresi geçen bulgular işaretlenir, gösterge paneline, rapora ve bildirim merkezine yansır.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Kritik (gün)</span>
+        <input class="field__input" type="number" name="sla_critical_days" min="0" max="3650" value="15"></label>
+      <label class="field"><span class="field__label">Yüksek (gün)</span>
+        <input class="field__input" type="number" name="sla_high_days" min="0" max="3650" value="30"></label>
+      <label class="field"><span class="field__label">Orta (gün)</span>
+        <input class="field__input" type="number" name="sla_medium_days" min="0" max="3650" value="90"></label>
+      <label class="field"><span class="field__label">Düşük (gün)</span>
+        <input class="field__input" type="number" name="sla_low_days" min="0" max="3650" value="180"></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="email_sla_overdue" value="1" checked> Süresi geçen bulgular için e-posta gönder</label>
+  </section>
+  <section class="panel" id="inventory">
+    <h2 class="panel__title">Yazılım envanteri</h2>
+    <input type="hidden" name="inventory_section" value="1">
+    <label class="check-label"><input type="checkbox" name="software_notify" value="1" checked> Yazılım kurulduğunda, kaldırıldığında veya sürümü değiştiğinde bildirim oluştur</label>
+    <p class="field__hint">Her sunucu raporu için en fazla bir bildirim oluşur. Değişiklik geçmişi bu ayardan bağımsız olarak her zaman tutulur.</p>
+    <label class="check-label"><input type="checkbox" name="eol_notify" value="1" checked> İşletim sistemi veya yazılım desteği bittiğinde ya da yaklaştığında bildirim oluştur</label>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Önceden uyarı (gün)</span>
+        <input class="field__input" type="number" name="eol_warn_days" min="0" max="730" value="90">
+        <span class="field__hint">Destek bitişine bu kadar gün kala sürüm &#34;yakında bitiyor&#34; sayılır ve bir kez bildirilir. Dağıtımın bakımını sürdürdüğü yazılımlar için bildirim oluşmaz.</span></label>
+    </div>
+  </section>
+
+  <section class="panel" id="backup">
+    <h2 class="panel__title">Otomatik yedekleme</h2>
+    <label class="check-label"><input type="checkbox" name="backup_enabled" value="1" checked> Veritabanını her gün otomatik olarak yedekle</label>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Yedekleme saati</span>
+        <input class="field__input" type="text" name="backup_time" value="02:30" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" inputmode="numeric" maxlength="5" required></label>
+      <label class="field"><span class="field__label">Saklanacak yedek sayısı</span>
+        <input class="field__input" type="number" name="backup_keep" min="1" max="365" value="7" required></label>
+    </div>
+    <p class="field__hint">Yedekler sunucudaki yedek dizinine yazılır; en yeni yedekler saklanır, eskileri silinir. Yedekler yalnızca bu sunucuda durduğu için düzenli olarak başka bir yere de kopyalayın (PATCHMAN_BACKUP_DIR ile ayrı bir diske yazdırabilirsiniz). Sunucu yedekleme saatinde kapalıysa yedek açılınca alınır.</p>
+  </section>
+
+  <div><button class="button button--primary" type="submit">Kaydet</button></div>
+</form>
+
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">Yedekler</h2>
+    <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="button button--sm" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-download"></use></svg>Şimdi yedek al</button></form>
+  </div>
+  <div class="panel__body">
+    <p class="muted">Dizin: /data/backups · Son yedek: 24 Kasım 2026 09:57</p>
+    
+    
+  </div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Dosya</th><th>Oluşturulma</th><th class="num">Boyut</th><th></th></tr></thead>
+    <tbody>
+    <tr><td class="mono">netio-patchman-20261124-095701.db</td><td>24.11.2026 09:57</td><td class="num">117,7 MB</td><td><a class="button button--sm" href="#demo-unavailable">İndir</a></td></tr><tr><td class="mono">netio-patchman-20261123-211000.db</td><td>23.11.2026 21:10</td><td class="num">15,9 MB</td><td><a class="button button--sm" href="#demo-unavailable">İndir</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+
+<div class="grid-2">
+  <section class="panel">
+    <h2 class="panel__title">Tarama durumu</h2>
+    <dl class="dl">
+      <dt>Son tarama</dt><dd>Hiç</dd>
+      <dt>Durum</dt><dd>Beklemede</dd>
+      <dt>KEV kataloğu</dt><dd>23 Kasım 2026 21:09 · 1790 kayıt</dd>
+      
+    </dl>
+    <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-refresh"></use></svg>Tüm sunucuları şimdi tara</button></form>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">Deneme e-postası</h2>
+    <p class="muted">SMTP yapılandırmasını doğrulamak için bir deneme e-postası gönderin.</p>
+    <form class="form form--row" method="post" action="#">
+      <input type="hidden" name="_csrf" value="demo">
+      <label class="field field--grow"><span class="field__label">E-posta adresi</span><input class="field__input" type="email" name="to" value="admin@example.test" required></label>
+      <div class="field field--end"><button class="button" type="submit" disabled>Gönder</button></div>
+    </form>
+  </section>
+</div>
+
+  </main>
+</div>
+
+</body>
+</html>

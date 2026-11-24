@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>libssl3t64 · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="packages.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="packages.html">Packages</a> / <span class="mono">libssl3t64</span></nav>
+<header class="pagehead">
+  <div><h1 class="pagehead__title mono"><form class="star-form" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="name" value="libssl3t64"><input type="hidden" name="back" value="/packages/libssl3t64"><input type="hidden" name="watch" value="1"><button class="star" type="submit" aria-pressed="false" title="Watch" aria-label="Watch: libssl3t64"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-star"></use></svg></button></form> libssl3t64</h1></div>
+  
+  <div class="pagehead__actions">
+    <form method="post" action="#" data-confirm="The libssl3t64 package will be updated on 4 servers. Continue?">
+      <input type="hidden" name="_csrf" value="demo"><button class="button button--primary" type="submit">Update on all servers</button>
+    </form>
+  </div>
+  
+</header>
+
+<form method="post" action="#" data-confirm="The libssl3t64 package will be updated on the selected servers. Continue?">
+<input type="hidden" name="_csrf" value="demo"><input type="hidden" name="selection" value="1">
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">Servers with a pending update <span class="muted">(4)</span></h2>
+    <button class="button button--sm" type="submit">Update on selected servers</button>
+  </div>
+  
+  <table class="table">
+    <thead><tr><th class="check"><input type="checkbox" data-check-all="host_ids" aria-label="Select all"></th><th>Server Name</th><th>Installed Version</th><th>New Version</th><th>Remote Updates</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="check"><input type="checkbox" name="host_ids" value="3" aria-label="db-01"></td>
+      <td><a href="servers-3--tab-updates.html">db-01</a></td><td class="mono">3.0.13-0ubuntu3</td><td class="mono">3.0.13-0ubuntu3.16</td>
+      <td>On</td></tr><tr>
+      <td class="check"><input type="checkbox" name="host_ids" value="5" aria-label="mail-01"></td>
+      <td><a href="servers-5--tab-updates.html">mail-01</a></td><td class="mono">3.0.13-0ubuntu3</td><td class="mono">3.0.13-0ubuntu3.16</td>
+      <td>On</td></tr><tr>
+      <td class="check"><input type="checkbox" name="host_ids" value="1" aria-label="web-01"></td>
+      <td><a href="servers-1--tab-updates.html">web-01</a></td><td class="mono">3.0.13-0ubuntu3</td><td class="mono">3.0.13-0ubuntu3.16</td>
+      <td>On</td></tr><tr>
+      <td class="check"><input type="checkbox" name="host_ids" value="2" aria-label="web-02"></td>
+      <td><a href="servers-2--tab-updates.html">web-02</a></td><td class="mono">3.0.13-0ubuntu3</td><td class="mono">3.0.13-0ubuntu3.16</td>
+      <td>On</td></tr>
+    </tbody>
+  </table>
+  
+</section>
+</form>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">Servers where it is installed <span class="muted">(6)</span></h2></div>
+  
+  <table class="table">
+    <thead><tr><th>Server Name</th><th>Version</th><th>Architecture</th></tr></thead>
+    <tbody>
+    <tr><td><a href="#demo-unavailable">backup-01</a></td><td class="mono">3.0.13-0ubuntu3.16</td><td class="mono">amd64</td></tr><tr><td><a href="#demo-unavailable">db-01</a></td><td class="mono">3.0.13-0ubuntu3</td><td class="mono">amd64</td></tr><tr><td><a href="#demo-unavailable">db-02</a></td><td class="mono">3.0.13-0ubuntu3.16</td><td class="mono">amd64</td></tr><tr><td><a href="#demo-unavailable">mail-01</a></td><td class="mono">3.0.13-0ubuntu3</td><td class="mono">amd64</td></tr><tr><td><a href="#demo-unavailable">web-01</a></td><td class="mono">3.0.13-0ubuntu3</td><td class="mono">amd64</td></tr><tr><td><a href="#demo-unavailable">web-02</a></td><td class="mono">3.0.13-0ubuntu3</td><td class="mono">amd64</td></tr>
+    </tbody>
+  </table>
+  
+</section>
+
+  </main>
+</div>
+
+</body>
+</html>

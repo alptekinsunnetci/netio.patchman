@@ -1,0 +1,3132 @@
+{
+  "schema": "netio.patchman/compliance-export/v1",
+  "version": {
+    "report_id": 1,
+    "version": 1,
+    "status": "draft",
+    "generated_at": "2026-11-23T18:38:57Z",
+    "generated_by": "admin@example.test",
+    "engine": "1",
+    "sha256": "589a7ae66f8c2c323aacc65c44530cde212ee55606a2158b5a750f7352420a33"
+  },
+  "report": {
+    "schema": "netio.patchman/compliance-report/v1",
+    "engine": "1",
+    "product": "netio.patchman",
+    "product_version": "1.0.3",
+    "report_id": 1,
+    "title": "2026 yıllık bilgi güvenliği denetimi",
+    "generated_at": "2026-11-23T18:38:57.6896362Z",
+    "generated_by": "admin@example.test",
+    "period_from": "2026-08-25T21:00:00Z",
+    "period_to": "2026-11-23T21:00:00Z",
+    "scope": {},
+    "profiles": [
+      {
+        "id": "isms",
+        "version": "1"
+      },
+      {
+        "id": "baseline",
+        "version": "1"
+      },
+      {
+        "id": "itsm",
+        "version": "1"
+      },
+      {
+        "id": "general",
+        "version": "1"
+      }
+    ],
+    "collection_start": "2026-11-23T18:10:00Z",
+    "summary": {
+      "hosts": 6,
+      "by_platform": {
+        "linux": 6
+      },
+      "profiles": [
+        {
+          "profile": "isms",
+          "controls": 12,
+          "outcomes": {
+            "deviation": 2,
+            "evidence_missing": 1,
+            "evidence_sufficient": 8,
+            "manual_evidence": 1
+          }
+        },
+        {
+          "profile": "baseline",
+          "controls": 12,
+          "outcomes": {
+            "deviation": 2,
+            "evidence_missing": 2,
+            "evidence_sufficient": 4,
+            "manual_evidence": 1,
+            "not_applicable": 2,
+            "partial": 1
+          }
+        },
+        {
+          "profile": "itsm",
+          "controls": 8,
+          "outcomes": {
+            "deviation": 1,
+            "evidence_missing": 1,
+            "evidence_sufficient": 5,
+            "manual_required": 1
+          }
+        },
+        {
+          "profile": "general",
+          "controls": 12,
+          "outcomes": {
+            "deviation": 2,
+            "evidence_missing": 1,
+            "evidence_sufficient": 8,
+            "partial": 1
+          }
+        }
+      ],
+      "warnings": [
+        {
+          "key": "compliance.warn.collection_started",
+          "params": {
+            "date": "2026-11-23T18:10:00Z"
+          }
+        }
+      ]
+    },
+    "inventory": [
+      {
+        "host_id": 6,
+        "hostname": "backup-01",
+        "platform": "linux",
+        "os_name": "Ubuntu 24.04.4 LTS",
+        "os_version": "24.04.4 LTS (Noble Numbat)",
+        "agent_version": "1.0.3",
+        "last_seen": "2026-11-23T18:09:36Z",
+        "os_support": "supported"
+      },
+      {
+        "host_id": 3,
+        "hostname": "db-01",
+        "platform": "linux",
+        "os_name": "Ubuntu 24.04.4 LTS",
+        "os_version": "24.04.4 LTS (Noble Numbat)",
+        "agent_version": "1.0.3",
+        "last_seen": "2026-11-23T18:09:36Z",
+        "groups": [
+          "Veritabanı"
+        ],
+        "os_support": "supported"
+      },
+      {
+        "host_id": 4,
+        "hostname": "db-02",
+        "platform": "linux",
+        "os_name": "Ubuntu 24.04.4 LTS",
+        "os_version": "24.04.4 LTS (Noble Numbat)",
+        "agent_version": "1.0.3",
+        "last_seen": "2026-11-23T18:09:36Z",
+        "groups": [
+          "Veritabanı"
+        ],
+        "os_support": "supported"
+      },
+      {
+        "host_id": 5,
+        "hostname": "mail-01",
+        "platform": "linux",
+        "os_name": "Ubuntu 24.04.4 LTS",
+        "os_version": "24.04.4 LTS (Noble Numbat)",
+        "agent_version": "1.0.3",
+        "last_seen": "2026-11-23T18:09:36Z",
+        "os_support": "supported"
+      },
+      {
+        "host_id": 1,
+        "hostname": "web-01",
+        "platform": "linux",
+        "os_name": "Ubuntu 24.04.4 LTS",
+        "os_version": "24.04.4 LTS (Noble Numbat)",
+        "agent_version": "1.0.3",
+        "last_seen": "2026-11-23T18:09:36Z",
+        "groups": [
+          "Web"
+        ],
+        "os_support": "supported"
+      },
+      {
+        "host_id": 2,
+        "hostname": "web-02",
+        "platform": "linux",
+        "os_name": "Ubuntu 24.04.4 LTS",
+        "os_version": "24.04.4 LTS (Noble Numbat)",
+        "agent_version": "1.0.3",
+        "last_seen": "2026-11-23T18:09:36Z",
+        "groups": [
+          "Web"
+        ],
+        "os_support": "supported"
+      }
+    ],
+    "updates": [
+      {
+        "platform": "linux",
+        "hosts": 6,
+        "hosts_with_security_updates": 4,
+        "security_updates": 522,
+        "updates": 710,
+        "reboot_pending": 1,
+        "update_jobs_succeeded": 0,
+        "update_jobs_failed": 0
+      }
+    ],
+    "vulnerabilities": {
+      "open_at_start": {
+        "critical": 2608,
+        "high": 17739,
+        "medium": 14952,
+        "low": 7811,
+        "kev": 44
+      },
+      "open_at_end": {
+        "critical": 2608,
+        "high": 17739,
+        "medium": 14952,
+        "low": 7811,
+        "kev": 44
+      },
+      "resolved": 0,
+      "mean_fix_days": 0,
+      "kev_resolved": 0,
+      "kev_overdue": 44,
+      "kev_open": [
+        {
+          "cve": "CVE-2024-36971",
+          "title": "net: fix __dst_negative_advice() race",
+          "due_date": "2024-08-28",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2024-53104",
+          "title": "media: uvcvideo: Skip parsing frames of type UVC_VS_UNDEFINED in uvc_parse_format",
+          "due_date": "2025-02-26",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2024-50302",
+          "title": "HID: core: zero-initialize the report buffer",
+          "due_date": "2025-03-25",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2024-53150",
+          "title": "ALSA: usb-audio: Fix out of bounds reads when finding clock sources",
+          "due_date": "2025-04-30",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2024-53197",
+          "title": "ALSA: usb-audio: Fix potential out-of-bound accesses for Extigy and Mbox devices",
+          "due_date": "2025-04-30",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2025-48384",
+          "title": "Git allows arbitrary code execution through broken config quoting",
+          "due_date": "2025-09-15",
+          "hosts": 3
+        },
+        {
+          "cve": "CVE-2025-38352",
+          "title": "posix-cpu-timers: fix race between handle_posix_cpu_timers() and posix_cpu_timer_del()",
+          "due_date": "2025-09-25",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2025-32463",
+          "due_date": "2025-10-20",
+          "hosts": 3
+        },
+        {
+          "cve": "CVE-2026-31431",
+          "title": "crypto: algif_aead - Revert to operating out-of-place",
+          "due_date": "2026-05-15",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2026-53362",
+          "title": "ipv6: account for fraggap on the paged allocation path",
+          "due_date": "2026-08-30",
+          "hosts": 6
+        },
+        {
+          "cve": "CVE-2025-39682",
+          "title": "tls: fix handling of zero-length records on the rx_list",
+          "due_date": "2026-09-21",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2025-39964",
+          "title": "crypto: af_alg - Disallow concurrent writes in af_alg_sendmsg",
+          "due_date": "2026-09-21",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2026-53266",
+          "title": "netfilter: bridge: make ebt_snat ARP rewrite writable",
+          "due_date": "2026-09-21",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2026-109618",
+          "title": "RCE via OOM corruption",
+          "due_date": "2026-10-29",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2026-109619",
+          "title": "RCE via stale global state",
+          "due_date": "2026-10-29",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2026-46300",
+          "title": "net: skbuff: preserve shared-frag marker during coalescing",
+          "due_date": "2026-10-31",
+          "hosts": 2
+        },
+        {
+          "cve": "CVE-2026-111497",
+          "title": "Out-of-Bounds Write in Google Brotli Decoder",
+          "due_date": "2026-11-10",
+          "hosts": 6
+        }
+      ]
+    },
+    "patch": {
+      "jobs": 0,
+      "succeeded": 0,
+      "partial": 0,
+      "failed": 0,
+      "not_run": 0,
+      "packages": 0,
+      "hosts_without_security_updates": 2,
+      "hosts": 6
+    },
+    "sla": {
+      "enabled": true,
+      "days": {
+        "critical": 15,
+        "high": 30,
+        "low": 180,
+        "medium": 90
+      },
+      "resolved": 0,
+      "within_sla": 0,
+      "late": 0,
+      "open_overdue": 0
+    },
+    "eol": null,
+    "changes": {
+      "total": 1,
+      "by_type": {
+        "preview": 1
+      },
+      "by_status": {
+        "succeeded": 1
+      },
+      "by_origin": {
+        "user": 1
+      },
+      "approvals": 0,
+      "require_preview": true
+    },
+    "audit": {
+      "events": 15,
+      "by_action": {
+        "agent.enroll": 6,
+        "auth.login": 1,
+        "group.add_hosts": 2,
+        "group.create": 2,
+        "job.create": 1,
+        "schedule.create": 1,
+        "setup.admin_created": 1,
+        "token.create": 1
+      },
+      "chain_ok": true,
+      "chain_items": 18
+    },
+    "checks": [
+      {
+        "key": "access.mfa",
+        "check": "access.mfa",
+        "outcome": "deviation",
+        "metrics": [
+          {
+            "key": "admins",
+            "value": 1,
+            "unit": "count"
+          },
+          {
+            "key": "admins_without_mfa",
+            "value": 1,
+            "unit": "count"
+          }
+        ],
+        "gaps": [
+          {
+            "key": "compliance.gap.admins_without_mfa",
+            "params": {
+              "n": "1"
+            }
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "agent.coverage",
+        "check": "agent.coverage",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "host_days",
+            "value": 6,
+            "unit": "count"
+          },
+          {
+            "key": "host_days_reachable",
+            "value": 6,
+            "unit": "count"
+          },
+          {
+            "key": "coverage",
+            "value": 100,
+            "unit": "percent"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "backup.daily",
+        "check": "backup.daily",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "days",
+            "value": 1,
+            "unit": "count"
+          },
+          {
+            "key": "backup_days",
+            "value": 1,
+            "unit": "count"
+          },
+          {
+            "key": "backup_failures",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "backup_rate",
+            "value": 100,
+            "unit": "percent"
+          }
+        ],
+        "evidence": 1
+      },
+      {
+        "key": "change.approval",
+        "check": "change.approval",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "approvals",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "approved_updates",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "planned_changes",
+            "value": 1,
+            "unit": "count"
+          }
+        ],
+        "evidence": 1
+      },
+      {
+        "key": "change.recorded",
+        "check": "change.recorded",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "changes",
+            "value": 1,
+            "unit": "count"
+          },
+          {
+            "key": "by_user",
+            "value": 1,
+            "unit": "count"
+          },
+          {
+            "key": "by_schedule",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "by_rollout",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "automatic",
+            "value": 0,
+            "unit": "count"
+          }
+        ],
+        "evidence": 3
+      },
+      {
+        "key": "config.drift",
+        "check": "config.drift",
+        "outcome": "evidence_missing",
+        "metrics": [
+          {
+            "key": "standards",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "deviations",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "hosts_deviating",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "deviations_detected",
+            "value": 0,
+            "unit": "count"
+          }
+        ],
+        "gaps": [
+          {
+            "key": "compliance.gap.no_standards"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "eol.unsupported",
+        "check": "eol.unsupported",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "hosts",
+            "value": 6,
+            "unit": "count"
+          },
+          {
+            "key": "os_eol",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "os_soon",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "os_unknown",
+            "value": 0,
+            "unit": "count"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "eol.unsupported[linux]",
+        "check": "eol.unsupported",
+        "platforms": [
+          "linux"
+        ],
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "hosts",
+            "value": 6,
+            "unit": "count"
+          },
+          {
+            "key": "os_eol",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "os_soon",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "os_unknown",
+            "value": 0,
+            "unit": "count"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "eol.unsupported[windows_10,windows_11,windows_other]",
+        "check": "eol.unsupported",
+        "platforms": [
+          "windows_10",
+          "windows_11",
+          "windows_other"
+        ],
+        "outcome": "not_applicable",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_platform_hosts"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "eol.unsupported[windows_server]",
+        "check": "eol.unsupported",
+        "platforms": [
+          "windows_server"
+        ],
+        "outcome": "not_applicable",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_platform_hosts"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "inventory.completeness",
+        "check": "inventory.completeness",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "hosts",
+            "value": 6,
+            "unit": "count"
+          },
+          {
+            "key": "stale_hosts",
+            "value": 0,
+            "unit": "count"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "log.integrity",
+        "check": "log.integrity",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "audit_events",
+            "value": 15,
+            "unit": "count"
+          },
+          {
+            "key": "chain_items",
+            "value": 18,
+            "unit": "count"
+          }
+        ],
+        "evidence": 15
+      },
+      {
+        "key": "monitoring.coverage",
+        "check": "monitoring.coverage",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "host_days",
+            "value": 6,
+            "unit": "count"
+          },
+          {
+            "key": "host_days_monitored",
+            "value": 6,
+            "unit": "count"
+          },
+          {
+            "key": "monitoring_rate",
+            "value": 100,
+            "unit": "percent"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "patch.applied",
+        "check": "patch.applied",
+        "outcome": "evidence_missing",
+        "metrics": [
+          {
+            "key": "update_jobs",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "succeeded",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "partial",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "failed",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "not_run",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "failure_rate",
+            "value": 0,
+            "unit": "percent"
+          }
+        ],
+        "gaps": [
+          {
+            "key": "compliance.gap.no_update_jobs"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "patch.currency",
+        "check": "patch.currency",
+        "outcome": "partial",
+        "metrics": [
+          {
+            "key": "hosts",
+            "value": 6,
+            "unit": "count"
+          },
+          {
+            "key": "hosts_clean",
+            "value": 2,
+            "unit": "count"
+          },
+          {
+            "key": "security_updates",
+            "value": 522,
+            "unit": "count"
+          },
+          {
+            "key": "clean_rate",
+            "value": 33.3,
+            "unit": "percent"
+          }
+        ],
+        "gaps": [
+          {
+            "key": "compliance.gap.currency_low",
+            "params": {
+              "min": "90",
+              "pct": "33.3"
+            }
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "patch.currency[linux]",
+        "check": "patch.currency",
+        "platforms": [
+          "linux"
+        ],
+        "outcome": "partial",
+        "metrics": [
+          {
+            "key": "hosts",
+            "value": 6,
+            "unit": "count"
+          },
+          {
+            "key": "hosts_clean",
+            "value": 2,
+            "unit": "count"
+          },
+          {
+            "key": "security_updates",
+            "value": 522,
+            "unit": "count"
+          },
+          {
+            "key": "clean_rate",
+            "value": 33.3,
+            "unit": "percent"
+          }
+        ],
+        "gaps": [
+          {
+            "key": "compliance.gap.currency_low",
+            "params": {
+              "min": "90",
+              "pct": "33.3"
+            }
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "patch.currency[windows_10,windows_11,windows_other]",
+        "check": "patch.currency",
+        "platforms": [
+          "windows_10",
+          "windows_11",
+          "windows_other"
+        ],
+        "outcome": "not_applicable",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_platform_hosts"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "patch.currency[windows_server]",
+        "check": "patch.currency",
+        "platforms": [
+          "windows_server"
+        ],
+        "outcome": "not_applicable",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_platform_hosts"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "reboot.pending",
+        "check": "reboot.pending",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "reboot_pending",
+            "value": 1,
+            "unit": "count"
+          },
+          {
+            "key": "reboot_long",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "reboots",
+            "value": 0,
+            "unit": "count"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "reboot.pending[linux]",
+        "check": "reboot.pending",
+        "platforms": [
+          "linux"
+        ],
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "reboot_pending",
+            "value": 1,
+            "unit": "count"
+          },
+          {
+            "key": "reboot_long",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "reboots",
+            "value": 0,
+            "unit": "count"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "reboot.pending[windows_10,windows_11,windows_other]",
+        "check": "reboot.pending",
+        "platforms": [
+          "windows_10",
+          "windows_11",
+          "windows_other"
+        ],
+        "outcome": "not_applicable",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_platform_hosts"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "reboot.pending[windows_server]",
+        "check": "reboot.pending",
+        "platforms": [
+          "windows_server"
+        ],
+        "outcome": "not_applicable",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_platform_hosts"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "risk.accepted",
+        "check": "risk.accepted",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "accepted_risks",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "no_expiry",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "no_note",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "expiring_30d",
+            "value": 0,
+            "unit": "count"
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "vuln.kev",
+        "check": "vuln.kev",
+        "outcome": "deviation",
+        "metrics": [
+          {
+            "key": "kev_open",
+            "value": 44,
+            "unit": "count"
+          },
+          {
+            "key": "kev_overdue",
+            "value": 44,
+            "unit": "count"
+          },
+          {
+            "key": "kev_resolved",
+            "value": 0,
+            "unit": "count"
+          }
+        ],
+        "gaps": [
+          {
+            "key": "compliance.gap.kev_overdue",
+            "params": {
+              "n": "44"
+            }
+          }
+        ],
+        "evidence": 0
+      },
+      {
+        "key": "vuln.sla",
+        "check": "vuln.sla",
+        "outcome": "evidence_sufficient",
+        "metrics": [
+          {
+            "key": "resolved",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "within_sla",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "resolved_late",
+            "value": 0,
+            "unit": "count"
+          },
+          {
+            "key": "open_overdue",
+            "value": 0,
+            "unit": "count"
+          }
+        ],
+        "evidence": 0
+      }
+    ],
+    "controls": [
+      {
+        "profile": "isms",
+        "version": "1",
+        "controls": [
+          {
+            "id": "ISMS-01",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "inventory.completeness",
+                "check": "inventory.completeness",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "agent.coverage",
+                "check": "agent.coverage",
+                "relevance": "supporting",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ISMS-02",
+            "outcome": "deviation",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "vuln.sla",
+                "check": "vuln.sla",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "vuln.kev",
+                "check": "vuln.kev",
+                "relevance": "primary",
+                "outcome": "deviation"
+              },
+              {
+                "key": "patch.applied",
+                "check": "patch.applied",
+                "relevance": "supporting",
+                "outcome": "evidence_missing"
+              },
+              {
+                "key": "patch.currency",
+                "check": "patch.currency",
+                "relevance": "supporting",
+                "outcome": "partial"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ISMS-03",
+            "outcome": "evidence_missing",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "config.drift",
+                "check": "config.drift",
+                "relevance": "primary",
+                "outcome": "evidence_missing"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ISMS-04",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "change.recorded",
+                "check": "change.recorded",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "change.approval",
+                "check": "change.approval",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 3
+          },
+          {
+            "id": "ISMS-05",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "change.recorded",
+                "check": "change.recorded",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "change.approval",
+                "check": "change.approval",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "patch.applied",
+                "check": "patch.applied",
+                "relevance": "supporting",
+                "outcome": "evidence_missing"
+              }
+            ],
+            "manual": "process",
+            "evidence": 3
+          },
+          {
+            "id": "ISMS-06",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "log.integrity",
+                "check": "log.integrity",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 15
+          },
+          {
+            "id": "ISMS-07",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "monitoring.coverage",
+                "check": "monitoring.coverage",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "agent.coverage",
+                "check": "agent.coverage",
+                "relevance": "supporting",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ISMS-08",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "backup.daily",
+                "check": "backup.daily",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 1
+          },
+          {
+            "id": "ISMS-09",
+            "outcome": "deviation",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "access.mfa",
+                "check": "access.mfa",
+                "relevance": "primary",
+                "outcome": "deviation"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ISMS-10",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "eol.unsupported",
+                "check": "eol.unsupported",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ISMS-11",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "risk.accepted",
+                "check": "risk.accepted",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ISMS-12",
+            "outcome": "manual_evidence",
+            "applicable": true,
+            "manual": "policy",
+            "manual_items": 1,
+            "evidence": 1
+          }
+        ]
+      },
+      {
+        "profile": "baseline",
+        "version": "1",
+        "controls": [
+          {
+            "id": "BASE-01",
+            "outcome": "evidence_missing",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "patch.applied",
+                "check": "patch.applied",
+                "relevance": "primary",
+                "outcome": "evidence_missing"
+              },
+              {
+                "key": "change.recorded",
+                "check": "change.recorded",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "manual": "process",
+            "evidence": 3
+          },
+          {
+            "id": "BASE-02",
+            "outcome": "deviation",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "vuln.sla",
+                "check": "vuln.sla",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "vuln.kev",
+                "check": "vuln.kev",
+                "relevance": "primary",
+                "outcome": "deviation"
+              },
+              {
+                "key": "patch.currency",
+                "check": "patch.currency",
+                "relevance": "supporting",
+                "outcome": "partial"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "BASE-03",
+            "outcome": "partial",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "patch.currency[linux]",
+                "check": "patch.currency",
+                "relevance": "primary",
+                "outcome": "partial"
+              },
+              {
+                "key": "eol.unsupported[linux]",
+                "check": "eol.unsupported",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "reboot.pending[linux]",
+                "check": "reboot.pending",
+                "relevance": "supporting",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "BASE-04",
+            "outcome": "not_applicable",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "patch.currency[windows_server]",
+                "check": "patch.currency",
+                "relevance": "primary",
+                "outcome": "not_applicable"
+              },
+              {
+                "key": "eol.unsupported[windows_server]",
+                "check": "eol.unsupported",
+                "relevance": "primary",
+                "outcome": "not_applicable"
+              },
+              {
+                "key": "reboot.pending[windows_server]",
+                "check": "reboot.pending",
+                "relevance": "supporting",
+                "outcome": "not_applicable"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "BASE-05",
+            "outcome": "not_applicable",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "patch.currency[windows_10,windows_11,windows_other]",
+                "check": "patch.currency",
+                "relevance": "primary",
+                "outcome": "not_applicable"
+              },
+              {
+                "key": "eol.unsupported[windows_10,windows_11,windows_other]",
+                "check": "eol.unsupported",
+                "relevance": "primary",
+                "outcome": "not_applicable"
+              },
+              {
+                "key": "reboot.pending[windows_10,windows_11,windows_other]",
+                "check": "reboot.pending",
+                "relevance": "supporting",
+                "outcome": "not_applicable"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "BASE-06",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "inventory.completeness",
+                "check": "inventory.completeness",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "agent.coverage",
+                "check": "agent.coverage",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "BASE-07",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "log.integrity",
+                "check": "log.integrity",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 15
+          },
+          {
+            "id": "BASE-08",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "backup.daily",
+                "check": "backup.daily",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 1
+          },
+          {
+            "id": "BASE-09",
+            "outcome": "deviation",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "access.mfa",
+                "check": "access.mfa",
+                "relevance": "primary",
+                "outcome": "deviation"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "BASE-10",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "monitoring.coverage",
+                "check": "monitoring.coverage",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "vuln.kev",
+                "check": "vuln.kev",
+                "relevance": "supporting",
+                "outcome": "deviation"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "BASE-11",
+            "outcome": "evidence_missing",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "config.drift",
+                "check": "config.drift",
+                "relevance": "primary",
+                "outcome": "evidence_missing"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "BASE-12",
+            "outcome": "manual_evidence",
+            "applicable": true,
+            "manual": "process",
+            "manual_items": 1,
+            "evidence": 1
+          }
+        ]
+      },
+      {
+        "profile": "itsm",
+        "version": "1",
+        "controls": [
+          {
+            "id": "ITSM-01",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "change.recorded",
+                "check": "change.recorded",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "change.approval",
+                "check": "change.approval",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "patch.applied",
+                "check": "patch.applied",
+                "relevance": "supporting",
+                "outcome": "evidence_missing"
+              }
+            ],
+            "evidence": 3
+          },
+          {
+            "id": "ITSM-02",
+            "outcome": "evidence_missing",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "patch.applied",
+                "check": "patch.applied",
+                "relevance": "primary",
+                "outcome": "evidence_missing"
+              },
+              {
+                "key": "reboot.pending",
+                "check": "reboot.pending",
+                "relevance": "supporting",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ITSM-03",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "inventory.completeness",
+                "check": "inventory.completeness",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "config.drift",
+                "check": "config.drift",
+                "relevance": "supporting",
+                "outcome": "evidence_missing"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ITSM-04",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "inventory.completeness",
+                "check": "inventory.completeness",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "eol.unsupported",
+                "check": "eol.unsupported",
+                "relevance": "supporting",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ITSM-05",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "monitoring.coverage",
+                "check": "monitoring.coverage",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "agent.coverage",
+                "check": "agent.coverage",
+                "relevance": "supporting",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ITSM-06",
+            "outcome": "deviation",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "vuln.sla",
+                "check": "vuln.sla",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              },
+              {
+                "key": "vuln.kev",
+                "check": "vuln.kev",
+                "relevance": "primary",
+                "outcome": "deviation"
+              },
+              {
+                "key": "access.mfa",
+                "check": "access.mfa",
+                "relevance": "supporting",
+                "outcome": "deviation"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ITSM-07",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "vuln.sla",
+                "check": "vuln.sla",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "ITSM-08",
+            "outcome": "manual_required",
+            "applicable": true,
+            "manual": "process",
+            "evidence": 0
+          }
+        ]
+      },
+      {
+        "profile": "general",
+        "version": "1",
+        "controls": [
+          {
+            "id": "GEN-01",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "vuln.sla",
+                "check": "vuln.sla",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "GEN-02",
+            "outcome": "deviation",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "vuln.kev",
+                "check": "vuln.kev",
+                "relevance": "primary",
+                "outcome": "deviation"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "GEN-03",
+            "outcome": "partial",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "patch.currency",
+                "check": "patch.currency",
+                "relevance": "primary",
+                "outcome": "partial"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "GEN-04",
+            "outcome": "evidence_missing",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "patch.applied",
+                "check": "patch.applied",
+                "relevance": "primary",
+                "outcome": "evidence_missing"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "GEN-05",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "eol.unsupported",
+                "check": "eol.unsupported",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "GEN-06",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "agent.coverage",
+                "check": "agent.coverage",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "GEN-07",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "reboot.pending",
+                "check": "reboot.pending",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "GEN-08",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "risk.accepted",
+                "check": "risk.accepted",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "GEN-09",
+            "outcome": "deviation",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "access.mfa",
+                "check": "access.mfa",
+                "relevance": "primary",
+                "outcome": "deviation"
+              }
+            ],
+            "evidence": 0
+          },
+          {
+            "id": "GEN-10",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "backup.daily",
+                "check": "backup.daily",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 1
+          },
+          {
+            "id": "GEN-11",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "log.integrity",
+                "check": "log.integrity",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 15
+          },
+          {
+            "id": "GEN-12",
+            "outcome": "evidence_sufficient",
+            "applicable": true,
+            "checks": [
+              {
+                "key": "monitoring.coverage",
+                "check": "monitoring.coverage",
+                "relevance": "primary",
+                "outcome": "evidence_sufficient"
+              }
+            ],
+            "evidence": 0
+          }
+        ]
+      }
+    ],
+    "evidence": {
+      "total": 18,
+      "shown": 18,
+      "items": [
+        {
+          "id": 18,
+          "kind": "manual",
+          "occurred_at": "2026-11-23T18:38:55Z",
+          "subject": "Bilgi güvenliği politikası v4",
+          "outcome": "recorded",
+          "sha256": "98342fc929f3e65a31558043a8782132243ccaa1ba2f2b8cf38785a69fec3654",
+          "controls": [
+            "baseline:BASE-12",
+            "isms:ISMS-12"
+          ]
+        },
+        {
+          "id": 17,
+          "kind": "backup_result",
+          "occurred_at": "2026-11-23T18:10:00Z",
+          "subject": "database",
+          "outcome": "succeeded",
+          "sha256": "d7832c1d957181421047d20f9984b19675ac66fb26a2736113e7534772c5b8e4",
+          "controls": [
+            "baseline:BASE-08",
+            "general:GEN-10",
+            "isms:ISMS-08"
+          ]
+        },
+        {
+          "id": 16,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "job.create",
+          "sha256": "b31abbfa8eddf6470f602069858d9d1047ab283fc3339560c350a3d653a6e8b6",
+          "controls": [
+            "baseline:BASE-01",
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-04",
+            "isms:ISMS-05",
+            "isms:ISMS-06",
+            "itsm:ITSM-01"
+          ]
+        },
+        {
+          "id": 15,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "schedule.create",
+          "sha256": "15f2a42755c84dbf1c5e12595f07cecd5bbc9dac28270791206e9c17cfe494c3",
+          "controls": [
+            "baseline:BASE-01",
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-04",
+            "isms:ISMS-05",
+            "isms:ISMS-06",
+            "itsm:ITSM-01"
+          ]
+        },
+        {
+          "id": 14,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "group.add_hosts",
+          "sha256": "1270b957d7cb917b8b4bfe55cf9b0b2bf5bd2d2ce586248877ad4e2b902ae357",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 13,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "group.add_hosts",
+          "sha256": "fdc733ba4e4ce5069a026d54be00a0317a4a34eef5aceed1a16af6fffff9fd06",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 12,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "group.create",
+          "sha256": "02cddc7a0d0cffd394937991bf2a293cc730f97b3ddfbc3b6cb2db917519198e",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 11,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "group.create",
+          "sha256": "4626b7b9d0cb960e6e985beca3ba03c5ef06fd231fe96e8ba1afa68bd1a46e25",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 10,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "agent.enroll",
+          "sha256": "3155a4ad067890cac8b966642fad9d34f8f18fb6ee4423f09de05fb91a863a8e",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 9,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "agent.enroll",
+          "sha256": "c28848a82ad75cb8ebe689bc25ac18b06e069725aa9c5aefab8b5667fac87618",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 8,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "agent.enroll",
+          "sha256": "579edafe240842d1e7113435f3ae91df75a2bd225bb6e1325bda293674ce9521",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "agent.enroll",
+          "sha256": "ee1869c36dfb666bb99b10eb6c1328925840d8e8b1d88dcdc5bf1a6bf6a56919",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 6,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "agent.enroll",
+          "sha256": "67fdba22849249f370c772fb1ddb26e781b4486c581c8c1f91178316aa1bd4e4",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 5,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "agent.enroll",
+          "sha256": "d0568112ce0edffb876778c144f9f26cda7526e713e2fbafaa95f2d665e2ed6c",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 4,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "token.create",
+          "sha256": "a1688df1a4d7c07200c091cf7e6727bc98228a535312eea3a55d6968bc82ad23",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 3,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "subject": "auth.login",
+          "sha256": "379c105a045024010ad11132f84acafe0a6549da397655ee67312501c3bebc24",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        },
+        {
+          "id": 1,
+          "kind": "change_job",
+          "occurred_at": "2026-11-23T18:09:36Z",
+          "hostname": "web-02",
+          "subject": "preview",
+          "outcome": "succeeded",
+          "sha256": "1f15e54df9cd1853fa262552a9ad961320131383f38f40bd619f21d205bca4d2",
+          "controls": [
+            "baseline:BASE-01",
+            "isms:ISMS-04",
+            "isms:ISMS-05",
+            "itsm:ITSM-01"
+          ]
+        },
+        {
+          "id": 2,
+          "kind": "audit_event",
+          "occurred_at": "2026-11-23T18:09:35Z",
+          "subject": "setup.admin_created",
+          "sha256": "82a511193b40bc42079edbe4b4fae261322baff1bdfa3370ab1ec3bd5acc3869",
+          "controls": [
+            "baseline:BASE-07",
+            "general:GEN-11",
+            "isms:ISMS-06"
+          ]
+        }
+      ]
+    },
+    "gaps": [
+      {
+        "profile": "isms",
+        "control": "ISMS-02",
+        "outcome": "deviation",
+        "gaps": [
+          {
+            "key": "compliance.gap.kev_overdue",
+            "params": {
+              "n": "44"
+            }
+          },
+          {
+            "key": "compliance.gap.no_update_jobs"
+          },
+          {
+            "key": "compliance.gap.currency_low",
+            "params": {
+              "min": "90",
+              "pct": "33.3"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.vuln.kev.fix"
+          },
+          {
+            "key": "compliance.check.patch.applied.fix"
+          },
+          {
+            "key": "compliance.check.patch.currency.fix"
+          }
+        ]
+      },
+      {
+        "profile": "isms",
+        "control": "ISMS-03",
+        "outcome": "evidence_missing",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_standards"
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.config.drift.fix"
+          }
+        ]
+      },
+      {
+        "profile": "isms",
+        "control": "ISMS-05",
+        "outcome": "evidence_sufficient",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_update_jobs"
+          },
+          {
+            "key": "compliance.gap.manual_missing",
+            "params": {
+              "type": "process"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.patch.applied.fix"
+          },
+          {
+            "key": "compliance.manual.process.fix"
+          }
+        ]
+      },
+      {
+        "profile": "isms",
+        "control": "ISMS-09",
+        "outcome": "deviation",
+        "gaps": [
+          {
+            "key": "compliance.gap.admins_without_mfa",
+            "params": {
+              "n": "1"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.access.mfa.fix"
+          }
+        ]
+      },
+      {
+        "profile": "isms",
+        "control": "ISMS-12",
+        "outcome": "manual_evidence"
+      },
+      {
+        "profile": "baseline",
+        "control": "BASE-01",
+        "outcome": "evidence_missing",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_update_jobs"
+          },
+          {
+            "key": "compliance.gap.manual_missing",
+            "params": {
+              "type": "process"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.patch.applied.fix"
+          },
+          {
+            "key": "compliance.manual.process.fix"
+          }
+        ]
+      },
+      {
+        "profile": "baseline",
+        "control": "BASE-02",
+        "outcome": "deviation",
+        "gaps": [
+          {
+            "key": "compliance.gap.kev_overdue",
+            "params": {
+              "n": "44"
+            }
+          },
+          {
+            "key": "compliance.gap.currency_low",
+            "params": {
+              "min": "90",
+              "pct": "33.3"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.vuln.kev.fix"
+          },
+          {
+            "key": "compliance.check.patch.currency.fix"
+          }
+        ]
+      },
+      {
+        "profile": "baseline",
+        "control": "BASE-03",
+        "outcome": "partial",
+        "gaps": [
+          {
+            "key": "compliance.gap.currency_low",
+            "params": {
+              "min": "90",
+              "pct": "33.3"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.patch.currency.fix"
+          }
+        ]
+      },
+      {
+        "profile": "baseline",
+        "control": "BASE-09",
+        "outcome": "deviation",
+        "gaps": [
+          {
+            "key": "compliance.gap.admins_without_mfa",
+            "params": {
+              "n": "1"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.access.mfa.fix"
+          }
+        ]
+      },
+      {
+        "profile": "baseline",
+        "control": "BASE-10",
+        "outcome": "evidence_sufficient",
+        "gaps": [
+          {
+            "key": "compliance.gap.kev_overdue",
+            "params": {
+              "n": "44"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.vuln.kev.fix"
+          }
+        ]
+      },
+      {
+        "profile": "baseline",
+        "control": "BASE-11",
+        "outcome": "evidence_missing",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_standards"
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.config.drift.fix"
+          }
+        ]
+      },
+      {
+        "profile": "baseline",
+        "control": "BASE-12",
+        "outcome": "manual_evidence"
+      },
+      {
+        "profile": "itsm",
+        "control": "ITSM-01",
+        "outcome": "evidence_sufficient",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_update_jobs"
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.patch.applied.fix"
+          }
+        ]
+      },
+      {
+        "profile": "itsm",
+        "control": "ITSM-02",
+        "outcome": "evidence_missing",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_update_jobs"
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.patch.applied.fix"
+          }
+        ]
+      },
+      {
+        "profile": "itsm",
+        "control": "ITSM-03",
+        "outcome": "evidence_sufficient",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_standards"
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.config.drift.fix"
+          }
+        ]
+      },
+      {
+        "profile": "itsm",
+        "control": "ITSM-06",
+        "outcome": "deviation",
+        "gaps": [
+          {
+            "key": "compliance.gap.kev_overdue",
+            "params": {
+              "n": "44"
+            }
+          },
+          {
+            "key": "compliance.gap.admins_without_mfa",
+            "params": {
+              "n": "1"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.vuln.kev.fix"
+          },
+          {
+            "key": "compliance.check.access.mfa.fix"
+          }
+        ]
+      },
+      {
+        "profile": "itsm",
+        "control": "ITSM-08",
+        "outcome": "manual_required",
+        "gaps": [
+          {
+            "key": "compliance.gap.manual_missing",
+            "params": {
+              "type": "process"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.manual.process.fix"
+          }
+        ]
+      },
+      {
+        "profile": "general",
+        "control": "GEN-02",
+        "outcome": "deviation",
+        "gaps": [
+          {
+            "key": "compliance.gap.kev_overdue",
+            "params": {
+              "n": "44"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.vuln.kev.fix"
+          }
+        ]
+      },
+      {
+        "profile": "general",
+        "control": "GEN-03",
+        "outcome": "partial",
+        "gaps": [
+          {
+            "key": "compliance.gap.currency_low",
+            "params": {
+              "min": "90",
+              "pct": "33.3"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.patch.currency.fix"
+          }
+        ]
+      },
+      {
+        "profile": "general",
+        "control": "GEN-04",
+        "outcome": "evidence_missing",
+        "gaps": [
+          {
+            "key": "compliance.gap.no_update_jobs"
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.patch.applied.fix"
+          }
+        ]
+      },
+      {
+        "profile": "general",
+        "control": "GEN-09",
+        "outcome": "deviation",
+        "gaps": [
+          {
+            "key": "compliance.gap.admins_without_mfa",
+            "params": {
+              "n": "1"
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "key": "compliance.check.access.mfa.fix"
+          }
+        ]
+      }
+    ]
+  },
+  "assessments": [
+    {
+      "profile": "baseline",
+      "control": "BASE-01",
+      "outcome": "evidence_missing",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-02",
+      "outcome": "deviation",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-03",
+      "outcome": "partial",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-04",
+      "outcome": "not_applicable",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-05",
+      "outcome": "not_applicable",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-06",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-07",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-08",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-09",
+      "outcome": "deviation",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-10",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-11",
+      "outcome": "evidence_missing",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "baseline",
+      "control": "BASE-12",
+      "outcome": "manual_evidence",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-01",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-02",
+      "outcome": "deviation",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-03",
+      "outcome": "partial",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-04",
+      "outcome": "evidence_missing",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-05",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-06",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-07",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-08",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-09",
+      "outcome": "deviation",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-10",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-11",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "general",
+      "control": "GEN-12",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-01",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-02",
+      "outcome": "deviation",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-03",
+      "outcome": "evidence_missing",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-04",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-05",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-06",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-07",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-08",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-09",
+      "outcome": "deviation",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-10",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-11",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "isms",
+      "control": "ISMS-12",
+      "outcome": "manual_evidence",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "itsm",
+      "control": "ITSM-01",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "itsm",
+      "control": "ITSM-02",
+      "outcome": "evidence_missing",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "itsm",
+      "control": "ITSM-03",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "itsm",
+      "control": "ITSM-04",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "itsm",
+      "control": "ITSM-05",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "itsm",
+      "control": "ITSM-06",
+      "outcome": "deviation",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "itsm",
+      "control": "ITSM-07",
+      "outcome": "evidence_sufficient",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    },
+    {
+      "profile": "itsm",
+      "control": "ITSM-08",
+      "outcome": "manual_required",
+      "applicable": true,
+      "review_status": "not_reviewed"
+    }
+  ],
+  "evidence": [
+    {
+      "id": 2,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:1",
+      "subject": "setup.admin_created",
+      "actor": "admin@example.test",
+      "occurred_at": "2026-11-23T18:09:35Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "",
+        "ip": "127.0.0.1",
+        "target": ""
+      },
+      "sha256": "82a511193b40bc42079edbe4b4fae261322baff1bdfa3370ab1ec3bd5acc3869",
+      "prev_sha256": "1f15e54df9cd1853fa262552a9ad961320131383f38f40bd619f21d205bca4d2",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 1,
+      "kind": "change_job",
+      "source": "agent",
+      "source_ref": "job:1",
+      "host_id": 2,
+      "hostname": "web-02",
+      "platform": "linux",
+      "subject": "preview",
+      "actor": "admin@example.test",
+      "outcome": "succeeded",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "created_at": 1795457376,
+        "dispatched_at": 1795457376,
+        "exit_code": 0,
+        "finished_at": 1795457376,
+        "job_id": 1,
+        "origin": "user",
+        "package_count": 0,
+        "remaining_count": 0,
+        "status": "succeeded",
+        "type": "preview"
+      },
+      "sha256": "1f15e54df9cd1853fa262552a9ad961320131383f38f40bd619f21d205bca4d2",
+      "prev_sha256": "",
+      "controls": [
+        "baseline:BASE-01",
+        "isms:ISMS-04",
+        "isms:ISMS-05",
+        "itsm:ITSM-01"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:2",
+      "subject": "auth.login",
+      "actor": "admin@example.test",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "",
+        "ip": "127.0.0.1",
+        "target": ""
+      },
+      "sha256": "379c105a045024010ad11132f84acafe0a6549da397655ee67312501c3bebc24",
+      "prev_sha256": "82a511193b40bc42079edbe4b4fae261322baff1bdfa3370ab1ec3bd5acc3869",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:3",
+      "subject": "token.create",
+      "actor": "admin@example.test",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "token_id=1",
+        "ip": "127.0.0.1",
+        "target": "Demo kurulum"
+      },
+      "sha256": "a1688df1a4d7c07200c091cf7e6727bc98228a535312eea3a55d6968bc82ad23",
+      "prev_sha256": "379c105a045024010ad11132f84acafe0a6549da397655ee67312501c3bebc24",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:4",
+      "subject": "agent.enroll",
+      "actor": "system",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "host_id=1",
+        "ip": "127.0.0.1",
+        "target": "web-01"
+      },
+      "sha256": "d0568112ce0edffb876778c144f9f26cda7526e713e2fbafaa95f2d665e2ed6c",
+      "prev_sha256": "a1688df1a4d7c07200c091cf7e6727bc98228a535312eea3a55d6968bc82ad23",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:5",
+      "subject": "agent.enroll",
+      "actor": "system",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "host_id=2",
+        "ip": "127.0.0.1",
+        "target": "web-02"
+      },
+      "sha256": "67fdba22849249f370c772fb1ddb26e781b4486c581c8c1f91178316aa1bd4e4",
+      "prev_sha256": "d0568112ce0edffb876778c144f9f26cda7526e713e2fbafaa95f2d665e2ed6c",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:6",
+      "subject": "agent.enroll",
+      "actor": "system",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "host_id=3",
+        "ip": "127.0.0.1",
+        "target": "db-01"
+      },
+      "sha256": "ee1869c36dfb666bb99b10eb6c1328925840d8e8b1d88dcdc5bf1a6bf6a56919",
+      "prev_sha256": "67fdba22849249f370c772fb1ddb26e781b4486c581c8c1f91178316aa1bd4e4",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:7",
+      "subject": "agent.enroll",
+      "actor": "system",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "host_id=4",
+        "ip": "127.0.0.1",
+        "target": "db-02"
+      },
+      "sha256": "579edafe240842d1e7113435f3ae91df75a2bd225bb6e1325bda293674ce9521",
+      "prev_sha256": "ee1869c36dfb666bb99b10eb6c1328925840d8e8b1d88dcdc5bf1a6bf6a56919",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:8",
+      "subject": "agent.enroll",
+      "actor": "system",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "host_id=5",
+        "ip": "127.0.0.1",
+        "target": "mail-01"
+      },
+      "sha256": "c28848a82ad75cb8ebe689bc25ac18b06e069725aa9c5aefab8b5667fac87618",
+      "prev_sha256": "579edafe240842d1e7113435f3ae91df75a2bd225bb6e1325bda293674ce9521",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:9",
+      "subject": "agent.enroll",
+      "actor": "system",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "host_id=6",
+        "ip": "127.0.0.1",
+        "target": "backup-01"
+      },
+      "sha256": "3155a4ad067890cac8b966642fad9d34f8f18fb6ee4423f09de05fb91a863a8e",
+      "prev_sha256": "c28848a82ad75cb8ebe689bc25ac18b06e069725aa9c5aefab8b5667fac87618",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:10",
+      "subject": "group.create",
+      "actor": "admin@example.test",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "group_id=1",
+        "ip": "127.0.0.1",
+        "target": "Web"
+      },
+      "sha256": "4626b7b9d0cb960e6e985beca3ba03c5ef06fd231fe96e8ba1afa68bd1a46e25",
+      "prev_sha256": "3155a4ad067890cac8b966642fad9d34f8f18fb6ee4423f09de05fb91a863a8e",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 12,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:11",
+      "subject": "group.create",
+      "actor": "admin@example.test",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "group_id=2",
+        "ip": "127.0.0.1",
+        "target": "Veritabanı"
+      },
+      "sha256": "02cddc7a0d0cffd394937991bf2a293cc730f97b3ddfbc3b6cb2db917519198e",
+      "prev_sha256": "4626b7b9d0cb960e6e985beca3ba03c5ef06fd231fe96e8ba1afa68bd1a46e25",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 13,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:12",
+      "subject": "group.add_hosts",
+      "actor": "admin@example.test",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "group_id=1 hosts=2",
+        "ip": "127.0.0.1",
+        "target": "Web"
+      },
+      "sha256": "fdc733ba4e4ce5069a026d54be00a0317a4a34eef5aceed1a16af6fffff9fd06",
+      "prev_sha256": "02cddc7a0d0cffd394937991bf2a293cc730f97b3ddfbc3b6cb2db917519198e",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 14,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:13",
+      "subject": "group.add_hosts",
+      "actor": "admin@example.test",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "group_id=2 hosts=2",
+        "ip": "127.0.0.1",
+        "target": "Veritabanı"
+      },
+      "sha256": "1270b957d7cb917b8b4bfe55cf9b0b2bf5bd2d2ce586248877ad4e2b902ae357",
+      "prev_sha256": "fdc733ba4e4ce5069a026d54be00a0317a4a34eef5aceed1a16af6fffff9fd06",
+      "controls": [
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-06"
+      ]
+    },
+    {
+      "id": 15,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:14",
+      "subject": "schedule.create",
+      "actor": "admin@example.test",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "schedule_id=1 type=upgrade_security days=9 time=03:00 window=120 target=group enabled=true reboot=false group=Web",
+        "ip": "127.0.0.1",
+        "target": "Web sunucuları gece güvenlik"
+      },
+      "sha256": "15f2a42755c84dbf1c5e12595f07cecd5bbc9dac28270791206e9c17cfe494c3",
+      "prev_sha256": "1270b957d7cb917b8b4bfe55cf9b0b2bf5bd2d2ce586248877ad4e2b902ae357",
+      "controls": [
+        "baseline:BASE-01",
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-04",
+        "isms:ISMS-05",
+        "isms:ISMS-06",
+        "itsm:ITSM-01"
+      ]
+    },
+    {
+      "id": 16,
+      "kind": "audit_event",
+      "source": "system",
+      "source_ref": "audit:15",
+      "subject": "job.create",
+      "actor": "admin@example.test",
+      "occurred_at": "2026-11-23T18:09:36Z",
+      "collected_at": "2026-11-23T18:10:00Z",
+      "payload": {
+        "details": "job_id=1 type=preview preview_type=upgrade_security",
+        "ip": "127.0.0.1",
+        "target": "web-02"
+      },
+      "sha256": "b31abbfa8eddf6470f602069858d9d1047ab283fc3339560c350a3d653a6e8b6",
+      "prev_sha256": "15f2a42755c84dbf1c5e12595f07cecd5bbc9dac28270791206e9c17cfe494c3",
+      "controls": [
+        "baseline:BASE-01",
+        "baseline:BASE-07",
+        "general:GEN-11",
+        "isms:ISMS-04",
+        "isms:ISMS-05",
+        "isms:ISMS-06",
+        "itsm:ITSM-01"
+      ]
+    },
+    {
+      "id": 17,
+      "kind": "backup_result",
+      "source": "system",
+      "source_ref": "backup:ok:1795457400",
+      "subject": "database",
+      "actor": "system",
+      "outcome": "succeeded",
+      "occurred_at": "2026-11-23T18:10:00Z",
+      "collected_at": "2026-11-23T18:11:00Z",
+      "payload": {},
+      "sha256": "d7832c1d957181421047d20f9984b19675ac66fb26a2736113e7534772c5b8e4",
+      "prev_sha256": "b31abbfa8eddf6470f602069858d9d1047ab283fc3339560c350a3d653a6e8b6",
+      "controls": [
+        "baseline:BASE-08",
+        "general:GEN-10",
+        "isms:ISMS-08"
+      ]
+    },
+    {
+      "id": 18,
+      "kind": "manual",
+      "source": "user",
+      "source_ref": "manual:654d046e23a2c2df1dd3492d",
+      "subject": "Bilgi güvenliği politikası v4",
+      "actor": "admin@example.test",
+      "outcome": "recorded",
+      "occurred_at": "2026-11-23T18:38:55Z",
+      "collected_at": "2026-11-23T18:38:55Z",
+      "payload": {
+        "controls": [
+          "isms:ISMS-12",
+          "baseline:BASE-12"
+        ],
+        "description": "Yönetim kurulu onaylı politika",
+        "document_date": "2026-11-23",
+        "reference": "DMS-2026-114",
+        "title": "Bilgi güvenliği politikası v4"
+      },
+      "sha256": "98342fc929f3e65a31558043a8782132243ccaa1ba2f2b8cf38785a69fec3654",
+      "prev_sha256": "d7832c1d957181421047d20f9984b19675ac66fb26a2736113e7534772c5b8e4",
+      "controls": [
+        "baseline:BASE-12",
+        "isms:ISMS-12"
+      ]
+    }
+  ]
+}

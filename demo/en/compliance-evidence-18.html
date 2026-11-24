@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Evidence #18 · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-evidence.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="compliance-evidence.html">Audit Evidence</a> / <span>Evidence #18</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Evidence #18</h1>
+    <p class="pagehead__sub">Manual evidence · 2026-11-23 21:38</p>
+  </div>
+</header>
+
+<div class="grid-2">
+<section class="panel">
+  <h2 class="panel__title">Fact</h2>
+  <dl class="dl">
+    <dt>Kind</dt><dd>Manual evidence</dd>
+    <dt>Source</dt><dd>User <span class="muted mono">manual:654d046e23a2c2df1dd3492d</span></dd>
+    
+    <dt>Subject</dt><dd class="mono break">Bilgi güvenliği politikası v4</dd>
+    <dt>Outcome</dt><dd class="mono">recorded</dd>
+    <dt>Actor</dt><dd>admin@example.test</dd>
+    <dt>Time</dt><dd>2026-11-23 21:38</dd>
+    <dt>Collected</dt><dd>2026-11-23 21:38</dd>
+    <dt class="mono">controls</dt><dd class="mono break">Information security management audits · ISMS-12, IT baseline protection audits · BASE-12</dd><dt class="mono">description</dt><dd class="mono break">Yönetim kurulu onaylı politika</dd><dt class="mono">document_date</dt><dd class="mono break">2026-11-23</dd><dt class="mono">reference</dt><dd class="mono break">DMS-2026-114</dd><dt class="mono">title</dt><dd class="mono break">Bilgi güvenliği politikası v4</dd>
+  </dl>
+</section>
+<section class="panel">
+  <h2 class="panel__title">Integrity</h2>
+  <dl class="dl">
+    <dt>SHA-256</dt><dd class="mono break">98342fc929f3e65a31558043a8782132243ccaa1ba2f2b8cf38785a69fec3654</dd>
+    <dt>Hash of the previous item</dt><dd class="mono break">d7832c1d957181421047d20f9984b19675ac66fb26a2736113e7534772c5b8e4</dd>
+  </dl>
+  <p class="footnote">The hash covers every field and the previous item&#39;s hash; changing or removing an item breaks the chain.</p>
+</section>
+</div>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">Used for controls <span class="muted">(2)</span></h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Title</th><th>Version</th><th>Control</th><th>Relevance</th></tr></thead>
+    <tbody>
+    
+    <tr><td><a href="compliance-reports-1--v-1.html">2026 yıllık bilgi güvenliği denetimi</a></td><td>v1 <span class="pill">Draft</span></td>
+      <td><a href="compliance-reports-1--v-1.html#c-baseline-BASE-12">IT baseline protection audits · BASE-12 Documented patch and change concept</a></td><td>Manual</td></tr>
+    
+    <tr><td><a href="compliance-reports-1--v-1.html">2026 yıllık bilgi güvenliği denetimi</a></td><td>v1 <span class="pill">Draft</span></td>
+      <td><a href="compliance-reports-1--v-1.html#c-isms-ISMS-12">Information security management audits · ISMS-12 Policies and procedures</a></td><td>Manual</td></tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+<p class="footnote">The same evidence can support controls of several frameworks; that does not mean all of their requirements are met.</p>
+
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Security score weights · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="settings.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="settings.html">Settings</a> / <span>Security score weights</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Security score weights</h1>
+    <p class="pagehead__sub">Set how many points each criterion deducts. All scores are recomputed after a change.</p>
+  </div>
+</header>
+<nav class="tabs settings-tabs" aria-label="Settings">
+  <a class="tab" href="settings.html">General</a>
+  <a class="tab" href="#demo-unavailable">Server configuration</a>
+  <a class="tab" href="settings-channels.html">Notification channels</a>
+  <a class="tab" href="settings-health.html">Health checks</a>
+  <a class="tab is-active" href="settings-score.html">Security score weights</a>
+</nav>
+
+<form class="form" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo">
+  <section class="panel">
+    <h2 class="panel__title">Weights (points)</h2>
+    <p class="field__hint">The score starts at 100 and the points below are deducted (minimum 0). On a server each CVE is penalized only once, with the highest criterion that applies; criteria are not added up. A pending security update does not count again if its package has an open finding. Software the distribution keeps maintaining does not count as unsupported.</p>
+    <div class="form-grid">
+      
+      <label class="field"><span class="field__label">Critical CVE</span>
+        <input class="field__input" type="number" name="score_critical" min="0" max="100" step="0.1" value="10" required>
+        <span class="field__hint">Default: 10</span></label>
+      
+      <label class="field"><span class="field__label">High CVE</span>
+        <input class="field__input" type="number" name="score_high" min="0" max="100" step="0.1" value="5" required>
+        <span class="field__hint">Default: 5</span></label>
+      
+      <label class="field"><span class="field__label">Medium CVE</span>
+        <input class="field__input" type="number" name="score_medium" min="0" max="100" step="0.1" value="2" required>
+        <span class="field__hint">Default: 2</span></label>
+      
+      <label class="field"><span class="field__label">Low CVE</span>
+        <input class="field__input" type="number" name="score_low" min="0" max="100" step="0.1" value="0.5" required>
+        <span class="field__hint">Default: 0.5</span></label>
+      
+      <label class="field"><span class="field__label">CVE of unknown severity</span>
+        <input class="field__input" type="number" name="score_unknown" min="0" max="100" step="0.1" value="1" required>
+        <span class="field__hint">Default: 1</span></label>
+      
+      <label class="field"><span class="field__label">CVE listed in CISA KEV</span>
+        <input class="field__input" type="number" name="score_kev" min="0" max="100" step="0.1" value="25" required>
+        <span class="field__hint">Default: 25</span></label>
+      
+      <label class="field"><span class="field__label">EPSS factor (probability × points)</span>
+        <input class="field__input" type="number" name="score_epss" min="0" max="100" step="0.1" value="20" required>
+        <span class="field__hint">Default: 20</span></label>
+      
+      <label class="field"><span class="field__label">CVE past its due date</span>
+        <input class="field__input" type="number" name="score_overdue" min="0" max="100" step="0.1" value="12" required>
+        <span class="field__hint">Default: 12</span></label>
+      
+      <label class="field"><span class="field__label">Cap for vulnerabilities</span>
+        <input class="field__input" type="number" name="score_vuln_cap" min="0" max="100" step="0.1" value="70" required>
+        <span class="field__hint">Default: 70</span></label>
+      
+      <label class="field"><span class="field__label">Unsupported operating system</span>
+        <input class="field__input" type="number" name="score_os_eol" min="0" max="100" step="0.1" value="25" required>
+        <span class="field__hint">Default: 25</span></label>
+      
+      <label class="field"><span class="field__label">OS support ending soon</span>
+        <input class="field__input" type="number" name="score_os_soon" min="0" max="100" step="0.1" value="5" required>
+        <span class="field__hint">Default: 5</span></label>
+      
+      <label class="field"><span class="field__label">Unsupported software release</span>
+        <input class="field__input" type="number" name="score_software_eol" min="0" max="100" step="0.1" value="5" required>
+        <span class="field__hint">Default: 5</span></label>
+      
+      <label class="field"><span class="field__label">Cap for unsupported software</span>
+        <input class="field__input" type="number" name="score_software_eol_cap" min="0" max="100" step="0.1" value="15" required>
+        <span class="field__hint">Default: 15</span></label>
+      
+      <label class="field"><span class="field__label">Pending security update</span>
+        <input class="field__input" type="number" name="score_security_update" min="0" max="100" step="0.1" value="1" required>
+        <span class="field__hint">Default: 1</span></label>
+      
+      <label class="field"><span class="field__label">Cap for updates</span>
+        <input class="field__input" type="number" name="score_security_update_cap" min="0" max="100" step="0.1" value="10" required>
+        <span class="field__hint">Default: 10</span></label>
+      
+    </div>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">Threshold notification</h2>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Notify when the score drops below</span>
+        <input class="field__input" type="number" name="alert_below" min="0" max="100" value="0" required>
+        <span class="field__hint">0 turns it off. Each server is notified once until its score rises above the threshold again.</span></label>
+    </div>
+  </section>
+  <div class="button-row">
+    <button class="button button--primary" type="submit">Save</button>
+    <button class="button button--ghost" type="submit" name="reset" value="1" formnovalidate data-confirm="Reset all weights to their defaults?">Reset to defaults</button>
+  </div>
+</form>
+
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Yeni kademeli güncelleme · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="rollouts.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="rollouts.html">Kademeli Güncellemeler</a> / <span>Yeni kademeli güncelleme</span></nav>
+<header class="pagehead"><div><h1 class="pagehead__title">Yeni kademeli güncelleme</h1><p class="pagehead__sub">Her aşama bitince başarısızlık oranı kontrol edilir; sınır aşılırsa süreç kendiliğinden durur.</p></div></header>
+
+<form class="form" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo">
+  <section class="panel">
+    <h2 class="panel__title">Ne güncellenecek?</h2>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Ad</span>
+        <input class="field__input" type="text" name="name" value="" maxlength="100" required></label>
+      <label class="field"><span class="field__label">İş Türü</span>
+        <select class="field__input" name="job_type"><option value="upgrade_security" selected>Güvenlik güncellemeleri</option><option value="upgrade_all">Tüm güncellemeler</option><option value="upgrade_packages">Seçili paket güncellemesi</option></select></label>
+    </div>
+    <label class="field"><span class="field__label">Paketler</span>
+      <textarea class="field__input mono" name="packages" rows="2" maxlength="4000"></textarea>
+      <span class="field__hint">Yalnızca &#34;Seçili paket güncellemesi&#34; için: virgül veya satırla ayrılmış paket adları.</span></label>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">Sunucular ve aşamalar</h2>
+    <fieldset class="fieldset">
+      <legend>Aşamalar</legend>
+      <div class="daypicker">
+        <label class="check-label"><input type="radio" name="strategy" value="batches" checked> Eşit büyüklükte aşamalar</label>
+        <label class="check-label"><input type="radio" name="strategy" value="groups"> Grup sırasına göre aşamalar (her grup bir aşama)</label>
+      </div>
+      <div data-show-when="strategy=batches">
+        <div class="form-grid">
+          <label class="field"><span class="field__label">Sunucular</span>
+            <select class="field__input" name="target">
+              <option value="all" selected>Tüm sunucular</option>
+              <option value="group">Bir grubun sunucuları</option>
+              <option value="hosts">Seçilen sunucular</option>
+            </select></label>
+          <label class="field"><span class="field__label">Gruplar</span>
+            <select class="field__input" name="group_id"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+          <label class="field"><span class="field__label">Aşama başına sunucu</span>
+            <input class="field__input" type="number" name="batch" min="0" max="1000" value="5">
+            <span class="field__hint">0: canary dışındaki tüm sunucular tek aşamada.</span></label>
+        </div>
+        <details class="details"><summary>Sunucu seç</summary>
+          <div class="checklist"><label class="check-label"><input type="checkbox" name="host_ids" value="6"> backup-01</label><label class="check-label"><input type="checkbox" name="host_ids" value="3"> db-01</label><label class="check-label"><input type="checkbox" name="host_ids" value="4"> db-02</label><label class="check-label"><input type="checkbox" name="host_ids" value="5"> mail-01</label><label class="check-label"><input type="checkbox" name="host_ids" value="1"> web-01</label><label class="check-label"><input type="checkbox" name="host_ids" value="2"> web-02</label></div>
+        </details>
+      </div>
+      <div data-show-when="strategy=groups" class="form-grid">
+        
+        <label class="field"><span class="field__label">1. aşama</span>
+          <select class="field__input" name="stage_group_0"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+        <label class="field"><span class="field__label">2. aşama</span>
+          <select class="field__input" name="stage_group_1"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+        <label class="field"><span class="field__label">3. aşama</span>
+          <select class="field__input" name="stage_group_2"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+        <label class="field"><span class="field__label">4. aşama</span>
+          <select class="field__input" name="stage_group_3"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+        <label class="field"><span class="field__label">5. aşama</span>
+          <select class="field__input" name="stage_group_4"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+        <label class="field"><span class="field__label">6. aşama</span>
+          <select class="field__input" name="stage_group_5"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+      </div>
+    </fieldset>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Sıralama</span>
+        <select class="field__input" name="order"><option value="score_desc" selected>En sağlıklı önce (yüksek skor)</option><option value="score_asc">En riskli önce (düşük skor)</option><option value="hostname">Sunucu adına göre</option></select></label>
+      <label class="field"><span class="field__label">Canary sunucu sayısı</span>
+        <input class="field__input" type="number" name="canary" min="0" max="100" value="1">
+        <span class="field__hint">İlk aşamada güncellenecek sunucu sayısı. Canary aşamasındaki tek bir hata süreci durdurur. 0: canary yok.</span></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="pause_after_canary" value="1" checked> Canary aşamasından sonra dur, onayımı bekle</label>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">Güvenlik sınırları</h2>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">En fazla eşzamanlı güncelleme</span>
+        <input class="field__input" type="number" name="max_parallel" min="1" max="500" value="5"></label>
+      <label class="field"><span class="field__label">Aşamalar arası bekleme (dakika)</span>
+        <input class="field__input" type="number" name="wait_minutes" min="0" max="1440" value="10"></label>
+      <label class="field"><span class="field__label">En yüksek hata oranı (%)</span>
+        <input class="field__input" type="number" name="max_failure_pct" min="0" max="100" value="10">
+        <span class="field__hint">Biten sunucuların bu yüzdesinden fazlası başarısızsa süreç durur. 0: ilk hatada dur.</span></label>
+      <label class="field"><span class="field__label">İş zaman aşımı (dakika)</span>
+        <input class="field__input" type="number" name="job_timeout_minutes" min="10" max="1440" value="180">
+        <span class="field__hint">Bu süre içinde ajana ulaşmayan iş başlatılmaz ve başarısız sayılır.</span></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="require_health" value="1" checked> Sağlık kontrolü bozulursa başarısız say</label>
+    <p class="field__hint">Güncellemelerle çalışan sağlık kontrolleri güncellemeden sonra başarısız olursa sunucu başarısız sayılır.</p>
+  </section>
+  <div><button class="button button--primary" type="submit" data-confirm="Kademeli güncelleme başlatılsın mı? İlk aşama hemen kuyruğa alınır."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-play"></use></svg>Başlat</button></div>
+</form>
+
+  </main>
+</div>
+
+</body>
+</html>

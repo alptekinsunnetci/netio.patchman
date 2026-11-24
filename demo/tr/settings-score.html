@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Güvenlik skoru ağırlıkları · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="settings.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="settings.html">Sistem Ayarları</a> / <span>Güvenlik skoru ağırlıkları</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Güvenlik skoru ağırlıkları</h1>
+    <p class="pagehead__sub">Skorun hangi ölçütten kaç puan düşeceğini belirleyin. Değişiklikten sonra tüm skorlar yeniden hesaplanır.</p>
+  </div>
+</header>
+<nav class="tabs settings-tabs" aria-label="Sistem Ayarları">
+  <a class="tab" href="settings.html">Genel</a>
+  <a class="tab" href="#demo-unavailable">Sunucu yapılandırması</a>
+  <a class="tab" href="settings-channels.html">Bildirim kanalları</a>
+  <a class="tab" href="settings-health.html">Sağlık kontrolleri</a>
+  <a class="tab is-active" href="settings-score.html">Güvenlik skoru ağırlıkları</a>
+</nav>
+
+<form class="form" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo">
+  <section class="panel">
+    <h2 class="panel__title">Ağırlıklar (puan)</h2>
+    <p class="field__hint">Skor 100&#39;den başlar ve aşağıdaki puanlar düşülür (en düşük 0). Her CVE bir sunucuda yalnızca bir kez, kendisine uyan ölçütlerden en yükseğiyle cezalandırılır; ölçütler toplanmaz. Bekleyen bir güvenlik güncellemesi, paketi için açık bir bulgu varsa ayrıca sayılmaz. Dağıtımın bakımını sürdürdüğü yazılımlar destek dışı sayılmaz.</p>
+    <div class="form-grid">
+      
+      <label class="field"><span class="field__label">Kritik CVE</span>
+        <input class="field__input" type="number" name="score_critical" min="0" max="100" step="0.1" value="10" required>
+        <span class="field__hint">Varsayılan: 10</span></label>
+      
+      <label class="field"><span class="field__label">Yüksek CVE</span>
+        <input class="field__input" type="number" name="score_high" min="0" max="100" step="0.1" value="5" required>
+        <span class="field__hint">Varsayılan: 5</span></label>
+      
+      <label class="field"><span class="field__label">Orta CVE</span>
+        <input class="field__input" type="number" name="score_medium" min="0" max="100" step="0.1" value="2" required>
+        <span class="field__hint">Varsayılan: 2</span></label>
+      
+      <label class="field"><span class="field__label">Düşük CVE</span>
+        <input class="field__input" type="number" name="score_low" min="0" max="100" step="0.1" value="0.5" required>
+        <span class="field__hint">Varsayılan: 0.5</span></label>
+      
+      <label class="field"><span class="field__label">Önem derecesi bilinmeyen CVE</span>
+        <input class="field__input" type="number" name="score_unknown" min="0" max="100" step="0.1" value="1" required>
+        <span class="field__hint">Varsayılan: 1</span></label>
+      
+      <label class="field"><span class="field__label">CISA KEV listesindeki CVE</span>
+        <input class="field__input" type="number" name="score_kev" min="0" max="100" step="0.1" value="25" required>
+        <span class="field__hint">Varsayılan: 25</span></label>
+      
+      <label class="field"><span class="field__label">EPSS çarpanı (olasılık × puan)</span>
+        <input class="field__input" type="number" name="score_epss" min="0" max="100" step="0.1" value="20" required>
+        <span class="field__hint">Varsayılan: 20</span></label>
+      
+      <label class="field"><span class="field__label">Düzeltme süresi geçmiş CVE</span>
+        <input class="field__input" type="number" name="score_overdue" min="0" max="100" step="0.1" value="12" required>
+        <span class="field__hint">Varsayılan: 12</span></label>
+      
+      <label class="field"><span class="field__label">Açıklar için üst sınır</span>
+        <input class="field__input" type="number" name="score_vuln_cap" min="0" max="100" step="0.1" value="70" required>
+        <span class="field__hint">Varsayılan: 70</span></label>
+      
+      <label class="field"><span class="field__label">Destek dışı işletim sistemi</span>
+        <input class="field__input" type="number" name="score_os_eol" min="0" max="100" step="0.1" value="25" required>
+        <span class="field__hint">Varsayılan: 25</span></label>
+      
+      <label class="field"><span class="field__label">Desteği yakında biten işletim sistemi</span>
+        <input class="field__input" type="number" name="score_os_soon" min="0" max="100" step="0.1" value="5" required>
+        <span class="field__hint">Varsayılan: 5</span></label>
+      
+      <label class="field"><span class="field__label">Destek dışı yazılım sürümü</span>
+        <input class="field__input" type="number" name="score_software_eol" min="0" max="100" step="0.1" value="5" required>
+        <span class="field__hint">Varsayılan: 5</span></label>
+      
+      <label class="field"><span class="field__label">Destek dışı yazılım için üst sınır</span>
+        <input class="field__input" type="number" name="score_software_eol_cap" min="0" max="100" step="0.1" value="15" required>
+        <span class="field__hint">Varsayılan: 15</span></label>
+      
+      <label class="field"><span class="field__label">Bekleyen güvenlik güncellemesi</span>
+        <input class="field__input" type="number" name="score_security_update" min="0" max="100" step="0.1" value="1" required>
+        <span class="field__hint">Varsayılan: 1</span></label>
+      
+      <label class="field"><span class="field__label">Güncellemeler için üst sınır</span>
+        <input class="field__input" type="number" name="score_security_update_cap" min="0" max="100" step="0.1" value="10" required>
+        <span class="field__hint">Varsayılan: 10</span></label>
+      
+    </div>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">Eşik bildirimi</h2>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Skor bu değerin altına düşerse bildir</span>
+        <input class="field__input" type="number" name="alert_below" min="0" max="100" value="0" required>
+        <span class="field__hint">0 kapatır. Her sunucu için skor eşiğin üstüne çıkana kadar bir kez bildirilir.</span></label>
+    </div>
+  </section>
+  <div class="button-row">
+    <button class="button button--primary" type="submit">Kaydet</button>
+    <button class="button button--ghost" type="submit" name="reset" value="1" formnovalidate data-confirm="Tüm ağırlıklar varsayılan değerlerine dönsün mü?">Varsayılanlara dön</button>
+  </div>
+</form>
+
+  </main>
+</div>
+
+</body>
+</html>

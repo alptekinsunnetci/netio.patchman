@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Compliance Policies · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-policies.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Compliance Policies</h1>
+    <p class="pagehead__sub">Enabled frameworks, the thresholds of the automated checks, control applicability and server standards.</p>
+  </div>
+</header>
+<nav class="tabs" aria-label="Compliance Policies">
+  <a class="tab is-active" href="compliance-policies.html">Frameworks and thresholds</a>
+  <a class="tab" href="compliance-policies--tab-controls.html">Control applicability</a>
+  <a class="tab" href="standards.html">Server Standards</a>
+</nav>
+
+
+
+<form class="form" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo">
+  <fieldset class="fieldset">
+  <section class="panel">
+    <h2 class="panel__title">Assessment frameworks</h2>
+    <p class="muted">The frameworks offered when creating a report. Framework catalogs are versioned; existing reports keep the version they were made with.</p>
+    <div class="plain-list">
+      <label class="check-label"><input type="checkbox" name="profiles" value="isms" checked> <strong>Information security management audits</strong> <span class="muted mono">isms@1</span><span class="cell-sub">Technical evidence asked for in information security management system audits: asset inventory, vulnerability management, change, logging, backup and access.</span></label><label class="check-label"><input type="checkbox" name="profiles" value="baseline" checked> <strong>IT baseline protection audits</strong> <span class="muted mono">baseline@1</span><span class="cell-sub">Module-oriented technical evidence for baseline protection assessments: patch and change management, Linux and Windows servers, Windows clients, logging and backup.</span></label><label class="check-label"><input type="checkbox" name="profiles" value="itsm" checked> <strong>IT service management assessments</strong> <span class="muted mono">itsm@1</span><span class="cell-sub">Evidence supporting IT service management practices: change enablement, release and deployment, configuration and asset management, monitoring and service levels.</span></label><label class="check-label"><input type="checkbox" name="profiles" value="general" checked> <strong>General security &amp; patch compliance</strong> <span class="muted mono">general@1</span><span class="cell-sub">netio.patchman&#39;s own baseline security and update controls with measurable targets.</span></label>
+    </div>
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">Thresholds of the automated checks</h2>
+    <p class="muted">Thresholds apply to newly generated versions; existing versions do not change.</p>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Minimum reach and monitoring coverage (%)</span>
+        <input class="field__input" type="number" name="compliance_coverage_min" min="0" max="100" value="95" required>
+        <span class="field__hint">For agent reach, monitoring and backup days.</span></label>
+      <label class="field"><span class="field__label">Maximum update failure rate (%)</span>
+        <input class="field__input" type="number" name="compliance_patch_failure_max" min="0" max="100" value="10" required>
+        <span class="field__hint">Share of failed or timed-out update jobs.</span></label>
+      <label class="field"><span class="field__label">Hosts without pending security updates (%)</span>
+        <input class="field__input" type="number" name="compliance_currency_min" min="0" max="100" value="90" required>
+        <span class="field__hint">State at the end of the period.</span></label>
+      <label class="field"><span class="field__label">Findings resolved within the SLA (%)</span>
+        <input class="field__input" type="number" name="compliance_sla_min" min="0" max="100" value="90" required>
+        <span class="field__hint">Findings resolved in the period that had a target.</span></label>
+      <label class="field"><span class="field__label">Longest pending reboot (days)</span>
+        <input class="field__input" type="number" name="compliance_reboot_max_days" min="1" max="365" value="7" required></label>
+      <label class="field"><span class="field__label">Evidence retention (days)</span>
+        <input class="field__input" type="number" name="compliance_evidence_days" min="400" max="3650" value="1095" required>
+        <span class="field__hint">At least 400 days; evidence used by final report versions is never removed.</span></label>
+    </div>
+  </section>
+  <div><button class="button button--primary" type="submit">Save</button></div>
+  </fieldset>
+</form>
+
+<section class="panel">
+  <h2 class="panel__title">Related settings</h2>
+  <p class="muted">The checks read these settings; their values live in one place, on their own settings pages.</p>
+  <dl class="dl">
+    <dt>Remediation targets (SLA)</dt><dd>Targets: critical 15, high 30, medium 90, low 180 days (0 = none). · <a href="settings.html#sla">Edit</a></dd>
+    <dt>Risk acceptance term</dt><dd>365 days · <a href="settings.html#security">Edit</a></dd>
+    <dt>Multi-factor authentication required</dt><dd>No · <a href="settings.html#security">Edit</a></dd>
+    <dt>Preview approval before updates</dt><dd>Yes · <a href="settings.html#updates">Edit</a></dd>
+    <dt>Automatic backups</dt><dd>Yes · <a href="settings.html#backup">Edit</a></dd>
+    <dt>Continuous monitoring</dt><dd>Every 5 minutes · <a href="settings.html#monitoring">Edit</a></dd>
+  </dl>
+</section>
+
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

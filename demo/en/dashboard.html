@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Dashboard · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink is-active" href="dashboard.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Dashboard</h1>
+    <p class="pagehead__sub">Security and update status of your infrastructure</p>
+  </div>
+</header>
+
+
+
+<section class="stats stats--8">
+  <a class="stat" href="#demo-unavailable">
+    <p class="stat__label">Average security score</p>
+    <p class="stat__value"><span class="score score--critical">25</span></p>
+    <p class="stat__meta">Lowest: 20</p>
+  </a>
+  <a class="stat" href="servers.html">
+    <p class="stat__label">Servers</p>
+    <p class="stat__value">6</p>
+    <p class="stat__meta">0 servers online</p>
+  </a>
+  <a class="stat stat--critical" href="#demo-unavailable">
+    <p class="stat__label">Critical Vulnerabilities</p>
+    <p class="stat__value">659</p>
+    <p class="stat__meta">4924 high severity</p>
+  </a>
+  <a class="stat stat--critical" href="#demo-unavailable">
+    <p class="stat__label">Exploited Vulnerabilities</p>
+    <p class="stat__value">17</p>
+    <p class="stat__meta">in the CISA KEV catalog</p>
+  </a>
+  <a class="stat" href="#demo-unavailable">
+    <p class="stat__label">Pending Security Updates</p>
+    <p class="stat__value">522</p>
+    <p class="stat__meta">710 updates in total, on 4 servers</p>
+  </a>
+  <a class="stat" href="#demo-unavailable">
+    <p class="stat__label">Overdue findings</p>
+    <p class="stat__value">0</p>
+    <p class="stat__meta">0 distinct CVEs past the SLA</p>
+  </a>
+  <a class="stat stat--warning" href="#demo-unavailable">
+    <p class="stat__label">Offline Agents</p>
+    <p class="stat__value">6</p>
+    <p class="stat__meta">Never connected: 0</p>
+  </a>
+  <a class="stat stat--warning" href="#demo-unavailable">
+    <p class="stat__label">Waiting for Reboot</p>
+    <p class="stat__value">1</p>
+    <p class="stat__meta">Oldest 12 h ago</p>
+  </a>
+</section>
+
+
+<section class="panel" aria-labelledby="trend-title">
+  <div class="panel__head">
+    <h2 class="panel__title" id="trend-title">Daily trend</h2>
+    <span class="panel__link muted">2026-10-26 – 2026-11-24</span>
+  </div>
+  
+  
+  <div class="trends">
+    
+    <figure class="trend" data-trend>
+      <figcaption class="trend__head"><span class="trend__title">Average security score</span><span class="trend__last">25</span></figcaption>
+      <div class="trend__plot" data-values="59,59,60,60,61,61,62,62,63,63,64,64,65,65,66,66,67,67,68,68,69,69,70,70,71,71,72,72,25,25" data-labels="2026-10-26|2026-10-27|2026-10-28|2026-10-29|2026-10-30|2026-10-31|2026-11-01|2026-11-02|2026-11-03|2026-11-04|2026-11-05|2026-11-06|2026-11-07|2026-11-08|2026-11-09|2026-11-10|2026-11-11|2026-11-12|2026-11-13|2026-11-14|2026-11-15|2026-11-16|2026-11-17|2026-11-18|2026-11-19|2026-11-20|2026-11-21|2026-11-22|2026-11-23|2026-11-24" data-name="Average security score" role="img" aria-label="Average security score: 59 at the start of the period, 25 now">
+        <span class="trend__tick trend__tick--max">100</span><span class="trend__tick trend__tick--min">0</span>
+        <svg class="trend__svg" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <line class="trend__grid" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="trend__grid" x1="0" y1="20" x2="100" y2="20"></line>
+          <line class="trend__base" x1="0" y1="40" x2="100" y2="40"></line>
+          <path class="trend__area" d="M0 40 L0 16.4 L3.45 16.4 L6.9 16 L10.34 16 L13.79 15.6 L17.24 15.6 L20.69 15.2 L24.14 15.2 L27.59 14.8 L31.03 14.8 L34.48 14.4 L37.93 14.4 L41.38 14 L44.83 14 L48.28 13.6 L51.72 13.6 L55.17 13.2 L58.62 13.2 L62.07 12.8 L65.52 12.8 L68.97 12.4 L72.41 12.4 L75.86 12 L79.31 12 L82.76 11.6 L86.21 11.6 L89.66 11.2 L93.1 11.2 L96.55 30 L100 30 L100 40 Z"></path>
+          <path class="trend__line" d="M0 16.4 L3.45 16.4 L6.9 16 L10.34 16 L13.79 15.6 L17.24 15.6 L20.69 15.2 L24.14 15.2 L27.59 14.8 L31.03 14.8 L34.48 14.4 L37.93 14.4 L41.38 14 L44.83 14 L48.28 13.6 L51.72 13.6 L55.17 13.2 L58.62 13.2 L62.07 12.8 L65.52 12.8 L68.97 12.4 L72.41 12.4 L75.86 12 L79.31 12 L82.76 11.6 L86.21 11.6 L89.66 11.2 L93.1 11.2 L96.55 30 L100 30"></path>
+          <line class="trend__cross" x1="0" y1="0" x2="0" y2="40" hidden></line>
+        </svg>
+        <span class="trend__dot" hidden></span>
+        <span class="trend__tip" role="status" hidden></span>
+      </div>
+    </figure>
+    
+    <figure class="trend" data-trend>
+      <figcaption class="trend__head"><span class="trend__title">Critical and high vulnerabilities (CVE)</span><span class="trend__last">5583</span></figcaption>
+      <div class="trend__plot" data-values="86,85,83,82,81,79,78,77,75,74,73,71,70,69,67,66,65,63,62,61,59,58,57,55,54,53,51,50,5583,5583" data-labels="2026-10-26|2026-10-27|2026-10-28|2026-10-29|2026-10-30|2026-10-31|2026-11-01|2026-11-02|2026-11-03|2026-11-04|2026-11-05|2026-11-06|2026-11-07|2026-11-08|2026-11-09|2026-11-10|2026-11-11|2026-11-12|2026-11-13|2026-11-14|2026-11-15|2026-11-16|2026-11-17|2026-11-18|2026-11-19|2026-11-20|2026-11-21|2026-11-22|2026-11-23|2026-11-24" data-name="Critical and high vulnerabilities (CVE)" role="img" aria-label="Critical and high vulnerabilities (CVE): 86 at the start of the period, 5583 now">
+        <span class="trend__tick trend__tick--max">10000</span><span class="trend__tick trend__tick--min">0</span>
+        <svg class="trend__svg" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <line class="trend__grid" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="trend__grid" x1="0" y1="20" x2="100" y2="20"></line>
+          <line class="trend__base" x1="0" y1="40" x2="100" y2="40"></line>
+          <path class="trend__area" d="M0 40 L0 39.66 L3.45 39.66 L6.9 39.67 L10.34 39.67 L13.79 39.68 L17.24 39.68 L20.69 39.69 L24.14 39.69 L27.59 39.7 L31.03 39.7 L34.48 39.71 L37.93 39.72 L41.38 39.72 L44.83 39.72 L48.28 39.73 L51.72 39.74 L55.17 39.74 L58.62 39.75 L62.07 39.75 L65.52 39.76 L68.97 39.76 L72.41 39.77 L75.86 39.77 L79.31 39.78 L82.76 39.78 L86.21 39.79 L89.66 39.8 L93.1 39.8 L96.55 17.67 L100 17.67 L100 40 Z"></path>
+          <path class="trend__line" d="M0 39.66 L3.45 39.66 L6.9 39.67 L10.34 39.67 L13.79 39.68 L17.24 39.68 L20.69 39.69 L24.14 39.69 L27.59 39.7 L31.03 39.7 L34.48 39.71 L37.93 39.72 L41.38 39.72 L44.83 39.72 L48.28 39.73 L51.72 39.74 L55.17 39.74 L58.62 39.75 L62.07 39.75 L65.52 39.76 L68.97 39.76 L72.41 39.77 L75.86 39.77 L79.31 39.78 L82.76 39.78 L86.21 39.79 L89.66 39.8 L93.1 39.8 L96.55 17.67 L100 17.67"></path>
+          <line class="trend__cross" x1="0" y1="0" x2="0" y2="40" hidden></line>
+        </svg>
+        <span class="trend__dot" hidden></span>
+        <span class="trend__tip" role="status" hidden></span>
+      </div>
+    </figure>
+    
+    <figure class="trend" data-trend>
+      <figcaption class="trend__head"><span class="trend__title">Exploited vulnerabilities (KEV)</span><span class="trend__last">17</span></figcaption>
+      <div class="trend__plot" data-values="2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,17,17" data-labels="2026-10-26|2026-10-27|2026-10-28|2026-10-29|2026-10-30|2026-10-31|2026-11-01|2026-11-02|2026-11-03|2026-11-04|2026-11-05|2026-11-06|2026-11-07|2026-11-08|2026-11-09|2026-11-10|2026-11-11|2026-11-12|2026-11-13|2026-11-14|2026-11-15|2026-11-16|2026-11-17|2026-11-18|2026-11-19|2026-11-20|2026-11-21|2026-11-22|2026-11-23|2026-11-24" data-name="Exploited vulnerabilities (KEV)" role="img" aria-label="Exploited vulnerabilities (KEV): 2 at the start of the period, 17 now">
+        <span class="trend__tick trend__tick--max">20</span><span class="trend__tick trend__tick--min">0</span>
+        <svg class="trend__svg" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <line class="trend__grid" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="trend__grid" x1="0" y1="20" x2="100" y2="20"></line>
+          <line class="trend__base" x1="0" y1="40" x2="100" y2="40"></line>
+          <path class="trend__area" d="M0 40 L0 36 L3.45 36 L6.9 36 L10.34 36 L13.79 36 L17.24 36 L20.69 36 L24.14 36 L27.59 36 L31.03 36 L34.48 36 L37.93 36 L41.38 36 L44.83 36 L48.28 36 L51.72 36 L55.17 38 L58.62 38 L62.07 38 L65.52 38 L68.97 38 L72.41 38 L75.86 38 L79.31 38 L82.76 38 L86.21 38 L89.66 38 L93.1 38 L96.55 6 L100 6 L100 40 Z"></path>
+          <path class="trend__line" d="M0 36 L3.45 36 L6.9 36 L10.34 36 L13.79 36 L17.24 36 L20.69 36 L24.14 36 L27.59 36 L31.03 36 L34.48 36 L37.93 36 L41.38 36 L44.83 36 L48.28 36 L51.72 36 L55.17 38 L58.62 38 L62.07 38 L65.52 38 L68.97 38 L72.41 38 L75.86 38 L79.31 38 L82.76 38 L86.21 38 L89.66 38 L93.1 38 L96.55 6 L100 6"></path>
+          <line class="trend__cross" x1="0" y1="0" x2="0" y2="40" hidden></line>
+        </svg>
+        <span class="trend__dot" hidden></span>
+        <span class="trend__tip" role="status" hidden></span>
+      </div>
+    </figure>
+    
+    <figure class="trend" data-trend>
+      <figcaption class="trend__head"><span class="trend__title">Open findings</span><span class="trend__last">43440</span></figcaption>
+      <div class="trend__plot" data-values="552,543,534,525,516,507,498,489,480,471,462,453,444,435,426,417,408,399,390,381,372,363,354,345,336,327,318,309,43440,43440" data-labels="2026-10-26|2026-10-27|2026-10-28|2026-10-29|2026-10-30|2026-10-31|2026-11-01|2026-11-02|2026-11-03|2026-11-04|2026-11-05|2026-11-06|2026-11-07|2026-11-08|2026-11-09|2026-11-10|2026-11-11|2026-11-12|2026-11-13|2026-11-14|2026-11-15|2026-11-16|2026-11-17|2026-11-18|2026-11-19|2026-11-20|2026-11-21|2026-11-22|2026-11-23|2026-11-24" data-name="Open findings" role="img" aria-label="Open findings: 552 at the start of the period, 43440 now">
+        <span class="trend__tick trend__tick--max">50000</span><span class="trend__tick trend__tick--min">0</span>
+        <svg class="trend__svg" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <line class="trend__grid" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="trend__grid" x1="0" y1="20" x2="100" y2="20"></line>
+          <line class="trend__base" x1="0" y1="40" x2="100" y2="40"></line>
+          <path class="trend__area" d="M0 40 L0 39.56 L3.45 39.57 L6.9 39.57 L10.34 39.58 L13.79 39.59 L17.24 39.59 L20.69 39.6 L24.14 39.61 L27.59 39.62 L31.03 39.62 L34.48 39.63 L37.93 39.64 L41.38 39.64 L44.83 39.65 L48.28 39.66 L51.72 39.67 L55.17 39.67 L58.62 39.68 L62.07 39.69 L65.52 39.7 L68.97 39.7 L72.41 39.71 L75.86 39.72 L79.31 39.72 L82.76 39.73 L86.21 39.74 L89.66 39.75 L93.1 39.75 L96.55 5.25 L100 5.25 L100 40 Z"></path>
+          <path class="trend__line" d="M0 39.56 L3.45 39.57 L6.9 39.57 L10.34 39.58 L13.79 39.59 L17.24 39.59 L20.69 39.6 L24.14 39.61 L27.59 39.62 L31.03 39.62 L34.48 39.63 L37.93 39.64 L41.38 39.64 L44.83 39.65 L48.28 39.66 L51.72 39.67 L55.17 39.67 L58.62 39.68 L62.07 39.69 L65.52 39.7 L68.97 39.7 L72.41 39.71 L75.86 39.72 L79.31 39.72 L82.76 39.73 L86.21 39.74 L89.66 39.75 L93.1 39.75 L96.55 5.25 L100 5.25"></path>
+          <line class="trend__cross" x1="0" y1="0" x2="0" y2="40" hidden></line>
+        </svg>
+        <span class="trend__dot" hidden></span>
+        <span class="trend__tip" role="status" hidden></span>
+      </div>
+    </figure>
+    
+    <figure class="trend" data-trend>
+      <figcaption class="trend__head"><span class="trend__title">Pending security updates</span><span class="trend__last">522</span></figcaption>
+      <div class="trend__plot" data-values="224,221,218,215,212,209,206,203,200,197,194,191,188,185,182,179,176,173,170,167,164,161,158,155,152,149,146,143,522,522" data-labels="2026-10-26|2026-10-27|2026-10-28|2026-10-29|2026-10-30|2026-10-31|2026-11-01|2026-11-02|2026-11-03|2026-11-04|2026-11-05|2026-11-06|2026-11-07|2026-11-08|2026-11-09|2026-11-10|2026-11-11|2026-11-12|2026-11-13|2026-11-14|2026-11-15|2026-11-16|2026-11-17|2026-11-18|2026-11-19|2026-11-20|2026-11-21|2026-11-22|2026-11-23|2026-11-24" data-name="Pending security updates" role="img" aria-label="Pending security updates: 224 at the start of the period, 522 now">
+        <span class="trend__tick trend__tick--max">1000</span><span class="trend__tick trend__tick--min">0</span>
+        <svg class="trend__svg" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <line class="trend__grid" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="trend__grid" x1="0" y1="20" x2="100" y2="20"></line>
+          <line class="trend__base" x1="0" y1="40" x2="100" y2="40"></line>
+          <path class="trend__area" d="M0 40 L0 31.04 L3.45 31.16 L6.9 31.28 L10.34 31.4 L13.79 31.52 L17.24 31.64 L20.69 31.76 L24.14 31.88 L27.59 32 L31.03 32.12 L34.48 32.24 L37.93 32.36 L41.38 32.48 L44.83 32.6 L48.28 32.72 L51.72 32.84 L55.17 32.96 L58.62 33.08 L62.07 33.2 L65.52 33.32 L68.97 33.44 L72.41 33.56 L75.86 33.68 L79.31 33.8 L82.76 33.92 L86.21 34.04 L89.66 34.16 L93.1 34.28 L96.55 19.12 L100 19.12 L100 40 Z"></path>
+          <path class="trend__line" d="M0 31.04 L3.45 31.16 L6.9 31.28 L10.34 31.4 L13.79 31.52 L17.24 31.64 L20.69 31.76 L24.14 31.88 L27.59 32 L31.03 32.12 L34.48 32.24 L37.93 32.36 L41.38 32.48 L44.83 32.6 L48.28 32.72 L51.72 32.84 L55.17 32.96 L58.62 33.08 L62.07 33.2 L65.52 33.32 L68.97 33.44 L72.41 33.56 L75.86 33.68 L79.31 33.8 L82.76 33.92 L86.21 34.04 L89.66 34.16 L93.1 34.28 L96.55 19.12 L100 19.12"></path>
+          <line class="trend__cross" x1="0" y1="0" x2="0" y2="40" hidden></line>
+        </svg>
+        <span class="trend__dot" hidden></span>
+        <span class="trend__tip" role="status" hidden></span>
+      </div>
+    </figure>
+    
+  </div>
+
+  <details class="details">
+    <summary>Show daily values as a table</summary>
+    <div class="table-wrap">
+    
+    <table class="table">
+      <thead><tr><th>Day</th><th class="num">Average security score</th><th class="num">Critical and high vulnerabilities (CVE)</th><th class="num">Exploited vulnerabilities (KEV)</th><th class="num">Open findings</th><th class="num">Pending security updates</th><th class="num">Waiting for reboot</th><th class="num">Servers</th></tr></thead>
+      <tbody>
+      <tr><td>2026-10-26</td><td class="num">59</td><td class="num">86</td><td class="num">2</td><td class="num">552</td><td class="num">224</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-10-27</td><td class="num">59</td><td class="num">85</td><td class="num">2</td><td class="num">543</td><td class="num">221</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-10-28</td><td class="num">60</td><td class="num">83</td><td class="num">2</td><td class="num">534</td><td class="num">218</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-10-29</td><td class="num">60</td><td class="num">82</td><td class="num">2</td><td class="num">525</td><td class="num">215</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-10-30</td><td class="num">61</td><td class="num">81</td><td class="num">2</td><td class="num">516</td><td class="num">212</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-10-31</td><td class="num">61</td><td class="num">79</td><td class="num">2</td><td class="num">507</td><td class="num">209</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-01</td><td class="num">62</td><td class="num">78</td><td class="num">2</td><td class="num">498</td><td class="num">206</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-02</td><td class="num">62</td><td class="num">77</td><td class="num">2</td><td class="num">489</td><td class="num">203</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-03</td><td class="num">63</td><td class="num">75</td><td class="num">2</td><td class="num">480</td><td class="num">200</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-04</td><td class="num">63</td><td class="num">74</td><td class="num">2</td><td class="num">471</td><td class="num">197</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-05</td><td class="num">64</td><td class="num">73</td><td class="num">2</td><td class="num">462</td><td class="num">194</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-06</td><td class="num">64</td><td class="num">71</td><td class="num">2</td><td class="num">453</td><td class="num">191</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-07</td><td class="num">65</td><td class="num">70</td><td class="num">2</td><td class="num">444</td><td class="num">188</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-08</td><td class="num">65</td><td class="num">69</td><td class="num">2</td><td class="num">435</td><td class="num">185</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-09</td><td class="num">66</td><td class="num">67</td><td class="num">2</td><td class="num">426</td><td class="num">182</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-10</td><td class="num">66</td><td class="num">66</td><td class="num">2</td><td class="num">417</td><td class="num">179</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-11</td><td class="num">67</td><td class="num">65</td><td class="num">1</td><td class="num">408</td><td class="num">176</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-12</td><td class="num">67</td><td class="num">63</td><td class="num">1</td><td class="num">399</td><td class="num">173</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-13</td><td class="num">68</td><td class="num">62</td><td class="num">1</td><td class="num">390</td><td class="num">170</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-14</td><td class="num">68</td><td class="num">61</td><td class="num">1</td><td class="num">381</td><td class="num">167</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-15</td><td class="num">69</td><td class="num">59</td><td class="num">1</td><td class="num">372</td><td class="num">164</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-16</td><td class="num">69</td><td class="num">58</td><td class="num">1</td><td class="num">363</td><td class="num">161</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-17</td><td class="num">70</td><td class="num">57</td><td class="num">1</td><td class="num">354</td><td class="num">158</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-18</td><td class="num">70</td><td class="num">55</td><td class="num">1</td><td class="num">345</td><td class="num">155</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-19</td><td class="num">71</td><td class="num">54</td><td class="num">1</td><td class="num">336</td><td class="num">152</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-20</td><td class="num">71</td><td class="num">53</td><td class="num">1</td><td class="num">327</td><td class="num">149</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-21</td><td class="num">72</td><td class="num">51</td><td class="num">1</td><td class="num">318</td><td class="num">146</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-22</td><td class="num">72</td><td class="num">50</td><td class="num">1</td><td class="num">309</td><td class="num">143</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-23</td><td class="num">25</td><td class="num">5583</td><td class="num">17</td><td class="num">43440</td><td class="num">522</td><td class="num">1</td><td class="num">6</td></tr><tr><td>2026-11-24</td><td class="num">25</td><td class="num">5583</td><td class="num">17</td><td class="num">43440</td><td class="num">522</td><td class="num">1</td><td class="num">6</td></tr>
+      </tbody>
+    </table>
+    
+    </div>
+  </details>
+  
+</section>
+
+
+<section class="panel">
+  <div class="panel__head">
+    <h2 class="panel__title">Open vulnerabilities by severity</h2>
+    <a class="panel__link" href="vulnerabilities.html">View all</a>
+  </div>
+  
+  
+  <div class="sevbar" role="img" aria-label="Open vulnerabilities by severity">
+    <span class="sevbar__seg sevbar__seg--critical" data-grow="659"></span>
+    <span class="sevbar__seg sevbar__seg--high" data-grow="4924"></span>
+    <span class="sevbar__seg sevbar__seg--medium" data-grow="4670"></span>
+    <span class="sevbar__seg sevbar__seg--low" data-grow="1461"></span>
+    <span class="sevbar__seg sevbar__seg--unknown" data-grow="112"></span>
+  </div>
+  <ul class="legend">
+    <li><a href="#demo-unavailable"><span class="legend__dot legend__dot--critical"></span>Critical <strong>659</strong></a></li>
+    <li><a href="#demo-unavailable"><span class="legend__dot legend__dot--high"></span>High <strong>4924</strong></a></li>
+    <li><a href="#demo-unavailable"><span class="legend__dot legend__dot--medium"></span>Medium <strong>4670</strong></a></li>
+    <li><a href="#demo-unavailable"><span class="legend__dot legend__dot--low"></span>Low <strong>1461</strong></a></li>
+    <li><a href="#demo-unavailable"><span class="legend__dot legend__dot--unknown"></span>Unknown <strong>112</strong></a></li>
+  </ul>
+  
+</section>
+
+
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">My watched packages</h2>
+  </div>
+  <div class="empty"><p class="empty__body">You are not watching any packages yet. Star important ones such as nginx or mariadb on a server&#39;s Installed Packages tab or on the Packages page to follow them across all servers here.</p></div>
+</section>
+
+<div class="grid-2">
+  <section class="panel panel--flush">
+    <div class="panel__head">
+      <h2 class="panel__title">Priority vulnerabilities</h2>
+      <a class="panel__link" href="vulnerabilities.html">View all</a>
+    </div>
+    
+    <table class="table">
+      <thead><tr><th>CVE ID</th><th>Severity</th><th class="num">Affected Servers</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><a class="mono" href="vulnerabilities-CVE-2026-111497.html">CVE-2026-111497</a> <span class="badge badge--kev" title="Listed in the CISA Known Exploited Vulnerabilities catalog: known to be actively exploited.">KEV</span><div class="cell-sub mono">brotli</div></td>
+        <td><span class="badge badge--critical">Critical</span></td>
+        <td class="num">6</td>
+      </tr>
+      
+      <tr>
+        <td><a class="mono" href="vulnerabilities-CVE-2026-109618.html">CVE-2026-109618</a> <span class="badge badge--kev" title="Listed in the CISA Known Exploited Vulnerabilities catalog: known to be actively exploited.">KEV</span><div class="cell-sub mono">php8.3</div></td>
+        <td><span class="badge badge--critical">Critical</span></td>
+        <td class="num">2</td>
+      </tr>
+      
+      <tr>
+        <td><a class="mono" href="vulnerabilities-CVE-2025-39682.html">CVE-2025-39682</a> <span class="badge badge--kev" title="Listed in the CISA Known Exploited Vulnerabilities catalog: known to be actively exploited.">KEV</span><div class="cell-sub mono">linux</div></td>
+        <td><span class="badge badge--critical">Critical</span></td>
+        <td class="num">2</td>
+      </tr>
+      
+      <tr>
+        <td><a class="mono" href="vulnerabilities-CVE-2025-32463.html">CVE-2025-32463</a> <span class="badge badge--kev" title="Listed in the CISA Known Exploited Vulnerabilities catalog: known to be actively exploited.">KEV</span><div class="cell-sub mono">sudo</div></td>
+        <td><span class="badge badge--critical">Critical</span></td>
+        <td class="num">3</td>
+      </tr>
+      
+      <tr>
+        <td><a class="mono" href="vulnerabilities-CVE-2026-74705.html">CVE-2026-74705</a> <div class="cell-sub mono">linux</div></td>
+        <td><span class="badge badge--critical">Critical</span></td>
+        <td class="num">6</td>
+      </tr>
+      
+      <tr>
+        <td><a class="mono" href="vulnerabilities-CVE-2026-74612.html">CVE-2026-74612</a> <div class="cell-sub mono">linux</div></td>
+        <td><span class="badge badge--critical">Critical</span></td>
+        <td class="num">6</td>
+      </tr>
+      
+      <tr>
+        <td><a class="mono" href="vulnerabilities-CVE-2026-74475.html">CVE-2026-74475</a> <div class="cell-sub mono">linux</div></td>
+        <td><span class="badge badge--critical">Critical</span></td>
+        <td class="num">6</td>
+      </tr>
+      
+      <tr>
+        <td><a class="mono" href="vulnerabilities-CVE-2026-74280.html">CVE-2026-74280</a> <div class="cell-sub mono">linux</div></td>
+        <td><span class="badge badge--critical">Critical</span></td>
+        <td class="num">6</td>
+      </tr>
+      
+      </tbody>
+    </table>
+    
+  </section>
+
+  <section class="panel panel--flush">
+    <div class="panel__head">
+      <h2 class="panel__title">Servers at highest risk</h2>
+      <a class="panel__link" href="#demo-unavailable">View all</a>
+    </div>
+    
+    <table class="table">
+      <thead><tr><th>Server Name</th><th class="num">Score</th><th>Vulnerabilities</th><th class="num">Security Updates</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><a href="servers-1.html">web-01</a><div class="cell-sub">Ubuntu 24.04.4 LTS</div></td>
+        <td class="num"><a href="servers-1-score.html"><span class="score score--critical">20</span></a></td>
+        <td><span class="sevcounts"><span class="sevcount sevcount--critical" title="Critical">653</span><span class="sevcount sevcount--high" title="High">4893</span><span class="sevcount sevcount--medium" title="Medium">4571</span><span class="sevcount sevcount--low" title="Low">1456</span><span class="sevcount sevcount--unknown" title="Unknown">111</span></span></td>
+        <td class="num">236</td>
+      </tr>
+      
+      <tr>
+        <td><a href="servers-2.html">web-02</a><div class="cell-sub">Ubuntu 24.04.4 LTS</div></td>
+        <td class="num"><a href="servers-2-score.html"><span class="score score--critical">20</span></a></td>
+        <td><span class="sevcounts"><span class="sevcount sevcount--critical" title="Critical">646</span><span class="sevcount sevcount--high" title="High">4852</span><span class="sevcount sevcount--medium" title="Medium">4506</span><span class="sevcount sevcount--low" title="Low">1434</span><span class="sevcount sevcount--unknown" title="Unknown">93</span></span></td>
+        <td class="num">156</td>
+      </tr>
+      
+      <tr>
+        <td><a href="servers-5.html">mail-01</a><div class="cell-sub">Ubuntu 24.04.4 LTS</div></td>
+        <td class="num"><a href="servers-5-score.html"><span class="score score--critical">20</span></a></td>
+        <td><span class="sevcounts"><span class="sevcount sevcount--critical" title="Critical">339</span><span class="sevcount sevcount--high" title="High">2083</span><span class="sevcount sevcount--medium" title="Medium">1578</span><span class="sevcount sevcount--low" title="Low">1266</span><span class="sevcount sevcount--unknown" title="Unknown">57</span></span></td>
+        <td class="num">117</td>
+      </tr>
+      
+      <tr>
+        <td><a href="servers-3.html">db-01</a><div class="cell-sub">Ubuntu 24.04.4 LTS</div></td>
+        <td class="num"><a href="#demo-unavailable"><span class="score score--critical">30</span></a></td>
+        <td><span class="sevcounts"><span class="sevcount sevcount--critical" title="Critical">336</span><span class="sevcount sevcount--high" title="High">2026</span><span class="sevcount sevcount--medium" title="Medium">1504</span><span class="sevcount sevcount--low" title="Low">1231</span><span class="sevcount sevcount--unknown" title="Unknown">19</span></span></td>
+        <td class="num">13</td>
+      </tr>
+      
+      <tr>
+        <td><a href="servers-4.html">db-02</a><div class="cell-sub">Ubuntu 24.04.4 LTS</div></td>
+        <td class="num"><a href="#demo-unavailable"><span class="score score--critical">30</span></a></td>
+        <td><span class="sevcounts"><span class="sevcount sevcount--critical" title="Critical">320</span><span class="sevcount sevcount--high" title="High">1962</span><span class="sevcount sevcount--medium" title="Medium">1448</span><span class="sevcount sevcount--low" title="Low">1215</span><span class="sevcount sevcount--unknown" title="Unknown">7</span></span></td>
+        <td class="num">0</td>
+      </tr>
+      
+      <tr>
+        <td><a href="servers-6.html">backup-01</a><div class="cell-sub">Ubuntu 24.04.4 LTS</div></td>
+        <td class="num"><a href="#demo-unavailable"><span class="score score--critical">30</span></a></td>
+        <td><span class="sevcounts"><span class="sevcount sevcount--critical" title="Critical">314</span><span class="sevcount sevcount--high" title="High">1923</span><span class="sevcount sevcount--medium" title="Medium">1345</span><span class="sevcount sevcount--low" title="Low">1209</span><span class="sevcount sevcount--unknown" title="Unknown">7</span></span></td>
+        <td class="num">0</td>
+      </tr>
+      
+      </tbody>
+    </table>
+    
+  </section>
+</div>
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">Recent update jobs</h2>
+    <a class="panel__link" href="jobs.html">View all</a>
+  </div>
+  
+  <table class="table">
+    <thead><tr><th>Job</th><th>Server Name</th><th>Job Type</th><th>Status</th><th>Created</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td><a class="mono" href="jobs-1.html">#1</a></td>
+      <td><a href="servers-2.html">web-02</a></td>
+      <td>Update preview</td>
+      <td><span class="pill pill--succeeded">Succeeded</span></td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="2026-11-23 21:09">12 h ago</time></td>
+    </tr>
+    
+    </tbody>
+  </table>
+  
+</section>
+
+<p class="footnote">
+  The vulnerability scan has not run yet.
+  
+</p>
+
+
+  </main>
+</div>
+
+</body>
+</html>

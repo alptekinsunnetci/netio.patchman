@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>New standard · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-policies.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="compliance-policies.html">Compliance Policies</a> / <a href="standards.html">Server Standards</a> / <span>New standard</span></nav>
+<header class="pagehead"><div><h1 class="pagehead__title">New standard</h1><p class="pagehead__sub">A standard applies to a group (or all servers). Deviations are recomputed every 15 minutes and right after saving.</p></div></header>
+
+<form class="form" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo">
+  <section class="panel">
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Standard</span><input class="field__input" type="text" name="name" value="" maxlength="100" required></label>
+      <label class="field"><span class="field__label">Scope</span>
+        <select class="field__input" name="group_id"><option value="0">All servers</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+    </div>
+    <label class="field"><span class="field__label">Description</span><input class="field__input" type="text" name="description" value="" maxlength="500"></label>
+    <label class="check-label"><input type="checkbox" name="enabled" value="1" checked> Enabled</label>
+  </section>
+
+  <section class="panel panel--flush">
+    <div class="panel__head"><h2 class="panel__title">Rules</h2></div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Rule type</th><th>Subject</th><th>Software or package</th><th>Value</th><th>Delete</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><input type="hidden" name="rule_0" value="0">
+          <select class="field__input" name="kind_0" aria-label="Rule type"><option value="required">Must be installed</option><option value="forbidden">Must not be installed</option><option value="allowed_cycles">Allowed release cycles</option><option value="min_version">Minimum package version</option><option value="running">Service must run</option></select></td>
+        <td><select class="field__input" name="type_0" aria-label="Subject">
+          <option value="software" selected>Software (catalog)</option>
+          <option value="package">Package name</option></select></td>
+        <td><input class="field__input mono" type="text" name="subject_0" value="" list="software-ids" maxlength="200" aria-label="Software or package"></td>
+        <td><input class="field__input mono" type="text" name="value_0" value="" maxlength="200" aria-label="Value"></td>
+        <td class="check"></td>
+      </tr>
+      
+      <tr>
+        <td><input type="hidden" name="rule_1" value="0">
+          <select class="field__input" name="kind_1" aria-label="Rule type"><option value="required">Must be installed</option><option value="forbidden">Must not be installed</option><option value="allowed_cycles">Allowed release cycles</option><option value="min_version">Minimum package version</option><option value="running">Service must run</option></select></td>
+        <td><select class="field__input" name="type_1" aria-label="Subject">
+          <option value="software" selected>Software (catalog)</option>
+          <option value="package">Package name</option></select></td>
+        <td><input class="field__input mono" type="text" name="subject_1" value="" list="software-ids" maxlength="200" aria-label="Software or package"></td>
+        <td><input class="field__input mono" type="text" name="value_1" value="" maxlength="200" aria-label="Value"></td>
+        <td class="check"></td>
+      </tr>
+      
+      <tr>
+        <td><input type="hidden" name="rule_2" value="0">
+          <select class="field__input" name="kind_2" aria-label="Rule type"><option value="required">Must be installed</option><option value="forbidden">Must not be installed</option><option value="allowed_cycles">Allowed release cycles</option><option value="min_version">Minimum package version</option><option value="running">Service must run</option></select></td>
+        <td><select class="field__input" name="type_2" aria-label="Subject">
+          <option value="software" selected>Software (catalog)</option>
+          <option value="package">Package name</option></select></td>
+        <td><input class="field__input mono" type="text" name="subject_2" value="" list="software-ids" maxlength="200" aria-label="Software or package"></td>
+        <td><input class="field__input mono" type="text" name="value_2" value="" maxlength="200" aria-label="Value"></td>
+        <td class="check"></td>
+      </tr>
+      
+      <tr>
+        <td><input type="hidden" name="rule_3" value="0">
+          <select class="field__input" name="kind_3" aria-label="Rule type"><option value="required">Must be installed</option><option value="forbidden">Must not be installed</option><option value="allowed_cycles">Allowed release cycles</option><option value="min_version">Minimum package version</option><option value="running">Service must run</option></select></td>
+        <td><select class="field__input" name="type_3" aria-label="Subject">
+          <option value="software" selected>Software (catalog)</option>
+          <option value="package">Package name</option></select></td>
+        <td><input class="field__input mono" type="text" name="subject_3" value="" list="software-ids" maxlength="200" aria-label="Software or package"></td>
+        <td><input class="field__input mono" type="text" name="value_3" value="" maxlength="200" aria-label="Value"></td>
+        <td class="check"></td>
+      </tr>
+      
+      <tr>
+        <td><input type="hidden" name="rule_4" value="0">
+          <select class="field__input" name="kind_4" aria-label="Rule type"><option value="required">Must be installed</option><option value="forbidden">Must not be installed</option><option value="allowed_cycles">Allowed release cycles</option><option value="min_version">Minimum package version</option><option value="running">Service must run</option></select></td>
+        <td><select class="field__input" name="type_4" aria-label="Subject">
+          <option value="software" selected>Software (catalog)</option>
+          <option value="package">Package name</option></select></td>
+        <td><input class="field__input mono" type="text" name="subject_4" value="" list="software-ids" maxlength="200" aria-label="Software or package"></td>
+        <td><input class="field__input mono" type="text" name="value_4" value="" maxlength="200" aria-label="Value"></td>
+        <td class="check"></td>
+      </tr>
+      
+      </tbody>
+    </table>
+    </div>
+    <datalist id="software-ids"><option value="dotnet">.NET</option><option value="dotnet-sdk">.NET SDK</option><option value="389-ds">389 Directory Server</option><option value="3proxy">3proxy</option><option value="adminer">Adminer</option><option value="aerospike">Aerospike</option><option value="age">age</option><option value="aide">AIDE</option><option value="amanda">Amanda</option><option value="amavis">Amavis</option><option value="ansible">Ansible</option><option value="ansible-core">ansible-core</option><option value="activemq">Apache ActiveMQ</option><option value="cassandra">Apache Cassandra</option><option value="couchdb">Apache CouchDB</option><option value="hbase">Apache HBase</option><option value="apache">Apache HTTP Server</option><option value="kafka">Apache Kafka</option><option value="solr">Apache Solr</option><option value="tomcat">Apache Tomcat</option><option value="tomee">Apache TomEE</option><option value="trafficserver">Apache Traffic Server</option><option value="apparmor">AppArmor</option><option value="arangodb">ArangoDB</option><option value="authelia">Authelia</option><option value="bacula">Bacula</option><option value="bareos">Bareos</option><option value="barman">Barman</option><option value="beanstalkd">Beanstalkd</option><option value="bind">BIND 9</option><option value="bird">BIRD</option><option value="borgbackup">BorgBackup</option><option value="btrfs">Btrfs (btrfs-progs)</option><option value="buildah">Buildah</option><option value="buildbot">Buildbot</option><option value="bun">Bun</option><option value="caddy">Caddy</option><option value="cadvisor">cAdvisor</option><option value="celery">Celery</option><option value="centreon">Centreon</option><option value="ceph">Ceph</option><option value="certbot">Certbot</option><option value="cfengine">CFEngine</option><option value="checkmk-agent">Checkmk Agent</option><option value="chef">Chef Infra Client</option><option value="cherokee">Cherokee</option><option value="chkrootkit">chkrootkit</option><option value="chrony">chrony</option><option value="clamav">ClamAV</option><option value="clickhouse">ClickHouse</option><option value="cagefs">CloudLinux CageFS</option><option value="lvemanager">CloudLinux LVE Manager</option><option value="mysql-governor">CloudLinux MySQL Governor</option><option value="cloudpanel">CloudPanel</option><option value="cockpit">Cockpit</option><option value="cockroachdb">CockroachDB</option><option value="collabora">Collabora Online</option><option value="collectd">collectd</option><option value="csf">ConfigServer Security &amp; Firewall</option><option value="consul">Consul</option><option value="containerd">containerd</option><option value="coredns">CoreDNS</option><option value="corosync">Corosync</option><option value="couchbase">Couchbase Server</option><option value="courier">Courier Mail Server</option><option value="cpanel">cPanel &amp; WHM</option><option value="cri-o">CRI-O</option><option value="crowdsec">CrowdSec</option><option value="crowdsec-bouncer">CrowdSec Firewall Bouncer</option><option value="crun">crun</option><option value="cyrus">Cyrus IMAP</option><option value="dbus">D-Bus</option><option value="daphne">Daphne</option><option value="deno">Deno</option><option value="directadmin">DirectAdmin</option><option value="dnsmasq">dnsmasq</option><option value="docker-compose">Docker Compose</option><option value="docker">Docker Engine</option><option value="dovecot">Dovecot</option><option value="dragonfly">Dragonfly</option><option value="drbd">DRBD</option><option value="dropbear">Dropbear SSH</option><option value="duplicati">Duplicati</option><option value="duplicity">Duplicity</option><option value="jetty">Eclipse Jetty</option><option value="elasticsearch">Elasticsearch</option><option value="elixir">Elixir</option><option value="emqx">EMQX</option><option value="envoy">Envoy Proxy</option><option value="erlang">Erlang/OTP</option><option value="etcd">etcd</option><option value="ethtool">ethtool</option><option value="exim">Exim</option><option value="fail2ban">Fail2ban</option><option value="falco">Falco</option><option value="ferretdb">FerretDB</option><option value="filebeat">Filebeat</option><option value="filezilla-server">FileZilla Server</option><option value="firebird">Firebird</option><option value="firewalld">firewalld</option><option value="fluent-bit">Fluent Bit</option><option value="fluentd">Fluentd</option><option value="forgejo">Forgejo</option><option value="foundationdb">FoundationDB</option><option value="frankenphp">FrankenPHP</option><option value="freeipa">FreeIPA</option><option value="freeradius">FreeRADIUS</option><option value="froxlor">Froxlor</option><option value="frr">FRRouting (FRR)</option><option value="gearman">Gearman</option><option value="gitea">Gitea</option><option value="gitlab">GitLab</option><option value="gitlab-runner">GitLab Runner</option><option value="glances">Glances</option><option value="glassfish">GlassFish</option><option value="glpi">GLPI</option><option value="glusterfs">GlusterFS</option><option value="coreutils">GNU Coreutils</option><option value="gnupg">GnuPG</option><option value="go">Go</option><option value="graalvm">GraalVM</option><option value="grafana">Grafana</option><option value="grafana-agent">Grafana Agent</option><option value="grafana-alloy">Grafana Alloy</option><option value="loki">Grafana Loki</option><option value="mimir">Grafana Mimir</option><option value="tempo">Grafana Tempo</option><option value="graylog">Graylog</option><option value="gunicorn">Gunicorn</option><option value="h2o">H2O</option><option value="haproxy">HAProxy</option><option value="boundary">HashiCorp Boundary</option><option value="nomad">HashiCorp Nomad</option><option value="hazelcast">Hazelcast</option><option value="hdparm">hdparm</option><option value="headscale">Headscale</option><option value="heimdal-kdc">Heimdal Kerberos KDC</option><option value="helm">Helm</option><option value="hestiacp">HestiaCP</option><option value="icinga2">Icinga 2</option><option value="imunify360">Imunify360</option><option value="imunifyav">ImunifyAV</option><option value="incus">Incus</option><option value="influxdb">InfluxDB</option><option value="iis">Internet Information Services (IIS)</option><option value="iperf3">iperf3</option><option value="iproute2">iproute2</option><option value="iptables">iptables</option><option value="ipvsadm">IPVS / LVS (ipvsadm)</option><option value="irqbalance">irqbalance</option><option value="isc-dhcp">ISC DHCP</option><option value="open-iscsi">iSCSI initiator</option><option value="iscsi-target">iSCSI Target (LIO)</option><option value="ispconfig">ISPConfig</option><option value="jaeger">Jaeger</option><option value="java">Java (OpenJDK)</option><option value="jboss-eap">JBoss EAP</option><option value="jenkins">Jenkins</option><option value="jetbackup">JetBackup</option><option value="artifactory">JFrog Artifactory</option><option value="jruby">JRuby</option><option value="kanidm">Kanidm</option><option value="kea">Kea DHCP</option><option value="keepalived">Keepalived</option><option value="kernelcare">KernelCare</option><option value="keycloak">Keycloak</option><option value="keydb">KeyDB</option><option value="kibana">Kibana</option><option value="knot">Knot DNS</option><option value="knot-resolver">Knot Resolver</option><option value="kopia">Kopia</option><option value="kubernetes">Kubernetes</option><option value="libressl">LibreSSL</option><option value="libvirt">libvirt</option><option value="lighttpd">lighttpd</option><option value="auditd">Linux Audit (auditd)</option><option value="maldet">Linux Malware Detect (maldet)</option><option value="litespeed">LiteSpeed Web Server</option><option value="lm-sensors">lm-sensors</option><option value="logrotate">logrotate</option><option value="logstash">Logstash</option><option value="lsof">lsof</option><option value="lua">Lua</option><option value="lvm2">LVM2</option><option value="lxc">LXC</option><option value="lxd">LXD</option><option value="lynis">Lynis</option><option value="mailman">Mailman</option><option value="mailscanner">MailScanner</option><option value="maradns">MaraDNS</option><option value="mariabackup">Mariabackup</option><option value="mariadb">MariaDB</option><option value="matomo">Matomo</option><option value="matrix-synapse">Matrix Synapse</option><option value="mattermost">Mattermost</option><option value="mdadm">mdadm</option><option value="mediawiki">MediaWiki</option><option value="meilisearch">Meilisearch</option><option value="memcached">Memcached</option><option value="metricbeat">Metricbeat</option><option value="exchange">Microsoft Exchange Server</option><option value="mssql">Microsoft SQL Server</option><option value="minikube">minikube</option><option value="minio">MinIO</option><option value="krb5-kdc">MIT Kerberos KDC</option><option value="mitmproxy">mitmproxy</option><option value="modsecurity">ModSecurity</option><option value="mongodb">MongoDB</option><option value="monit">Monit</option><option value="mono">Mono</option><option value="moosefs">MooseFS</option><option value="mosquitto">Mosquitto</option><option value="mtr">mtr</option><option value="multipath">multipath-tools</option><option value="munin">Munin</option><option value="mysql">MySQL</option><option value="nagios">Nagios Core</option><option value="nrpe">Nagios NRPE</option><option value="nats">NATS Server</option><option value="nebula">Nebula</option><option value="netcat">netcat</option><option value="netdata">Netdata</option><option value="nfs-server">NFS sunucusu (nfs-utils)</option><option value="nfs-ganesha">NFS-Ganesha</option><option value="nftables">nftables</option><option value="nginx">Nginx</option><option value="nginx-unit">NGINX Unit</option><option value="nmap">Nmap</option><option value="nodejs">Node.js</option><option value="nsd">NSD</option><option value="nsq">NSQ</option><option value="ntpsec">NTPsec</option><option value="nvme-cli">nvme-cli</option><option value="odoo">Odoo</option><option value="onlyoffice">ONLYOFFICE Docs</option><option value="openvswitch">Open vSwitch</option><option value="openbao">OpenBao</option><option value="openbgpd">OpenBGPD</option><option value="opendkim">OpenDKIM</option><option value="opendmarc">OpenDMARC</option><option value="openldap">OpenLDAP</option><option value="openlitespeed">OpenLiteSpeed</option><option value="opennebula">OpenNebula</option><option value="openntpd">OpenNTPD</option><option value="openproject">OpenProject</option><option value="openresty">OpenResty</option><option value="openscap">OpenSCAP</option><option value="opensearch">OpenSearch</option><option value="opensmtpd">OpenSMTPD</option><option value="openssh">OpenSSH</option><option value="openssl">OpenSSL</option><option value="otelcol">OpenTelemetry Collector</option><option value="opentofu">OpenTofu</option><option value="opentsdb">OpenTSDB</option><option value="openvpn">OpenVPN</option><option value="zfs">OpenZFS</option><option value="oracle-database">Oracle Database</option><option value="ossec">OSSEC</option><option value="ovirt">oVirt Engine</option><option value="owasp-crs">OWASP Core Rule Set</option><option value="pacemaker">Pacemaker</option><option value="packer">Packer</option><option value="percona-server">Percona Server for MySQL</option><option value="xtrabackup">Percona XtraBackup</option><option value="perl">Perl</option><option value="pgbackrest">pgBackRest</option><option value="php">PHP</option><option value="php-fpm">PHP-FPM</option><option value="phpbb">phpBB</option><option value="phpmyadmin">phpMyAdmin</option><option value="passenger">Phusion Passenger</option><option value="plesk">Plesk</option><option value="podman">Podman</option><option value="polkit">Polkit</option><option value="postfix">Postfix</option><option value="postgresql">PostgreSQL</option><option value="powerdns">PowerDNS Authoritative Server</option><option value="pdns-recursor">PowerDNS Recursor</option><option value="privoxy">Privoxy</option><option value="procps">procps-ng</option><option value="proftpd">ProFTPD</option><option value="prometheus">Prometheus</option><option value="alertmanager">Prometheus Alertmanager</option><option value="blackbox-exporter">Prometheus Blackbox Exporter</option><option value="node-exporter">Prometheus Node Exporter</option><option value="snmp-exporter">Prometheus SNMP Exporter</option><option value="proxmox-backup">Proxmox Backup Server</option><option value="proxmox-ve">Proxmox VE</option><option value="puma">Puma</option><option value="puppet">Puppet Agent</option><option value="puppetserver">Puppet Server</option><option value="pure-ftpd">Pure-FTPd</option><option value="pypy">PyPy</option><option value="python">Python</option><option value="qemu">QEMU / KVM</option><option value="quagga">Quagga</option><option value="r">R</option><option value="rabbitmq">RabbitMQ</option><option value="ravendb">RavenDB</option><option value="rclone">Rclone</option><option value="redis">Redis</option><option value="redmine">Redmine</option><option value="redpanda">Redpanda</option><option value="rear">Relax-and-Recover (ReaR)</option><option value="restic">Restic</option><option value="rethinkdb">RethinkDB</option><option value="rkhunter">Rootkit Hunter</option><option value="roundcube">Roundcube</option><option value="rpcbind">rpcbind</option><option value="rsnapshot">rsnapshot</option><option value="rspamd">Rspamd</option><option value="rsync">rsync</option><option value="rsyslog">rsyslog</option><option value="ruby">Ruby</option><option value="runc">runc</option><option value="rundeck">Rundeck</option><option value="rust">Rust</option><option value="s3fs">s3fs</option><option value="salt">Salt</option><option value="samba">Samba</option><option value="scylladb">ScyllaDB</option><option value="selinux">SELinux policy</option><option value="semaphore">Semaphore UI</option><option value="sendmail">Sendmail</option><option value="sensu">Sensu Go</option><option value="shorewall">Shorewall</option><option value="skopeo">Skopeo</option><option value="step-ca">Smallstep step-ca</option><option value="smartmontools">smartmontools</option><option value="snort">Snort</option><option value="socat">socat</option><option value="softether">SoftEther VPN</option><option value="sogo">SOGo</option><option value="sops">SOPS</option><option value="spamassassin">SpamAssassin</option><option value="sphinx">Sphinx Search</option><option value="sqlite">SQLite</option><option value="squid">Squid</option><option value="sssd">SSSD</option><option value="strace">strace</option><option value="strongswan">strongSwan</option><option value="sudo">sudo</option><option value="suricata">Suricata</option><option value="swift">Swift</option><option value="syslog-ng">syslog-ng</option><option value="sysstat">sysstat</option><option value="systemd">systemd</option><option value="tailscale">Tailscale</option><option value="tarantool">Tarantool</option><option value="tcpdump">tcpdump</option><option value="technitium">Technitium DNS Server</option><option value="telegraf">Telegraf</option><option value="tengine">Tengine</option><option value="terraform">Terraform</option><option value="tetragon">Tetragon</option><option value="thanos">Thanos</option><option value="timescaledb">TimescaleDB</option><option value="tinyproxy">Tinyproxy</option><option value="traceroute">traceroute</option><option value="traefik">Traefik</option><option value="tripwire">Tripwire</option><option value="tshark">TShark (Wireshark)</option><option value="tuned">TuneD</option><option value="typesense">Typesense</option><option value="ufw">UFW</option><option value="unbound">Unbound</option><option value="unicorn">Unicorn</option><option value="urbackup">UrBackup</option><option value="util-linux">util-linux</option><option value="uvicorn">Uvicorn</option><option value="uwsgi">uWSGI</option><option value="vagrant">Vagrant</option><option value="valkey">Valkey</option><option value="varnish">Varnish Cache</option><option value="vault">Vault</option><option value="vector">Vector</option><option value="veeam">Veeam Agent</option><option value="vernemq">VerneMQ</option><option value="vestacp">VestaCP</option><option value="victoriametrics">VictoriaMetrics</option><option value="virtualbox">VirtualBox</option><option value="virtualmin">Virtualmin</option><option value="vsftpd">vsftpd</option><option value="wazuh-agent">Wazuh Agent</option><option value="wazuh-manager">Wazuh Manager</option><option value="webmin">Webmin</option><option value="wildfly">WildFly</option><option value="wireguard">WireGuard</option><option value="woodpecker">Woodpecker CI</option><option value="wordpress">WordPress</option><option value="xen">Xen</option><option value="yara">YARA</option><option value="zabbix-agent">Zabbix Agent</option><option value="zabbix-proxy">Zabbix Proxy</option><option value="zabbix-server">Zabbix Server</option><option value="zammad">Zammad</option><option value="zeek">Zeek</option><option value="zeromq">ZeroMQ</option><option value="zerotier">ZeroTier</option></datalist>
+    <div class="panel__body"><p class="field__hint">For software enter the catalog id (nginx, php, mariadb, openssh…). Release cycles are separated by commas (8.2, 8.3). The minimum version is a distribution package version (e.g. 1:9.2p1-2&#43;deb12u3). Rows without a subject are ignored.</p></div>
+  </section>
+  <div class="button-row"><button class="button button--primary" type="submit">Save</button><a class="button button--ghost" href="standards.html">Cancel</a></div>
+</form>
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

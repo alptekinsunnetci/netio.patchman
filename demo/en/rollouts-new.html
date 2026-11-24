@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>New rolling update · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="rollouts.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="rollouts.html">Rolling Updates</a> / <span>New rolling update</span></nav>
+<header class="pagehead"><div><h1 class="pagehead__title">New rolling update</h1><p class="pagehead__sub">After each stage the failure rate is checked; the rollout stops by itself when the limit is exceeded.</p></div></header>
+
+<form class="form" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo">
+  <section class="panel">
+    <h2 class="panel__title">What is updated?</h2>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Name</span>
+        <input class="field__input" type="text" name="name" value="" maxlength="100" required></label>
+      <label class="field"><span class="field__label">Job Type</span>
+        <select class="field__input" name="job_type"><option value="upgrade_security" selected>Security updates</option><option value="upgrade_all">All updates</option><option value="upgrade_packages">Selected package update</option></select></label>
+    </div>
+    <label class="field"><span class="field__label">Packages</span>
+      <textarea class="field__input mono" name="packages" rows="2" maxlength="4000"></textarea>
+      <span class="field__hint">Only for &#34;Selected package update&#34;: package names separated by commas or lines.</span></label>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">Servers and stages</h2>
+    <fieldset class="fieldset">
+      <legend>Stages</legend>
+      <div class="daypicker">
+        <label class="check-label"><input type="radio" name="strategy" value="batches" checked> Stages of equal size</label>
+        <label class="check-label"><input type="radio" name="strategy" value="groups"> Stages by group order (one group per stage)</label>
+      </div>
+      <div data-show-when="strategy=batches">
+        <div class="form-grid">
+          <label class="field"><span class="field__label">Servers</span>
+            <select class="field__input" name="target">
+              <option value="all" selected>All servers</option>
+              <option value="group">The servers of a group</option>
+              <option value="hosts">Selected servers</option>
+            </select></label>
+          <label class="field"><span class="field__label">Groups</span>
+            <select class="field__input" name="group_id"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+          <label class="field"><span class="field__label">Servers per stage</span>
+            <input class="field__input" type="number" name="batch" min="0" max="1000" value="5">
+            <span class="field__hint">0: all servers after the canary in one stage.</span></label>
+        </div>
+        <details class="details"><summary>Choose servers</summary>
+          <div class="checklist"><label class="check-label"><input type="checkbox" name="host_ids" value="6"> backup-01</label><label class="check-label"><input type="checkbox" name="host_ids" value="3"> db-01</label><label class="check-label"><input type="checkbox" name="host_ids" value="4"> db-02</label><label class="check-label"><input type="checkbox" name="host_ids" value="5"> mail-01</label><label class="check-label"><input type="checkbox" name="host_ids" value="1"> web-01</label><label class="check-label"><input type="checkbox" name="host_ids" value="2"> web-02</label></div>
+        </details>
+      </div>
+      <div data-show-when="strategy=groups" class="form-grid">
+        
+        <label class="field"><span class="field__label">Stage 1</span>
+          <select class="field__input" name="stage_group_0"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+        <label class="field"><span class="field__label">Stage 2</span>
+          <select class="field__input" name="stage_group_1"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+        <label class="field"><span class="field__label">Stage 3</span>
+          <select class="field__input" name="stage_group_2"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+        <label class="field"><span class="field__label">Stage 4</span>
+          <select class="field__input" name="stage_group_3"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+        <label class="field"><span class="field__label">Stage 5</span>
+          <select class="field__input" name="stage_group_4"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+        <label class="field"><span class="field__label">Stage 6</span>
+          <select class="field__input" name="stage_group_5"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+        
+      </div>
+    </fieldset>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Order</span>
+        <select class="field__input" name="order"><option value="score_desc" selected>Healthiest first (highest score)</option><option value="score_asc">Riskiest first (lowest score)</option><option value="hostname">By server name</option></select></label>
+      <label class="field"><span class="field__label">Canary servers</span>
+        <input class="field__input" type="number" name="canary" min="0" max="100" value="1">
+        <span class="field__hint">Servers updated in the first stage. One failure in the canary stops the rollout. 0: no canary.</span></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="pause_after_canary" value="1" checked> Pause after the canary stage and wait for my approval</label>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">Safety limits</h2>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Maximum parallel updates</span>
+        <input class="field__input" type="number" name="max_parallel" min="1" max="500" value="5"></label>
+      <label class="field"><span class="field__label">Wait between stages (minutes)</span>
+        <input class="field__input" type="number" name="wait_minutes" min="0" max="1440" value="10"></label>
+      <label class="field"><span class="field__label">Maximum failure rate (%)</span>
+        <input class="field__input" type="number" name="max_failure_pct" min="0" max="100" value="10">
+        <span class="field__hint">The rollout stops when more than this share of finished servers failed. 0: stop at the first failure.</span></label>
+      <label class="field"><span class="field__label">Job timeout (minutes)</span>
+        <input class="field__input" type="number" name="job_timeout_minutes" min="10" max="1440" value="180">
+        <span class="field__hint">A job not picked up by the agent within this time is not started and counts as failed.</span></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="require_health" value="1" checked> Count broken health checks as failures</label>
+    <p class="field__hint">A server counts as failed when the health checks that run with updates fail after the update.</p>
+  </section>
+  <div><button class="button button--primary" type="submit" data-confirm="Start the rolling update? The first stage is queued now."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-play"></use></svg>Start</button></div>
+</form>
+
+  </main>
+</div>
+
+</body>
+</html>

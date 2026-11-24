@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Ajan Yönetimi · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink is-active" href="agents.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Ajan Yönetimi</h1>
+    <p class="pagehead__sub">Ajan kurulumu, kayıt anahtarları ve ajan durumları</p>
+  </div>
+</header>
+
+
+
+<section class="panel">
+  <div class="panel__head">
+    <h2 class="panel__title">Ajan güncellemeleri</h2>
+    
+  </div>
+  
+  <dl class="dl">
+    <dt>Dağıtılan sürüm</dt><dd class="mono">1.0.3 <span class="muted">(linux/amd64, linux/arm64, windows/amd64)</span></dd>
+    <dt>Otomatik güncelleme</dt><dd><span class="pill pill--online">Açık</span> <span class="muted">Eski sürümdeki ajanlar bir sonraki bağlantılarında kendiliğinden güncellenir.</span></dd>
+    <dt>Eski sürümdeki ajan</dt><dd>0</dd>
+  </dl>
+  
+</section>
+
+<div class="grid-2 grid-2--wide-left">
+  <section class="panel">
+    <h2 class="panel__title">Ajan kurulumu</h2>
+    <ol class="steps">
+      <li>Sağdaki formdan bir kayıt anahtarı oluşturun. Anahtar yalnızca bir kez gösterilir.</li>
+      <li>Sunucunun işletim sistemini seçin ve oluşan komutu yönetilecek sunucuda çalıştırın:
+        
+<div class="installcmd" data-installcmd="example-command">
+  <div class="installcmd__opts" hidden>
+    <label class="field field--inline"><span class="field__label">İşletim sistemi</span>
+      <select class="field__input" data-installcmd-os>
+        <option value="ubuntu" data-root="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;" data-sudo="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;" data-default-sudo>Ubuntu</option><option value="debian" data-root="wget -qO- https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;" data-sudo="wget -qO- https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;">Debian</option><option value="rhel" data-root="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;" data-sudo="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;">RHEL / CentOS / AlmaLinux / Rocky / Oracle Linux</option><option value="fedora" data-root="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;" data-sudo="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;" data-default-sudo>Fedora</option><option value="suse" data-root="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;" data-sudo="curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;">SUSE / openSUSE</option><option value="alpine" data-root="wget -qO- https://patchman.example.test/downloads/install-agent.sh | sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;" data-sudo="wget -qO- https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;">Alpine (OpenRC)</option><option value="windows" data-root="powershell -NoProfile -ExecutionPolicy Bypass -Command &#34;[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; &amp; ([scriptblock]::Create((irm &#39;https://patchman.example.test/downloads/install-agent.ps1&#39;).TrimStart([char]65279))) -ServerUrl &#39;https://patchman.example.test&#39; -Token &#39;&lt;KAYIT-ANAHTARI&gt;&#39;&#34;" data-sudo="powershell -NoProfile -ExecutionPolicy Bypass -Command &#34;[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; &amp; ([scriptblock]::Create((irm &#39;https://patchman.example.test/downloads/install-agent.ps1&#39;).TrimStart([char]65279))) -ServerUrl &#39;https://patchman.example.test&#39; -Token &#39;&lt;KAYIT-ANAHTARI&gt;&#39;&#34;" data-nosudo>Windows / Windows Server (PowerShell)</option>
+      </select></label>
+    <label class="check-label"><input type="checkbox" data-installcmd-sudo checked>sudo ile çalıştır</label>
+  </div>
+  <span class="copy"><textarea class="field__input field__input--area mono" rows="3" readonly id="example-command">curl -fsSL https://patchman.example.test/downloads/install-agent.sh | sudo sh -s -- --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt;</textarea><button class="button button--sm" type="button" data-copy="example-command">Kopyala</button></span>
+  <span class="field__hint">Kurulum root yetkisi ister. root oturumunda sudo gerekmez; sudo kurulu değilse (CentOS, Debian ve Alpine&#39;de sık görülür) kutuyu boş bırakın. Debian ve Alpine komutu curl yerine wget kullanır. Windows komutu yönetici olarak açılan PowerShell veya komut isteminde çalıştırılır.</span>
+</div>
+
+      </li>
+      <li>Ajan sunucuya kaydolur, envanteri gönderir ve birkaç dakika içinde Sunucu Envanteri sayfasında görünür.</li>
+    </ol>
+    <details class="details">
+      <summary>İnternet erişimi olmayan sunucular</summary>
+      <p>Dosyaları bu adreslerden indirip sunucuya kopyalayın ve kurulum betiğini --binary seçeneğiyle çalıştırın:</p>
+      <pre class="code">https://patchman.example.test/downloads/agent/netio-patchman-agent-linux-amd64
+https://patchman.example.test/downloads/agent/netio-patchman-agent-linux-arm64
+https://patchman.example.test/downloads/netio-patchman-agent.service
+https://patchman.example.test/downloads/netio-patchman-agent.openrc
+https://patchman.example.test/downloads/install-agent.sh</pre>
+      <pre class="code">sh install-agent.sh --server-url https://patchman.example.test --token &lt;KAYIT-ANAHTARI&gt; --binary ./netio-patchman-agent-linux-amd64</pre>
+      <p>Windows: dosyaları aynı klasöre kopyalayın ve yönetici olarak açılan PowerShell&#39;de çalıştırın:</p>
+      <pre class="code">https://patchman.example.test/downloads/agent/netio-patchman-agent-windows-amd64.exe
+https://patchman.example.test/downloads/install-agent.ps1</pre>
+      <pre class="code">.\install-agent.ps1 -ServerUrl https://patchman.example.test -Token &lt;KAYIT-ANAHTARI&gt; -Binary .\netio-patchman-agent-windows-amd64.exe</pre>
+    </details>
+    <details class="details">
+      <summary>Desteklenen sistemler</summary>
+      <p>Envanter ve güncelleme: apt (Debian, Ubuntu), dnf/yum (RHEL, AlmaLinux, Rocky Linux), zypper (SUSE, openSUSE) ve apk (Alpine) kullanan, systemd veya OpenRC çalıştıran tüm dağıtımlar (CentOS, Oracle Linux ve Fedora dahil) ile Windows 10, Windows 11 ve Windows Server 2016 / 2019 / 2022 / 2025 (x64, Windows Update). Fiziksel sunucu, VMware, Hyper-V, KVM/Proxmox veya bulut fark etmez. Güvenlik açığı taraması: Debian, Ubuntu, AlmaLinux, Rocky Linux, Red Hat Enterprise Linux, CloudLinux 8/9 (AlmaLinux verileriyle), SUSE Linux Enterprise, openSUSE Leap, Alpine ve Windows (bekleyen Microsoft güncellemelerinin CVE&#39;leri; üçüncü taraf Windows programları taranmaz).</p>
+    </details>
+  </section>
+
+  
+  <section class="panel">
+    <h2 class="panel__title">Yeni kayıt anahtarı</h2>
+    <form class="form" method="post" action="#">
+      <input type="hidden" name="_csrf" value="demo">
+      <label class="field"><span class="field__label">Anahtar adı</span>
+        <input class="field__input" type="text" name="name" required maxlength="100" placeholder="Örneğin: Üretim web sunucuları"></label>
+      <label class="field"><span class="field__label">Geçerlilik süresi (gün)</span>
+        <input class="field__input" type="number" name="valid_days" min="0" max="3650" value="7">
+        <span class="field__hint">0 girilirse süresiz geçerli olur.</span></label>
+      <label class="field"><span class="field__label">En fazla kullanım</span>
+        <input class="field__input" type="number" name="max_uses" min="0" max="100000" value="0">
+        <span class="field__hint">0 girilirse sınırsız sayıda sunucu kaydedilebilir.</span></label>
+      <div><button class="button button--primary" type="submit">Anahtar oluştur</button></div>
+    </form>
+  </section>
+  
+</div>
+
+<section class="panel panel--flush">
+  <div class="panel__head"><h2 class="panel__title">Kayıt anahtarları</h2></div>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Anahtar adı</th><th>Anahtar</th><th>Oluşturan</th><th>Oluşturulma</th><th>Geçerlilik Sonu</th><th class="num">Kullanım</th><th>Durum</th><th></th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td>Demo kurulum</td>
+      <td class="mono">npe_ELxN_x…</td>
+      <td>Demo Yönetici</td>
+      <td>23.11.2026 21:09</td>
+      <td>23.12.2026 21:09</td>
+      <td class="num">6</td>
+      <td><span class="pill pill--online">Geçerli</span></td>
+      <td class="actions"><form method="post" action="#" data-confirm="Anahtar iptal edilecek. Kayıtlı ajanlar çalışmaya devam eder, ancak bu anahtarla yeni sunucu eklenemez. Devam edilsin mi?"><input type="hidden" name="_csrf" value="demo"><button class="button button--sm button--ghost" type="submit">İptal et</button></form></td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+<section class="panel panel--flush">
+  <div class="panel__head">
+    <h2 class="panel__title">Ajanlar</h2>
+    <form class="filters filters--inline" method="get" action="#">
+      <select class="field__input" name="status" aria-label="Durum">
+        <option value="">Tüm durumlar</option>
+        <option value="online">Çevrimiçi</option>
+        <option value="offline">Çevrimdışı</option>
+      </select>
+      <button class="button button--sm" type="submit">Filtrele</button>
+    </form>
+  </div>
+  <p class="panel__note">Ajan sürümleri: <span class="mono">1.0.3</span> (6)</p>
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Sunucu Adı</th><th>Durum</th><th>Ajan Sürümü</th><th>Otomatik Ajan Güncellemesi</th><th>Uzaktan Güncelleme</th><th>Kayıt Tarihi</th><th>Son Bağlantı</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td><a href="servers-6.html">backup-01</a></td>
+      <td><span class="pill pill--offline">Çevrimdışı</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Güncel</span></td>
+      <td>Açık</td>
+      <td>Açık</td>
+      <td>23.11.2026</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="23.11.2026 21:09">12 sa önce</time></td>
+    </tr>
+    
+    <tr>
+      <td><a href="servers-3.html">db-01</a></td>
+      <td><span class="pill pill--offline">Çevrimdışı</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Güncel</span></td>
+      <td>Açık</td>
+      <td>Açık</td>
+      <td>23.11.2026</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="23.11.2026 21:09">12 sa önce</time></td>
+    </tr>
+    
+    <tr>
+      <td><a href="servers-4.html">db-02</a></td>
+      <td><span class="pill pill--offline">Çevrimdışı</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Güncel</span></td>
+      <td>Açık</td>
+      <td>Açık</td>
+      <td>23.11.2026</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="23.11.2026 21:09">12 sa önce</time></td>
+    </tr>
+    
+    <tr>
+      <td><a href="servers-5.html">mail-01</a></td>
+      <td><span class="pill pill--offline">Çevrimdışı</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Güncel</span></td>
+      <td>Açık</td>
+      <td>Açık</td>
+      <td>23.11.2026</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="23.11.2026 21:09">12 sa önce</time></td>
+    </tr>
+    
+    <tr>
+      <td><a href="servers-1.html">web-01</a></td>
+      <td><span class="pill pill--offline">Çevrimdışı</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Güncel</span></td>
+      <td>Açık</td>
+      <td>Açık</td>
+      <td>23.11.2026</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="23.11.2026 21:09">12 sa önce</time></td>
+    </tr>
+    
+    <tr>
+      <td><a href="servers-2.html">web-02</a></td>
+      <td><span class="pill pill--offline">Çevrimdışı</span></td>
+      <td class="mono">1.0.3 <span class="pill pill--online">Güncel</span></td>
+      <td>Açık</td>
+      <td>Açık</td>
+      <td>23.11.2026</td>
+      <td><time datetime="2026-11-23T18:09:36Z" title="23.11.2026 21:09">12 sa önce</time></td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+<p class="pager__info pager__info--single">Toplam 6 kayıt</p>
+
+  </main>
+</div>
+
+</body>
+</html>

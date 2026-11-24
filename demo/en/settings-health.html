@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Health checks · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="settings.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="settings.html">Settings</a> / <span>Health checks</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Health checks</h1>
+    <p class="pagehead__sub">Checks that run before and after updates and can be started by hand. A check that passed before an update and fails after it raises a notification.</p>
+  </div>
+</header>
+<nav class="tabs settings-tabs" aria-label="Settings">
+  <a class="tab" href="settings.html">General</a>
+  <a class="tab" href="#demo-unavailable">Server configuration</a>
+  <a class="tab" href="settings-channels.html">Notification channels</a>
+  <a class="tab is-active" href="settings-health.html">Health checks</a>
+  <a class="tab" href="settings-score.html">Security score weights</a>
+</nav>
+<p class="alert alert--info">Agents report CPU, memory and disk usage on their own; no check is needed for that. The checks here are extra ones such as websites, ports and services: they run before and after updates and at the monitoring interval. <a href="settings.html#monitoring">Measurement interval and warning limits</a></p>
+
+<section class="panel panel--flush">
+  <div class="empty"><p class="empty__body">No health checks defined yet.</p></div>
+</section>
+
+<section class="panel" id="form">
+  <h2 class="panel__title">New health check</h2>
+  <form class="form" method="post" action="#">
+    <input type="hidden" name="_csrf" value="demo">
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Name</span>
+        <input class="field__input" type="text" name="name" value="" maxlength="100" required></label>
+      <label class="field"><span class="field__label">Type</span>
+        <select class="field__input" name="type"><option value="http" selected>HTTP/HTTPS</option><option value="tcp">TCP port</option><option value="service">Service</option><option value="resources">CPU, memory and disk</option><option value="command">Local command (health.d)</option></select></label>
+      <label class="field"><span class="field__label">Target</span>
+        <input class="field__input mono" type="text" name="target" value="" maxlength="500" placeholder="https://127.0.0.1/health">
+        <span class="field__hint">HTTP: https://127.0.0.1/health · TCP: 127.0.0.1:3306 · Service: nginx · Command: the file name in health.d. Checks run on the server itself, by the agent.</span></label>
+      <label class="field"><span class="field__label">Timeout (seconds)</span>
+        <input class="field__input" type="number" name="timeout_seconds" min="1" max="120" value="10"></label>
+    </div>
+    <fieldset class="fieldset">
+      <legend>HTTP options</legend>
+      <div class="form-grid">
+        <label class="field"><span class="field__label">Expected HTTP status</span>
+          <input class="field__input" type="number" name="expect" min="0" max="599" value="" placeholder="200">
+          <span class="field__hint">When empty, 2xx and 3xx codes count as success.</span></label>
+        <label class="field"><span class="field__label">Text the response must contain</span>
+          <input class="field__input" type="text" name="contains" value="" maxlength="200"></label>
+      </div>
+      <label class="check-label"><input type="checkbox" name="insecure" value="1"> Accept certificate errors (self-signed certificates)</label>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend>Resource limits</legend>
+      <div class="form-grid">
+        <label class="field"><span class="field__label">Highest CPU load (%)</span><input class="field__input" type="number" name="cpu" min="0" max="1000" value=""></label>
+        <label class="field"><span class="field__label">Highest memory use (%)</span><input class="field__input" type="number" name="memory" min="0" max="100" value=""></label>
+        <label class="field"><span class="field__label">Highest disk usage (%)</span><input class="field__input" type="number" name="disk" min="0" max="100" value=""></label>
+        <label class="field"><span class="field__label">Disk paths</span><input class="field__input mono" type="text" name="paths" value="" placeholder="/, /var"></label>
+      </div>
+      <p class="field__hint">CPU is the 1-minute load average per core in percent (not measured on Windows). Empty limits are not checked. Without disk paths the root (C:\ on Windows) is used.</p>
+    </fieldset>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Scope</span>
+        <select class="field__input" name="scope">
+          <option value="all" selected>All servers</option>
+          <option value="group">One group</option>
+          <option value="host">One server</option>
+        </select></label>
+      <label class="field"><span class="field__label">Groups</span>
+        <select class="field__input" name="group_id"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+      <label class="field"><span class="field__label">Server Name</span>
+        <select class="field__input" name="host_id"><option value="0">—</option><option value="6">backup-01</option><option value="3">db-01</option><option value="4">db-02</option><option value="5">mail-01</option><option value="1">web-01</option><option value="2">web-02</option></select></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="with_updates" value="1" checked> Run before and after update jobs</label>
+    <label class="check-label"><input type="checkbox" name="monitor" value="1" checked> Also run in the agents&#39; monitoring rounds</label>
+    <label class="check-label"><input type="checkbox" name="enabled" value="1" checked> Enabled</label>
+    <div class="button-row">
+      <button class="button button--primary" type="submit">Save</button>
+      
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">Local command checks</h2>
+  <p>For security, the dashboard cannot send command lines to servers. For a custom check, place the script in the server&#39;s health.d directory and enter only its file name here. On Linux the file and directory must be owned by root and not writable by group or others, or the agent refuses to run it. Exit code 0 means healthy.</p>
+  <pre class="output">/etc/netio-patchman/health.d/&lt;ad&gt;    (Linux: root:root, 0755)
+C:\ProgramData\netio-patchman\health.d\&lt;ad&gt;.ps1 | .cmd | .exe    (Windows)</pre>
+</section>
+
+  </main>
+</div>
+
+</body>
+</html>

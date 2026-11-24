@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>backup-01 · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink is-active" href="servers.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="servers.html">Server Inventory</a> / <span>backup-01</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">backup-01 <span class="pill pill--offline">Offline</span> </h1>
+    <p class="pagehead__sub">Ubuntu 24.04.4 LTS · <span class="mono">6.8.0-71-generic</span> · Physical server · last seen 13 h ago</p>
+    
+  </div>
+  
+  <div class="pagehead__actions">
+    <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="refresh">
+      <button class="button" type="submit" title="Asks the agent to send its package list again right away."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-refresh"></use></svg>Refresh inventory</button></form>
+    
+    <form method="post" action="#" data-confirm="All security updates will be installed on backup-01. Continue?"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="upgrade_security">
+      <button class="button button--primary" type="submit" disabled><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg>Apply security updates (0)</button></form>
+    <form method="post" action="#" data-confirm="All pending updates will be installed on backup-01. Continue?"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="upgrade_all">
+      <button class="button" type="submit" disabled><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg>Apply all updates (0)</button></form>
+    
+    
+    <form method="post" action="#" data-confirm="backup-01 will reboot within 1 minute and be unavailable meanwhile. Continue?"><input type="hidden" name="_csrf" value="demo"><input type="hidden" name="type" value="reboot">
+      <button class="button" type="submit" title="Reboots the server in 1 minute. The agent sends a new inventory after startup."><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-power"></use></svg>Reboot</button></form>
+    
+    
+  </div>
+  
+</header>
+
+
+
+
+
+
+<section class="stats stats--compact stats--5">
+  <a class="stat" href="#demo-unavailable"><p class="stat__label">Security score</p><p class="stat__value"><span class="score score--critical">30</span></p><p class="stat__meta">Critical</p></a>
+  <div class="stat"><p class="stat__label">Vulnerabilities</p><p class="stat__value">4798</p><p class="stat__meta"><span class="sevcounts"><span class="sevcount sevcount--critical" title="Critical">314</span><span class="sevcount sevcount--high" title="High">1923</span><span class="sevcount sevcount--medium" title="Medium">1345</span><span class="sevcount sevcount--low" title="Low">1209</span><span class="sevcount sevcount--unknown" title="Unknown">7</span></span></p></div>
+  <div class="stat"><p class="stat__label">Security Updates</p><p class="stat__value">0</p><p class="stat__meta">0 updates in total</p></div>
+  <div class="stat"><p class="stat__label">Installed Packages</p><p class="stat__value">634</p><p class="stat__meta">apt</p></div>
+  <div class="stat"><p class="stat__label">Last Scan</p><p class="stat__value stat__value--sm">12 h ago</p><p class="stat__meta">Last Inventory: 13 h ago</p></div>
+</section>
+
+<nav class="tabs" aria-label="Server details">
+  <a class="tab is-active" href="servers-6.html">Vulnerabilities</a>
+  <a class="tab" href="servers-6--tab-updates.html">Pending Updates <span class="tab__count">0</span></a>
+  <a class="tab" href="servers-6--tab-packages.html">Installed Packages <span class="tab__count">634</span></a>
+  <a class="tab" href="servers-6--tab-watched.html">Watched <span class="tab__count">0</span></a>
+  <a class="tab" href="servers-6--tab-software.html">Software</a>
+  <a class="tab" href="servers-6--tab-health.html">Health</a>
+  <a class="tab" href="servers-6--tab-jobs.html">Job History</a>
+  <a class="tab" href="servers-6--tab-info.html">System Information</a>
+</nav>
+
+
+<form class="filters" method="get" action="#">
+  <input class="field__input" type="search" name="q" value="" placeholder="CVE ID, package name or title" aria-label="Search">
+  <select class="field__input" name="status" aria-label="Status">
+    <option value="">Unresolved</option>
+    <option value="accepted_risk">Risk Accepted</option>
+    <option value="false_positive">False Positive</option>
+    <option value="resolved">Resolved</option>
+    <option value="all">All statuses</option>
+  </select>
+  <label class="check-label"><input type="checkbox" name="overdue" value="1"> Overdue</label>
+  <button class="button" type="submit">Filter</button>
+</form>
+
+<form class="inline-actions" method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="button button--sm button--ghost" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-refresh"></use></svg>Rescan</button></form>
+
+<section class="panel panel--flush">
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>CVE ID</th><th>Severity</th><th class="num">CVSS Score</th><th class="num" title="FIRST EPSS: probability that the vulnerability is exploited in the next 30 days. Updated daily.">EPSS</th><th>Affected Package</th><th>Installed Version</th><th>Fixed Version</th><th>Status</th><th>First Detected</th><th>Due</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td><a class="mono" href="vulnerabilities-CVE-2026-74705.html">CVE-2026-74705</a> <div class="cell-sub" lang="en">udp: fix potential use-after-free in tunnel segmentation</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">10.0</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="vulnerabilities-CVE-2026-74612.html">CVE-2026-74612</a> <div class="cell-sub" lang="en">veth: fix skb length accounting after XDP frag adjustment</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">10.0</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="vulnerabilities-CVE-2026-74475.html">CVE-2026-74475</a> <div class="cell-sub" lang="en">vxlan: use neigh_ha_snapshot() in route_shortcircuit()</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">10.0</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="vulnerabilities-CVE-2026-74280.html">CVE-2026-74280</a> <div class="cell-sub" lang="en">crypto: marvell/octeontx - fix DMA cleanup using wrong loop index</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">10.0</td>
+      <td class="num mono">0.8%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-147.147</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="vulnerabilities-CVE-2026-74279.html">CVE-2026-74279</a> <div class="cell-sub" lang="en">crypto: cavium/cpt - fix DMA cleanup using wrong loop index</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">10.0</td>
+      <td class="num mono">0.8%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-147.147</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="vulnerabilities-CVE-2026-72421.html">CVE-2026-72421</a> <div class="cell-sub" lang="en">ipv4: fib: Don&#39;t ignore error route in local/main tables.</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">10.0</td>
+      <td class="num mono">0.6%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-147.147</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="vulnerabilities-CVE-2026-63795.html">CVE-2026-63795</a> <div class="cell-sub" lang="en">9p: avoid putting oldfid in p9_client_walk() error path</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">10.0</td>
+      <td class="num mono">0.6%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-147.147</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-46595</a> <div class="cell-sub" lang="en">Invoking  VerifiedPublicKeyCallback permissions skip enforcement in golang.org/x/crypto/ss…</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">10.0</td>
+      <td class="num mono">0.6%</td>
+      <td class="mono">snapd</td>
+      <td class="mono">2.76.3&#43;ubuntu24.04</td>
+      <td><span class="muted">Not released yet</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-72493</a> <div class="cell-sub" lang="en">net: serialize netif_running() check in enqueue_to_backlog()</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.9</td>
+      <td class="num mono">0.4%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="muted">Not released yet</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-99310</a> <div class="cell-sub" lang="en">nfsd: hold cl_lock in client_has_openowners()</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="muted">Not released yet</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-99306</a> <div class="cell-sub" lang="en">ceph: reject mdsmaps that claim more than CEPH_MAX_MDS ranks</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="muted">Not released yet</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-99304</a> <div class="cell-sub" lang="en">ceph: fix integer overflow in the snap trace bounds check</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="muted">Not released yet</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-99154</a> <div class="cell-sub" lang="en">scsi: libiscsi: Reject a negative task index from parse_pdu_itt</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-151.151</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-99153</a> <div class="cell-sub" lang="en">scsi: libiscsi: Validate the ITT reflected in a Reject PDU</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-151.151</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-99079</a> <div class="cell-sub" lang="en">net/mlx5e: Prevent stale XSK buffer release on refill retry</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.4%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-99078</a> <div class="cell-sub" lang="en">net/mlx5e: Prevent stale XSK buffer release on MPWQE refill retry</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-98959</a> <div class="cell-sub" lang="en">btrfs: fix xattr replace when multiple xattrs are packed in the same item</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.6%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-98548</a> <div class="cell-sub" lang="en">sctp: discard the rest of the packet on a stale-cookie error</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-98490</a> <div class="cell-sub" lang="en">net: openvswitch: conntrack: fix helper UAF due to extensions realloc</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-98432</a> <div class="cell-sub" lang="en">ipv4: free inet_opt and ireq_opt after an RCU grace period</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">82.1%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-98365</a> <div class="cell-sub" lang="en">RDMA/rxe: Fix integer overflow in mr_check_range() leading to OOB access</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.4%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-98323</a> <div class="cell-sub" lang="en">RDMA/siw: Bound fragmented header copies by the remaining length</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-97413</a> <div class="cell-sub" lang="en">RDMA/rtrs-srv: Fix integer underflow in process_read and process_write</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-93207</a> <div class="cell-sub" lang="en">SUNRPC: Zero rpc_gss_wire_cred at svcauth_gss_decode_credbody() entry</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-92489</a> <div class="cell-sub" lang="en">xfrm: Fix skb double-free in xfrm_dev_direct_output()</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-90235</a> <div class="cell-sub" lang="en">sunrpc: xprtsock: annotate shared socket callbacks with READ_ONCE/WRITE_ONCE</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-90151</a> <div class="cell-sub" lang="en">NFSv4: remove callback IDR entry on client allocation failure</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-90104</a> <div class="cell-sub" lang="en">NFSv4.1: zero referring call lists before decoding</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-151.151</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-90048</a> <div class="cell-sub" lang="en">fs/ntfs3: fix slab-out-of-bounds write in ni_create_attr_list()</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-90042</a> <div class="cell-sub" lang="en">ceph: properly decrypt filenames in vmalloc() buffers</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-90037</a> <div class="cell-sub" lang="en">NFSD: Prevent client use-after-free during close_lru reaping</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.6%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-90036</a> <div class="cell-sub" lang="en">NFSD: Prevent client use-after-free during blocked-lock reaping</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89972</a> <div class="cell-sub" lang="en">nvme: add missing SRCU grace period in error path</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.8%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89970</a> <div class="cell-sub" lang="en">nvmet-auth: Synchronize timeout work during SQ teardown</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.8%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89969</a> <div class="cell-sub" lang="en">nvmet-tcp: fix out-of-bounds write when receiving an over-long PDU</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89857</a> <div class="cell-sub" lang="en">scsi: qla2xxx: Hold qpair lock when sending NVMe LS reject</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.6%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89847</a> <div class="cell-sub" lang="en">scsi: qla2xxx: Avoid double completion in async IOCB timeout</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89788</a> <div class="cell-sub" lang="en">ksmbd: fix tree connection use-after-free in smb2_tree_connect()</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-151.151</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89783</a> <div class="cell-sub" lang="en">xfrm6: fix out-of-bounds write in xfrm6_input_addr() when secpath is full</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89778</a> <div class="cell-sub" lang="en">isofs: fix out-of-bounds page array access on empty zisofs block</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89712</a> <div class="cell-sub" lang="en">NFSD: restart ssc_expire_umount walk after dropping nfsd_ssc_lock</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89708</a> <div class="cell-sub" lang="en">nfsd: RCU-protect cl_cb_session to fix use-after-free on session teardown</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.4%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89702</a> <div class="cell-sub" lang="en">nfsd: size fh_verify server sockaddr slot by xpt_locallen</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89686</a> <div class="cell-sub" lang="en">nfsd: fix BUG_ON in nfsd4_alloc_layout_stateid on racing delegation revoke</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89676</a> <div class="cell-sub" lang="en">nfsd: fix stale s2s_cp_stateids IDR entry for async COPY</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89675</a> <div class="cell-sub" lang="en">nfsd: fix UAF in async copy cancel and shutdown</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.4%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="muted">Not released yet</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89674</a> <div class="cell-sub" lang="en">nfsd: fix XDR length calculation in nfsd4_ff_encode_layoutget</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.5%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89669</a> <div class="cell-sub" lang="en">nfsd: initialize copy-notify stateid before publishing it</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89662</a> <div class="cell-sub" lang="en">NFSD: Prevent lock owner use-after-free during client teardown</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.7%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    <tr>
+      <td><a class="mono" href="#demo-unavailable">CVE-2026-89659</a> <div class="cell-sub" lang="en">NFSD: Prevent client use-after-free during delegation revoke</div></td>
+      <td><span class="badge badge--critical">Critical</span></td>
+      <td class="num mono">9.8</td>
+      <td class="num mono">0.6%</td>
+      <td class="mono">linux</td>
+      <td class="mono">6.8.0-146.146</td>
+      <td><span class="mono">6.8.0-149.149</span></td>
+      <td><span class="pill pill--open">Open</span></td>
+      <td><time datetime="2026-11-23T18:27:33Z">2026-11-23</time></td>
+      <td><time datetime="2026-12-08T18:27:33Z">2026-12-08</time></td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+
+<nav class="pager" aria-label="Pagination">
+  <span class="pager__info">1–50 of 4804</span>
+  <span class="pager__links">
+    <span class="button button--sm is-disabled">Previous</span>
+    <span class="pager__page">Page 1 of 97</span>
+    <a class="button button--sm" href="#demo-unavailable">Next</a>
+  </span>
+</nav>
+
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Software Inventory · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="software.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Software Inventory</h1>
+    <p class="pagehead__sub">Server software installed and running on your servers, versions and change history</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <a class="tab is-active" href="software.html">Software</a>
+  <a class="tab" href="software--tab-eol.html">End of life (EOL)</a>
+  <a class="tab" href="software--tab-compare.html">Compare servers</a>
+  <a class="tab" href="software--tab-changes.html">Change history</a>
+</nav>
+
+
+<form class="filters" method="get" action="#">
+  <input class="field__input" type="search" name="q" value="" placeholder="Software name" aria-label="Search">
+  <select class="field__input" name="category" aria-label="Category">
+    <option value="">All categories</option>
+    <option value="appserver">Application server</option><option value="backup">Backup</option><option value="business">Business application</option><option value="cache">Cache</option><option value="container">Containers</option><option value="database">Database</option><option value="devops">Development and CI/CD</option><option value="directory">Directory and identity</option><option value="dns">DNS</option><option value="file">File sharing and FTP</option><option value="infra">Infrastructure services</option><option value="library">Library</option><option value="mail">Mail</option><option value="monitoring">Monitoring</option><option value="network">Network services</option><option value="panel">Hosting and admin panel</option><option value="queue">Message queue</option><option value="remote">Remote access</option><option value="runtime">Runtime</option><option value="search">Search and log analytics</option><option value="security">Security</option><option value="storage">Storage</option><option value="system">System tool</option><option value="virtualization">Virtualization</option><option value="vpn">VPN</option><option value="web">Web server / proxy</option><option value="webapp">Web application</option>
+  </select>
+  <button class="button" type="submit">Filter</button>
+</form>
+<section class="panel panel--flush">
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Software</th><th>Category</th><th class="num">Servers</th><th class="num">Running</th><th>Release cycles</th><th>Vulnerabilities</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td><a href="software-apparmor.html">AppArmor</a></td>
+      <td class="cell-sub">Security</td>
+      <td class="num">6</td>
+      <td class="num">0</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">4.0 <span>6</span></a></div></td>
+      <td><span class="muted">No vulnerabilities</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-dbus.html">D-Bus</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num">0</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">1.14 <span>6</span></a></div></td>
+      <td><span class="badge badge--medium">Medium</span> 4 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-ethtool.html">ethtool</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">6.7 <span>6</span></a></div></td>
+      <td><span class="muted">No vulnerabilities</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-fail2ban.html">Fail2ban</a></td>
+      <td class="cell-sub">Security</td>
+      <td class="num">3</td>
+      <td class="num">3</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">1.0 <span>3</span></a></div></td>
+      <td><span class="badge badge--medium">Medium</span> 1 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-coreutils.html">GNU Coreutils</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">9.4 <span>6</span></a></div></td>
+      <td><span class="badge badge--medium">Medium</span> 3 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-gnupg.html">GnuPG</a></td>
+      <td class="cell-sub">Security</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">2.4 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">High</span> 7 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-iproute2.html">iproute2</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">6.1 <span>6</span></a></div></td>
+      <td><span class="muted">No vulnerabilities</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-logrotate.html">logrotate</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3.21 <span>6</span></a></div></td>
+      <td><span class="muted">No vulnerabilities</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-lsof.html">lsof</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">4.95 <span>6</span></a></div></td>
+      <td><span class="muted">No vulnerabilities</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-mariadb.html">MariaDB</a></td>
+      <td class="cell-sub">Database</td>
+      <td class="num">2</td>
+      <td class="num">2</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">10.11 <span>2</span></a></div></td>
+      <td><span class="badge badge--critical">Critical</span> 140 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-mtr.html">mtr</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">0.95 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">High</span> 2 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-netcat.html">netcat</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">1.226 <span>6</span></a></div></td>
+      <td><span class="muted">No vulnerabilities</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-nginx.html">Nginx</a></td>
+      <td class="cell-sub">Web server / proxy</td>
+      <td class="num">2</td>
+      <td class="num">2</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">1.24 <span>2</span></a></div></td>
+      <td><span class="badge badge--high">High</span> 45 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-openssl.html">OpenSSL</a></td>
+      <td class="cell-sub">Library</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3.0 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Critical</span> 76 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">Perl</a></td>
+      <td class="cell-sub">Runtime</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">5.38 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Critical</span> 17 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">PHP</a></td>
+      <td class="cell-sub">Runtime</td>
+      <td class="num">2</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">8.3 <span>2</span></a></div></td>
+      <td><span class="badge badge--critical">Critical</span> 65 CVE <span class="badge badge--kev" title="Listed in the CISA Known Exploited Vulnerabilities catalog: known to be actively exploited.">KEV</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">PHP-FPM</a></td>
+      <td class="cell-sub">Runtime</td>
+      <td class="num">2</td>
+      <td class="num">2</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">8.3 <span>2</span></a></div></td>
+      <td><span class="badge badge--critical">Critical</span> 65 CVE <span class="badge badge--kev" title="Listed in the CISA Known Exploited Vulnerabilities catalog: known to be actively exploited.">KEV</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">Polkit</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num">0</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">124 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">High</span> 4 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">Postfix</a></td>
+      <td class="cell-sub">Mail</td>
+      <td class="num">1</td>
+      <td class="num">1</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3.8 <span>1</span></a></div></td>
+      <td><span class="badge badge--low">Low</span> 2 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">procps-ng</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">4.0 <span>6</span></a></div></td>
+      <td><span class="muted">No vulnerabilities</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">Python</a></td>
+      <td class="cell-sub">Runtime</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3.12 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Critical</span> 86 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">Redis</a></td>
+      <td class="cell-sub">Cache</td>
+      <td class="num">2</td>
+      <td class="num">2</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">7.0 <span>2</span></a></div></td>
+      <td><span class="badge badge--high">High</span> 14 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">rsync</a></td>
+      <td class="cell-sub">Backup</td>
+      <td class="num">6</td>
+      <td class="num">0</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3.2 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Critical</span> 51 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">rsyslog</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num">0</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">8.2312 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">High</span> 18 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">SQLite</a></td>
+      <td class="cell-sub">Database</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Critical</span> 22 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">sudo</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">1.9 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Critical</span> 6 CVE <span class="badge badge--kev" title="Listed in the CISA Known Exploited Vulnerabilities catalog: known to be actively exploited.">KEV</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">systemd</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">255.4 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">High</span> 10 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">util-linux</a></td>
+      <td class="cell-sub">System tool</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="This software has no service (a command-line tool or library).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">2.39 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">High</span> 10 CVE</td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+<p class="footnote">399 server products are recognized: Linux packages, Windows programs and products installed outside the package manager (such as cPanel, Plesk, DirectAdmin, LiteSpeed, CSF, IIS, SQL Server; the agent detects them). Applications installed from tarballs, containers or language package managers (such as WordPress sites or Laravel) are not visible.</p>
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

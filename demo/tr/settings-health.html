@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Sağlık kontrolleri · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="settings.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="settings.html">Sistem Ayarları</a> / <span>Sağlık kontrolleri</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Sağlık kontrolleri</h1>
+    <p class="pagehead__sub">Güncellemeden önce ve sonra çalışan, ayrıca elle başlatılabilen kontroller. Önce başarılı olup güncellemeden sonra başarısız olan kontrol bildirim oluşturur.</p>
+  </div>
+</header>
+<nav class="tabs settings-tabs" aria-label="Sistem Ayarları">
+  <a class="tab" href="settings.html">Genel</a>
+  <a class="tab" href="#demo-unavailable">Sunucu yapılandırması</a>
+  <a class="tab" href="settings-channels.html">Bildirim kanalları</a>
+  <a class="tab is-active" href="settings-health.html">Sağlık kontrolleri</a>
+  <a class="tab" href="settings-score.html">Güvenlik skoru ağırlıkları</a>
+</nav>
+<p class="alert alert--info">Ajanlar işlemci, bellek ve disk kullanımını kendiliğinden bildirir; bunun için kontrol tanımlamak gerekmez. Buradaki kontroller web sitesi, port, servis gibi ek denetimler içindir: güncellemelerden önce ve sonra, ayrıca kaynak izleme aralığıyla çalışır. <a href="settings.html#monitoring">Ölçüm aralığı ve uyarı sınırları</a></p>
+
+<section class="panel panel--flush">
+  <div class="empty"><p class="empty__body">Henüz sağlık kontrolü tanımlanmadı.</p></div>
+</section>
+
+<section class="panel" id="form">
+  <h2 class="panel__title">Yeni sağlık kontrolü</h2>
+  <form class="form" method="post" action="#">
+    <input type="hidden" name="_csrf" value="demo">
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Ad</span>
+        <input class="field__input" type="text" name="name" value="" maxlength="100" required></label>
+      <label class="field"><span class="field__label">Tür</span>
+        <select class="field__input" name="type"><option value="http" selected>HTTP/HTTPS</option><option value="tcp">TCP bağlantı noktası</option><option value="service">Servis</option><option value="resources">CPU, bellek ve disk</option><option value="command">Yerel komut (health.d)</option></select></label>
+      <label class="field"><span class="field__label">Hedef</span>
+        <input class="field__input mono" type="text" name="target" value="" maxlength="500" placeholder="https://127.0.0.1/health">
+        <span class="field__hint">HTTP: https://127.0.0.1/health · TCP: 127.0.0.1:3306 · Servis: nginx · Komut: health.d içindeki dosyanın adı. Kontroller sunucunun kendisinde, ajan tarafından çalıştırılır.</span></label>
+      <label class="field"><span class="field__label">Zaman aşımı (saniye)</span>
+        <input class="field__input" type="number" name="timeout_seconds" min="1" max="120" value="10"></label>
+    </div>
+    <fieldset class="fieldset">
+      <legend>HTTP seçenekleri</legend>
+      <div class="form-grid">
+        <label class="field"><span class="field__label">Beklenen HTTP durum kodu</span>
+          <input class="field__input" type="number" name="expect" min="0" max="599" value="" placeholder="200">
+          <span class="field__hint">Boş bırakılırsa 2xx ve 3xx kodları başarılı sayılır.</span></label>
+        <label class="field"><span class="field__label">Yanıtta geçmesi gereken metin</span>
+          <input class="field__input" type="text" name="contains" value="" maxlength="200"></label>
+      </div>
+      <label class="check-label"><input type="checkbox" name="insecure" value="1"> Sertifika hatalarını kabul et (kendinden imzalı sertifikalar)</label>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend>Kaynak sınırları</legend>
+      <div class="form-grid">
+        <label class="field"><span class="field__label">En yüksek CPU yükü (%)</span><input class="field__input" type="number" name="cpu" min="0" max="1000" value=""></label>
+        <label class="field"><span class="field__label">En yüksek bellek kullanımı (%)</span><input class="field__input" type="number" name="memory" min="0" max="100" value=""></label>
+        <label class="field"><span class="field__label">En yüksek disk doluluğu (%)</span><input class="field__input" type="number" name="disk" min="0" max="100" value=""></label>
+        <label class="field"><span class="field__label">Disk yolları</span><input class="field__input mono" type="text" name="paths" value="" placeholder="/, /var"></label>
+      </div>
+      <p class="field__hint">CPU, 1 dakikalık yük ortalamasının çekirdek başına yüzdesidir (Windows&#39;ta ölçülmez). Boş bırakılan sınır kontrol edilmez. Disk yolu verilmezse kök dizin (Windows&#39;ta C:\) kullanılır.</p>
+    </fieldset>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Kapsam</span>
+        <select class="field__input" name="scope">
+          <option value="all" selected>Tüm sunucular</option>
+          <option value="group">Bir grup</option>
+          <option value="host">Tek sunucu</option>
+        </select></label>
+      <label class="field"><span class="field__label">Gruplar</span>
+        <select class="field__input" name="group_id"><option value="0">—</option><option value="2">Veritabanı</option><option value="1">Web</option></select></label>
+      <label class="field"><span class="field__label">Sunucu Adı</span>
+        <select class="field__input" name="host_id"><option value="0">—</option><option value="6">backup-01</option><option value="3">db-01</option><option value="4">db-02</option><option value="5">mail-01</option><option value="1">web-01</option><option value="2">web-02</option></select></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="with_updates" value="1" checked> Güncelleme işlerinden önce ve sonra çalıştır</label>
+    <label class="check-label"><input type="checkbox" name="monitor" value="1" checked> Ajanların sürekli izleme turlarında da çalıştır</label>
+    <label class="check-label"><input type="checkbox" name="enabled" value="1" checked> Etkin</label>
+    <div class="button-row">
+      <button class="button button--primary" type="submit">Kaydet</button>
+      
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">Yerel komut kontrolleri</h2>
+  <p>Güvenlik gereği panel sunuculara komut satırı gönderemez. Özel bir kontrol için betiği sunucuda health.d dizinine koyun ve burada yalnızca dosya adını yazın. Linux&#39;ta dosya ve dizin root&#39;a ait olmalı, grup ve diğer kullanıcılar yazamamalıdır; aksi halde ajan dosyayı çalıştırmaz. Çıkış kodu 0 başarılı demektir.</p>
+  <pre class="output">/etc/netio-patchman/health.d/&lt;ad&gt;    (Linux: root:root, 0755)
+C:\ProgramData\netio-patchman\health.d\&lt;ad&gt;.ps1 | .cmd | .exe    (Windows)</pre>
+</section>
+
+  </main>
+</div>
+
+</body>
+</html>

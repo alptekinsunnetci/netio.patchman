@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>Compliance Policies · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="compliance-policies.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Compliance Policies</h1>
+    <p class="pagehead__sub">Enabled frameworks, the thresholds of the automated checks, control applicability and server standards.</p>
+  </div>
+</header>
+<nav class="tabs" aria-label="Compliance Policies">
+  <a class="tab" href="compliance-policies.html">Frameworks and thresholds</a>
+  <a class="tab is-active" href="compliance-policies--tab-controls.html">Control applicability</a>
+  <a class="tab" href="standards.html">Server Standards</a>
+</nav>
+
+
+
+
+
+<p class="muted">Exclude a control that does not apply to your organization, with a reason. The reason appears next to the control in reports.</p>
+
+<form class="form" method="post" action="#" id="p-isms">
+  <input type="hidden" name="_csrf" value="demo"><input type="hidden" name="profile" value="isms">
+  <fieldset class="fieldset">
+  <section class="panel panel--flush">
+    <div class="panel__head"><h2 class="panel__title">Information security management audits <span class="muted mono">isms@1</span></h2></div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Control</th><th>Checks</th><th>Applicable</th><th>Justification</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><strong class="mono">ISMS-01</strong> Asset inventory<div class="cell-sub">A current, complete inventory of managed servers and clients that report regularly.</div></td>
+        <td class="cell-sub"><div>Inventory completeness · Primary</div><div>Agent reach · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-01" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-01" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-02</strong> Technical vulnerability management<div class="cell-sub">Vulnerabilities are detected, resolved within targets and actively exploited ones come first.</div></td>
+        <td class="cell-sub"><div>Remediation target (SLA) · Primary</div><div>Actively exploited vulnerabilities · Primary</div><div>Update jobs · Supporting</div><div>Security update currency · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-02" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-02" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-03</strong> Configuration management<div class="cell-sub">Servers follow defined standards and deviations are tracked.</div></td>
+        <td class="cell-sub"><div>Configuration standards · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-03" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-03" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-04</strong> Software changes on operational systems<div class="cell-sub">Installations and updates on systems are recorded and approved.</div></td>
+        <td class="cell-sub"><div>Change records · Primary</div><div>Change approval · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-04" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-04" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-05</strong> Change management<div class="cell-sub">Changes are planned, approved, carried out and their results followed up.</div></td>
+        <td class="cell-sub"><div>Change records · Primary</div><div>Change approval · Primary</div><div>Update jobs · Supporting</div><div>Process document</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-05" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-05" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-06</strong> Logging<div class="cell-sub">User and system actions are recorded in a tamper-evident way.</div></td>
+        <td class="cell-sub"><div>Log integrity · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-06" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-06" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-07</strong> Monitoring activities<div class="cell-sub">Resource and health state of systems is monitored continuously.</div></td>
+        <td class="cell-sub"><div>Continuous monitoring · Primary</div><div>Agent reach · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-07" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-07" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-08</strong> Information backup<div class="cell-sub">Management data is backed up regularly and successfully.</div></td>
+        <td class="cell-sub"><div>Backup · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-08" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-08" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-09</strong> Secure authentication and privileged access<div class="cell-sub">Administrator accounts use multi-factor authentication; access changes are tracked.</div></td>
+        <td class="cell-sub"><div>Multi-factor authentication · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-09" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-09" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-10</strong> System lifecycle<div class="cell-sub">Operating systems out of support are identified and replaced.</div></td>
+        <td class="cell-sub"><div>End-of-life systems · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-10" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-10" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-11</strong> Risk treatment<div class="cell-sub">Accepted risks have a reason, an end date and can be traced.</div></td>
+        <td class="cell-sub"><div>Accepted risks · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-11" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-11" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ISMS-12</strong> Policies and procedures<div class="cell-sub">The information security policy and procedures are documented (manual evidence).</div></td>
+        <td class="cell-sub"><div>Policy document</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ISMS-12" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ISMS-12" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <div><button class="button button--primary" type="submit">Save</button></div>
+  </fieldset>
+</form>
+
+<form class="form" method="post" action="#" id="p-baseline">
+  <input type="hidden" name="_csrf" value="demo"><input type="hidden" name="profile" value="baseline">
+  <fieldset class="fieldset">
+  <section class="panel panel--flush">
+    <div class="panel__head"><h2 class="panel__title">IT baseline protection audits <span class="muted mono">baseline@1</span></h2></div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Control</th><th>Checks</th><th>Applicable</th><th>Justification</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><strong class="mono">BASE-01</strong> Patch and change management<div class="cell-sub">Updates are applied through a process and every change is recorded.</div></td>
+        <td class="cell-sub"><div>Update jobs · Primary</div><div>Change records · Primary</div><div>Process document</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-01" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-01" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-02</strong> Timely security updates<div class="cell-sub">Security updates are applied within targets, actively exploited vulnerabilities first.</div></td>
+        <td class="cell-sub"><div>Remediation target (SLA) · Primary</div><div>Actively exploited vulnerabilities · Primary</div><div>Security update currency · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-02" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-02" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-03</strong> Linux servers<div class="cell-sub">Linux servers: current security patches, supported releases and pending reboots.</div></td>
+        <td class="cell-sub"><div>Security update currency (Linux) · Primary</div><div>End-of-life systems (Linux) · Primary</div><div>Pending reboots (Linux) · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-03" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-03" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-04</strong> Windows servers<div class="cell-sub">Windows Server systems: current security updates, supported releases and pending reboots.</div></td>
+        <td class="cell-sub"><div>Security update currency (Windows Server) · Primary</div><div>End-of-life systems (Windows Server) · Primary</div><div>Pending reboots (Windows Server) · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-04" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-04" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-05</strong> Windows clients<div class="cell-sub">Windows 10 and Windows 11 clients: current security updates, supported releases and pending reboots.</div></td>
+        <td class="cell-sub"><div>Security update currency (Windows 10, Windows 11, Other Windows) · Primary</div><div>End-of-life systems (Windows 10, Windows 11, Other Windows) · Primary</div><div>Pending reboots (Windows 10, Windows 11, Other Windows) · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-05" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-05" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-06</strong> Orderly IT administration and inventory<div class="cell-sub">All systems are in the inventory and connect to the management tool regularly.</div></td>
+        <td class="cell-sub"><div>Inventory completeness · Primary</div><div>Agent reach · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-06" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-06" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-07</strong> Logging<div class="cell-sub">Administrative actions are recorded with their integrity protected.</div></td>
+        <td class="cell-sub"><div>Log integrity · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-07" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-07" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-08</strong> Data backup<div class="cell-sub">Management data is backed up every day.</div></td>
+        <td class="cell-sub"><div>Backup · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-08" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-08" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-09</strong> Identity and authorization management<div class="cell-sub">Multi-factor authentication for administrative access.</div></td>
+        <td class="cell-sub"><div>Multi-factor authentication · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-09" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-09" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-10</strong> Detection of security events<div class="cell-sub">Resource and health monitoring and detection of actively exploited vulnerabilities.</div></td>
+        <td class="cell-sub"><div>Continuous monitoring · Primary</div><div>Actively exploited vulnerabilities · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-10" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-10" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-11</strong> Configuration standards<div class="cell-sub">Servers comply with defined standards.</div></td>
+        <td class="cell-sub"><div>Configuration standards · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-11" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-11" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">BASE-12</strong> Documented patch and change concept<div class="cell-sub">The patch and change process is defined in writing (manual evidence).</div></td>
+        <td class="cell-sub"><div>Process document</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_BASE-12" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_BASE-12" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <div><button class="button button--primary" type="submit">Save</button></div>
+  </fieldset>
+</form>
+
+<form class="form" method="post" action="#" id="p-itsm">
+  <input type="hidden" name="_csrf" value="demo"><input type="hidden" name="profile" value="itsm">
+  <fieldset class="fieldset">
+  <section class="panel panel--flush">
+    <div class="panel__head"><h2 class="panel__title">IT service management assessments <span class="muted mono">itsm@1</span></h2></div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Control</th><th>Checks</th><th>Applicable</th><th>Justification</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><strong class="mono">ITSM-01</strong> Change enablement<div class="cell-sub">Changes are recorded, approved and carried out as planned.</div></td>
+        <td class="cell-sub"><div>Change records · Primary</div><div>Change approval · Primary</div><div>Update jobs · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-01" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-01" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-02</strong> Release and deployment management<div class="cell-sub">Rollout of updates and their success rate.</div></td>
+        <td class="cell-sub"><div>Update jobs · Primary</div><div>Pending reboots · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-02" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-02" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-03</strong> Service configuration management<div class="cell-sub">Inventory of configuration items and their compliance with standards.</div></td>
+        <td class="cell-sub"><div>Inventory completeness · Primary</div><div>Configuration standards · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-03" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-03" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-04</strong> IT asset management<div class="cell-sub">Inventory and lifecycle of assets.</div></td>
+        <td class="cell-sub"><div>Inventory completeness · Primary</div><div>End-of-life systems · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-04" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-04" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-05</strong> Monitoring and event management<div class="cell-sub">Continuous monitoring and reachability of systems.</div></td>
+        <td class="cell-sub"><div>Continuous monitoring · Primary</div><div>Agent reach · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-05" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-05" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-06</strong> Information security management<div class="cell-sub">Resolution of vulnerabilities and access security.</div></td>
+        <td class="cell-sub"><div>Remediation target (SLA) · Primary</div><div>Actively exploited vulnerabilities · Primary</div><div>Multi-factor authentication · Supporting</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-06" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-06" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-07</strong> Service level management<div class="cell-sub">Meeting the defined service levels (SLA) for security updates.</div></td>
+        <td class="cell-sub"><div>Remediation target (SLA) · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-07" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-07" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">ITSM-08</strong> Incident and problem process<div class="cell-sub">The incident and problem management process is documented (manual evidence).</div></td>
+        <td class="cell-sub"><div>Process document</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_ITSM-08" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_ITSM-08" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <div><button class="button button--primary" type="submit">Save</button></div>
+  </fieldset>
+</form>
+
+<form class="form" method="post" action="#" id="p-general">
+  <input type="hidden" name="_csrf" value="demo"><input type="hidden" name="profile" value="general">
+  <fieldset class="fieldset">
+  <section class="panel panel--flush">
+    <div class="panel__head"><h2 class="panel__title">General security &amp; patch compliance <span class="muted mono">general@1</span></h2></div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Control</th><th>Checks</th><th>Applicable</th><th>Justification</th></tr></thead>
+      <tbody>
+      
+      <tr>
+        <td><strong class="mono">GEN-01</strong> Vulnerabilities resolved within targets<div class="cell-sub">Vulnerabilities are resolved within the targets set per severity.</div></td>
+        <td class="cell-sub"><div>Remediation target (SLA) · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-01" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-01" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-02</strong> No overdue actively exploited vulnerability<div class="cell-sub">Vulnerabilities in the CISA KEV catalog are resolved before their due date.</div></td>
+        <td class="cell-sub"><div>Actively exploited vulnerabilities · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-02" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-02" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-03</strong> Security update currency<div class="cell-sub">Share of systems without pending security updates.</div></td>
+        <td class="cell-sub"><div>Security update currency · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-03" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-03" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-04</strong> Update job success<div class="cell-sub">Failure rate of update jobs.</div></td>
+        <td class="cell-sub"><div>Update jobs · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-04" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-04" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-05</strong> No end-of-life operating system<div class="cell-sub">No operating system is out of vendor support.</div></td>
+        <td class="cell-sub"><div>End-of-life systems · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-05" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-05" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-06</strong> Agent reach<div class="cell-sub">Systems connect regularly throughout the period.</div></td>
+        <td class="cell-sub"><div>Agent reach · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-06" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-06" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-07</strong> Pending reboots<div class="cell-sub">No system goes long without the reboot an update needs.</div></td>
+        <td class="cell-sub"><div>Pending reboots · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-07" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-07" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-08</strong> Accepted risks<div class="cell-sub">Accepted risks have an end date and a reason.</div></td>
+        <td class="cell-sub"><div>Accepted risks · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-08" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-08" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-09</strong> Multi-factor authentication for administrators<div class="cell-sub">Every administrator account uses multi-factor authentication.</div></td>
+        <td class="cell-sub"><div>Multi-factor authentication · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-09" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-09" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-10</strong> Daily backup<div class="cell-sub">The management database is backed up every day.</div></td>
+        <td class="cell-sub"><div>Backup · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-10" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-10" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-11</strong> Evidence chain integrity<div class="cell-sub">A hash chain shows that evidence items were not changed.</div></td>
+        <td class="cell-sub"><div>Log integrity · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-11" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-11" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      <tr>
+        <td><strong class="mono">GEN-12</strong> Continuous monitoring<div class="cell-sub">Resource usage of systems is monitored continuously.</div></td>
+        <td class="cell-sub"><div>Continuous monitoring · Primary</div></td>
+        <td><label class="check-label"><input type="checkbox" name="applicable_GEN-12" value="1" checked> Applicable</label></td>
+        <td><input class="field__input" type="text" name="justification_GEN-12" value="" maxlength="1000" aria-label="Justification">
+          </td>
+      </tr>
+      
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <div><button class="button button--primary" type="submit">Save</button></div>
+  </fieldset>
+</form>
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Linux ve Windows sunucular için merkezi güvenlik, güncelleme ve izleme yönetimi">
+<title>Yazılım Envanteri · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Ana menü">
+      
+      
+      
+      <p class="navgroup">Genel bakış</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Gösterge Paneli</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Bildirim Merkezi</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Envanter</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Sunucu Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Sunucu Grupları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="software.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Yazılım Envanteri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Paket Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güvenlik</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Güvenlik Açıkları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Güncelleme</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Güncelleme İşleri</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Kademeli Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="schedules.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Zamanlanmış Güncellemeler</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Uyum ve Denetim</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Genel Bakış</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Uyum Raporları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Denetim Kanıtları</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Denetim Geçmişi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Uyum Politikaları</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Yönetim</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Ajan Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Kullanıcı Yönetimi</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Sistem Ayarları</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Yönetici</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Çıkış Yap</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Canlı demo</strong> · Örnek verilerle salt okunur bir görünüm; değişiklikler kaydedilmez. <a href="../en/dashboard.html" class="demo-lang">English</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">Yazılım Envanteri</h1>
+    <p class="pagehead__sub">Sunucularda kurulu ve çalışan sunucu yazılımları, sürümleri ve değişiklik geçmişi</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <a class="tab is-active" href="software.html">Yazılımlar</a>
+  <a class="tab" href="software--tab-eol.html">Destek bitişi (EOL)</a>
+  <a class="tab" href="software--tab-compare.html">Sunucu karşılaştırma</a>
+  <a class="tab" href="software--tab-changes.html">Değişiklik geçmişi</a>
+</nav>
+
+
+<form class="filters" method="get" action="#">
+  <input class="field__input" type="search" name="q" value="" placeholder="Yazılım adı" aria-label="Ara">
+  <select class="field__input" name="category" aria-label="Kategori">
+    <option value="">Tüm kategoriler</option>
+    <option value="appserver">Uygulama sunucusu</option><option value="backup">Yedekleme</option><option value="business">Kurumsal uygulama</option><option value="cache">Önbellek</option><option value="container">Konteyner</option><option value="database">Veritabanı</option><option value="devops">Geliştirme ve CI/CD</option><option value="directory">Dizin ve kimlik</option><option value="dns">DNS</option><option value="file">Dosya paylaşımı ve FTP</option><option value="infra">Altyapı servisleri</option><option value="library">Kütüphane</option><option value="mail">E-posta</option><option value="monitoring">İzleme</option><option value="network">Ağ servisleri</option><option value="panel">Barındırma ve yönetim paneli</option><option value="queue">Mesaj kuyruğu</option><option value="remote">Uzaktan erişim</option><option value="runtime">Çalışma ortamı</option><option value="search">Arama ve günlük analizi</option><option value="security">Güvenlik</option><option value="storage">Depolama</option><option value="system">Sistem aracı</option><option value="virtualization">Sanallaştırma</option><option value="vpn">VPN</option><option value="web">Web sunucusu / proxy</option><option value="webapp">Web uygulaması</option>
+  </select>
+  <button class="button" type="submit">Filtrele</button>
+</form>
+<section class="panel panel--flush">
+  
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Yazılım</th><th>Kategori</th><th class="num">Sunucu</th><th class="num">Çalışan</th><th>Sürüm serileri</th><th>Güvenlik Açıkları</th></tr></thead>
+    <tbody>
+    
+    <tr>
+      <td><a href="software-apparmor.html">AppArmor</a></td>
+      <td class="cell-sub">Güvenlik</td>
+      <td class="num">6</td>
+      <td class="num">0</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">4.0 <span>6</span></a></div></td>
+      <td><span class="muted">Açık yok</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-dbus.html">D-Bus</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num">0</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">1.14 <span>6</span></a></div></td>
+      <td><span class="badge badge--medium">Orta</span> 4 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-ethtool.html">ethtool</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">6.7 <span>6</span></a></div></td>
+      <td><span class="muted">Açık yok</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-fail2ban.html">Fail2ban</a></td>
+      <td class="cell-sub">Güvenlik</td>
+      <td class="num">3</td>
+      <td class="num">3</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">1.0 <span>3</span></a></div></td>
+      <td><span class="badge badge--medium">Orta</span> 1 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-coreutils.html">GNU Coreutils</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">9.4 <span>6</span></a></div></td>
+      <td><span class="badge badge--medium">Orta</span> 3 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-gnupg.html">GnuPG</a></td>
+      <td class="cell-sub">Güvenlik</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">2.4 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">Yüksek</span> 7 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-iproute2.html">iproute2</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">6.1 <span>6</span></a></div></td>
+      <td><span class="muted">Açık yok</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-logrotate.html">logrotate</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3.21 <span>6</span></a></div></td>
+      <td><span class="muted">Açık yok</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-lsof.html">lsof</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">4.95 <span>6</span></a></div></td>
+      <td><span class="muted">Açık yok</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-mariadb.html">MariaDB</a></td>
+      <td class="cell-sub">Veritabanı</td>
+      <td class="num">2</td>
+      <td class="num">2</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">10.11 <span>2</span></a></div></td>
+      <td><span class="badge badge--critical">Kritik</span> 140 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-mtr.html">mtr</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">0.95 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">Yüksek</span> 2 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-netcat.html">netcat</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">1.226 <span>6</span></a></div></td>
+      <td><span class="muted">Açık yok</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-nginx.html">Nginx</a></td>
+      <td class="cell-sub">Web sunucusu / proxy</td>
+      <td class="num">2</td>
+      <td class="num">2</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">1.24 <span>2</span></a></div></td>
+      <td><span class="badge badge--high">Yüksek</span> 45 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="software-openssl.html">OpenSSL</a></td>
+      <td class="cell-sub">Kütüphane</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3.0 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Kritik</span> 76 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">Perl</a></td>
+      <td class="cell-sub">Çalışma ortamı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">5.38 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Kritik</span> 17 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">PHP</a></td>
+      <td class="cell-sub">Çalışma ortamı</td>
+      <td class="num">2</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">8.3 <span>2</span></a></div></td>
+      <td><span class="badge badge--critical">Kritik</span> 65 CVE <span class="badge badge--kev" title="CISA Known Exploited Vulnerabilities kataloğunda yer alıyor: aktif olarak istismar edildiği biliniyor.">KEV</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">PHP-FPM</a></td>
+      <td class="cell-sub">Çalışma ortamı</td>
+      <td class="num">2</td>
+      <td class="num">2</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">8.3 <span>2</span></a></div></td>
+      <td><span class="badge badge--critical">Kritik</span> 65 CVE <span class="badge badge--kev" title="CISA Known Exploited Vulnerabilities kataloğunda yer alıyor: aktif olarak istismar edildiği biliniyor.">KEV</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">Polkit</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num">0</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">124 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">Yüksek</span> 4 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">Postfix</a></td>
+      <td class="cell-sub">E-posta</td>
+      <td class="num">1</td>
+      <td class="num">1</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3.8 <span>1</span></a></div></td>
+      <td><span class="badge badge--low">Düşük</span> 2 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">procps-ng</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">4.0 <span>6</span></a></div></td>
+      <td><span class="muted">Açık yok</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">Python</a></td>
+      <td class="cell-sub">Çalışma ortamı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3.12 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Kritik</span> 86 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">Redis</a></td>
+      <td class="cell-sub">Önbellek</td>
+      <td class="num">2</td>
+      <td class="num">2</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">7.0 <span>2</span></a></div></td>
+      <td><span class="badge badge--high">Yüksek</span> 14 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">rsync</a></td>
+      <td class="cell-sub">Yedekleme</td>
+      <td class="num">6</td>
+      <td class="num">0</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3.2 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Kritik</span> 51 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">rsyslog</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num">0</td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">8.2312 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">Yüksek</span> 18 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">SQLite</a></td>
+      <td class="cell-sub">Veritabanı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">3 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Kritik</span> 22 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">sudo</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">1.9 <span>6</span></a></div></td>
+      <td><span class="badge badge--critical">Kritik</span> 6 CVE <span class="badge badge--kev" title="CISA Known Exploited Vulnerabilities kataloğunda yer alıyor: aktif olarak istismar edildiği biliniyor.">KEV</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">systemd</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">255.4 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">Yüksek</span> 10 CVE</td>
+    </tr>
+    
+    <tr>
+      <td><a href="#demo-unavailable">util-linux</a></td>
+      <td class="cell-sub">Sistem aracı</td>
+      <td class="num">6</td>
+      <td class="num"><span class="muted" title="Bu yazılımın çalışan bir servisi yok (komut satırı aracı veya kütüphane).">—</span></td>
+      <td><div class="chips"><a class="chip" href="#demo-unavailable">2.39 <span>6</span></a></div></td>
+      <td><span class="badge badge--high">Yüksek</span> 10 CVE</td>
+    </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+<p class="footnote">399 sunucu yazılımı tanınır: Linux paketleri, Windows programları ve paket yöneticisi dışında kurulan ürünler (cPanel, Plesk, DirectAdmin, LiteSpeed, CSF, IIS, SQL Server gibi; ajan kendisi tespit eder). Tarball, konteyner veya dil paket yöneticisiyle kurulan uygulamalar (ör. WordPress siteleri, Laravel) görünmez.</p>
+
+
+
+  </main>
+</div>
+
+</body>
+</html>

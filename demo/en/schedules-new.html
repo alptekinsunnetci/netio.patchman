@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="netio.patchman">
+<meta name="description" content="Central security, update and monitoring management for Linux and Windows servers">
+<title>New schedule · netio.patchman</title>
+<link rel="icon" href="../static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../static/app.css">
+<script src="../static/app.js" defer></script>
+<link rel="stylesheet" href="../demo.css">
+<script src="../demo.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar__brand" href="dashboard.html" aria-label="netio.patchman"><span class="wordmark"><svg class="wordmark__mark" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-mark"></use></svg><span class="wordmark__text"><span class="wordmark__ns">netio</span>.patchman</span></span></a>
+    <nav class="sidebar__nav" aria-label="Main menu">
+      
+      
+      
+      <p class="navgroup">Overview</p>
+      <a class="navlink" href="dashboard.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-dashboard"></use></svg><span>Dashboard</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="notifications.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-bell"></use></svg><span>Notifications</span>
+        <span class="navlink__count">13</span>
+      </a>
+      
+      
+      
+      <p class="navgroup">Inventory</p>
+      <a class="navlink" href="servers.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-server"></use></svg><span>Server Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="groups.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-tag"></use></svg><span>Server Groups</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="software.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-layers"></use></svg><span>Software Inventory</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="packages.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-package"></use></svg><span>Packages</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Security</p>
+      <a class="navlink" href="vulnerabilities.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-shield"></use></svg><span>Vulnerabilities</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Updates</p>
+      <a class="navlink" href="jobs.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-jobs"></use></svg><span>Update Jobs</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="rollouts.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-rollout"></use></svg><span>Rolling Updates</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink is-active" href="schedules.html" aria-current="page">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-calendar"></use></svg><span>Scheduled Updates</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Compliance &amp; Audit</p>
+      <a class="navlink" href="compliance.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-audit"></use></svg><span>Overview</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-reports.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-report"></use></svg><span>Compliance Reports</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-evidence.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-evidence"></use></svg><span>Audit Evidence</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-history.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-history"></use></svg><span>Audit History</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="compliance-policies.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-check"></use></svg><span>Compliance Policies</span>
+        
+      </a>
+      
+      
+      
+      <p class="navgroup">Administration</p>
+      <a class="navlink" href="agents.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-agent"></use></svg><span>Agents</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="users.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-users"></use></svg><span>Users</span>
+        
+      </a>
+      
+      
+      
+      
+      <a class="navlink" href="settings.html">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-settings"></use></svg><span>Settings</span>
+        
+      </a>
+      
+      
+    </nav>
+    <div class="sidebar__foot">
+      <a class="navlink" href="profile.html"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-user"></use></svg><span class="navlink__user"><span>Demo Yönetici</span><small>Administrator</small></span></a>
+      <form method="post" action="#"><input type="hidden" name="_csrf" value="demo"><button class="navlink navlink--button" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="../static/icons.svg#i-logout"></use></svg><span>Sign out</span></button></form>
+      <p class="sidebar__version">netio.patchman 1.1.0 “gökalp”</p>
+    </div>
+  </aside>
+  <main class="main" id="main">
+<div class="demo-banner" role="note"><strong>Live demo</strong> · A read-only view with sample data; nothing is saved. <a href="../tr/dashboard.html" class="demo-lang">Türkçe</a> · <a href="https://github.com/alptekinsunnetci/netio.patchman">GitHub</a></div>
+    
+    
+
+
+
+    
+
+<nav class="breadcrumb"><a href="schedules.html">Scheduled Updates</a> / <span>New schedule</span></nav>
+<header class="pagehead">
+  <div>
+    <h1 class="pagehead__title">New schedule</h1>
+    
+  </div>
+  
+</header>
+
+
+
+
+<form class="form" method="post" action="#">
+  <input type="hidden" name="_csrf" value="demo">
+  <fieldset class="fieldset">
+  <section class="panel">
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Name</span>
+        <input class="field__input" type="text" name="name" value="" maxlength="100" required placeholder="For example: Sunday night security updates"></label>
+      <label class="field"><span class="field__label">Action</span>
+        <select class="field__input" name="job_type"><option value="upgrade_security" selected>Security updates</option><option value="upgrade_all">All updates</option></select></label>
+    </div>
+    <label class="check-label"><input type="checkbox" name="enabled" value="1" checked> Rule enabled</label>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">Schedule</h2>
+    <div class="field"><span class="field__label">Days</span>
+      <div class="daypicker"><label class="check-label"><input type="checkbox" name="days" value="1"> Monday</label><label class="check-label"><input type="checkbox" name="days" value="2"> Tuesday</label><label class="check-label"><input type="checkbox" name="days" value="3"> Wednesday</label><label class="check-label"><input type="checkbox" name="days" value="4"> Thursday</label><label class="check-label"><input type="checkbox" name="days" value="5"> Friday</label><label class="check-label"><input type="checkbox" name="days" value="6"> Saturday</label><label class="check-label"><input type="checkbox" name="days" value="0" checked> Sunday</label></div>
+    </div>
+    <div class="form-grid">
+      <label class="field"><span class="field__label">Start time</span>
+        <input class="field__input" type="text" name="time" value="03:00" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" inputmode="numeric" maxlength="5" placeholder="03:00" autocomplete="off">
+        <span class="field__hint">In Europe/Istanbul time.</span></label>
+      <label class="field"><span class="field__label">Maintenance window (minutes)</span>
+        <input class="field__input" type="number" name="window_minutes" min="15" max="1440" value="120" required>
+        <span class="field__hint">If the agent does not connect within this time, the update is skipped for this run.</span></label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">Scope</h2>
+    <div class="daypicker">
+      <label class="check-label"><input type="radio" name="target" value="all" checked> All servers</label><label class="check-label"><input type="radio" name="target" value="os"> A specific operating system</label><label class="check-label"><input type="radio" name="target" value="group"> Servers in a group</label><label class="check-label"><input type="radio" name="target" value="hosts"> Selected servers</label>
+    </div>
+    <label class="field" data-show-when="target=group"><span class="field__label">Group</span>
+      <select class="field__input" name="group_id">
+        <option value="">—</option>
+        <option value="2">Veritabanı · 2 servers</option><option value="1">Web · 2 servers</option>
+      </select>
+      </label>
+    <label class="field" data-show-when="target=os"><span class="field__label">Operating system</span>
+      <select class="field__input" name="os_id">
+        <option value="">—</option>
+        <option value="ubuntu">ubuntu · Ubuntu 24.04.4 LTS</option>
+      </select></label>
+    <div class="field" data-show-when="target=hosts"><span class="field__label">Servers</span>
+      
+      <label class="check-label"><input type="checkbox" data-check-all="host_ids"> Select all</label>
+      <div class="checklist">
+        <label class="check-label"><input type="checkbox" name="host_ids" value="6"> <span>backup-01 <small class="muted">Ubuntu 24.04.4 LTS</small></span></label><label class="check-label"><input type="checkbox" name="host_ids" value="3"> <span>db-01 <small class="muted">Ubuntu 24.04.4 LTS</small></span></label><label class="check-label"><input type="checkbox" name="host_ids" value="4"> <span>db-02 <small class="muted">Ubuntu 24.04.4 LTS</small></span></label><label class="check-label"><input type="checkbox" name="host_ids" value="5"> <span>mail-01 <small class="muted">Ubuntu 24.04.4 LTS</small></span></label><label class="check-label"><input type="checkbox" name="host_ids" value="1"> <span>web-01 <small class="muted">Ubuntu 24.04.4 LTS</small></span></label><label class="check-label"><input type="checkbox" name="host_ids" value="2"> <span>web-02 <small class="muted">Ubuntu 24.04.4 LTS</small></span></label>
+      </div>
+      
+    </div>
+  </section>
+
+  <section class="panel">
+    <label class="check-label"><input type="checkbox" name="reboot" value="1"> Restart the server within the maintenance window if the update requires it</label>
+    <p class="field__hint">Unless this box is checked, netio.patchman does not restart servers; plan restarts separately so kernel updates take effect. When checked, a server that reports a pending restart after its update job finished is restarted one minute later, as long as the maintenance window is still open.</p>
+  </section>
+  <div><button class="button button--primary" type="submit">Save</button></div>
+  </fieldset>
+</form>
+
+
+
+  </main>
+</div>
+
+</body>
+</html>
