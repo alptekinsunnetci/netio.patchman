@@ -247,6 +247,14 @@ func TestChannelIntegrations(t *testing.T) {
 	waitFor(t, func() bool {
 		return len(tk.find("/sn/api/now/table/incident")) == 1 && len(tk.find("/glpi/Ticket")) == 1 && len(tk.find("/glpi/killSession")) == 1 && len(zbxFrames()) == 2
 	})
+	// Deliveries run concurrently: wait until their outcome is recorded, so the
+	// next delivery's result is not overwritten by this one.
+	waitFor(t, func() bool {
+		sn, _, _ := e.st.ListDeliveries(ctx, ids["ServiceNow"], store.Page{Number: 1, Size: 10})
+		gl, _, _ := e.st.ListDeliveries(ctx, ids["GLPI"], store.Page{Number: 1, Size: 10})
+		zb, _, _ := e.st.ListDeliveries(ctx, ids["Zabbix"], store.Page{Number: 1, Size: 10})
+		return len(sn) == 1 && len(gl) == 1 && len(zb) == 2
+	})
 	var inc map[string]string
 	_ = json.Unmarshal(tk.find("/sn/api/now/table/incident")[0].Body, &inc)
 	if inc["urgency"] != "1" || !strings.Contains(inc["short_description"], "db-01") {
@@ -274,8 +282,10 @@ func TestChannelIntegrations(t *testing.T) {
 	var failed store.Delivery
 	waitFor(t, func() bool {
 		list, _, _ := e.st.ListDeliveries(ctx, ids["GLPI"], store.Page{Number: 1, Size: 10})
-		if len(list) == 2 {
-			failed = list[0]
+		for _, d := range list {
+			if !d.OK {
+				failed = d
+			}
 		}
 		return len(list) == 2
 	})
