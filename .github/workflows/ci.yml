@@ -129,7 +129,7 @@ jobs:
       - name: The agent runs (native target only)
         if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
         run: out/netio-patchman-agent-linux-amd64 -version
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
           path: out/
