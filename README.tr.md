@@ -6,7 +6,7 @@
 
 🇬🇧 [English](README.md) · 🇹🇷 **Türkçe** · 🇩🇪 [Deutsch](README.de.md) · 🇷🇺 [Русский](README.ru.md)
 
-📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki) · 🏛️ [Mimari ve güvenlik modeli](docs/mimari-ve-guvenlik.md) · 🧪 [Canlı demo](https://alptekinsunnetci.github.io/netio.patchman/demo/tr/dashboard.html) · 🤝 [Katkı rehberi](CONTRIBUTING.tr.md) · ⏱️ Okuma süresi: yaklaşık 23 dakika
+📖 [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki/Ana-Sayfa) · 🏛️ [Mimari ve güvenlik modeli](docs/mimari-ve-guvenlik.md) · 🧪 [Canlı demo](https://alptekinsunnetci.github.io/netio.patchman/demo/tr/dashboard.html) · 🤝 [Katkı rehberi](CONTRIBUTING.tr.md) · ⏱️ Okuma süresi: yaklaşık 23 dakika
 
 netio.patchman, yüzlerce Linux ve Windows sunucunun güvenlik açıklarını ve paket güncellemelerini tek bir panelden izlemenizi ve yönetmenizi sağlayan, kendi altyapınızda çalışan (self-hosted) bir platformdur.
 

@@ -5,7 +5,7 @@
 Bu belge netio.patchman'in nasıl kurulduğunu, hangi bileşenin hangisine güvendiğini, verinin bileşenler arasında nasıl
 aktığını ve onu hangi önlemlerin koruduğunu anlatır. Nerede çalıştıracağına karar veren sistem yöneticileri, güvenlik
 incelemesi yapanlar ve katkıda bulunacak geliştiriciler içindir.
-[README](../README.tr.md)'ye dön · [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki)
+[README](../README.tr.md)'ye dön · [Wiki](https://github.com/alptekinsunnetci/netio.patchman/wiki/Ana-Sayfa)
 
 > [!WARNING]
 > netio.patchman sunucularınızda paket günceller, servisleri ve sunucuyu yeniden başlatır. Kullanım riski tamamen
