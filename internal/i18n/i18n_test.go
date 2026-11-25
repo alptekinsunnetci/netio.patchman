@@ -173,6 +173,7 @@ func TestReferencedKeysExist(t *testing.T) {
 		"rollout.host.":         {"pending", "queued", "succeeded", "failed", "skipped"},
 		"rollout.reason.":       {"canary_failed", "failure_rate", "canary_done", "manual"},
 		"rollout.order.":        {"hostname", "score_asc", "score_desc"},
+		"agents.signing.":       {"mismatch", "missing", "old", "pending"},
 		"rollout.done_":         {"pause", "resume", "cancel"},
 		"standard.kind.":        {"required", "forbidden", "allowed_cycles", "min_version", "running"},
 		"standard.suggest.":     {"required", "forbidden", "allowed_cycles", "min_version", "running"},

@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"netio.patchman/internal/api"
 	"netio.patchman/internal/eol"
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/scanner"
@@ -365,6 +366,10 @@ func (s *Server) queueJob(r *http.Request, h store.Host, typ string, pkgs []stri
 		if !ok {
 			return 0, s.l.T("job.error.no_agent_binary", "arch", h.Arch)
 		}
+		cfg, _ := settings.Load(r.Context(), s.st)
+		if keys, _ := api.UpdateKeys(h.HostInfo(), cfg); !s.o.Release.Installable(h.AgentVersion, h.OSID, h.Arch, keys) {
+			return 0, s.l.T("job.error.agent_update_unsigned", "hostname", h.Hostname, "version", s.o.Release.Version)
+		}
 		if active, _ := s.st.HasActiveJob(r.Context(), h.ID, typ); active {
 			return 0, s.l.T("job.error.already_queued", "hostname", h.Hostname)
 		}
@@ -513,6 +518,7 @@ func (s *Server) serversBulkJob(w http.ResponseWriter, r *http.Request) {
 // agentsUpdateAll queues an agent update on every outdated agent.
 func (s *Server) agentsUpdateAll(w http.ResponseWriter, r *http.Request) {
 	var ids []int64
+	cfg, _ := settings.Load(r.Context(), s.st)
 	for pg := 1; ; pg++ {
 		hosts, _, err := s.st.ListHosts(r.Context(), store.HostFilter{OfflineAfter: s.offlineAfter()}, store.Page{Number: pg, Size: 500})
 		if err != nil {
@@ -520,7 +526,8 @@ func (s *Server) agentsUpdateAll(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		for _, h := range hosts {
-			if h.SelfUpdate && s.o.Release.Outdated(h.AgentVersion, h.OSID, h.Arch) {
+			keys, _ := api.UpdateKeys(h.HostInfo(), cfg)
+			if h.SelfUpdate && s.o.Release.Outdated(h.AgentVersion, h.OSID, h.Arch) && s.o.Release.Installable(h.AgentVersion, h.OSID, h.Arch, keys) {
 				ids = append(ids, h.ID)
 			}
 		}

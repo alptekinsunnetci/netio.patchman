@@ -229,6 +229,7 @@ Kayıt anahtarını süreli ve kullanım sınırlı oluşturup Ansible, Puppet v
 | `PATCHMAN_WINGET` | `true` | Windows: üçüncü taraf program güncellemelerini winget ile listeler ve kurar (kurulumda `-DisableWinget`) |
 | `PATCHMAN_REFRESH_PACKAGE_LISTS` | `true` | Paket listelerini en fazla 6 saatte bir yeniler (`apt-get update`, `zypper refresh`, `apk update`) |
 | `PATCHMAN_CA_FILE` | — | Ek CA sertifikası |
+| `PATCHMAN_UPDATE_KEYS` | — | Ajan güncellemelerinin imzalanması gereken açık anahtarlar (virgülle ayrılmış). Tanımlıysa ajan yalnızca bu anahtarlardan biriyle imzalanmış, daha yeni sürümleri kurar (bkz. [İmzalı ajan güncellemeleri](#i̇mzalı-ajan-güncellemeleri)) |
 | `PATCHMAN_LOCALE` | `tr-TR` | Ajan günlüklerinin ve panelde görünen iş mesajlarının dili (`tr-TR`, `en-US`, `de-DE` veya `ru-RU`). Kurulumda `--locale` ile yazılır (ör. `--locale de-DE`) |
 
 Değişiklikten sonra: `systemctl restart netio-patchman-agent.service` (Alpine: `rc-service netio-patchman-agent restart`)
@@ -432,7 +433,7 @@ Güncelleyici depodaki betiği (`deploy/updater/updater.sh`) çalıştırır; b�
 Docker imajı, sunucuyla aynı sürümdeki amd64 ve arm64 Linux ile amd64 Windows ajan dosyalarını içerir. **Sistem Ayarları → Ajanlar → Ajanları otomatik olarak güncelle** açıkken (varsayılan):
 
 1. Farklı sürüm çalıştıran bir ajan bağlandığında sunucu bir "Ajan güncellemesi" işi oluşturur.
-2. Ajan yeni dosyayı sunucudan indirir, SHA-256 özetini karşılaştırır ve `-version` ile çalıştığını doğrular.
+2. Ajan yeni dosyayı sunucudan indirir, SHA-256 özetini karşılaştırır ve `-version` ile çalıştığını doğrular. İmza anahtarı tanımlı ajanlar önce sürümün imzasını doğrular (aşağıya bakın).
 3. Mevcut dosyayı `netio-patchman-agent.previous` olarak saklar, yenisini yerine koyar ve çıkar; systemd ajanı yeni sürümle yeniden başlatır. Windows'ta çalışan dosya `netio-patchman-agent.exe.previous` adıyla kenara alınır ve hizmet, kurtarma ayarları sayesinde yeni sürümle birkaç saniye içinde yeniden başlar.
 
 Aynı anda en fazla 25 ajan güncellenir. Başarısız bir güncelleme 6 saat sonra yeniden denenir ve Bildirim Merkezi'ne düşer. Otomatik güncelleme kapalıyken ajanlar **Ajan Yönetimi → Eski ajanları güncelle** düğmesiyle ya da sunucu sayfasındaki **Ajanı güncelle** düğmesiyle güncellenebilir.
@@ -447,6 +448,54 @@ sudo systemctl restart netio-patchman-agent.service
 ```
 
 İmaj dışı kurulumlarda ajan dosyalarını `PATCHMAN_AGENT_DIST_DIR` dizinine `netio-patchman-agent-linux-<mimari>` ve `netio-patchman-agent-windows-amd64.exe` adıyla, sürümü de aynı dizindeki `version` dosyasına yazın. `scripts/build-agent.sh <sürüm> <dizin>` betiği bu dizini (Linux amd64 ve arm64, Windows amd64, SHA-256 özetleri ve `version` dosyası) hazır olarak üretir.
+
+### İmzalı ajan güncellemeleri
+
+Ajan güncellemesi yalnızca SHA-256 ile doğrulandığında özeti sunucu bildirir. Sunucuyu ele geçiren biri bu yüzden tüm sunuculara kendi ajan dosyasını dağıtabilir; ajanlar root olarak çalıştığı için bu, her sunucuda komut çalıştırmak demektir. İmzalı güncellemelerde ajan, sürümün sunucuda bulunmayan bir Ed25519 anahtarıyla imzalanmış olmasını ister:
+
+- İmza sürümü, platformu ve dosyanın SHA-256 özetini kapsar. Ajan imzayı indirmeden önce doğrular; indirilen dosyanın özeti de imzalı özetle eşleşmelidir.
+- İmza anahtarı tanımlı bir ajan imzasız güncellemeleri ve eski sürüme dönüşleri reddeder.
+- Ajanın güvendiği anahtarlar yönetilen sunucuda durur ve merkezi sunucudan değiştirilemez.
+- İsteğe bağlıdır ve mevcut kurulumları etkilemez: anahtar tanımlanmadıkça tüm ajanlar eskisi gibi SHA-256 ile güncellenir. 1.1.2'den eski ajanlar imzayı tanımaz, yeni sunucuyla eskisi gibi çalışır ve otomatik güncellemeyle yeni sürüme geçer.
+
+**1. Anahtar çiftini oluşturun.** Sunucunun dışında, güvendiğiniz bir makinede (çevrimdışı olabilir):
+
+```sh
+netio-patchman-server agent-key -out agent-signing.key
+```
+
+Komut gizli anahtarı yalnızca sahibinin okuyabileceği bir dosyaya yazar, açık anahtarı (ör. `Z0OUQxnMvSfCy+bgVZSs/wKuAflQXnAHoeof0yjj1e4=`) ve kimliğini (ör. `471ae649095c738e`) gösterir. Gizli anahtar sunucuya hiç konmaz; kaybolursa yeni bir çift oluşturup ajanlardaki anahtarı değiştirmeniz gerekir. Makinede `netio-patchman-server` yoksa komutu depodan çalıştırın: `go run ./cmd/netio-patchman-server agent-key -out agent-signing.key`.
+
+**2. Ajan dosyalarını derleyip imzalayın.** Aynı makinede, sunucuda çalışan sürümün etiketinden:
+
+```sh
+git checkout v1.1.2
+PATCHMAN_SIGNING_KEY=/yol/agent-signing.key scripts/build-agent.sh "" agent
+```
+
+Betik dosyaları derler ve her birinin yanına `<dosya>.sig` imzasını yazar (Windows'ta `scripts\build-agent.ps1` aynı değişkeni okur). Var olan bir dizini imzalamak için: `netio-patchman-server agent-sign -key agent-signing.key -dir agent`. Komut özetleri kendisi hesaplar; bir `.sha256` dosyası tutmazsa imzalamaz.
+
+**3. İmzalı dosyaları sunucuya verin.** Veri dizinindeki `agent` klasörü bir `version` dosyası içeriyorsa sunucu imajdaki ajan dosyaları yerine onu dağıtır. Docker Compose kurulumunda:
+
+```sh
+docker compose cp agent/. server:/data/agent/
+docker compose restart server
+```
+
+İmaj dışı kurulumlarda dosyaları `<veri dizini>/agent` klasörüne veya `PATCHMAN_AGENT_DIST_DIR` dizinine koyup sunucuyu yeniden başlatın. **Ajan Yönetimi → Ajan güncellemeleri** dağıtılan sürümü, **İmza** satırı da imzalayan anahtarı gösterir.
+
+**4. Anahtarı ajanlara verin.** İki yol vardır:
+
+- **Sistem Ayarları → Ajanlar → Güncelleme imza anahtarları** alanına açık anahtarı girin. Henüz anahtarı olmayan ajanlar (1.1.2 ve üstü) bir sonraki bağlantılarında anahtarı durum dizinine kaydeder (`/var/lib/netio-patchman/update-keys`, Windows'ta `C:\ProgramData\netio-patchman\update-keys`) ve bundan sonra yalnızca onunla imzalanmış güncellemeleri kurar. Bu ilk kayıt sunucuya güvenir: sunucu o anda ele geçirilmişse saldırganın anahtarı kaydedilebilir.
+- Daha sıkı bir yöntem için anahtarı ajanın yapılandırmasına kendiniz yazın: `/etc/netio-patchman/agent.env` (Windows: `C:\ProgramData\netio-patchman\agent.env`) dosyasına `PATCHMAN_UPDATE_KEYS=<açık anahtar>` satırını ekleyip ajanı yeniden başlatın. Yapılandırmadaki anahtarlar kaydedilmiş anahtarlardan önce gelir. Toplu dağıtımda bu satırı yapılandırma yönetim aracınızla ekleyebilirsiniz.
+
+İmzalama kullanılmaya başlandığında (sunucuda anahtar, imzalı sürüm veya anahtarlı bir ajan varsa) **Ajan Yönetimi → Ajan güncellemeleri** bölümündeki **İmzalı ajan güncellemeleri** uyarısı eşleşen bir anahtara henüz güvenmeyen ajanları adlarıyla listeler: farklı bir anahtara güvenenler (anahtar yalnızca ajan sunucusunda değiştirilebilir), anahtarı olmayanlar, anahtar alamayan eski ajanlar (önce 1.1.2 veya üstüne güncellenmeleri gerekir; otomatik güncelleme bunu kendiliğinden yapar) ve anahtarı bir sonraki bağlantıda kaydedecek olanlar. Sunucuda anahtar tanımlıysa uyarı, elle atama için `PATCHMAN_UPDATE_KEYS=…` satırını kopyalanabilir olarak gösterir. Tüm ajanlar eşleşen bir anahtara güvendiğinde uyarı kaybolur.
+
+Ajan listesinde imzalı güncelleme isteyen ajanlar **Yalnızca imzalı** etiketini taşır. Dağıtılan sürüm bir ajanın anahtarıyla imzalanmamışsa veya ajanın sürümünden yeni değilse sunucu o ajana güncelleme işi göndermez; ajan **İmza bekleniyor** etiketiyle görünür.
+
+**Her sürüm yükseltmesinde** 2. ve 3. adımları yeni sürüm için tekrarlayın. Veri dizinindeki dosyalar imajdakilerden önce geldiği için imzalamadığınız bir sürüm ajanlara dağıtılmaz.
+
+**Anahtar değiştirme:** Yeni bir çift oluşturun. Geçiş süresince ajanlara iki anahtarı birden verin (`PATCHMAN_UPDATE_KEYS=<eski>,<yeni>`, en çok 8 anahtar), ardından sürümleri yeni anahtarla imzalayın. Sunucudan kaydedilen anahtarlar yalnızca yönetilen sunucuda değişir: `update-keys` dosyasını düzenleyin veya silin, ajanı yeniden başlatın. Dosya silinirse ajan bir sonraki bağlantıda sunucudaki anahtarları yeniden kaydeder.
 
 ### Ajanı elle yeniden kurma
 

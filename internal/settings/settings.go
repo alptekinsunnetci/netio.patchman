@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"netio.patchman/internal/agentsign"
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/score"
 	"netio.patchman/internal/store"
@@ -29,6 +30,7 @@ const (
 	KeyAgentCheckinSeconds  = "agent.checkin_seconds"
 	KeyAgentReportMinutes   = "agent.report_minutes"
 	KeyAgentAutoUpdate      = "agent.auto_update"
+	KeyAgentUpdateKeys      = "agent.update_keys"
 	KeyScanEnabled          = "scan.enabled"
 	KeyRetentionDays        = "retention.days"
 	KeyScannerLastDaily     = "scanner.last_daily"
@@ -116,10 +118,13 @@ type Values struct {
 	AgentCheckinSeconds  int
 	AgentReportMinutes   int
 	AgentAutoUpdate      bool
-	ScanEnabled          bool
-	RetentionDays        int
-	ScannerLastDaily     time.Time
-	KEVUpdatedAt         time.Time
+	// AgentUpdateKeys are release signing keys (base64 Ed25519) agents that
+	// trust none yet pin at their next check-in.
+	AgentUpdateKeys  []string
+	ScanEnabled      bool
+	RetentionDays    int
+	ScannerLastDaily time.Time
+	KEVUpdatedAt     time.Time
 	// AuthRequireMFA sends users without an authenticator to set one up.
 	AuthRequireMFA bool
 	// RiskMaxDays caps how long a risk can be accepted (0 = no limit).
@@ -280,6 +285,9 @@ func FromMap(raw map[string]string) Values {
 	b(KeyEmailServerUpdate, &v.EmailServerUpdate)
 	b(KeyScanEnabled, &v.ScanEnabled)
 	b(KeyAgentAutoUpdate, &v.AgentAutoUpdate)
+	if keys, err := agentsign.ParsePublicKeys(raw[KeyAgentUpdateKeys]); err == nil {
+		v.AgentUpdateKeys = keys
+	}
 	b(KeyAuthRequireMFA, &v.AuthRequireMFA)
 	i(KeyRiskMaxDays, &v.RiskMaxDays, 0, 3650)
 	b(KeyBackupEnabled, &v.BackupEnabled)

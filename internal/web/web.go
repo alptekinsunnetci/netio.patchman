@@ -23,6 +23,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"netio.patchman/internal/agentsign"
 	"netio.patchman/internal/api"
 	"netio.patchman/internal/auth"
 	"netio.patchman/internal/backup"
@@ -344,6 +345,12 @@ func (s *Server) funcs() template.FuncMap {
 		"agentOutdated": func(h store.Host) bool {
 			return s.o.Release.Outdated(h.AgentVersion, h.OSID, h.Arch)
 		},
+		// The agent requires signed updates the release cannot satisfy.
+		"agentSignaturePending": func(h store.Host) bool {
+			return len(h.UpdateKeys) > 0 && s.o.Release.Outdated(h.AgentVersion, h.OSID, h.Arch) &&
+				!s.o.Release.Installable(h.AgentVersion, h.OSID, h.Arch, h.UpdateKeys)
+		},
+		"keyIDs":        func(keys []string) string { return strings.Join(agentsign.KeyIDs(keys), ", ") },
 		"agentRelease":  func() string { return s.o.Release.Version },
 		"virt":          s.virtLabel,
 		"size":          s.size,

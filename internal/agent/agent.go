@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"netio.patchman/internal/agentsign"
 	"netio.patchman/internal/brand"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/protocol"
@@ -36,6 +37,10 @@ type Config struct {
 	StateDir string
 	// Locale is the language of agent logs and job messages (PATCHMAN_LOCALE).
 	Locale string
+	// UpdateKeys are the release signing keys (PATCHMAN_UPDATE_KEYS, base64
+	// Ed25519) agent updates must be signed with. They take precedence over
+	// keys pinned from the server (see PinnedUpdateKeys).
+	UpdateKeys []string
 }
 
 // LoadConfig reads KEY=VALUE pairs from path; environment variables override
@@ -78,6 +83,11 @@ func LoadConfig(l i18n.Localizer, path string, getenv func(string) string) (Conf
 		Winget:          boolean("WINGET", true),
 		StateDir:        get("STATE_DIR", DefaultStateDir),
 		Locale:          get("LOCALE", i18n.DefaultLocale),
+	}
+	if keys, err := agentsign.ParsePublicKeys(get("UPDATE_KEYS", "")); err != nil {
+		errs = append(errs, errors.New(l.T("config.error.invalid_update_keys", "max", agentsign.MaxKeys)))
+	} else {
+		cfg.UpdateKeys = keys
 	}
 	raw := get("SERVER_URL", "")
 	switch u, err := url.Parse(raw); {
@@ -196,7 +206,7 @@ func pickPackageManager(rel map[string]string, has func(string) bool) string {
 // Capabilities are the optional features this agent implements; the server
 // only sends the jobs and parameters behind them to agents that declare them.
 func Capabilities(pm string) []string {
-	caps := []string{protocol.CapServices, protocol.CapHealth, protocol.CapHealthMonitor}
+	caps := []string{protocol.CapServices, protocol.CapHealth, protocol.CapHealthMonitor, protocol.CapSignedUpdate}
 	if protocol.PreviewSupported(pm) {
 		caps = append(caps, protocol.CapPreview)
 	}

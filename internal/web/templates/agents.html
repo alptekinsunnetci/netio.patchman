@@ -38,9 +38,25 @@
     <dt>{{t "agents.update.release"}}</dt><dd class="mono">{{$d.Release.Version}} <span class="muted">({{$d.ReleaseArchs}})</span></dd>
     <dt>{{t "agents.update.auto"}}</dt><dd>{{if $d.AutoUpdate}}<span class="pill pill--online">{{t "common.enabled"}}</span> <span class="muted">{{t "agents.update.auto_on_hint"}}</span>{{else}}<span class="pill pill--muted">{{t "common.disabled"}}</span> <span class="muted">{{t "agents.update.auto_off_hint"}}</span>{{end}}</dd>
     <dt>{{t "agents.update.outdated_count"}}</dt><dd>{{$d.Outdated}}</dd>
+    <dt>{{t "agents.update.signature"}}</dt><dd>{{if $d.Signers}}<span class="pill pill--online">{{t "agents.update.signed"}}</span> <span class="mono">{{$d.Signers}}</span>{{if $d.Release.Unsigned}} <span class="muted">{{t "agents.update.partly_unsigned"}}</span>{{end}}{{else}}<span class="pill pill--muted">{{t "agents.update.unsigned"}}</span> <span class="muted">{{t "agents.update.unsigned_hint"}}</span>{{end}}</dd>
+    <dt>{{t "agents.update.trusted_keys"}}</dt><dd>{{if $d.TrustedKeys}}<span class="mono">{{$d.TrustedKeys}}</span>{{else}}<span class="muted">{{t "agents.update.no_trusted_keys"}}</span>{{end}}</dd>
   </dl>
   {{else}}
   <p class="alert alert--warning">{{t "agents.update.no_release"}}</p>
+  {{end}}
+  {{with $d.Signing}}
+  <div class="alert {{if .Warn}}alert--warning{{else}}alert--info{{end}}" id="signing-notice">
+    <p><strong>{{t "agents.signing.title"}}</strong></p>
+    {{range .Groups}}
+    <p>{{t (printf "agents.signing.%s" .Kind) "n" .Count}}
+      {{range $i, $h := .Hosts}}{{if $i}}, {{end}}<a href="/servers/{{$h.ID}}">{{$h.Hostname}}</a>{{end}}{{if .More}} {{t "agents.signing.more" "n" .More}}{{end}}</p>
+    {{end}}
+    {{if .EnvLine}}
+    <p>{{t "agents.signing.manual"}}</p>
+    <span class="copy"><input class="field__input mono" type="text" value="{{.EnvLine}}" readonly id="update-keys-line"><button class="button button--sm" type="button" data-copy="update-keys-line">{{t "common.copy"}}</button></span>
+    {{end}}
+    <p class="muted">{{t "agents.signing.hint"}}</p>
+  </div>
   {{end}}
 </section>
 
@@ -140,8 +156,8 @@
     <tr>
       <td><a href="/servers/{{.ID}}">{{.Hostname}}</a></td>
       <td>{{template "hoststatus" .}}</td>
-      <td class="mono">{{.AgentVersion}} {{if agentOutdated .}}<span class="pill pill--warning">{{t "agents.update.outdated"}}</span>{{else if $d.Release.Available}}<span class="pill pill--online">{{t "agents.update.current"}}</span>{{end}}</td>
-      <td>{{if .SelfUpdate}}{{t "common.enabled"}}{{else}}<span class="muted">{{t "common.disabled"}}</span>{{end}}</td>
+      <td class="mono">{{.AgentVersion}} {{if agentSignaturePending .}}<span class="pill pill--warning" title="{{t "agents.update.signature_pending_hint"}}">{{t "agents.update.signature_pending"}}</span>{{else if agentOutdated .}}<span class="pill pill--warning">{{t "agents.update.outdated"}}</span>{{else if $d.Release.Available}}<span class="pill pill--online">{{t "agents.update.current"}}</span>{{end}}</td>
+      <td>{{if .SelfUpdate}}{{t "common.enabled"}}{{else}}<span class="muted">{{t "common.disabled"}}</span>{{end}}{{if .UpdateKeys}} <span class="pill pill--muted" title="{{keyIDs .UpdateKeys}}">{{t "agents.update.signed_only"}}</span>{{end}}</td>
       <td>{{if .RemoteUpdates}}{{t "common.enabled"}}{{else}}<span class="muted">{{t "common.disabled"}}</span>{{end}}</td>
       <td>{{date .EnrolledAt}}</td>
       <td><time datetime="{{iso .LastSeenAt}}" title="{{datetime .LastSeenAt}}">{{ago .LastSeenAt}}</time></td>

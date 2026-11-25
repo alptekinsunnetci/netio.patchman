@@ -497,7 +497,7 @@ The rollout progresses in the background, in the server's maintenance loop (ever
 
 - **Enrollment tokens:** used by new servers to register. A token is shown only when it is created. Giving it an expiry and a use limit is recommended. Revoking a token does not affect registered agents.
 - **Agents:** agent versions, automatic and remote update settings, last connection. Agents on an old version carry the "Outdated" label.
-- **Agent updates:** the agent version the server distributes and the number of outdated agents. With automatic updates on, agents update on their own; otherwise **Update outdated agents** starts an update for all of them.
+- **Agent updates:** the agent version the server distributes, the number of outdated agents and the release signature. With automatic updates on, agents update on their own; otherwise **Update outdated agents** starts an update for all of them. Agents that only accept signed updates show **Signed only**, those that cannot take the distributed version **Waiting for a signature**. When signing is in use, the **Signed agent updates** notice shows the agents that do not trust a matching key yet and what to do; it disappears once all agents are set up (installation guide, "Signed agent updates").
 
 ## Notifications and e-mail
 

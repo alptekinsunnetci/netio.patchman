@@ -66,7 +66,7 @@ yanıtta kendisi için kuyruğa alınmış işler, envanter raporunun zamanı ge
 | Rapor | ajan → sunucu (gzip) | Kurulu paketler, bekleyen güncellemeler, yeniden başlatma durumu, servisler, ürün sürümleri |
 | İş sonucu | ajan → sunucu | Çıkış kodu, sınırlı çıktı, hâlâ bekleyen paketler, yapılandırılmış sonuçlar (sağlık, önizleme, geri dönüş) |
 | İzleme | ajan → sunucu | Sağlık kontrolü sonuçları; işlemci, bellek, takas ve disk kullanımı |
-| Ajan indirme | ajan → sunucu | Kendini güncellemek için ajan dosyası, işteki SHA-256 ile karşılaştırılır |
+| Ajan indirme | ajan → sunucu | Kendini güncellemek için ajan dosyası, işteki SHA-256 ile ve imza anahtarı tanımlı ajanlarda sürüm imzasıyla doğrulanır |
 | Veri kaynakları | sunucu → internet | Güvenlik açığı ve destek verisi (salt okuma, bkz. [bölüm 7](#7-dışarıya-yapılan-bağlantılar)) |
 | Bildirimler | sunucu → kanallar | Tanımladığınız e-posta ve sohbet/kayıt sistemlerine mesajlar |
 
@@ -85,8 +85,9 @@ bekleyen KB güncellemelerini bildirir; sunucu bunların hangi CVE'leri kapattı
 | Sunucu ↔ Docker ana makinesi | Kendini güncelleme (isteğe bağlı) | Updater konteyneri yalnızca `updater` profiliyle vardır; istekten hiçbir girdi almaz |
 
 **Ajan, hangi işleri çalıştıracağı konusunda sunucuya güvenir.** Bu yüzden en değerli hedef sunucudur: onu ele geçiren
-her yönetilen sunucuda paket güncelleyebilir, servisleri ve sunucuyu yeniden başlatabilir (ancak keyfi komut
-çalıştıramaz, aşağıya bakın). Sunucuyu diğer yapılandırma yönetim sistemleri gibi koruyun.
+her yönetilen sunucuda paket güncelleyebilir, servisleri ve sunucuyu yeniden başlatabilir (ancak komut gönderemez, aşağıya
+bakın). İmza anahtarı olmayan ajanlara root olarak çalışacak kendi ajan dosyasını da dağıtabilir; bu yolu
+[imzalı ajan güncellemeleri](#4-ajan) kapatır. Sunucuyu diğer yapılandırma yönetim sistemleri gibi koruyun.
 
 ## 4. Ajan
 
@@ -111,6 +112,13 @@ her yönetilen sunucuda paket güncelleyebilir, servisleri ve sunucuyu yeniden b
 - **Kendini güncelleme:** iş bir sürüm, bir SHA-256 özeti ve `/downloads/agent/` altında bir yol içerir. Ajan dosyayı
   indirir, özeti karşılaştırır, yeni dosyayı `-version` ile çalıştırıp sürümünü denetler, eskisini `.previous` olarak
   saklar ve ancak bundan sonra kendini değiştirir. `PATCHMAN_AUTO_UPDATE=false` bunu kapatır.
+- **İmzalı ajan güncellemeleri:** sürüm imza anahtarlarına güvenen bir ajan (Ed25519; yapılandırmadaki
+  `PATCHMAN_UPDATE_KEYS` veya sunucu ayarından bir kez `<durum dizini>/update-keys` dosyasına kaydedilen anahtarlar)
+  yalnızca sürüm, platform ve SHA-256 üzerindeki imzası bu anahtarlardan biriyle doğrulanan sürümleri kurar, kendi
+  sürümünden eskisini hiç kurmaz. Gizli anahtar sunucunun dışında oluşturulur ve kullanılır (`netio-patchman-server
+  agent-key` / `agent-sign`); sunucu yalnızca `.sig` dosyalarını dağıtır, bu yüzden ele geçirilen bir sunucu dosya
+  imzalayamaz. Kaydedilen anahtarlar sunucudan değişmez; ilk kayıt o andaki sunucuya güvenir, yapılandırmadaki
+  anahtarlar güvenmez.
 - **Windows:** Windows Update betiği ajan dosyasına gömülüdür ve `-EncodedCommand` ile başlatılır; girdisini ortam
   değişkenlerinden alır, iş mesajları ileti kataloğundan gelir. Böylece hiçbir kullanıcı metni betik koduna dönüşmez.
 - Ajan root olarak çalışır, çünkü paket yöneticileri bunu gerektirir. systemd altında `PrivateTmp` kullanılır; dosya
@@ -186,7 +194,8 @@ kanallara gider.
 
 ## 8. netio.patchman'in kendi güncellemeleri
 
-- **Ajanlar** [bölüm 4](#4-ajan)'te anlatıldığı gibi, sunucu imajındaki ajan dosyalarından kendilerini günceller.
+- **Ajanlar** [bölüm 4](#4-ajan)'te anlatıldığı gibi, sunucu imajındaki ajan dosyalarından ya da varsa yöneticinin
+  `<veri dizini>/agent` klasörüne koyduğu imzalı derlemeden kendilerini günceller.
 - **Sunucu** `git pull` ve `docker compose up -d --build` ile ya da isteğe bağlı `updater` servisiyle panelden
   güncellenir. Bu servis Docker soketini bağlar; bu, Docker ana makinesinde root yetkisine denktir. `updater` profilini
   açmadıkça başlatılmaz. Sunucu yalnızca bir istek dosyası yazar; updater depodaki sabit betiği (pull, yedek, derleme,
@@ -211,7 +220,7 @@ kanallara gider.
 | Tehdit | Önlem | Kalan risk |
 |---|---|---|
 | Çalınan yönetici parolası | PBKDF2, deneme sınırı, zorunlu kılınabilen MFA, denetim kaydı | Oltalamayla ele geçirilen TOTP kodları |
-| Ele geçirilen sunucu | Ajanlar yalnızca sabit iş türlerini, doğrulanmış adları kabul eder, komut çalıştırmaz; ajan sırları özetle saklanır | Saldırgan tüm sunucularda güncelleme, servis yeniden başlatma ve yeniden başlatma yapabilir; sunucuyu buna göre koruyun |
+| Ele geçirilen sunucu | Ajanlar yalnızca sabit iş türlerini, doğrulanmış adları kabul eder, komut çalıştırmaz; ajan sırları özetle saklanır; imza anahtarı tanımlı ajanlar yalnızca sunucu dışında imzalanmış ajan sürümlerini kurar | Saldırgan tüm sunucularda güncelleme, servis yeniden başlatma ve yeniden başlatma yapabilir, imza anahtarı olmayan ajanlara kendi dosyasını dağıtabilir; sunucuyu buna göre koruyun |
 | Kötü niyetli ajan veya çalınan ajan sırrı | Sunucuya özel sır; sunucu tüm girdiyi doğrular ve sınırlar; diğer sunucuların verisi okunamaz | Kendi sunucusu için yanlış envanter gönderebilir |
 | Ajanla sunucu arasındaki ağ saldırganı | Sertifika doğrulamalı TLS, özel CA seçeneği | Yalnızca `http://` kullanılırsa |
 | CSRF, tıklama tuzağı, XSS | CSRF anahtarı + Origin denetimi, `frame-ancestors 'none'`, katı CSP, kaçışlanan şablonlar | — |
@@ -233,6 +242,8 @@ kanallara gider.
 8. Yalnızca envanteri izlenecek sunucularda uzaktan güncellemeleri kapatın (`PATCHMAN_REMOTE_UPDATES=false`).
 9. İnternet erişimi olmayan ağlarda veri kaynaklarını iç yansılara yönlendirin veya kullanmadıklarınızı kapatın.
 10. Denetim kaydını ve kanıt bütünlüğü denetimini düzenli olarak gözden geçirin.
+11. Ajan sürümlerini sunucu dışında tutulan bir anahtarla imzalayın ve açık anahtarı ajanlara, tercihen yapılandırmalarındaki
+    `PATCHMAN_UPDATE_KEYS` ile verin (kurulum kılavuzu, "İmzalı ajan güncellemeleri").
 
 ## 12. Güvenlik açığı bildirimi
 

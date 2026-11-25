@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"netio.patchman/internal/agentsign"
 	"netio.patchman/internal/auth"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify"
@@ -140,6 +141,11 @@ func (s *Server) renderAgents(w http.ResponseWriter, r *http.Request, nt *newTok
 	}
 	versions, _ := s.st.AgentVersions(ctx)
 	cfg, _ := settings.Load(ctx, s.st)
+	signing, err := s.signingState(ctx, cfg)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
 	outdated := 0
 	for _, v := range versions {
 		if v[0] != s.o.Release.Version {
@@ -157,6 +163,7 @@ func (s *Server) renderAgents(w http.ResponseWriter, r *http.Request, nt *newTok
 	d.Data = map[string]any{
 		"Tokens": tokens, "NewToken": nt, "Hosts": hosts, "Pager": newPager(r, pg, total), "Versions": versions,
 		"Release": s.o.Release, "ReleaseArchs": strings.Join(archs, ", "), "AutoUpdate": cfg.AgentAutoUpdate, "Outdated": outdated,
+		"Signing": signing, "Signers": strings.Join(s.o.Release.Signers(), ", "), "TrustedKeys": strings.Join(agentsign.KeyIDs(cfg.AgentUpdateKeys), ", "),
 		"BaseURL": s.baseURL(), "ExampleCommand": s.installCommand("example-command", s.l.T("agents.install.token_placeholder")),
 		"Status": r.URL.Query().Get("status"),
 	}
@@ -550,6 +557,13 @@ func (s *Server) settingsSave(w http.ResponseWriter, r *http.Request) {
 			bad = append(bad, s.l.T("exclude.error.invalid", "patterns", strings.Join(invalid, ", ")))
 		}
 		kv[settings.KeyUpdateExclude] = strings.Join(patterns, ", ")
+	}
+	if raw, ok := r.PostForm["agent_update_keys"]; ok {
+		if keys, err := agentsign.ParsePublicKeys(raw[0]); err != nil {
+			bad = append(bad, s.l.T("settings.agent.update_keys_invalid", "max", agentsign.MaxKeys))
+		} else {
+			kv[settings.KeyAgentUpdateKeys] = strings.Join(keys, "\n")
+		}
 	}
 	if raw, ok := r.PostForm["backup_time"]; ok {
 		if m, ok := schedule.ParseClock(strings.TrimSpace(raw[0])); ok {

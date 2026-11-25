@@ -65,7 +65,7 @@ response carries the jobs queued for it, whether an inventory report is due and 
 | Report | agent → server (gzip) | Installed packages, pending updates, reboot state, services, product versions |
 | Job result | agent → server | Exit code, output (bounded), packages still pending, structured results (health, preview, rollback) |
 | Monitoring | agent → server | Health check results, CPU, memory, swap and disk usage |
-| Agent download | agent → server | Agent binary for self-update, checked against a SHA-256 the job carries |
+| Agent download | agent → server | Agent binary for self-update, checked against a SHA-256 the job carries and, on agents with signing keys, a release signature |
 | Feeds | server → internet | Vulnerability and support data (read-only requests, see [section 7](#7-outbound-connections)) |
 | Notifications | server → channels | Messages to e-mail and chat/ticket systems you configure |
 
@@ -84,8 +84,9 @@ pending KB updates; the server asks the Microsoft Security Update Guide which CV
 | Server ↔ Docker host | Self-update (optional) | Updater container only exists with the `updater` profile; it takes no input from the request |
 
 The **agent trusts the server** to tell it which jobs to run, so the server is the most valuable target: whoever
-controls it can update packages, restart services and reboot every managed host (but cannot run arbitrary commands, see
-below). Protect it like any other configuration management system.
+controls it can update packages, restart services and reboot every managed host (but cannot send commands, see
+below). It can also hand agents without signing keys an agent binary of its own, which runs as root: use
+[signed agent updates](#4-the-agent) to close that path. Protect the server like any other configuration management system.
 
 ## 4. The agent
 
@@ -110,6 +111,12 @@ below). Protect it like any other configuration management system.
 - **Self-update:** the job names a version, a SHA-256 and a download path under `/downloads/agent/`. The agent
   downloads, compares the hash, runs the new binary with `-version`, keeps the old one as `.previous` and only then
   replaces itself. `PATCHMAN_AUTO_UPDATE=false` disables it.
+- **Signed agent updates:** an agent that trusts release signing keys (Ed25519, `PATCHMAN_UPDATE_KEYS` in its
+  configuration, or keys from the server's setting saved once in `<state dir>/update-keys`) installs only versions whose
+  signature over version, platform and SHA-256 one of those keys verifies, and never a version older than its own. The
+  private key is created and used away from the server (`netio-patchman-server agent-key` / `agent-sign`); the server only
+  distributes the `.sig` files, so a compromised server cannot sign a binary. Saved keys never change from the server;
+  saving them the first time trusts the server at that moment, keys in the configuration do not.
 - **Windows:** the Windows Update script is embedded in the binary and started with `-EncodedCommand`; its input comes
   from environment variables and job messages come from the message catalog, so no user text ever becomes script code.
 - The agent runs as root because package managers require it. Under systemd it uses `PrivateTmp`; file system
@@ -185,7 +192,8 @@ Notifications go only to the channels you configure.
 
 ## 8. Updates of netio.patchman itself
 
-- **Agents** update themselves as described in [section 4](#4-the-agent), from the binaries bundled with the server image.
+- **Agents** update themselves as described in [section 4](#4-the-agent), from the binaries bundled with the server image
+  or, when present, from the signed build an operator put into `<data dir>/agent`.
 - **The server** is updated with `git pull` and `docker compose up -d --build`, or from the panel with the optional
   `updater` service. That service mounts the Docker socket, which is equivalent to root on the Docker host. It is not
   started unless you enable the `updater` profile; the server only writes a request file and the updater runs the fixed
@@ -209,7 +217,7 @@ Notifications go only to the channels you configure.
 | Threat | Mitigation | Residual risk |
 |---|---|---|
 | Stolen admin password | PBKDF2, rate limiting, optional mandatory MFA, audit log | Phished TOTP codes |
-| Compromised server | Agents accept only fixed job types, validated names, no commands; hashed agent secrets | Attacker can update, restart services and reboot every host; protect the server accordingly |
+| Compromised server | Agents accept only fixed job types, validated names, no commands; hashed agent secrets; agents with signing keys install only agent releases signed away from the server | Attacker can update, restart services and reboot every host, and hand agents without signing keys a binary of its own; protect the server accordingly |
 | Malicious agent or stolen agent secret | Secret per host, server validates and bounds all input, cannot read other hosts' data | It can send false inventory for its own host |
 | Network attacker between agent and server | TLS with certificate verification, custom CA option | Only if you use `http://` |
 | CSRF, clickjacking, XSS | CSRF token + Origin check, `frame-ancestors 'none'`, strict CSP, escaped templates | — |
@@ -231,6 +239,8 @@ Notifications go only to the channels you configure.
 8. Leave remote updates off (`PATCHMAN_REMOTE_UPDATES=false`) on hosts that must only be inventoried.
 9. Point feeds at internal mirrors in air-gapped networks, or disable the ones you do not use.
 10. Review the audit log and the evidence integrity check regularly.
+11. Sign agent releases with a key kept away from the server and give the agents its public key, ideally through
+    `PATCHMAN_UPDATE_KEYS` in their configuration (installation guide, "Signed agent updates").
 
 ## 12. Reporting a vulnerability
 

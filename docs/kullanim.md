@@ -495,7 +495,7 @@ Dağıtım arka planda, sunucunun bakım döngüsünde (dakikada bir) ilerler. S
 
 - **Kayıt anahtarları:** Yeni sunucuların kaydolması için kullanılır. Anahtar yalnızca oluşturulduğu anda gösterilir. Geçerlilik süresi ve kullanım sınırı verilmesi önerilir. Bir anahtarın iptal edilmesi kayıtlı ajanları etkilemez.
 - **Ajanlar:** Ajan sürümleri, otomatik güncelleme ve uzaktan güncelleme durumları, son bağlantı zamanları. Eski sürümdeki ajanlar "Eski sürüm" etiketiyle gösterilir.
-- **Ajan güncellemeleri:** Sunucunun dağıttığı ajan sürümü ve eski sürümdeki ajan sayısı. Otomatik güncelleme açıksa ajanlar kendiliğinden güncellenir; kapalıysa **Eski ajanları güncelle** düğmesi tüm eski ajanlar için güncelleme başlatır.
+- **Ajan güncellemeleri:** Sunucunun dağıttığı ajan sürümü, eski sürümdeki ajan sayısı ve sürümün imzası. Otomatik güncelleme açıksa ajanlar kendiliğinden güncellenir; kapalıysa **Eski ajanları güncelle** düğmesi tüm eski ajanlar için güncelleme başlatır. Yalnızca imzalı güncelleme kabul eden ajanlar **Yalnızca imzalı**, dağıtılan sürümü kuramayanlar **İmza bekleniyor** etiketiyle gösterilir. İmzalama kullanılıyorsa **İmzalı ajan güncellemeleri** uyarısı eşleşen bir anahtara henüz güvenmeyen ajanları ve yapılacak işi gösterir; tüm ajanlar ayarlanınca kaybolur (kurulum kılavuzu, "İmzalı ajan güncellemeleri").
 
 ## Bildirim Merkezi ve e-postalar
 

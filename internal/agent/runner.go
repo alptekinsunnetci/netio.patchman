@@ -6,10 +6,12 @@ import (
 	"log/slog"
 	"math/rand/v2"
 	"net/http"
+	"path/filepath"
 	"sort"
 	"sync/atomic"
 	"time"
 
+	"netio.patchman/internal/agentsign"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/timeutil"
@@ -80,8 +82,35 @@ func NewRunner(cfg Config, l i18n.Localizer, logger *slog.Logger) (*Runner, erro
 		Pending:   func(ctx context.Context) ([]protocol.Update, error) { return PendingUpdates(ctx, pm) },
 		Services:  func(ctx context.Context) []string { s, _ := RestartServices(ctx, pm); return s },
 	}
-	r.updater = SelfUpdater{L: l, Client: client, Enabled: cfg.AutoUpdate}
+	r.updater = SelfUpdater{L: l, Client: client, Enabled: cfg.AutoUpdate, Keys: cfg.UpdateKeys}
+	if len(cfg.UpdateKeys) == 0 {
+		keys, err := PinnedUpdateKeys(cfg.StateDir)
+		if err != nil {
+			// Never fall back to unsigned updates: the agent does not start.
+			return nil, errors.New(l.T("log.agent.update_keys_unreadable", "path", filepath.Join(cfg.StateDir, pinnedKeysFile), "error", err.Error()))
+		}
+		r.updater.Keys = keys
+	}
 	return r, nil
+}
+
+// pinUpdateKeys takes over the server's release signing keys when the agent
+// trusts none yet (CheckinResponse.UpdateKeys); afterwards they only change
+// on the host.
+func (r *Runner) pinUpdateKeys(keys []string) {
+	if len(keys) == 0 || len(r.updater.Keys) > 0 {
+		return
+	}
+	keys = agentsign.CleanPublicKeys(keys)
+	if len(keys) == 0 {
+		return
+	}
+	if err := PinUpdateKeys(r.cfg.StateDir, keys); err != nil {
+		r.logger.Warn(r.l.T("log.agent.update_keys_pin_failed"), slog.String("error", err.Error()))
+		return
+	}
+	r.updater.Keys = keys
+	r.logger.Info(r.l.T("log.agent.update_keys_pinned"), slog.Any("keys", agentsign.KeyIDs(keys)))
 }
 
 func (r *Runner) hostInfo() protocol.HostInfo {
@@ -89,6 +118,7 @@ func (r *Runner) hostInfo() protocol.HostInfo {
 	if err != nil {
 		r.logger.Warn(r.l.T("log.agent.sysinfo_failed"), slog.String("error", err.Error()))
 	}
+	info.UpdateKeys = r.updater.Keys
 	return info
 }
 
@@ -208,6 +238,8 @@ func (r *Runner) Run(ctx context.Context) {
 // when one is due and starts a monitoring round when one is due. It returns
 // false when the agent must stop (cancelled, or restarting after an update).
 func (r *Runner) afterCheckin(ctx context.Context, resp protocol.CheckinResponse) bool {
+	// Keys first: the server queued any update for an agent that pins them.
+	r.pinUpdateKeys(resp.UpdateKeys)
 	// Monitoring runs in the background, so it starts before long jobs.
 	r.monitor(ctx, resp.Health)
 	needReport := resp.ReportRequested

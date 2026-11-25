@@ -70,6 +70,10 @@ type HostInfo struct {
 	// constants). The server only sends jobs and parameters an agent
 	// declared; agents before 1.0.0 send none.
 	Capabilities []string `json:"capabilities,omitempty"`
+	// UpdateKeys are the Ed25519 public keys (base64) the agent requires
+	// agent updates to be signed with (CapSignedUpdate). Empty: updates are
+	// checked by SHA-256 only.
+	UpdateKeys []string `json:"update_keys,omitempty"`
 }
 
 // Agent capabilities. A new feature that needs agent support adds a
@@ -86,6 +90,10 @@ const (
 	// CapHealthMonitor: the agent runs CheckinResponse.Health on its interval
 	// and posts a HealthStatus with its resource usage.
 	CapHealthMonitor = "health_monitor"
+	// CapSignedUpdate: the agent verifies ParamSignature of agent_update jobs
+	// once it trusts update keys (HostInfo.UpdateKeys) and pins
+	// CheckinResponse.UpdateKeys when it has none.
+	CapSignedUpdate = "signed_update"
 )
 
 // PreviewSupported reports whether the agent can simulate a package job
@@ -196,6 +204,10 @@ type CheckinResponse struct {
 	ReportIntervalSeconds  int   `json:"report_interval_seconds"`
 	// Health is the monitoring schedule (CapHealthMonitor agents only).
 	Health *HealthSchedule `json:"health,omitempty"`
+	// UpdateKeys are the release signing keys (base64 Ed25519) configured on
+	// the server, sent to CapSignedUpdate agents that trust no key yet. The
+	// agent pins them once; later changes on the server do not reach it.
+	UpdateKeys []string `json:"update_keys,omitempty"`
 }
 
 // HealthSchedule asks the agent to run Checks every IntervalSeconds and to
@@ -469,6 +481,9 @@ const (
 	ParamVersion = "version" // target agent version
 	ParamSHA256  = "sha256"  // hex SHA-256 of the binary
 	ParamPath    = "path"    // download path on the server, under AgentDownloadPrefix
+	// ParamSignature is the release signature (package agentsign) of the
+	// version, platform and SHA-256, when the release is signed.
+	ParamSignature = "signature"
 )
 
 // AgentDownloadPrefix is where the server serves agent binaries.

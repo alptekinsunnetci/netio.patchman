@@ -41,6 +41,9 @@
     <h2 class="panel__title">{{t "settings.agent.title"}}</h2>
     <label class="check-label"><input type="checkbox" name="agent_auto_update" value="1"{{if $c.AgentAutoUpdate}} checked{{end}}> {{t "settings.agent.auto_update"}}</label>
     <p class="field__hint">{{t "settings.agent.auto_update_hint"}}</p>
+    <label class="field"><span class="field__label">{{t "settings.agent.update_keys"}}</span>
+      <textarea class="field__input field__input--area mono" name="agent_update_keys" rows="2" spellcheck="false" placeholder="{{t "settings.agent.update_keys_placeholder"}}">{{join $c.AgentUpdateKeys "\n"}}</textarea>
+      <span class="field__hint">{{t "settings.agent.update_keys_hint"}}</span></label>
     <div class="form-grid">
       <label class="field"><span class="field__label">{{t "settings.agent.checkin_seconds"}}</span>
         <input class="field__input" type="number" name="agent_checkin_seconds" min="15" max="3600" value="{{$c.AgentCheckinSeconds}}"></label>

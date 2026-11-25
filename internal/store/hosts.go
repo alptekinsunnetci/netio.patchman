@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"netio.patchman/internal/agentsign"
 	"netio.patchman/internal/protocol"
 )
 
@@ -56,6 +57,9 @@ type Host struct {
 	Exclude string
 	// Capabilities are the optional agent features (protocol.Cap*).
 	Capabilities []string
+	// UpdateKeys are the release signing keys the agent requires (base64
+	// Ed25519); empty when it checks agent updates by SHA-256 only.
+	UpdateKeys []string
 	// SecurityScore is 0-100 (higher is better), -1 before the first computation.
 	SecurityScore int
 	// Groups the host belongs to (filled by list and detail queries).
@@ -88,6 +92,7 @@ func (h Host) HostInfo() protocol.HostInfo {
 		Hostname: h.Hostname, FQDN: h.FQDN, MachineID: h.MachineID, OSID: h.OSID,
 		OSVersionID: h.OSVersionID, OSVersion: h.OSVersion, OSName: h.OSName,
 		Kernel: h.Kernel, Arch: h.Arch, PackageManager: h.PackageManager, Upstream: h.Upstream, Capabilities: h.Capabilities,
+		UpdateKeys: h.UpdateKeys,
 	}
 }
 
@@ -96,7 +101,7 @@ const activeStatuses = `('open','in_progress')`
 const hostSelect = `SELECT h.id, h.machine_id, h.hostname, h.fqdn, h.os_id, h.os_version_id, h.os_name, h.os_version,
  h.kernel, h.arch, h.ip_addresses, h.package_manager, h.ecosystem, h.agent_version, h.remote_updates,
  h.reboot_required, h.uptime_seconds, h.enrolled_at, h.last_seen_at, h.last_report_at, h.last_scan_at,
- h.report_errors, h.notes, h.self_update, h.restart_services, h.reboot_required_since, h.virtualization, h.upstream, h.kernel_patch, h.kernel_effective, h.livepatch_cves, h.exclude_packages, h.capabilities, h.security_score,
+ h.report_errors, h.notes, h.self_update, h.restart_services, h.reboot_required_since, h.virtualization, h.upstream, h.kernel_patch, h.kernel_effective, h.livepatch_cves, h.exclude_packages, h.capabilities, h.update_keys, h.security_score,
  (SELECT COUNT(*) FROM host_packages p WHERE p.host_id = h.id) AS pkg_count,
  (SELECT COUNT(*) FROM host_updates u WHERE u.host_id = h.id) AS upd_count,
  (SELECT COUNT(*) FROM host_updates u WHERE u.host_id = h.id AND u.security = 1) AS sec_count,
@@ -109,12 +114,12 @@ const hostSelect = `SELECT h.id, h.machine_id, h.hostname, h.fqdn, h.os_id, h.os
 
 func scanHost(row interface{ Scan(...any) error }) (Host, error) {
 	var h Host
-	var ips, errs, svcs, lpCVEs, caps string
+	var ips, errs, svcs, lpCVEs, caps, keys string
 	var remote, reboot, self int
 	var enrolled, seen, report, scan, rebootSince int64
 	err := row.Scan(&h.ID, &h.MachineID, &h.Hostname, &h.FQDN, &h.OSID, &h.OSVersionID, &h.OSName, &h.OSVersion,
 		&h.Kernel, &h.Arch, &ips, &h.PackageManager, &h.Ecosystem, &h.AgentVersion, &remote,
-		&reboot, &h.UptimeSeconds, &enrolled, &seen, &report, &scan, &errs, &h.Notes, &self, &svcs, &rebootSince, &h.Virtualization, &h.Upstream, &h.KernelPatch, &h.KernelEffective, &lpCVEs, &h.Exclude, &caps, &h.SecurityScore,
+		&reboot, &h.UptimeSeconds, &enrolled, &seen, &report, &scan, &errs, &h.Notes, &self, &svcs, &rebootSince, &h.Virtualization, &h.Upstream, &h.KernelPatch, &h.KernelEffective, &lpCVEs, &h.Exclude, &caps, &keys, &h.SecurityScore,
 		&h.PackageCount, &h.UpdateCount, &h.SecurityUpdateCount,
 		&h.Vulns.Critical, &h.Vulns.High, &h.Vulns.Medium, &h.Vulns.Low, &h.Vulns.Other)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -128,6 +133,7 @@ func scanHost(row interface{ Scan(...any) error }) (Host, error) {
 	_ = json.Unmarshal([]byte(svcs), &h.RestartServices)
 	_ = json.Unmarshal([]byte(lpCVEs), &h.LivepatchCVEs)
 	_ = json.Unmarshal([]byte(caps), &h.Capabilities)
+	_ = json.Unmarshal([]byte(keys), &h.UpdateKeys)
 	h.RemoteUpdates, h.RebootRequired, h.SelfUpdate = remote == 1, reboot == 1, self == 1
 	h.EnrolledAt, h.LastSeenAt, h.LastReportAt, h.LastScanAt = fromTS(enrolled), fromTS(seen), fromTS(report), fromTS(scan)
 	h.RebootRequiredSince = fromTS(rebootSince)
@@ -448,13 +454,14 @@ func updateHostInfo(ctx context.Context, tx *Tx, id int64, info protocol.HostInf
 	ips, _ := json.Marshal(nonNil(info.IPAddresses))
 	virt := protocol.CleanVirtualization(info.Virtualization)
 	caps, _ := json.Marshal(protocol.CleanCapabilities(info.Capabilities))
+	keys, _ := json.Marshal(agentsign.CleanPublicKeys(info.UpdateKeys))
 	// Agents before 0.3.0 do not report the platform; keep what is known.
 	_, err := tx.ExecContext(ctx, `UPDATE hosts SET hostname = ?, fqdn = ?, os_id = ?, os_version_id = ?, os_name = ?, os_version = ?,
 		kernel = ?, arch = ?, ip_addresses = ?, package_manager = ?, ecosystem = ?, agent_version = ?, remote_updates = ?, self_update = ?,
-		uptime_seconds = ?, last_seen_at = ?, offline_notified = 0, virtualization = CASE WHEN ? = '' THEN virtualization ELSE ? END, upstream = ?, capabilities = ? WHERE id = ?`,
+		uptime_seconds = ?, last_seen_at = ?, offline_notified = 0, virtualization = CASE WHEN ? = '' THEN virtualization ELSE ? END, upstream = ?, capabilities = ?, update_keys = ? WHERE id = ?`,
 		info.Hostname, info.FQDN, info.OSID, info.OSVersionID, info.OSName, info.OSVersion,
 		info.Kernel, info.Arch, string(ips), info.PackageManager, ecosystem, info.AgentVersion, boolInt(info.RemoteUpdates), boolInt(info.SelfUpdate),
-		info.UptimeSeconds, now(), virt, virt, protocol.CleanUpstream(info.Upstream), string(caps), id)
+		info.UptimeSeconds, now(), virt, virt, protocol.CleanUpstream(info.Upstream), string(caps), string(keys), id)
 	return err
 }
 
@@ -774,4 +781,44 @@ func kernelPatchFields(kp *protocol.KernelPatch) (provider, effective, cves stri
 	}
 	b, _ := json.Marshal(nonNil(list))
 	return provider, effective, string(b)
+}
+
+// HostKeys is a host's agent and the release signing keys it trusts.
+type HostKeys struct {
+	ID           int64
+	Hostname     string
+	AgentVersion string
+	Capabilities []string
+	UpdateKeys   []string
+	LastSeenAt   time.Time
+}
+
+// Supports reports whether the agent declared capability c.
+func (h HostKeys) Supports(c string) bool {
+	return protocol.HostInfo{Capabilities: h.Capabilities}.Supports(c)
+}
+
+// UpdateKeyStates lists every host with its trusted signing keys, by name.
+func (s *Store) UpdateKeyStates(ctx context.Context) ([]HostKeys, error) {
+	where, args := andScope(ctx, "", nil, "id")
+	rows, err := s.db.QueryContext(ctx, `SELECT id, hostname, agent_version, capabilities, update_keys, last_seen_at FROM hosts`+where+
+		` ORDER BY lower(hostname), id`, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []HostKeys
+	for rows.Next() {
+		var h HostKeys
+		var caps, keys string
+		var seen int64
+		if err := rows.Scan(&h.ID, &h.Hostname, &h.AgentVersion, &caps, &keys, &seen); err != nil {
+			return nil, err
+		}
+		_ = json.Unmarshal([]byte(caps), &h.Capabilities)
+		_ = json.Unmarshal([]byte(keys), &h.UpdateKeys)
+		h.LastSeenAt = fromTS(seen)
+		out = append(out, h)
+	}
+	return out, rows.Err()
 }

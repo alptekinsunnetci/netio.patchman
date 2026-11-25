@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"netio.patchman/internal/agentsign"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/version"
@@ -64,13 +65,17 @@ type SelfUpdater struct {
 	Enabled bool
 	// Executable overrides the binary path (tests); empty means os.Executable.
 	Executable string
+	// Keys are the trusted release signing keys (base64 Ed25519). With keys,
+	// an update needs a valid signature and a newer version.
+	Keys []string
 }
 
 // Update downloads, verifies and installs the agent version described by the
 // job. It returns a Turkish message and whether a restart is required.
 //
-// Steps: validate parameters, download next to the current binary, compare
-// SHA-256, run "<new> -version" and check the version, keep the current
+// Steps: validate parameters, check the release signature when the agent
+// trusts signing keys (and refuse older versions then), download next to the
+// current binary, compare SHA-256, run "<new> -version" and check the version, keep the current
 // binary as "<name>.previous", then rename the new file into place (atomic
 // on the same filesystem).
 func (u SelfUpdater) Update(ctx context.Context, job protocol.Job) (string, bool, error) {
@@ -89,6 +94,23 @@ func (u SelfUpdater) Update(ctx context.Context, job protocol.Job) (string, bool
 	}
 	if target == version.Version {
 		return u.L.T("agent.update.already_current", "version", target), false, nil
+	}
+	// The signature covers version, platform and SHA-256, and the download
+	// must match that SHA-256, so the installed file is the signed one.
+	signed := ""
+	if len(u.Keys) > 0 {
+		sig := job.Params[protocol.ParamSignature]
+		if sig == "" {
+			return "", false, errors.New(u.L.T("agent.update.signature_missing"))
+		}
+		id, ok := agentsign.Verify(sig, u.Keys, target, runtime.GOOS, runtime.GOARCH, sum)
+		if !ok {
+			return "", false, errors.New(u.L.T("agent.update.signature_invalid", "keys", strings.Join(agentsign.KeyIDs(u.Keys), ", ")))
+		}
+		if version.Compare(target, version.Version) <= 0 {
+			return "", false, errors.New(u.L.T("agent.update.downgrade_refused", "from", version.Version, "to", target))
+		}
+		signed = u.L.T("agent.update.signature_ok", "key", id) + "\n[netio.patchman] "
 	}
 
 	exe := u.Executable
@@ -143,7 +165,7 @@ func (u SelfUpdater) Update(ctx context.Context, job protocol.Job) (string, bool
 			_ = os.Rename(previous, exe)
 			return "", false, fmt.Errorf("install: %w", err)
 		}
-		return u.L.T("agent.update.installed", "from", version.Version, "to", target), true, nil
+		return signed + u.L.T("agent.update.installed", "from", version.Version, "to", target), true, nil
 	}
 	if err := os.Link(exe, previous); err != nil {
 		// Hard links can fail on some filesystems; fall back to a copy.
@@ -154,7 +176,7 @@ func (u SelfUpdater) Update(ctx context.Context, job protocol.Job) (string, bool
 	if err := os.Rename(tmp, exe); err != nil {
 		return "", false, fmt.Errorf("install: %w", err)
 	}
-	return u.L.T("agent.update.installed", "from", version.Version, "to", target), true, nil
+	return signed + u.L.T("agent.update.installed", "from", version.Version, "to", target), true, nil
 }
 
 func copyFile(src, dst string) error {

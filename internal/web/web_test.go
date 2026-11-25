@@ -24,6 +24,7 @@ import (
 
 	agentdist "netio.patchman/deploy/agent"
 	"netio.patchman/internal/agent"
+	"netio.patchman/internal/agentsign"
 	"netio.patchman/internal/api"
 	"netio.patchman/internal/backup"
 	"netio.patchman/internal/config"
@@ -146,6 +147,9 @@ type env struct {
 	telegram string // fake Telegram API base
 	hooks    *hooks // records webhook and Telegram requests
 	selfUpd  *selfupdate.Manager
+	// signKey is the public key the Linux amd64 agent of the test release is
+	// signed with (the Windows agent stays unsigned).
+	signKey string
 }
 
 func newEnv(t *testing.T) *env { return newEnvWith(t, true) }
@@ -206,6 +210,16 @@ func newEnvOpts(t *testing.T, capture bool, adjust func(*web.Options)) *env {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(dist+"/version", []byte("9.9.9\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	pub, priv, err := agentsign.GenerateKey()
+	if err != nil {
+		t.Fatal(err)
+	}
+	e.signKey = agentsign.EncodePublicKey(pub)
+	linuxSum := sha256.Sum256([]byte(fakeAgentBinary))
+	sig := agentsign.Sign(priv, "9.9.9", "linux", "amd64", hex.EncodeToString(linuxSum[:]))
+	if err := os.WriteFile(dist+"/netio-patchman-agent-linux-amd64.sig", []byte(sig+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	rel := release.Load(dist, "test")

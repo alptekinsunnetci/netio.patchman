@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"netio.patchman/internal/agentsign"
 	"netio.patchman/internal/auth"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify"
@@ -55,12 +56,27 @@ const (
 	AgentUpdateRetryAfter = 6 * time.Hour
 )
 
+// UpdateKeys returns the release signing keys an agent will check its
+// update against: its own, or the server's that it pins with this check-in
+// (pin true: send them in the response).
+func UpdateKeys(info protocol.HostInfo, cfg settings.Values) (keys []string, pin bool) {
+	if len(info.UpdateKeys) > 0 {
+		return info.UpdateKeys, false
+	}
+	if len(cfg.AgentUpdateKeys) > 0 && info.Supports(protocol.CapSignedUpdate) {
+		return cfg.AgentUpdateKeys, true
+	}
+	return nil, false
+}
+
 // maybeQueueAgentUpdate queues an agent_update job when automatic updates
-// are enabled and the agent runs a different version than the server
-// distributes. Failed attempts are retried after AgentUpdateRetryAfter.
-func (s *Server) maybeQueueAgentUpdate(ctx context.Context, hostID int64, info protocol.HostInfo, cfg settings.Values) {
+// are enabled, the agent runs a different version than the server
+// distributes and would accept it (signed and newer when it trusts signing
+// keys). Failed attempts are retried after AgentUpdateRetryAfter.
+func (s *Server) maybeQueueAgentUpdate(ctx context.Context, hostID int64, info protocol.HostInfo, keys []string, cfg settings.Values) {
 	rel := s.o.Release
-	if !cfg.AgentAutoUpdate || !info.SelfUpdate || !rel.Outdated(info.AgentVersion, info.OSID, info.Arch) {
+	if !cfg.AgentAutoUpdate || !info.SelfUpdate || !rel.Outdated(info.AgentVersion, info.OSID, info.Arch) ||
+		!rel.Installable(info.AgentVersion, info.OSID, info.Arch, keys) {
 		return
 	}
 	st := s.o.Store
@@ -204,6 +220,7 @@ func sanitizeHost(info *protocol.HostInfo) bool {
 	if len(info.IPAddresses) > 64 {
 		info.IPAddresses = info.IPAddresses[:64]
 	}
+	info.UpdateKeys = agentsign.CleanPublicKeys(info.UpdateKeys)
 	return true
 }
 
@@ -257,7 +274,8 @@ func (s *Server) checkin(w http.ResponseWriter, r *http.Request, hostID int64) {
 		s.o.Notifier.AgentOnline(r.Context(), hostID, req.Host.Hostname)
 	}
 	s.closeUnreported(r.Context(), hostID, req.Host)
-	s.maybeQueueAgentUpdate(r.Context(), hostID, req.Host, cfg)
+	keys, pin := UpdateKeys(req.Host, cfg)
+	s.maybeQueueAgentUpdate(r.Context(), hostID, req.Host, keys, cfg)
 	jobs, err := s.o.Store.DispatchJobs(r.Context(), hostID)
 	if err != nil {
 		s.internal(w, err)
@@ -287,13 +305,17 @@ func (s *Server) checkin(w http.ResponseWriter, r *http.Request, hostID int64) {
 			}
 		}
 	}
-	writeJSON(w, protocol.CheckinResponse{
+	resp := protocol.CheckinResponse{
 		Jobs:                   jobs,
 		ReportRequested:        reportDue,
 		CheckinIntervalSeconds: cfg.AgentCheckinSeconds,
 		ReportIntervalSeconds:  cfg.AgentReportMinutes * 60,
 		Health:                 s.monitorSchedule(r.Context(), hostID, req.Host, cfg),
-	})
+	}
+	if pin {
+		resp.UpdateKeys = keys
+	}
+	writeJSON(w, resp)
 }
 
 // closeUnreported finishes jobs dispatched at an earlier check-in whose result
@@ -420,7 +442,7 @@ func (s *Server) download(w http.ResponseWriter, r *http.Request) {
 func validDistName(name string) bool {
 	for _, p := range protocol.AgentPlatforms {
 		bin := protocol.AgentBinaryName(p[0], p[1])
-		if name == bin || name == bin+".sha256" {
+		if name == bin || name == bin+".sha256" || name == bin+".sig" {
 			return true
 		}
 	}

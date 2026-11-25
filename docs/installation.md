@@ -229,6 +229,7 @@ Create the enrollment token with an expiry and a use limit and run the same comm
 | `PATCHMAN_AUTO_UPDATE` | `true` | With `false`, the agent does not update itself (version pinning) |
 | `PATCHMAN_WINGET` | `true` | Windows: lists and installs updates of third-party programs with winget (`-DisableWinget` at installation) |
 | `PATCHMAN_REFRESH_PACKAGE_LISTS` | `true` | Refreshes package lists at most every 6 hours (`apt-get update`, `zypper refresh`, `apk update`) |
+| `PATCHMAN_UPDATE_KEYS` | — | Public keys agent updates must be signed with (comma separated). When set, the agent only installs newer versions signed with one of them (see [Signed agent updates](#signed-agent-updates)) |
 | `PATCHMAN_CA_FILE` | — | Additional CA certificate |
 | `PATCHMAN_LOCALE` | `tr-TR` | Language of the agent's logs and of the job messages shown in the panel (`tr-TR`, `en-US`, `de-DE` or `ru-RU`). Set at installation with `--locale` (e.g. `--locale en-US`) |
 
@@ -433,7 +434,7 @@ The updater runs the script from the repository (`deploy/updater/updater.sh`), s
 The Docker image contains the amd64 and arm64 Linux agents and the amd64 Windows agent of the same version as the server. While **Settings → Agents → Update agents automatically** is on (the default):
 
 1. When an agent running a different version connects, the server creates an "Agent update" job.
-2. The agent downloads the new binary from the server, compares the SHA-256 hash and checks that it runs with `-version`.
+2. The agent downloads the new binary from the server, compares the SHA-256 hash and checks that it runs with `-version`. Agents with a signing key first verify the version's signature (see below).
 3. It keeps the current binary as `netio-patchman-agent.previous`, puts the new one in place and exits; systemd restarts the agent with the new version. On Windows the running file is set aside as `netio-patchman-agent.exe.previous` and the service restarts with the new version within a few seconds thanks to the recovery settings.
 
 At most 25 agents update at the same time. A failed update is retried after 6 hours and shows up in Notifications. With automatic updates off, agents can be updated with **Agents → Update outdated agents** or the **Update agent** button on the host page.
@@ -448,6 +449,54 @@ sudo systemctl restart netio-patchman-agent.service
 ```
 
 For installations without the image, put the agent binaries into the `PATCHMAN_AGENT_DIST_DIR` folder as `netio-patchman-agent-linux-<arch>` and `netio-patchman-agent-windows-amd64.exe`, and write the version into a `version` file in the same folder. `scripts/build-agent.sh <version> <folder>` produces this folder ready to use (Linux amd64 and arm64, Windows amd64, SHA-256 hashes and the `version` file).
+
+### Signed agent updates
+
+When an agent update is checked by SHA-256 only, the server provides the hash. Whoever takes over the server could therefore hand every host an agent binary of their own; agents run as root, so that means running commands on every host. With signed updates the agent requires the version to be signed with an Ed25519 key that is not on the server:
+
+- The signature covers the version, the platform and the SHA-256 of the file. The agent verifies it before the download, and the downloaded file must match the signed hash.
+- An agent with a signing key refuses unsigned updates and downgrades.
+- The keys an agent trusts are kept on the managed host and cannot be changed from the central server.
+- It is optional and does not affect existing installations: until a key is set, all agents keep updating by SHA-256. Agents older than 1.1.2 do not know signatures, keep working with the new server and move to the new version through automatic updates.
+
+**1. Create the key pair** on a machine you trust, away from the server (it may be offline):
+
+```sh
+netio-patchman-server agent-key -out agent-signing.key
+```
+
+The command writes the private key to a file only its owner can read and prints the public key (e.g. `Z0OUQxnMvSfCy+bgVZSs/wKuAflQXnAHoeof0yjj1e4=`) and its id (e.g. `471ae649095c738e`). The private key never goes onto the server; if you lose it, create a new pair and replace the key on the agents. Without a `netio-patchman-server` binary on that machine, run the command from the repository: `go run ./cmd/netio-patchman-server agent-key -out agent-signing.key`.
+
+**2. Build and sign the agent files** on the same machine, from the tag of the version the server runs:
+
+```sh
+git checkout v1.1.2
+PATCHMAN_SIGNING_KEY=/path/agent-signing.key scripts/build-agent.sh "" agent
+```
+
+The script builds the files and writes a `<file>.sig` signature next to each one (on Windows `scripts\build-agent.ps1` reads the same variable). To sign an existing folder: `netio-patchman-server agent-sign -key agent-signing.key -dir agent`. The command computes the hashes itself and does not sign when a `.sha256` file disagrees.
+
+**3. Give the signed files to the server.** When the `agent` folder in the data directory contains a `version` file, the server distributes it instead of the agent files in the image. With Docker Compose:
+
+```sh
+docker compose cp agent/. server:/data/agent/
+docker compose restart server
+```
+
+For installations without the image, put the files into `<data directory>/agent` or the `PATCHMAN_AGENT_DIST_DIR` folder and restart the server. **Agents → Agent updates** shows the distributed version, and the **Signature** row the key that signed it.
+
+**4. Give the key to the agents.** There are two ways:
+
+- Enter the public key under **Settings → Agents → Update signing keys**. Agents without a key yet (1.1.2 and later) save it in their state directory at their next connection (`/var/lib/netio-patchman/update-keys`, on Windows `C:\ProgramData\netio-patchman\update-keys`) and from then on only install updates signed with it. This first save trusts the server: if the server is compromised at that moment, the attacker's key could be saved.
+- For a stricter setup, write the key into the agent configuration yourself: add `PATCHMAN_UPDATE_KEYS=<public key>` to `/etc/netio-patchman/agent.env` (Windows: `C:\ProgramData\netio-patchman\agent.env`) and restart the agent. Keys in the configuration take precedence over saved keys. For a mass rollout, add the line with your configuration management tool.
+
+Once signing is in use (a key on the server, a signed release or an agent with a key), the **Signed agent updates** notice under **Agents → Agent updates** lists by name the agents that do not trust a matching key yet: those trusting another key (the key can only be changed on the host), those without a key, older agents that cannot take a key (they must move to 1.1.2 or later first; automatic updates do that on their own) and those that save the key at their next connection. With keys on the server, the notice shows the `PATCHMAN_UPDATE_KEYS=…` line for assigning the key by hand, ready to copy. The notice disappears once every agent trusts a matching key.
+
+In the agent list, agents that require signed updates carry the **Signed only** label. If the distributed version is not signed with an agent's key or is not newer than the agent, the server sends that agent no update job; it shows **Waiting for a signature**.
+
+**On every upgrade**, repeat steps 2 and 3 for the new version. The files in the data directory take precedence over those in the image, so a version you did not sign is never distributed.
+
+**Changing the key:** create a new pair. During the transition give the agents both keys (`PATCHMAN_UPDATE_KEYS=<old>,<new>`, at most 8 keys), then sign releases with the new key. Keys saved from the server only change on the managed host: edit or delete the `update-keys` file and restart the agent. Once the file is deleted, the agent saves the server's keys again at its next connection.
 
 ### Reinstalling an agent by hand
 

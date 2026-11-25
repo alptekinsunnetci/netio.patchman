@@ -69,10 +69,19 @@ func main() {
 	out := fs.String("out", "", boot.T("flag.backup_out"))
 	in := fs.String("in", "", boot.T("flag.restore_in"))
 	emailAddr := fs.String("email", "", boot.T("flag.email"))
+	keyPath := fs.String("key", "", boot.T("flag.signing_key"))
+	distDir := fs.String("dir", "", boot.T("flag.agent_dir"))
 	_ = fs.Parse(args)
 	if *showVersion {
 		fmt.Printf("%s %s %q (%s)\n", brand.ServerBinary, version.Version, version.CurrentCodename(), brand.Name)
 		return
+	}
+	// Release signing runs away from the server: no configuration, no database.
+	switch cmd {
+	case "agent-key":
+		os.Exit(agentKey(bundle.Localizer(os.Getenv(brand.EnvPrefix+"LOCALE")), *out))
+	case "agent-sign":
+		os.Exit(agentSign(bundle.Localizer(os.Getenv(brand.EnvPrefix+"LOCALE")), *keyPath, *distDir))
 	}
 
 	cfg, err := config.Load(bundle, os.Getenv)
@@ -249,19 +258,26 @@ func serve(ctx context.Context, cfg config.Config, st *store.Store, bundle *i18n
 		}
 		notifier.RolloutEvent(ctx, kind, level, r)
 	}}
-	agentRelease := release.Load(cfg.AgentDistDir, version.Version)
+	// Agent files the operator put into the data directory (for example a
+	// build signed away from the server) replace the ones in the image.
+	distDir := cfg.AgentDistDir
+	if own := filepath.Join(cfg.DataDir, "agent"); fileExists(filepath.Join(own, "version")) {
+		distDir = own
+	}
+	agentRelease := release.Load(distDir, version.Version)
 	if agentRelease.Available() {
 		archs := make([]string, 0, len(agentRelease.Binaries))
 		for a := range agentRelease.Binaries {
 			archs = append(archs, a)
 		}
-		logger.Info(l.T("log.server.agent_release"), slog.String("agent_version", agentRelease.Version), slog.Any("archs", archs))
+		logger.Info(l.T("log.server.agent_release"), slog.String("agent_version", agentRelease.Version), slog.Any("archs", archs),
+			slog.String("dir", distDir), slog.Any("signed_by", agentRelease.Signers()), slog.Bool("unsigned", agentRelease.Unsigned()))
 	} else {
-		logger.Warn(l.T("log.server.agent_release_missing"), slog.String("dir", cfg.AgentDistDir))
+		logger.Warn(l.T("log.server.agent_release_missing"), slog.String("dir", distDir))
 	}
 	agentAPI := api.New(api.Options{
 		Store: st, L: l, Logger: logger, Scanner: scan, Notifier: notifier,
-		AgentDistDir: cfg.AgentDistDir, Assets: agentdist.Assets(), System: live, Release: agentRelease,
+		AgentDistDir: distDir, Assets: agentdist.Assets(), System: live, Release: agentRelease,
 	})
 	updates := updatecheck.New(ctx, updatecheck.Options{
 		Current: version.Version, Store: st, System: live, Logger: logger, L: l,
@@ -551,4 +567,9 @@ func sleepUntil(ctx context.Context, t time.Time) bool {
 	case <-timer.C:
 		return true
 	}
+}
+
+func fileExists(path string) bool {
+	st, err := os.Stat(path)
+	return err == nil && !st.IsDir()
 }

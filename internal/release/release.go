@@ -6,6 +6,7 @@
 //	netio-patchman-agent-linux-<arch>             Linux binaries (amd64, arm64)
 //	netio-patchman-agent-windows-amd64.exe        the Windows binary
 //	<binary>.sha256                               "<hex>  <name>" (optional, computed if missing)
+//	<binary>.sig                                  release signature (optional, package agentsign)
 //	version                                       the agent version (optional, defaults to the server version)
 package release
 
@@ -15,9 +16,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
+	"netio.patchman/internal/agentsign"
 	"netio.patchman/internal/protocol"
+	"netio.patchman/internal/version"
 )
 
 // Binary is one platform's agent binary.
@@ -27,6 +31,10 @@ type Binary struct {
 	Name   string
 	SHA256 string
 	Size   int64
+	// Signature is the content of <binary>.sig ("" when unsigned); KeyID is
+	// the key it names.
+	Signature string
+	KeyID     string
 }
 
 // Release is the agent version the server rolls out.
@@ -64,7 +72,13 @@ func Load(dir, fallbackVersion string) Release {
 		if sum == "" {
 			continue
 		}
-		r.Binaries[key(p[0], p[1])] = Binary{OS: p[0], Arch: p[1], Name: name, SHA256: sum, Size: st.Size()}
+		b := Binary{OS: p[0], Arch: p[1], Name: name, SHA256: sum, Size: st.Size()}
+		if sig, err := os.ReadFile(path + ".sig"); err == nil {
+			if id := agentsign.SignatureKeyID(string(sig)); id != "" {
+				b.Signature, b.KeyID = strings.TrimSpace(string(sig)), id
+			}
+		}
+		r.Binaries[key(p[0], p[1])] = b
 	}
 	return r
 }
@@ -116,15 +130,62 @@ func (r Release) Outdated(agentVersion, osID, arch string) bool {
 	return ok
 }
 
+// Installable reports whether an outdated agent that trusts keys (base64
+// Ed25519, HostInfo.UpdateKeys) would accept this release: without keys any
+// release; with keys only a newer version whose signature one of them
+// verifies (agents refuse unsigned updates and downgrades then).
+func (r Release) Installable(agentVersion, osID, arch string, keys []string) bool {
+	b, ok := r.For(protocol.AgentOS(osID), arch)
+	if !ok {
+		return false
+	}
+	if len(keys) == 0 {
+		return true
+	}
+	if version.Compare(r.Version, agentVersion) <= 0 {
+		return false
+	}
+	_, ok = agentsign.Verify(b.Signature, keys, r.Version, b.OS, b.Arch, b.SHA256)
+	return ok
+}
+
+// Signers returns the ids of the keys the binaries are signed with, sorted.
+func (r Release) Signers() []string {
+	seen := map[string]bool{}
+	out := []string{}
+	for _, b := range r.Binaries {
+		if b.KeyID != "" && !seen[b.KeyID] {
+			seen[b.KeyID] = true
+			out = append(out, b.KeyID)
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+// Unsigned reports whether some binaries carry no signature.
+func (r Release) Unsigned() bool {
+	for _, b := range r.Binaries {
+		if b.Signature == "" {
+			return true
+		}
+	}
+	return false
+}
+
 // JobParams returns the agent_update job parameters for a host.
 func (r Release) JobParams(osID, arch string) (map[string]string, bool) {
 	b, ok := r.For(protocol.AgentOS(osID), arch)
 	if !ok {
 		return nil, false
 	}
-	return map[string]string{
+	p := map[string]string{
 		protocol.ParamVersion: r.Version,
 		protocol.ParamSHA256:  b.SHA256,
 		protocol.ParamPath:    protocol.AgentDownloadPrefix + b.Name,
-	}, true
+	}
+	if b.Signature != "" {
+		p[protocol.ParamSignature] = b.Signature
+	}
+	return p, true
 }
