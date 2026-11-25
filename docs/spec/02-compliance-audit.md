@@ -381,9 +381,18 @@ kesinleştirme, dışa aktarımların aynı kalması, uygulanabilirlik, eşikler
 1. **Geriye dönük kanıt:** Kanıt toplama başlamadan önceki dönem için yalnızca henüz budanmamış kayıtlar aktarılabilir;
    günlük sunucu durumları geriye dönük üretilemez. Rapor bu durumu uyarı olarak gösterir.
 2. **Windows istemcileri:** Windows 10/11 cihazlar sürekli açık değildir; erişim kapsamı eşiği tektir. Gerekirse platform
-   bazlı eşik eklenebilir.
-3. **Performans:** Rapor üretimi istek içinde çalışır; 500+ sunucu ve 12 aylık dönemde süresi ölçülmeli, gerekirse arka
-   plana alınmalıdır.
+   bazlı eşik eklenebilir (issue #11).
+3. **Performans (ölçüldü, arka plana alındı):** `BenchmarkGenerateLargeFleet` (`internal/compliance/scale_test.go`)
+   500 sunucu, 12 ay, yaklaşık 86.000 kanıt kaydı ve 182.500 günlük sunucu durumu üretir; dört çerçeveli bir sürüm
+   ölçülür. SQLite, 16 çekirdekli Xeon E5-2667 v4: üretim 4,2 sn, sürümün kaydı 6,1 sn (yaklaşık 600.000
+   `assessment_evidence` satırı), PDF dışa aktarımı 2,1 sn; rapor içeriği 0,45 MB (kanıt dizini 1.000, PDF 300 kayıtla
+   sınırlı). PostgreSQL ve SQLite ölçümleri `Benchmark` iş akışında (elle ve ayda bir) tekrarlanır. Ters vekillerin
+   bekleme süresi (nginx varsayılanı 60 sn) daha büyük filolarda aşılabileceği için sürüm üretimi arka plandadır
+   (`web/compliance_gen.go`): istek en çok 20 sn bekler (`Options.ComplianceWait`), hazır olmayan sürüm arka planda
+   tamamlanır ve listede “Oluşturuluyor” olarak görünür; aynı rapor için ikinci bir üretim reddedilir, aynı anda en çok
+   iki üretim çalışır, denetim kaydı sürüm kaydedilince yazılır, hata sunucu günlüğüne gider ve raporda gösterilir.
+   Açık nokta: her sürüm eşleme satırlarını yeniden yazar (ölçülen filoda sürüm başına yaklaşık 600.000 satır, onlarca MB); eşlemenin
+   ölçüm (check) düzeyinde saklanması ileride değerlendirilebilir.
 4. **Hash zinciri ve PostgreSQL eşzamanlılığı:** zincir başı kilidi yazma hızını sınırlar; olay hacmi bunun çok altındadır.
 
 ### 11. Kabul ölçütleri (özet)

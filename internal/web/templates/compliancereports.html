@@ -21,7 +21,9 @@
       <td>{{join .Profiles ", "}}</td>
       <td>{{date .From}} – {{date (lastDay .To)}}</td>
       <td>{{.Scope}}</td>
-      <td>{{if .LatestVersion}}v{{.LatestVersion}} <span class="pill{{if eq .LatestStatus "final"}} pill--succeeded{{end}}">{{t (printf "compliance.status.%s" .LatestStatus)}}</span>{{end}}</td>
+      <td>{{if .LatestVersion}}v{{.LatestVersion}} <span class="pill{{if eq .LatestStatus "final"}} pill--succeeded{{end}}">{{t (printf "compliance.status.%s" .LatestStatus)}}</span>{{end}}
+        {{if .Gen.Running}}<span class="pill pill--in_progress" title="{{datetime .Gen.Started}} · {{.Gen.By}}">{{t "compliance.report.generating_pill"}}</span>{{else if .Gen.Err}}<span class="pill pill--failed">{{t "compliance.report.failed_pill"}}</span>
+        {{if and $root.User.CanOperate (not .LatestVersion)}}<form class="inline-actions" method="post" action="/compliance/reports/{{.ID}}/regenerate">{{template "csrf" $root}}<button class="button button--sm" type="submit">{{t "compliance.report.retry"}}</button></form>{{end}}{{end}}</td>
       <td>{{range .Counts}}<span class="pill {{outcomeClass .Outcome}}">{{outcomeLabel .Outcome}}: {{.N}}</span> {{end}}</td>
     </tr>
     {{end}}

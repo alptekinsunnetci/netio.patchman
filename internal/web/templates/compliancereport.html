@@ -21,13 +21,14 @@
 
 <div class="no-print">
 {{if not $d.Latest}}<p class="alert alert--info">{{t "compliance.report.old_version" "n" $rep.LatestVersion}} <a href="/compliance/reports/{{$rep.ID}}">{{t "compliance.report.show_latest"}}</a></p>{{end}}
+{{with $d.Gen}}{{if .Running}}<p class="alert alert--info" role="status">{{t "compliance.report.generating_since" "time" (datetime .Started) "user" .By}} <a href="/compliance/reports/{{$rep.ID}}">{{t "compliance.report.refresh"}}</a></p>{{else if .Err}}<p class="alert alert--error" role="alert">{{t "compliance.report.generate_failed"}}</p>{{end}}{{end}}
 <div class="filters">
   <form class="filters" method="get" action="/compliance/reports/{{$rep.ID}}">
     <label class="field field--inline"><span class="field__label">{{t "compliance.col.version"}}</span>
       <select class="field__input" name="v">{{range $d.Versions}}<option value="{{.Version}}"{{if eq .Version $v.Version}} selected{{end}}>v{{.Version}} · {{datetime .GeneratedAt}} · {{t (printf "compliance.status.%s" .Status)}}</option>{{end}}</select></label>
     <button class="button" type="submit">{{t "compliance.report.show"}}</button>
   </form>
-  {{if $d.CanRegenerate}}
+  {{if and $d.CanRegenerate (not $d.Gen.Running)}}
   <form method="post" action="/compliance/reports/{{$rep.ID}}/regenerate">{{template "csrf" $root}}
     <button class="button" type="submit" title="{{t "compliance.report.regenerate_hint"}}">{{template "icon" "refresh"}}{{t "compliance.report.regenerate"}}</button></form>
   {{end}}

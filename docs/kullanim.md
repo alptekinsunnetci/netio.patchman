@@ -253,7 +253,7 @@ Her kontrolün **otomatik sonucu** yalnızca birincil ölçümlerden hesaplanır
 
 ### Sürümler, inceleme ve dışa aktarma
 
-- Rapor her oluşturulduğunda yeni bir **sürüm** açılır; eski sürümler değişmeden saklanır. **Yeni sürüm oluştur** güncel kanıtlarla yeniden değerlendirir.
+- Rapor her oluşturulduğunda yeni bir **sürüm** açılır; eski sürümler değişmeden saklanır. **Yeni sürüm oluştur** güncel kanıtlarla yeniden değerlendirir. Büyük bir filoda veya uzun bir dönemde bu biraz sürebilir: sürüm yaklaşık 20 saniye içinde hazır olmazsa arka planda tamamlanır ve rapor listesinde görünene kadar **Oluşturuluyor…** olarak gösterilir (sayfayı yenileyin). Bir rapor için aynı anda tek bir üretim çalışır; başarısız olursa listede **Oluşturulamadı** ve **Yeniden dene** görünür, ayrıntılar sunucu günlüğündedir.
 - Yöneticiler her kontrol için **manuel inceleme** kaydeder (incelendi, kabul edildi / incelendi, eksik var ve not). İnceleme otomatik sonucun yanında ayrıca saklanır, onu değiştirmez. Otomatik sonucu değişmeyen kontrollerin incelemeleri yeni sürüme aktarılır.
 - **Sürümü kesinleştir** sürümü ve incelemelerini dondurur; kesin sürüm değiştirilemez, kesin sürümü olan rapor silinemez. Kesin sürüm içerik ve incelemeleri kapsayan ayrı bir SHA-256 taşır.
 - Dışa aktarma saklanan sürümden üretilir, yeniden hesaplanmaz: aynı sürüm her zaman aynı içeriği verir.

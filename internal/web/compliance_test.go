@@ -19,6 +19,7 @@ import (
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/store"
 	"netio.patchman/internal/timeutil"
+	"netio.patchman/internal/web"
 )
 
 var reportURLRE = regexp.MustCompile(`^/compliance/reports/(\d+)\?v=(\d+)$`)
@@ -47,7 +48,7 @@ func TestComplianceAudit(t *testing.T) {
 	if _, err := e.st.CompleteJob(ctx, winID, jobID, protocol.JobResult{Succeeded: true, Output: "ok", StartedAt: timeutil.Now(), FinishedAt: timeutil.Now()}); err != nil {
 		t.Fatal(err)
 	}
-	col := &compliance.Collector{Store: e.st, Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), L: i18n.MustLoad().Localizer(i18n.DefaultLocale)}
+	col := &compliance.Collector{Store: e.st, EOL: e.eol.Data, Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), L: i18n.MustLoad().Localizer(i18n.DefaultLocale)}
 	if err := col.Snapshot(ctx, timeutil.Now()); err != nil {
 		t.Fatal(err)
 	}
@@ -375,4 +376,54 @@ func TestComplianceAudit(t *testing.T) {
 	if status != 200 || !strings.Contains(body, items[0].SHA256) {
 		t.Errorf("api evidence: %d %.200s", status, body)
 	}
+}
+
+// TestComplianceBackgroundGeneration: a version that is not ready within the
+// wait time is finished in the background; the list shows it as being
+// generated and the report appears when it is stored.
+func TestComplianceBackgroundGeneration(t *testing.T) {
+	e := newEnvOpts(t, true, func(o *web.Options) { o.ComplianceWait = -1 })
+	admin := e.client
+	pw := "çok-güçlü-parola-1"
+	if status, _, _ := e.do(admin, "POST", "/setup", url.Values{"name": {"Admin"}, "email": {"admin@example.test"}, "password": {pw}, "password_confirm": {pw}}); status != http.StatusSeeOther {
+		t.Fatalf("setup: %d", status)
+	}
+	form := url.Values{"_csrf": {e.csrf(admin)}, "title": {"Arka plan raporu"}, "preset": {"30d"}, "profiles": {"general@1"}}
+	status, _, hdr := e.do(admin, "POST", "/compliance/reports", form)
+	if status != http.StatusSeeOther || hdr.Get("Location") != "/compliance/reports" {
+		t.Fatalf("create: %d %s", status, hdr.Get("Location"))
+	}
+	ctx := context.Background()
+	var rep store.ComplianceReport
+	waitFor(t, func() bool {
+		list, _ := e.st.ListComplianceReports(ctx)
+		if len(list) == 1 {
+			rep = list[0]
+		}
+		return len(list) == 1 && list[0].LatestVersion == 1
+	})
+	status, body, _ := e.do(admin, "GET", "/compliance/reports/"+strconv.FormatInt(rep.ID, 10), nil)
+	expect(t, "report", status, 200, body, "Arka plan raporu", "Genel Güvenlik ve Yama Uyumu")
+	if strings.Contains(body, "Yeni bir sürüm oluşturuluyor") {
+		t.Error("finished report still shown as being generated")
+	}
+	// The audit entry is written when the version is stored.
+	waitFor(t, func() bool {
+		entries, _, _ := e.st.ListAudit(ctx, store.Page{Number: 1, Size: 50})
+		for _, a := range entries {
+			if a.Action == "compliance.report_create" {
+				return a.UserEmail == "admin@example.test" && strings.Contains(a.Details, "profiles=general@1")
+			}
+		}
+		return false
+	})
+	// A new version in the background, then the regenerated version 2.
+	status, _, hdr = e.do(admin, "POST", "/compliance/reports/"+strconv.FormatInt(rep.ID, 10)+"/regenerate", url.Values{"_csrf": {e.csrf(admin)}})
+	if status != http.StatusSeeOther || !strings.HasPrefix(hdr.Get("Location"), "/compliance/reports/"+strconv.FormatInt(rep.ID, 10)) {
+		t.Fatalf("regenerate: %d %s", status, hdr.Get("Location"))
+	}
+	waitFor(t, func() bool {
+		r, _ := e.st.ComplianceReportByID(ctx, rep.ID)
+		return r.LatestVersion == 2
+	})
 }

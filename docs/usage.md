@@ -256,7 +256,7 @@ Example: a successfully applied Windows security update is one evidence item and
 
 ### Versions, reviews and exports
 
-- Every generation opens a new **version**; earlier versions are kept unchanged. **Generate new version** re-assesses with the current evidence.
+- Every generation opens a new **version**; earlier versions are kept unchanged. **Generate new version** re-assesses with the current evidence. For a large fleet or a long period this can take a while: if the version is not ready within about 20 seconds, it is finished in the background and the report list shows it as **Generating…** until it appears (refresh the page). Only one generation per report runs at a time; if one fails, the list shows **Generation failed** with **Try again**, and the details are in the server log.
 - Administrators record a **manual review** for every control (reviewed, accepted / reviewed, gap found, plus a note). The review is stored next to the automated outcome and does not change it. Reviews of controls whose automated outcome did not change carry over to the new version.
 - **Finalize version** freezes the version and its reviews; a final version cannot change and a report with a final version cannot be deleted. A final version carries a separate SHA-256 covering its content and reviews.
 - Exports are built from the stored version, never recomputed: the same version always gives the same content.

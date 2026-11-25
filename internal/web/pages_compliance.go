@@ -104,6 +104,7 @@ type reportListRow struct {
 	Profiles []string // names
 	Scope    string
 	Counts   []outcomeCount
+	Gen      genStatus // background generation of a new version
 }
 
 func (s *Server) reportRows(r *http.Request, reports []store.ComplianceReport, withCounts int) []reportListRow {
@@ -119,7 +120,7 @@ func (s *Server) reportRows(r *http.Request, reports []store.ComplianceReport, w
 		if !s.reportVisible(r, rep) {
 			continue
 		}
-		row := reportListRow{ComplianceReport: rep, Scope: s.l.T("compliance.scope.all")}
+		row := reportListRow{ComplianceReport: rep, Scope: s.l.T("compliance.scope.all"), Gen: s.gen.status(rep.ID)}
 		for _, k := range rep.Profiles {
 			id, _, _ := strings.Cut(k, "@")
 			row.Profiles = append(row.Profiles, rd.ProfileName(id))
@@ -326,24 +327,17 @@ func (s *Server) complianceReportCreate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	rep.ID = id
-	n, err := s.generateVersion(r, rep, nil)
+	details := "report_id=" + strconv.FormatInt(id, 10) + " profiles=" + strings.Join(profiles, ",")
+	n, err := s.startVersion(r, rep, nil, s.auditEntry(r, "compliance.report_create", title, ""), func(int) string { return details })
 	if err != nil {
 		s.serverError(w, r, err)
 		return
 	}
-	s.audit(r, "compliance.report_create", title, "report_id="+strconv.FormatInt(id, 10)+" profiles="+strings.Join(profiles, ","))
-	s.redirect(w, r, "/compliance/reports/"+strconv.FormatInt(id, 10)+"?v="+strconv.Itoa(n), "success", s.l.T("compliance.report.created"))
-}
-
-func (s *Server) generateVersion(r *http.Request, rep store.ComplianceReport, prev []store.ControlAssessment) (int, error) {
-	u := sessionFrom(r).user
-	res, err := compliance.Generate(s.st, compliance.Request{Report: rep, GeneratedBy: u.Email, Now: timeutil.Now(), Previous: prev})
-	if err != nil {
-		return 0, err
+	if n == 0 {
+		s.redirect(w, r, "/compliance/reports", "info", s.l.T("compliance.report.generating", "title", title))
+		return
 	}
-	n, _, err := s.st.AddReportVersion(r.Context(), store.ReportVersion{ReportID: rep.ID, GeneratedAt: res.Report.GeneratedAt, GeneratedBy: u.Email,
-		Engine: compliance.EngineVersion, Content: res.Content, SHA256: res.SHA256}, res.Assessments, res.Mapping)
-	return n, err
+	s.redirect(w, r, reportURL(id, n), "success", s.l.T("compliance.report.created"))
 }
 
 // loadReport reads the report of the path and checks that the user may see it.
@@ -445,8 +439,16 @@ func (s *Server) complianceReport(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	gen := s.gen.status(rep.ID)
 	if rep.LatestVersion == 0 {
-		s.errorPage(w, r, http.StatusNotFound, "error.not_found")
+		switch {
+		case gen.Running:
+			s.redirect(w, r, "/compliance/reports", "info", s.l.T("compliance.report.generating", "title", rep.Title))
+		case gen.Err != "":
+			s.redirect(w, r, "/compliance/reports", "error", s.l.T("compliance.report.generate_failed"))
+		default:
+			s.errorPage(w, r, http.StatusNotFound, "error.not_found")
+		}
 		return
 	}
 	v, ok := s.loadVersion(w, r, rep)
@@ -558,7 +560,7 @@ func (s *Server) complianceReport(w http.ResponseWriter, r *http.Request) {
 		"ByAction": sortedCounts(content.Audit.ByAction, func(k string) string { return s.l.T("audit.action." + k) }),
 		"MeanFix":  rd.Number(content.Vulnerabilities.MeanFixDays), "Disclaimer": rd.Disclaimer(),
 		"CanReview": u.IsAdmin() && !v.Final(), "CanRegenerate": u.CanOperate(), "Latest": v.Version == rep.LatestVersion,
-		"PeriodEnd": content.PeriodTo.Add(-time.Second), "Reviews": []string{store.ReviewNone, store.ReviewAccepted, store.ReviewGap}}
+		"PeriodEnd": content.PeriodTo.Add(-time.Second), "Reviews": []string{store.ReviewNone, store.ReviewAccepted, store.ReviewGap}, "Gen": gen}
 	s.render(w, r, http.StatusOK, "compliancereport", d)
 }
 
@@ -579,13 +581,23 @@ func (s *Server) complianceRegenerate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	n, err := s.generateVersion(r, rep, prev)
-	if err != nil {
-		s.serverError(w, r, err)
-		return
+	n, err := s.startVersion(r, rep, prev, s.auditEntry(r, "compliance.report_regenerate", rep.Title, ""), func(n int) string {
+		return "report_id=" + strconv.FormatInt(rep.ID, 10) + " version=" + strconv.Itoa(n)
+	})
+	back := reportURL(rep.ID, 0)
+	if rep.LatestVersion == 0 {
+		back = "/compliance/reports"
 	}
-	s.audit(r, "compliance.report_regenerate", rep.Title, "report_id="+strconv.FormatInt(rep.ID, 10)+" version="+strconv.Itoa(n))
-	s.redirect(w, r, "/compliance/reports/"+strconv.FormatInt(rep.ID, 10)+"?v="+strconv.Itoa(n), "success", s.l.T("compliance.report.regenerated", "n", n))
+	switch {
+	case errors.Is(err, errGenBusy):
+		s.redirect(w, r, back, "info", s.l.T("compliance.report.busy"))
+	case err != nil:
+		s.serverError(w, r, err)
+	case n == 0:
+		s.redirect(w, r, back, "info", s.l.T("compliance.report.generating", "title", rep.Title))
+	default:
+		s.redirect(w, r, reportURL(rep.ID, n), "success", s.l.T("compliance.report.regenerated", "n", n))
+	}
 }
 
 func (s *Server) complianceReview(w http.ResponseWriter, r *http.Request) {

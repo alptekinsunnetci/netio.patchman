@@ -1,0 +1,56 @@
+name: Benchmark
+
+# Compliance report generation for a large fleet (500 hosts, 12 months of
+# evidence) on SQLite and PostgreSQL. Started by hand and once a month; the
+# numbers are in the job summary.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 5 1 * *"
+
+permissions:
+  contents: read
+
+env:
+  GOTOOLCHAIN: local
+  GO_VERSION: "1.26.x"
+
+jobs:
+  compliance-scale:
+    name: Compliance report at scale (${{ matrix.db }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        db: [sqlite, postgres]
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: np
+          POSTGRES_PASSWORD: np-ci
+          POSTGRES_DB: np
+          POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U np" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+      - name: go test -bench GenerateLargeFleet
+        env:
+          DB: ${{ matrix.db }}
+        run: |
+          if [ "$DB" = postgres ]; then
+            export PATCHMAN_TEST_DATABASE_URL='postgres://np:np-ci@127.0.0.1:5432/np?sslmode=disable'
+          fi
+          go test -run '^$' -bench GenerateLargeFleet -benchtime 3x -timeout 60m ./internal/compliance/ | tee bench.txt
+          {
+            echo "### Compliance report, 500 hosts, 12 months ($DB)"
+            echo '```'
+            grep -E '^(Benchmark|cpu:)' bench.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

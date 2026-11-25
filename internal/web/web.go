@@ -82,6 +82,9 @@ type Options struct {
 	// Rollouts pauses, resumes and cancels rolling updates (optional; nil
 	// uses one without notifications).
 	Rollouts *rollout.Runner
+	// ComplianceWait is how long a request waits for a compliance report
+	// version before it is finished in the background (0: 20 s, <0: no wait).
+	ComplianceWait time.Duration
 }
 
 // Server is the dashboard in one language. New returns the default-language
@@ -106,6 +109,8 @@ type shared struct {
 	requireMFA atomic.Bool
 	// mfa holds pending second-step sign-ins.
 	mfa mfaChallenges
+	// gen runs compliance report generations in the background.
+	gen *genState
 	// variants maps a locale to its Server; def is the server's default locale.
 	variants map[string]*Server
 	locales  []string
@@ -154,7 +159,7 @@ var pageNames = []string{
 // New parses templates and returns the Server for the default language
 // (o.Localizer). With o.Bundle set, every other catalog gets its own variant.
 func New(o Options) (*Server, error) {
-	sh := &shared{limiter: auth.NewLimiter(8, 15*time.Minute), variants: map[string]*Server{}, def: o.Localizer.Locale()}
+	sh := &shared{limiter: auth.NewLimiter(8, 15*time.Minute), variants: map[string]*Server{}, def: o.Localizer.Locale(), gen: newGenState(o.ComplianceWait)}
 	locales := []i18n.Localizer{o.Localizer}
 	if o.Bundle != nil {
 		for _, loc := range o.Bundle.Locales() {
@@ -823,7 +828,8 @@ func (s *Server) redirect(w http.ResponseWriter, r *http.Request, to, kind, text
 	http.Redirect(w, r, to, http.StatusSeeOther)
 }
 
-func (s *Server) audit(r *http.Request, action, target, details string) {
+// auditEntry builds the audit log entry of a request (user, IP, API key).
+func (s *Server) auditEntry(r *http.Request, action, target, details string) store.AuditEntry {
 	e := store.AuditEntry{Action: action, Target: target, Details: details, IP: s.clientIP(r)}
 	if sess := sessionFrom(r); sess != nil {
 		e.UserID, e.UserEmail = sess.user.ID, sess.user.Email
@@ -831,6 +837,11 @@ func (s *Server) audit(r *http.Request, action, target, details string) {
 			e.Details = strings.TrimSpace(e.Details + " api_token=" + sess.apiToken)
 		}
 	}
+	return e
+}
+
+func (s *Server) audit(r *http.Request, action, target, details string) {
+	e := s.auditEntry(r, action, target, details)
 	if err := s.st.Audit(r.Context(), e); err != nil {
 		s.logger.Warn(s.l.T("log.audit.failed"), slog.String("error", err.Error()))
 	}
