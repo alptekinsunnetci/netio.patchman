@@ -30,7 +30,7 @@ body:
     attributes:
       label: netio.patchman version
       description: Shown at the bottom of the sidebar, or `netio-patchman-server -version`.
-      placeholder: 1.1.0
+      placeholder: 1.1.1
     validations:
       required: true
   - type: dropdown
@@ -42,7 +42,7 @@ body:
     id: agent
     attributes:
       label: Affected agents (if any)
-      description: Operating system, version and agent version, e.g. "Ubuntu 24.04, agent 1.1.0" or "Windows Server 2022, agent 1.0.5".
+      description: Operating system, version and agent version, e.g. "Ubuntu 24.04, agent 1.1.1" or "Windows Server 2022, agent 1.0.5".
   - type: textarea
     id: logs
     attributes:
