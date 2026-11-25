@@ -11,8 +11,9 @@ her şeyi anlatır: geliştirme ortamı, sunucuyu ve bir ajanı çalıştırma, 
 - Bir fikriniz mi var? Büyük bir değişikliğe başlamadan önce bir
   [özellik isteği](https://github.com/alptekinsunnetci/netio.patchman/issues/new?template=feature_request.yml) açın;
   yaklaşımda önceden anlaşalım.
-- Bir güvenlik açığı mı buldunuz? Konu (issue) **açmayın**; bkz.
-  [Güvenlik açığı bildirimi](docs/mimari-ve-guvenlik.md#12-güvenlik-açığı-bildirimi).
+- Bir güvenlik açığı mı buldunuz? Konu (issue) **açmayın**; özel olarak bildirin
+  ([Report a vulnerability](https://github.com/alptekinsunnetci/netio.patchman/security/advisories/new)), bkz. [güvenlik politikası](SECURITY.md).
+- Lütfen [davranış kurallarına](CODE_OF_CONDUCT.md#davranış-kuralları) uyun.
 - Hiçbir şey kurmadan arayüzü deneyin: [canlı demo](https://alptekinsunnetci.github.io/netio.patchman/demo/).
 - Konular ve pull request'ler Türkçe veya İngilizce yazılabilir.
 

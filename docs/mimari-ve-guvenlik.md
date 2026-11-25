@@ -236,6 +236,6 @@ kanallara gider.
 
 ## 12. Güvenlik açığı bildirimi
 
-Güvenlik sorunlarını herkese açık bir konu (issue) açmadan, doğrudan bakımcıya
-([github.com/alptekinsunnetci](https://github.com/alptekinsunnetci)) özel olarak bildirin. Sürümü, etkilenen bileşeni ve
-sorunu yeniden üretme adımlarını ekleyin.
+Güvenlik sorunlarını herkese açık bir konu (issue) açmadan GitHub üzerinden özel olarak bildirin
+([Report a vulnerability](https://github.com/alptekinsunnetci/netio.patchman/security/advisories/new)). Sürümü, etkilenen bileşeni ve sorunu yeniden üretme adımlarını ekleyin. Desteklenen
+sürümler, kapsam ve süreç: [güvenlik politikası](../SECURITY.md#türkçe-özet).

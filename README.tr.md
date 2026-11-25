@@ -468,6 +468,7 @@ Ayrıntılı bilgi: [docs/kurulum.md](docs/kurulum.md) (kurulum ve işletim), [d
 - Bir sunucuda uzaktan güncellemeyi tamamen kapatmak için o sunucunun `/etc/netio-patchman/agent.env` dosyasına `PATCHMAN_REMOTE_UPDATES=false` yazın. Windows'ta aynı ayar `C:\ProgramData\netio-patchman\agent.env` dosyasındadır.
 - Panel katı bir Content-Security-Policy ile sunulur ve dış kaynak (CDN, yazı tipi) kullanmaz; internet erişimi olmayan ağlarda da çalışır.
 - Bileşenlerin birbirine nasıl güvendiği, tehdit modeli ve sıkılaştırma listesi: [Mimari ve güvenlik modeli](docs/mimari-ve-guvenlik.md).
+- Bir güvenlik açığı mı buldunuz? Herkese açık bir konu açmadan özel olarak bildirin: [güvenlik politikası](SECURITY.md#türkçe-özet).
 
 ## Geliştirme
 

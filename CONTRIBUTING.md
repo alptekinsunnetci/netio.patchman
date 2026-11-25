@@ -11,8 +11,9 @@ environment, running the server and an agent, running the tests and the rules th
   and leave a comment that you are working on it.
 - Have an idea? Open a [feature request](https://github.com/alptekinsunnetci/netio.patchman/issues/new?template=feature_request.yml)
   before writing a large change, so we can agree on the approach.
-- Found a security issue? Do **not** open an issue; see
-  [Reporting a vulnerability](docs/architecture-and-security.md#12-reporting-a-vulnerability).
+- Found a security issue? Do **not** open an issue; report it privately
+  ([Report a vulnerability](https://github.com/alptekinsunnetci/netio.patchman/security/advisories/new)), see the [security policy](SECURITY.md).
+- Please follow the [code of conduct](CODE_OF_CONDUCT.md).
 - Try the interface without installing anything: [live demo](https://alptekinsunnetci.github.io/netio.patchman/demo/).
 - Issues and pull requests can be written in English or Turkish.
 

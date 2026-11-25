@@ -234,6 +234,6 @@ Notifications go only to the channels you configure.
 
 ## 12. Reporting a vulnerability
 
-Please report security issues privately to the maintainer
-([github.com/alptekinsunnetci](https://github.com/alptekinsunnetci)) and do not open a public issue for them. Include the
-version, the affected component and the steps to reproduce.
+Please report security issues privately through GitHub ([Report a vulnerability](https://github.com/alptekinsunnetci/netio.patchman/security/advisories/new)) and do not open a public
+issue for them. Include the version, the affected component and the steps to reproduce. Supported versions, scope and
+what to expect: [security policy](../SECURITY.md).

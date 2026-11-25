@@ -472,6 +472,7 @@ More information: [docs/installation.md](docs/installation.md) (installation and
 - To turn off remote updates completely on a server, set `PATCHMAN_REMOTE_UPDATES=false` in that server's `/etc/netio-patchman/agent.env`. On Windows the same setting is in `C:\ProgramData\netio-patchman\agent.env`.
 - The dashboard is served with a strict Content-Security-Policy and uses no external resources (CDNs, fonts); it also works in networks without internet access.
 - How the parts trust each other, the threat model and a hardening checklist: [Architecture & security model](docs/architecture-and-security.md).
+- Found a vulnerability? Report it privately, not in a public issue: [security policy](SECURITY.md).
 
 ## Development
 

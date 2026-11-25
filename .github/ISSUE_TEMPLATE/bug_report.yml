@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Security issues:** do not report them here; see [Reporting a vulnerability](https://github.com/alptekinsunnetci/netio.patchman/blob/main/docs/architecture-and-security.md#12-reporting-a-vulnerability).
+        **Security issues:** do not report them here; report them privately ([Report a vulnerability](https://github.com/alptekinsunnetci/netio.patchman/security/advisories/new), see the [security policy](https://github.com/alptekinsunnetci/netio.patchman/blob/main/SECURITY.md)).
         Please remove host names, IP addresses, tokens and other private data from logs before posting. Bu formu Türkçe de doldurabilirsiniz.
   - type: textarea
     id: what

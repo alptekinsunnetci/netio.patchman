@@ -472,6 +472,7 @@ Weitere Informationen (Englisch): [docs/installation.md](docs/installation.md) (
 - Um Remote-Updates auf einem Server vollständig abzuschalten, setzen Sie `PATCHMAN_REMOTE_UPDATES=false` in dessen `/etc/netio-patchman/agent.env`. Unter Windows steht dieselbe Einstellung in `C:\ProgramData\netio-patchman\agent.env`.
 - Das Dashboard wird mit einer strengen Content-Security-Policy ausgeliefert und nutzt keine externen Ressourcen (CDNs, Schriftarten); es funktioniert auch in Netzen ohne Internetzugang.
 - Vertrauensgrenzen, Bedrohungsmodell und Härtungs-Checkliste: [Architektur & Sicherheitsmodell](docs/architecture-and-security.md) (Englisch, [Türkisch](docs/mimari-ve-guvenlik.md)).
+- Eine Schwachstelle gefunden? Bitte privat melden, nicht in einem öffentlichen Issue: [Sicherheitsrichtlinie](SECURITY.md) (Englisch).
 
 ## Entwicklung
 
