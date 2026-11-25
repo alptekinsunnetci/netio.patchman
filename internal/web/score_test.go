@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"netio.patchman/internal/eol"
 	"netio.patchman/internal/protocol"
 	"netio.patchman/internal/scoring"
 	"netio.patchman/internal/settings"
@@ -27,7 +26,7 @@ func TestSecurityScore(t *testing.T) {
 		t.Fatal(err)
 	}
 	var below []store.HostRef
-	engine := &scoring.Engine{Store: e.st, EOL: eol.Embedded, OnBelow: func(_ context.Context, hosts []store.HostRef, _ int) { below = append(below, hosts...) }}
+	engine := &scoring.Engine{Store: e.st, EOL: e.eol.Data, OnBelow: func(_ context.Context, hosts []store.HostRef, _ int) { below = append(below, hosts...) }}
 	if err := e.st.SaveSettings(ctx, map[string]string{settings.KeyScoreAlertBelow: "99"}); err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +127,7 @@ func TestScoreGroups(t *testing.T) {
 	if _, err := e.st.AddHostsToGroup(ctx, gid, []int64{dbID}); err != nil {
 		t.Fatal(err)
 	}
-	if err := (&scoring.Engine{Store: e.st}).Run(ctx, timeutil.Now()); err != nil {
+	if err := (&scoring.Engine{Store: e.st, EOL: e.eol.Data}).Run(ctx, timeutil.Now()); err != nil {
 		t.Fatal(err)
 	}
 	db, _ := e.st.HostByID(ctx, dbID)

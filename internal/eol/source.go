@@ -43,6 +43,9 @@ func (s *Source) Data() Data {
 	return d
 }
 
+// Use replaces the current calendars (tests pin them to a reference date).
+func (s *Source) Use(d Data) { s.data.Store(&d) }
+
 // Load reads stored calendars over the built-in snapshot.
 func (s *Source) Load(ctx context.Context) error {
 	d := Embedded()

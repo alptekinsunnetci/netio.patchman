@@ -27,6 +27,7 @@ import (
 	"netio.patchman/internal/api"
 	"netio.patchman/internal/backup"
 	"netio.patchman/internal/config"
+	"netio.patchman/internal/eol"
 	"netio.patchman/internal/i18n"
 	"netio.patchman/internal/notify"
 	"netio.patchman/internal/notify/email"
@@ -127,6 +128,9 @@ func (c *captureSender) Send(m email.Message) error {
 }
 
 type env struct {
+	// eol is the support calendar the site uses: the built-in one, pinned to
+	// eolReference (see testCalendar).
+	eol      *eol.Source
 	t        *testing.T
 	srv      *httptest.Server
 	st       *store.Store
@@ -148,7 +152,10 @@ func newEnv(t *testing.T) *env { return newEnvWith(t, true) }
 
 // newEnvWith builds a test site; without capture, email goes through the
 // SMTP settings of the server configuration.
-func newEnvWith(t *testing.T, capture bool) *env {
+func newEnvWith(t *testing.T, capture bool) *env { return newEnvOpts(t, capture, nil) }
+
+// newEnvOpts is newEnvWith with a hook that adjusts the web options.
+func newEnvOpts(t *testing.T, capture bool, adjust func(*web.Options)) *env {
 	t.Helper()
 	ctx := context.Background()
 	st, err := store.Open(ctx, t.TempDir()+"/test.db")
@@ -213,8 +220,14 @@ func newEnvWith(t *testing.T, capture bool) *env {
 	e.telegram = e.hooks.srv.URL
 	e.selfUpd = &selfupdate.Manager{DataDir: t.TempDir()}
 	e.channels = notify.NewDispatcher(notify.DispatcherOptions{Store: st, L: l, System: e.sys, Logger: logger, TelegramAPI: e.telegram, RetryDelays: []time.Duration{}})
-	site, err := web.New(web.Options{Store: st, Localizer: l, Formatter: f, Logger: logger, Scanner: e.scan, Notifier: e.notifier, System: e.sys, API: apiSrv, Release: rel, Updates: e.updates,
-		Bundle: i18n.MustLoad(), Backups: e.backups, Channels: e.channels, SelfUpdate: e.selfUpd})
+	e.eol = &eol.Source{Store: st, System: e.sys, Logger: logger, L: l}
+	e.eol.Use(testCalendar())
+	opts := web.Options{Store: st, Localizer: l, Formatter: f, Logger: logger, Scanner: e.scan, Notifier: e.notifier, System: e.sys, API: apiSrv, Release: rel, Updates: e.updates,
+		Bundle: i18n.MustLoad(), Backups: e.backups, Channels: e.channels, SelfUpdate: e.selfUpd, EOL: e.eol}
+	if adjust != nil {
+		adjust(&opts)
+	}
+	site, err := web.New(opts)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -721,4 +734,32 @@ func TestEndToEnd(t *testing.T) {
 	status, body, _ = e.do(admin, "GET", "/compliance/history?tab=audit", nil)
 	expect(t, "audit", status, 200, body, "Kayıt anahtarı oluşturuldu", "Güncelleme işi başlatıldı", "Sunucu kaldırıldı", "Başarısız giriş denemesi",
 		"Zamanlama oluşturuldu", "Zamanlama elle çalıştırıldı", "Zamanlama silindi")
+}
+
+// eolReference is the day the test expectations about support status were
+// written against.
+var eolReference = time.Date(2026, 11, 24, 0, 0, 0, 0, time.UTC)
+
+// testCalendar is the built-in support calendar with every date moved by the
+// time since eolReference: on any day the tests run, each release has the
+// status it had on eolReference (Debian 12 supported, Ubuntu 20.04 out of
+// support, ...), so the tests do not change when a real release ends.
+func testCalendar() eol.Data {
+	shift := timeutil.Now().Sub(eolReference)
+	move := func(t time.Time) time.Time {
+		if t.IsZero() {
+			return t
+		}
+		return t.Add(shift)
+	}
+	d := eol.Data{}
+	for p, rels := range eol.Embedded() {
+		out := make([]eol.Release, len(rels))
+		for i, r := range rels {
+			r.Released, r.EOL, r.Support, r.Extended = move(r.Released), move(r.EOL), move(r.Support), move(r.Extended)
+			out[i] = r
+		}
+		d[p] = out
+	}
+	return d
 }

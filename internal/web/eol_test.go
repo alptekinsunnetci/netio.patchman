@@ -61,7 +61,7 @@ func TestEOLReport(t *testing.T) {
 
 	// Notices: once per release and kind.
 	now := timeutil.Now()
-	notices, err := eol.Notices(ctx, e.st, eol.Embedded(), now, 90*24*time.Hour)
+	notices, err := eol.Notices(ctx, e.st, e.eol.Data(), now, 90*24*time.Hour)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestEOLReport(t *testing.T) {
 	if !names["Ubuntu 20.04 eol"] || !names["PHP 7.4 eol"] {
 		t.Errorf("notices: %v", names)
 	}
-	again, _ := eol.Notices(ctx, e.st, eol.Embedded(), now, 90*24*time.Hour)
+	again, _ := eol.Notices(ctx, e.st, e.eol.Data(), now, 90*24*time.Hour)
 	if len(again) != 0 {
 		t.Errorf("repeated notices: %d", len(again))
 	}
@@ -129,5 +129,23 @@ func TestEOLSourceRefresh(t *testing.T) {
 	}
 	if r, _ := src2.Data().Find("ubuntu", "20.04"); r.EOL.Year() != 2099 {
 		t.Errorf("stored calendar not loaded: %+v", r)
+	}
+}
+
+// TestCalendarPinned: the test calendar gives every release today the status
+// it had on eolReference, so support ending in the real world does not
+// change test results.
+func TestCalendarPinned(t *testing.T) {
+	now, warn := timeutil.Now(), 90*24*time.Hour
+	pinned := testCalendar()
+	for p, rels := range eol.Embedded() {
+		for i, r := range rels {
+			if got, want := pinned[p][i].Status(now, warn), r.Status(eolReference, warn); got != want {
+				t.Errorf("%s %s: %s, want %s", p, r.Cycle, got, want)
+			}
+		}
+	}
+	if r, ok := pinned.Find("debian", "12"); !ok || r.Status(now, warn) != eol.StatusSupported {
+		t.Errorf("debian 12: %+v", r)
 	}
 }
