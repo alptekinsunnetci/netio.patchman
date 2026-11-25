@@ -150,7 +150,9 @@ func TestContinuousMonitoring(t *testing.T) {
 	}
 	_, body, _ = e.do(admin, "GET", hostURL+"?tab=health&range=30d", nil)
 	expect(t, "30 days", 200, 200, body, "Son 30 gün")
-	if samples, _ := e.st.HostMetrics(ctx, id, timeutil.Now().Add(-time.Hour)); len(samples) < 3 || samples[len(samples)-1].CPU != 375 || samples[len(samples)-1].Disk != 950 {
+	// The window covers the samples 30 and 60 minutes back with room to spare:
+	// a slow run (race detector) must not push the 60-minute one out.
+	if samples, _ := e.st.HostMetrics(ctx, id, timeutil.Now().Add(-75*time.Minute)); len(samples) < 3 || samples[len(samples)-1].CPU != 375 || samples[len(samples)-1].Disk != 950 {
 		t.Errorf("samples: %+v", samples)
 	}
 	_, body, _ = e.do(admin, "GET", "/servers", nil)
