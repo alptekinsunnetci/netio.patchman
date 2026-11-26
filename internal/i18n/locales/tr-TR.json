@@ -1563,6 +1563,7 @@
   "agent.health.failed_after": "Güncelleme sonrası başarısız sağlık kontrolleri: {checks}",
   "server.tab.health": "Sağlık",
   "common.cancel": "Vazgeç",
+  "common.close": "Kapat",
   "health.title": "Sağlık kontrolleri",
   "health.subtitle": "Güncellemeden önce ve sonra çalışan, ayrıca elle başlatılabilen kontroller. Önce başarılı olup güncellemeden sonra başarısız olan kontrol bildirim oluşturur.",
   "health.field.name": "Ad",

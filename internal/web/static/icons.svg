@@ -58,6 +58,9 @@
   <symbol id="i-plus" viewBox="0 0 24 24">
     <path d="M12 5v14M5 12h14"/>
   </symbol>
+  <symbol id="i-close" viewBox="0 0 24 24">
+    <path d="M6 6l12 12M18 6L6 18"/>
+  </symbol>
   <symbol id="i-refresh" viewBox="0 0 24 24">
     <path d="M19.5 12a7.5 7.5 0 0 1-13.2 4.9M4.5 12a7.5 7.5 0 0 1 13.2-4.9"/>
     <path d="M18 3.5v4h-4M6 20.5v-4h4"/>

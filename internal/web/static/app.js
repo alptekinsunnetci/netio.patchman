@@ -219,6 +219,21 @@
     setTimeout(poll, 3000);
   }
 
+  // Closing the result of a dashboard update: the cookie keeps it closed on
+  // the other pages (the server compares it with the finish time).
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest && e.target.closest("[data-selfupdate-dismiss]");
+    if (!btn) return;
+    var box = btn.closest("[data-selfupdate-result]");
+    if (!box) return;
+    var v = box.getAttribute("data-selfupdate-result") || "";
+    if (/^[0-9]+$/.test(v)) {
+      document.cookie = "np_selfupdate_seen=" + v + "; path=/; max-age=86400; SameSite=Lax" +
+        (window.location.protocol === "https:" ? "; Secure" : "");
+    }
+    box.parentNode.removeChild(box);
+  });
+
   // Print button (reports); printing works from the browser menu without JS.
   document.addEventListener("click", function (e) {
     if (e.target.closest && e.target.closest("[data-print]")) window.print();

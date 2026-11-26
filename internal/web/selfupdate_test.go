@@ -135,15 +135,38 @@ func TestSelfUpdateFromDashboard(t *testing.T) {
 	if strings.Contains(body, "data-selfupdate=") {
 		t.Error("result banner polls")
 	}
-	// An hour later, after an update that found nothing new.
-	hourAgo := strconv.FormatInt(time.Now().Add(-time.Hour).Unix(), 10)
-	if err := os.WriteFile(filepath.Join(dir, ".update-requested-at"), []byte(hourAgo), 0o644); err != nil {
+	if !strings.Contains(body, `data-selfupdate-result="`+strconv.FormatInt(finished, 10)+`"`) || !strings.Contains(body, "data-selfupdate-dismiss") {
+		t.Error("result banner cannot be closed")
+	}
+	// Closed by the user (app.js sets the cookie): gone on every page.
+	srvURL, _ := url.Parse(e.srv.URL)
+	admin.Jar.SetCookies(srvURL, []*http.Cookie{{Name: "np_selfupdate_seen", Value: strconv.FormatInt(finished, 10), Path: "/"}})
+	if _, body, _ = e.do(admin, "GET", "/servers", nil); strings.Contains(body, "sürümüne güncellendi") {
+		t.Error("closed result shown again")
+	}
+	if _, body, _ = e.do(admin, "GET", "/settings/system", nil); !strings.Contains(body, "0.6.1 sürümünden 0.7.0 sürümüne güncellendi") {
+		t.Error("system page lost the last result")
+	}
+	admin.Jar.SetCookies(srvURL, []*http.Cookie{{Name: "np_selfupdate_seen", Value: "", Path: "/", MaxAge: -1}})
+	// A success goes away after 10 minutes, a failure stays for an hour.
+	ago := func(d time.Duration) string { return strconv.FormatInt(time.Now().Add(-d).Unix(), 10) }
+	if err := os.WriteFile(filepath.Join(dir, ".update-requested-at"), []byte(ago(2*time.Hour)), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	write("status.json", `{"state":"succeeded","step":"done","started_at":`+hourAgo+`,"finished_at":`+hourAgo+`,"from":"0.7.0","to":"0.7.0"}`)
+	write("status.json", `{"state":"succeeded","step":"done","started_at":`+ago(12*time.Minute)+`,"finished_at":`+ago(11*time.Minute)+`,"from":"0.7.0","to":"0.7.0"}`)
 	if _, body, _ = e.do(admin, "GET", "/dashboard", nil); strings.Contains(body, "sürümüyle yeniden derlenip") {
-		t.Error("old result on the dashboard")
+		t.Error("old success on the dashboard")
 	}
+	write("status.json", `{"state":"failed","step":"build","started_at":`+ago(31*time.Minute)+`,"finished_at":`+ago(30*time.Minute)+`,"from":"0.7.0","to":"0.7.1"}`)
+	if _, body, _ = e.do(admin, "GET", "/dashboard", nil); !strings.Contains(body, "Son güncelleme başarısız oldu") {
+		t.Error("recent failure missing on the dashboard")
+	}
+	write("status.json", `{"state":"failed","step":"build","started_at":`+ago(62*time.Minute)+`,"finished_at":`+ago(61*time.Minute)+`,"from":"0.7.0","to":"0.7.1"}`)
+	if _, body, _ = e.do(admin, "GET", "/dashboard", nil); strings.Contains(body, "Son güncelleme başarısız oldu") {
+		t.Error("old failure on the dashboard")
+	}
+	hourAgo := ago(time.Hour)
+	write("status.json", `{"state":"succeeded","step":"done","started_at":`+hourAgo+`,"finished_at":`+hourAgo+`,"from":"0.7.0","to":"0.7.0"}`)
 	// Nothing new to pull reads as such.
 	if _, body, _ = e.do(admin, "GET", "/settings/system", nil); !strings.Contains(body, "Yeni sürüm bulunamadı; sunucu 0.7.0 sürümüyle yeniden derlenip başlatıldı") {
 		t.Error("same-version result missing")

@@ -40,7 +40,8 @@
   <p class="selfupdate__note" data-selfupdate-newserver hidden>{{t "selfupdate.new_server"}}</p>
   <p class="selfupdate__note" data-selfupdate-stalled{{if not $p.Stalled}} hidden{{end}}>{{t "selfupdate.stalled"}}</p>
 </div>
-{{else}}{{template "selfupdateresult" $p}}{{end}}
+{{else}}<div class="selfupdate-result" data-selfupdate-result="{{.FinishedUnix}}">{{template "selfupdateresult" $p}}
+  <button class="button button--ghost button--sm selfupdate-result__close" type="button" data-selfupdate-dismiss title="{{t "common.close"}}" aria-label="{{t "common.close"}}">{{template "icon" "close"}}</button></div>{{end}}
 {{end}}
 
 {{define "selfupdateresult"}}{{$at := datetime .Status.FinishedAt}}

@@ -312,6 +312,9 @@ func (v selfUpdateData) Active() bool { return v.Progress.Active }
 // Version is the running server version (app.js notices the new one).
 func (v selfUpdateData) Version() string { return version.Version }
 
+// FinishedUnix is the finish time of the last update (the banner's close button).
+func (v selfUpdateData) FinishedUnix() int64 { return v.Progress.Status.FinishedAt.Unix() }
+
 // ElapsedSeconds is the time since the update began.
 func (v selfUpdateData) ElapsedSeconds() int64 { return int64(v.Progress.Elapsed / time.Second) }
 

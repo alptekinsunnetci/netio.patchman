@@ -752,8 +752,24 @@ type pageData struct {
 	Path string
 }
 
-// selfUpdateResultFor is how long the banner shows the result of an update.
-const selfUpdateResultFor = 15 * time.Minute
+// selfUpdateResultFor is how long the other pages show the result of an
+// update: a success briefly, a failure longer.
+func selfUpdateResultFor(p selfupdate.Progress) time.Duration {
+	if p.Status.State == selfupdate.StateFailed {
+		return time.Hour
+	}
+	return 10 * time.Minute
+}
+
+// selfUpdateSeenCookie holds the finish time of the result the user closed
+// (set by app.js), so the banner does not come back on the next page.
+const selfUpdateSeenCookie = "np_selfupdate_seen"
+
+// selfUpdateSeen reports whether the user closed the banner of this result.
+func selfUpdateSeen(r *http.Request, p selfupdate.Progress) bool {
+	c, err := r.Cookie(selfUpdateSeenCookie)
+	return err == nil && c.Value == strconv.FormatInt(p.Status.FinishedAt.Unix(), 10)
+}
 
 func (s *Server) page(r *http.Request, title, active string) pageData {
 	d := pageData{Product: brand.Name, Version: version.Version, Lang: s.l.Lang(), Title: title, Active: active, Nav: navigation,
@@ -777,7 +793,7 @@ func (s *Server) page(r *http.Request, title, active string) pageData {
 			}
 		}
 		if u.IsAdmin() && s.o.SelfUpdate != nil {
-			if p := s.o.SelfUpdate.Progress(); p.Active || p.FinishedWithin(selfUpdateResultFor) {
+			if p := s.o.SelfUpdate.Progress(); p.Active || (p.FinishedWithin(selfUpdateResultFor(p)) && !selfUpdateSeen(r, p)) {
 				d.SelfUpdate = &selfUpdateData{Progress: p, Steps: updateSteps(p.Step)}
 				if p.Active {
 					// The release notice would read as if nothing happened.
