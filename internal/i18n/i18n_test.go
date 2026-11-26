@@ -211,7 +211,8 @@ func TestReferencedKeysExist(t *testing.T) {
 		"weekday.":           {"0", "1", "2", "3", "4", "5", "6"},
 		"agents.install.os.": {"ubuntu", "debian", "rhel", "fedora", "suse", "alpine", "windows"},
 		"weekday.short.":     {"0", "1", "2", "3", "4", "5", "6"},
-		"selfupdate.step.":   {"pull", "backup", "build", "restart", "health", "done"},
+		"selfupdate.step.":   {"queued", "pull", "backup", "build", "restart", "health", "done"},
+		"selfupdate.hint.":   {"queued", "pull", "backup", "build", "restart", "health"},
 		"kernel_patch.":      {"kernelcare", "livepatch"},
 	}
 	for prefix, ids := range families {

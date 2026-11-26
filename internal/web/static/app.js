@@ -150,27 +150,73 @@
     }
   }
 
-  // Self-update progress: poll the status while the updater works. The
-  // server restarts during the update, so failed requests are retried; the
-  // page reloads when the update is over.
+  // Self-update progress: poll the status while the updater works and show
+  // the current step, the elapsed time and the moment the server is out of
+  // reach (it restarts during the update, so failed requests are retried).
+  // The texts are rendered by the server; this only switches them. The page
+  // reloads when the update is over.
   function initSelfUpdate() {
-    var box = document.querySelector("[data-selfupdate]");
-    if (!box || !window.fetch) return;
-    var url = box.getAttribute("data-selfupdate");
+    var boxes = document.querySelectorAll("[data-selfupdate]");
+    if (!boxes.length || !window.fetch) return;
+    var url = boxes[0].getAttribute("data-selfupdate");
+    var startVersion = boxes[0].getAttribute("data-version") || "";
+    var elapsed = parseInt(boxes[0].getAttribute("data-elapsed") || "0", 10) || 0;
+    var fails = 0;
+    var each = function (sel, fn) {
+      for (var i = 0; i < boxes.length; i++) {
+        var els = boxes[i].querySelectorAll(sel);
+        for (var j = 0; j < els.length; j++) fn(els[j]);
+      }
+    };
+    var show = function (sel, on) { each(sel, function (el) { el.hidden = !on; }); };
+    var two = function (n) { return (n < 10 ? "0" : "") + n; };
+    var tick = function () {
+      var h = Math.floor(elapsed / 3600), m = Math.floor(elapsed / 60) % 60, sec = elapsed % 60;
+      var text = h ? h + ":" + two(m) + ":" + two(sec) : m + ":" + two(sec);
+      each("[data-selfupdate-elapsed]", function (el) { el.textContent = text; });
+    };
+    var steps = function (cur) {
+      each("[data-steps]", function (list) {
+        var items = list.querySelectorAll("[data-step]"), at = -1, k;
+        for (k = 0; k < items.length; k++) if (items[k].getAttribute("data-step") === cur) at = k;
+        if (at < 0) return;
+        for (k = 0; k < items.length; k++) {
+          items[k].classList.toggle("is-done", k < at);
+          items[k].classList.toggle("is-current", k === at);
+          items[k].classList.toggle("is-todo", k > at);
+        }
+      });
+    };
+    tick();
+    setInterval(function () { elapsed++; tick(); }, 1000);
     var poll = function () {
       fetch(url, { credentials: "same-origin", cache: "no-store" })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (st) {
-          if (st && !st.active) { window.location.reload(); return; }
-          if (st && st.log) {
-            var pre = box.querySelector("[data-selfupdate-log]");
-            if (pre) pre.textContent = st.log;
+          if (!st || typeof st.active !== "boolean") throw new Error("status");
+          fails = 0;
+          show("[data-selfupdate-offline]", false);
+          if (!st.active) { window.location.reload(); return; }
+          if (typeof st.elapsed === "number") { elapsed = st.elapsed; tick(); }
+          if (st.step) steps(st.step);
+          show("[data-selfupdate-stalled]", !!st.stalled);
+          show("[data-selfupdate-newserver]", !!st.version && !!startVersion && st.version !== startVersion);
+          if (st.step && st.step !== "queued" && st.from) {
+            var v = st.from + (st.to ? " → " + st.to : "");
+            each("[data-selfupdate-versions]", function (el) { el.textContent = v; });
           }
-          setTimeout(poll, 4000);
+          var logs = document.querySelectorAll("[data-selfupdate-log]");
+          for (var i = 0; i < logs.length; i++) logs[i].textContent = st.log || "";
+          setTimeout(poll, 3000);
         })
-        .catch(function () { setTimeout(poll, 4000); });
+        .catch(function () {
+          // One missed answer can be a slow request; two mean the server is away.
+          fails++;
+          if (fails >= 2) show("[data-selfupdate-offline]", true);
+          setTimeout(poll, 3000);
+        });
     };
-    setTimeout(poll, 4000);
+    setTimeout(poll, 3000);
   }
 
   // Print button (reports); printing works from the browser menu without JS.

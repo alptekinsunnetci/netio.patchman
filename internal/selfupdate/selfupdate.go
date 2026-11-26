@@ -6,6 +6,7 @@
 // updater reports its heartbeat and progress in files the server reads:
 //
 //	<data>/update-request.json   written by the server, removed by the updater
+//	<data>/.update-requested-at  time of the last request (server only)
 //	<data>/update/updater.json   {"version": "...", "seen_at": unix} every 5 s
 //	<data>/update/status.json    {"state", "step", "started_at", "finished_at", "from", "to"}
 //	<data>/update/update.log     command output of the last update
@@ -16,6 +17,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,6 +33,22 @@ const (
 
 // Steps reported while running (also the catalog keys selfupdate.step.<id>).
 var Steps = []string{"pull", "backup", "build", "restart", "health", "done"}
+
+// StepQueued is the step shown before the updater has started.
+const StepQueued = "queued"
+
+// ProgressSteps are the steps the panel lists while an update runs.
+func ProgressSteps() []string {
+	return append([]string{StepQueued}, Steps[:len(Steps)-1]...)
+}
+
+// requestedFile keeps the time of the last request. Only the server writes it,
+// so the moment between the updater taking the request and writing its first
+// status does not look like an idle updater.
+const requestedFile = ".update-requested-at"
+
+// pickupWindow is how long a taken request counts as starting.
+const pickupWindow = time.Minute
 
 // heartbeatTimeout is how old the updater heartbeat may be.
 const heartbeatTimeout = 30 * time.Second
@@ -125,12 +143,83 @@ func (m Manager) Request(by string) error {
 	if st, ok := m.Status(); m.Pending() || (ok && st.Running()) {
 		return ErrBusy
 	}
-	b, _ := json.Marshal(map[string]any{"requested_by": by, "requested_at": timeutil.Now().Unix()})
+	now := timeutil.Now().Unix()
+	if err := os.WriteFile(m.path(requestedFile), []byte(strconv.FormatInt(now, 10)), 0o644); err != nil {
+		return err
+	}
+	b, _ := json.Marshal(map[string]any{"requested_by": by, "requested_at": now})
 	tmp := m.path(".update-request.json.tmp")
 	if err := os.WriteFile(tmp, b, 0o644); err != nil {
 		return err
 	}
 	return os.Rename(tmp, m.path("update-request.json"))
+}
+
+// requestedAt is the time of the last request (zero when none).
+func (m Manager) requestedAt() time.Time {
+	b, err := os.ReadFile(m.path(requestedFile))
+	if err != nil {
+		return time.Time{}
+	}
+	v, err := strconv.ParseInt(strings.TrimSpace(string(b)), 10, 64)
+	if err != nil {
+		return time.Time{}
+	}
+	return unix(v)
+}
+
+// Progress is what the panel shows about an update.
+type Progress struct {
+	Active    bool   // requested or running
+	Step      string // StepQueued or one of Steps while active
+	Stalled   bool   // requested, but no updater takes the request
+	HasStatus bool
+	Status    Status // the last status the updater wrote
+	Elapsed   time.Duration
+}
+
+// FinishedWithin reports whether the last update ended less than d ago.
+func (p Progress) FinishedWithin(d time.Duration) bool {
+	return !p.Active && p.HasStatus && !p.Status.FinishedAt.IsZero() && timeutil.Now().Sub(p.Status.FinishedAt) < d
+}
+
+// SameVersion reports whether the last update found no newer version.
+func (p Progress) SameVersion() bool { return p.Status.From != "" && p.Status.From == p.Status.To }
+
+// Progress returns the state of the current or last update.
+func (m Manager) Progress() Progress {
+	var p Progress
+	p.Status, p.HasStatus = m.Status()
+	now := timeutil.Now()
+	at := m.requestedAt()
+	pending := m.Pending()
+	// A request the updater took a moment ago, before its first status: the
+	// status on disk is still the one of an earlier update.
+	last := p.Status.StartedAt
+	if p.Status.FinishedAt.After(last) {
+		last = p.Status.FinishedAt
+	}
+	starting := !at.IsZero() && now.Sub(at) < pickupWindow && (!p.HasStatus || last.Unix() < at.Unix())
+	switch {
+	case p.HasStatus && p.Status.Running():
+		p.Active, p.Step = true, p.Status.Step
+		if !p.Status.StartedAt.IsZero() {
+			p.Elapsed = now.Sub(p.Status.StartedAt)
+		}
+	case pending || starting:
+		p.Active, p.Step = true, StepQueued
+		if !at.IsZero() {
+			p.Elapsed = now.Sub(at)
+		}
+		if pending {
+			_, alive := m.Updater()
+			p.Stalled = !alive
+		}
+	}
+	if p.Elapsed < 0 {
+		p.Elapsed = 0
+	}
+	return p
 }
 
 // Log returns the end of the last update's output (at most max bytes).

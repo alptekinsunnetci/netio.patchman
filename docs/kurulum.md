@@ -422,6 +422,8 @@ Nasıl çalışır:
 2. Güncelleyici (her 5 saniyede bir yoklar) dosyayı alır ve sırasıyla çalıştırır: `git pull --ff-only` (depo sahibinin kimliğiyle, dosyalar root'a geçmez), `netio-patchman-server backup` ile yedek (`/data/before-update-<sürüm>-<zaman>.db`), `docker compose build server`, `docker compose up -d server`, sağlık denetimi (en fazla 10 dakika).
 3. Durum `/data/update/status.json`, çıktı `/data/update/update.log` dosyasına yazılır; panel bunları gösterir ve bitince bildirim oluşturur.
 
+Güncelleme sürerken **Ürün sürümü** bölümü adımları (istek, git pull, yedek, derleme, yeniden başlatma, sağlık denetimi), o anki adımın açıklamasını, geçen süreyi ve canlı çıktıyı gösterir. Yöneticiler diğer sayfalarda da o anki adımı gösteren bir uyarı görür; "yeni sürüm yayımlandı" uyarısı bu sırada gizlenir. Sunucu yeniden başlarken panel kısa bir süre erişilemez. Sayfa bunu belirtir, bağlantı kurulunca kendiliğinden devam eder ve iş bitince yenilenir. Sonuç ("… sürümünden … sürümüne güncellendi" ya da başarısız adım) 15 dakika boyunca tüm sayfalarda görünür. Güncelleyici isteği almazsa (konteyner çalışmıyorsa) panel bunu da belirtir.
+
 Güncelleyici depodaki betiği (`deploy/updater/updater.sh`) çalıştırır; böylece `git pull` ile kendisi de güncellenir. Güncelleyici imajının kendisi değişirse (`deploy/updater/Dockerfile`) bir kez `docker compose up -d --build` çalıştırın.
 
 **Güvenlik:** Güncelleyici `/var/run/docker.sock` bağlar; bu, sunucuda root yetkisine eşdeğerdir. Port açmaz ve istek dosyasından parametre almaz; panele yönetici olarak giren biri yalnızca depodaki en yeni sürüme yükseltmeyi başlatabilir. Özelliği kapatmak için `.env` dosyasından `COMPOSE_PROFILES=updater` satırını silip `docker compose --profile updater rm -sf updater` çalıştırın.

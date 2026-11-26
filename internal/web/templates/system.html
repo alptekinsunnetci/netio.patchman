@@ -102,7 +102,7 @@
       <button class="button button--sm" type="submit">{{template "icon" "refresh"}}{{t "system.update.check_now"}}</button></form>{{end}}
   </div>
   {{if not .Enabled}}<p class="muted">{{t "system.update.disabled"}}</p>
-  {{else if .Available}}<div class="alert alert--warning"><p>{{t "system.update.available" "latest" .Latest "current" .Current}} <a href="{{.ChangesURL}}" rel="noopener noreferrer" target="_blank">{{t "system.update.changes"}}</a></p>
+  {{else if and .Available (not $d.SelfUpdate.Active)}}<div class="alert alert--warning"><p>{{t "system.update.available" "latest" .Latest "current" .Current}} <a href="{{.ChangesURL}}" rel="noopener noreferrer" target="_blank">{{t "system.update.changes"}}</a></p>
     <p>{{t "system.update.how"}}</p>
     <pre class="code">git pull
 docker compose up -d --build</pre></div>
@@ -145,21 +145,30 @@ docker compose up -d --build</pre></div>
 {{end}}
 
 {{define "selfupdate"}}{{$root := .Root}}
-<div class="selfupdate" id="self-update"{{if .Active}} data-selfupdate="/settings/system/self-update/status"{{end}}>
+{{$p := .Progress}}
+<div class="selfupdate" id="self-update">
   <h3 class="panel__title panel__title--spaced">{{t "selfupdate.title"}}</h3>
   {{if .Available}}
-    {{if .Active}}
-      <p class="alert alert--info">{{if .Pending}}{{t "selfupdate.pending"}}{{else}}{{t "selfupdate.running" "step" (t (printf "selfupdate.step.%s" .Status.Step))}}{{end}} <span class="muted">{{t "selfupdate.wait"}}</span></p>
+    {{if $p.Active}}
+      <div class="alert alert--info selfupdate__progress" role="status" data-selfupdate="/settings/system/self-update/status" data-version="{{.Version}}" data-elapsed="{{.ElapsedSeconds}}">
+        <p><strong>{{t "selfupdate.progress_title"}}</strong> <span class="mono" data-selfupdate-versions>{{.Versions}}</span></p>
+        <ol class="progress-steps" data-steps>
+          {{range .Steps}}<li class="progress-steps__item is-{{.State}}" data-step="{{.ID}}"><span class="progress-steps__label">{{t (printf "selfupdate.step.%s" .ID)}}</span><span class="progress-steps__hint">{{t (printf "selfupdate.hint.%s" .ID)}}</span></li>
+          {{end}}
+        </ol>
+        <p class="selfupdate__note">{{t "selfupdate.elapsed"}} <span class="mono" data-selfupdate-elapsed></span></p>
+        <p class="selfupdate__note" data-selfupdate-offline hidden>{{t "selfupdate.offline"}}</p>
+        <p class="selfupdate__note" data-selfupdate-newserver hidden>{{t "selfupdate.new_server"}}</p>
+        <p class="selfupdate__note" data-selfupdate-stalled{{if not $p.Stalled}} hidden{{end}}>{{t "selfupdate.stalled"}}</p>
+        <p class="selfupdate__note">{{t "selfupdate.wait"}}</p>
+      </div>
     {{else}}
-      {{if .HasStatus}}
-        {{if eq .Status.State "succeeded"}}<p class="alert alert--success">{{t "selfupdate.succeeded" "from" .Status.From "to" .Status.To "at" (datetime .Status.FinishedAt)}}</p>
-        {{else}}<p class="alert alert--error">{{t "selfupdate.failed" "step" (t (printf "selfupdate.step.%s" .Status.Step)) "at" (datetime .Status.FinishedAt)}}</p>{{end}}
-      {{end}}
+      {{if $p.HasStatus}}{{template "selfupdateresult" $p}}{{end}}
       <p class="muted">{{t "selfupdate.how"}}</p>
       <form method="post" action="/settings/system/self-update" data-confirm="{{t "selfupdate.confirm"}}">{{template "csrf" $root}}
         <button class="button button--primary" type="submit">{{template "icon" "download"}}{{t "selfupdate.start"}}</button></form>
     {{end}}
-    {{with .Log}}<details class="details"{{if $.Active}} open{{end}}><summary>{{t "selfupdate.log"}}</summary><pre class="code prewrap" data-selfupdate-log>{{.}}</pre></details>{{end}}
+    {{if or .Log $p.Active}}<details class="details"{{if $p.Active}} open{{end}}><summary>{{t "selfupdate.log"}}</summary><pre class="code prewrap" data-selfupdate-log>{{.Log}}</pre></details>{{end}}
   {{else}}
     <p class="muted">{{t "selfupdate.unavailable"}}</p>
     <pre class="code">echo "COMPOSE_PROFILES=updater" >> .env

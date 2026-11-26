@@ -95,6 +95,7 @@ func (s *Server) renderSystem(w http.ResponseWriter, r *http.Request, status int
 		d.Data.(map[string]any)["UpdateStatus"] = &st
 	}
 	d.Data.(map[string]any)["SelfUpdate"] = s.selfUpdateView(d)
+	d.SelfUpdateInline = true // the page shows the progress itself
 	s.render(w, r, status, "system", d)
 }
 
@@ -300,11 +301,59 @@ func (s *Server) updateCheck(w http.ResponseWriter, r *http.Request) {
 type selfUpdateData struct {
 	Root      pageData
 	Available bool // the updater container runs
-	Active    bool // an update is requested or running
-	Pending   bool
-	HasStatus bool
-	Status    selfupdate.Status
+	Progress  selfupdate.Progress
+	Steps     []updateStep
 	Log       string
+}
+
+// Active reports whether an update is requested or running.
+func (v selfUpdateData) Active() bool { return v.Progress.Active }
+
+// Version is the running server version (app.js notices the new one).
+func (v selfUpdateData) Version() string { return version.Version }
+
+// ElapsedSeconds is the time since the update began.
+func (v selfUpdateData) ElapsedSeconds() int64 { return int64(v.Progress.Elapsed / time.Second) }
+
+// Versions is "from → to" of the running update (empty while queued).
+func (v selfUpdateData) Versions() string {
+	st := v.Progress.Status
+	if v.Progress.Step == selfupdate.StepQueued || st.From == "" {
+		return ""
+	}
+	if st.To == "" {
+		return st.From
+	}
+	return st.From + " → " + st.To
+}
+
+// updateStep is one step of the progress list.
+type updateStep struct {
+	ID    string
+	State string // done, current or todo (CSS class is-<state>)
+}
+
+// updateSteps marks the steps before the current one as done.
+func updateSteps(cur string) []updateStep {
+	ids := selfupdate.ProgressSteps()
+	at := -1
+	for i, id := range ids {
+		if id == cur {
+			at = i
+		}
+	}
+	out := make([]updateStep, len(ids))
+	for i, id := range ids {
+		st := "todo"
+		switch {
+		case i < at:
+			st = "done"
+		case i == at:
+			st = "current"
+		}
+		out[i] = updateStep{ID: id, State: st}
+	}
+	return out
 }
 
 func (s *Server) selfUpdateView(d pageData) selfUpdateData {
@@ -313,10 +362,14 @@ func (s *Server) selfUpdateView(d pageData) selfUpdateData {
 		return v
 	}
 	_, v.Available = s.o.SelfUpdate.Updater()
-	v.Status, v.HasStatus = s.o.SelfUpdate.Status()
-	v.Pending = s.o.SelfUpdate.Pending()
-	v.Active = v.Pending || v.Status.Running()
-	v.Log = s.o.SelfUpdate.Log(16 << 10)
+	v.Progress = s.o.SelfUpdate.Progress()
+	// A running update keeps its progress even when the heartbeat pauses.
+	v.Available = v.Available || v.Progress.Active
+	v.Steps = updateSteps(v.Progress.Step)
+	if v.Progress.Step != selfupdate.StepQueued {
+		// While queued the file still holds the previous update's output.
+		v.Log = s.o.SelfUpdate.Log(16 << 10)
+	}
 	return v
 }
 
@@ -345,12 +398,15 @@ func (s *Server) selfUpdateStart(w http.ResponseWriter, r *http.Request) {
 
 // selfUpdateStatus is polled by app.js while an update runs.
 func (s *Server) selfUpdateStatus(w http.ResponseWriter, r *http.Request) {
-	out := map[string]any{"active": false}
+	out := map[string]any{"active": false, "version": version.Version}
 	if s.o.SelfUpdate != nil {
-		st, _ := s.o.SelfUpdate.Status()
-		pending := s.o.SelfUpdate.Pending()
-		out = map[string]any{"active": pending || st.Running(), "state": st.State, "step": st.Step, "to": st.To,
-			"log": s.o.SelfUpdate.Log(16 << 10)}
+		p := s.o.SelfUpdate.Progress()
+		out = map[string]any{"active": p.Active, "step": p.Step, "stalled": p.Stalled, "state": p.Status.State,
+			"from": p.Status.From, "to": p.Status.To, "elapsed": int64(p.Elapsed / time.Second),
+			"version": version.Version}
+		if p.Step != selfupdate.StepQueued {
+			out["log"] = s.o.SelfUpdate.Log(16 << 10)
+		}
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")

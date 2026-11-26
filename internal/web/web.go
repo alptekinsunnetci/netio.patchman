@@ -741,11 +741,19 @@ type pageData struct {
 	Data    any
 	// Update is set for administrators when a newer product version exists.
 	Update *updatecheck.Status
+	// SelfUpdate is set for administrators while an update from the dashboard
+	// runs and shortly after it ended (banner on every page).
+	SelfUpdate *selfUpdateData
+	// SelfUpdateInline hides that banner on the page that shows the progress.
+	SelfUpdateInline bool
 	// Languages offers the interface languages (login and profile pages).
 	Languages []languageOption
 	// Path is the current request URI (for the language switch).
 	Path string
 }
+
+// selfUpdateResultFor is how long the banner shows the result of an update.
+const selfUpdateResultFor = 15 * time.Minute
 
 func (s *Server) page(r *http.Request, title, active string) pageData {
 	d := pageData{Product: brand.Name, Version: version.Version, Lang: s.l.Lang(), Title: title, Active: active, Nav: navigation,
@@ -766,6 +774,15 @@ func (s *Server) page(r *http.Request, title, active string) pageData {
 		if u.IsAdmin() && s.o.Updates != nil {
 			if st := s.o.Updates.Status(); st.Enabled && st.Available() {
 				d.Update = &st
+			}
+		}
+		if u.IsAdmin() && s.o.SelfUpdate != nil {
+			if p := s.o.SelfUpdate.Progress(); p.Active || p.FinishedWithin(selfUpdateResultFor) {
+				d.SelfUpdate = &selfUpdateData{Progress: p, Steps: updateSteps(p.Step)}
+				if p.Active {
+					// The release notice would read as if nothing happened.
+					d.Update = nil
+				}
 			}
 		}
 	}

@@ -52,6 +52,8 @@ run_update() {
 
 	step=pull
 	write_status running "$step" "$start" 0 "$from" ""
+	# İstek, ilk durum yazıldıktan sonra silinir: panel arada boşta görünmez.
+	rm -f /data/update-request.json
 	log "git pull"
 	if ! git_ fetch --tags --prune origin >> "$DIR/update.log" 2>&1 || ! git_ pull --ff-only >> "$DIR/update.log" 2>&1; then
 		fail; return
@@ -105,8 +107,12 @@ while true; do
 	chmod 0644 "$DIR/updater.json.tmp"
 	mv "$DIR/updater.json.tmp" "$DIR/updater.json"
 	if [ -f /data/update-request.json ]; then
-		rm -f /data/update-request.json
 		run_update
+		rm -f /data/update-request.json
+		# git pull betiğin yenisini getirmiş olabilir: döngü yeni betikle sürer.
+		if [ -f "$REPO/deploy/updater/updater.sh" ]; then
+			exec sh "$REPO/deploy/updater/updater.sh"
+		fi
 	fi
 	sleep 5
 done

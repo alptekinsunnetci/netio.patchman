@@ -23,8 +23,27 @@
   </aside>
   <main class="main" id="main">
     {{with .Update}}{{if ne $.Active "settings"}}<p class="alert alert--info" role="status">{{t "update.banner" "latest" .Latest "current" .Current}} <a href="/settings/system#updates">{{t "update.banner_link"}}</a></p>{{end}}{{end}}
+    {{with .SelfUpdate}}{{if not $.SelfUpdateInline}}{{template "selfupdatebanner" .}}{{end}}{{end}}
     {{template "flash" .}}
     {{block "content" .}}{{end}}
   </main>
 </div>
+{{end}}
+
+{{define "selfupdatebanner"}}{{$p := .Progress}}
+{{if $p.Active}}<div class="alert alert--info selfupdate-banner" role="status" data-selfupdate="/settings/system/self-update/status" data-version="{{.Version}}" data-elapsed="{{.ElapsedSeconds}}">
+  <p><strong>{{t "selfupdate.banner"}}</strong> <span class="progress-steps progress-steps--inline" data-steps>{{range .Steps}}<span class="progress-steps__item is-{{.State}}" data-step="{{.ID}}">{{t (printf "selfupdate.step.%s" .ID)}}</span>{{end}}</span>
+    <span class="selfupdate__sep">·</span> <span class="mono" data-selfupdate-elapsed></span>
+    <span class="selfupdate__sep">·</span> <a href="/settings/system#self-update">{{t "selfupdate.banner_link"}}</a></p>
+  <p class="selfupdate__note">{{t "selfupdate.banner_hint"}}</p>
+  <p class="selfupdate__note" data-selfupdate-offline hidden>{{t "selfupdate.offline"}}</p>
+  <p class="selfupdate__note" data-selfupdate-newserver hidden>{{t "selfupdate.new_server"}}</p>
+  <p class="selfupdate__note" data-selfupdate-stalled{{if not $p.Stalled}} hidden{{end}}>{{t "selfupdate.stalled"}}</p>
+</div>
+{{else}}{{template "selfupdateresult" $p}}{{end}}
+{{end}}
+
+{{define "selfupdateresult"}}{{$at := datetime .Status.FinishedAt}}
+{{if eq .Status.State "succeeded"}}<p class="alert alert--success" role="status">{{if .SameVersion}}{{t "selfupdate.succeeded_same" "to" .Status.To "at" $at}}{{else}}{{t "selfupdate.succeeded" "from" .Status.From "to" .Status.To "at" $at}}{{end}}</p>
+{{else}}<p class="alert alert--error" role="alert">{{t "selfupdate.failed" "step" (t (printf "selfupdate.step.%s" .Status.Step)) "at" $at}} <a href="/settings/system#self-update">{{t "selfupdate.log"}}</a></p>{{end}}
 {{end}}
